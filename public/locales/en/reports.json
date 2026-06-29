@@ -1,0 +1,19 @@
+{
+  "title": "Reports",
+  "subtitle": "Operational metrics, exports and the activity log.",
+  "kpis": {
+    "openRequests": "Open requests",
+    "openWork": "Open work orders",
+    "overdue": "Overdue work orders",
+    "avgResolution": "Avg resolution (hrs)",
+    "pmDue": "PM due",
+    "lowStock": "Low-stock parts",
+    "expiringContracts": "Contracts expiring (30d)"
+  },
+  "exports": "Exports",
+  "exportRequests": "Export requests (CSV)",
+  "exportWorkOrders": "Export work orders (CSV)",
+  "auditLog": "Activity log",
+  "auditEmpty": "No activity recorded yet.",
+  "columns": { "when": "When", "entity": "Entity", "action": "Action" }
+}

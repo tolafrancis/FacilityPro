@@ -1,0 +1,30 @@
+{
+  "title": "Phụ tùng & kho",
+  "subtitle": "Mức tồn kho và lượng tiêu hao trên lệnh công việc.",
+  "empty": "Chưa có phụ tùng. Thêm một mục để theo dõi tồn kho.",
+  "add": "Phụ tùng mới",
+  "lowStock": "Sắp hết",
+  "columns": {
+    "name": "Phụ tùng",
+    "sku": "Mã SKU",
+    "stock": "Tồn kho",
+    "reorder": "Mức đặt lại",
+    "cost": "Đơn giá"
+  },
+  "restock": "Nhập thêm",
+  "dialog": {
+    "title": "Phụ tùng mới",
+    "sku": "Mã SKU (tùy chọn)",
+    "unit": "Đơn vị (vd: cái, L)",
+    "initialStock": "Tồn kho ban đầu",
+    "reorder": "Mức đặt lại",
+    "cost": "Đơn giá"
+  },
+  "use": {
+    "title": "Phụ tùng đã dùng",
+    "part": "Phụ tùng",
+    "qty": "Số lượng",
+    "add": "Ghi nhận",
+    "empty": "Chưa ghi nhận phụ tùng nào cho lệnh này."
+  }
+}

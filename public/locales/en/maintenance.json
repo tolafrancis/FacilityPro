@@ -1,0 +1,31 @@
+{
+  "title": "Preventive maintenance",
+  "subtitle": "Schedule recurring work so nothing gets missed.",
+  "empty": "No maintenance schedules yet.",
+  "addSchedule": "New schedule",
+  "runDue": "Generate due now",
+  "generated": "{{count}} work order(s) generated.",
+  "noneDue": "Nothing is due right now.",
+  "upcoming": "Schedules",
+  "overdue": "Overdue",
+  "every_days": "Every {{count}} days",
+  "every_units": "Every {{count}} units",
+  "meterTriggered": "Meter-based",
+  "pause": "Pause",
+  "resume": "Resume",
+  "dialog": {
+    "title": "New maintenance schedule",
+    "asset": "Asset",
+    "triggerType": "Trigger",
+    "triggerCalendar": "On a schedule (days)",
+    "triggerMeter": "By meter usage",
+    "interval": "Repeat every (days)",
+    "meter": "Meter",
+    "meterThreshold": "Every (units)",
+    "meterRequired": "Choose a meter for a meter-based schedule.",
+    "checklist": "Checklist (optional)",
+    "assignee": "Assign to (optional)",
+    "priority": "Priority",
+    "firstDue": "First due date"
+  }
+}

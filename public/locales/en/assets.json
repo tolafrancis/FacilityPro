@@ -1,0 +1,38 @@
+{
+  "title": "Assets",
+  "subtitle": "Your equipment registry. Each asset gets a QR code for instant access in the field.",
+  "add": "Add asset",
+  "empty": "No assets yet. Add your first piece of equipment.",
+  "columns": { "name": "Asset", "type": "Type", "location": "Location", "serial": "Serial", "status": "Status" },
+  "form": {
+    "type": "Asset type",
+    "location": "Location",
+    "serial": "Serial number",
+    "manufacturer": "Manufacturer",
+    "model": "Model",
+    "warranty": "Warranty expiry",
+    "create": "Create asset",
+    "title": "Add asset"
+  },
+  "detail": {
+    "info": "Details",
+    "history": "History",
+    "qr": "QR code",
+    "qrHint": "Print and attach this code to the asset. Scanning it opens this asset so anyone can report a fault.",
+    "noHistory": "No requests or work orders for this asset yet.",
+    "warranty": "Warranty until",
+    "type": "Type",
+    "location": "Location",
+    "serial": "Serial"
+  },
+  "meters": {
+    "tab": "Meters",
+    "add": "Add meter",
+    "unit": "Unit (e.g. hours, km)",
+    "value": "Value",
+    "logReading": "Log reading",
+    "latest": "Latest",
+    "empty": "No meters on this asset yet.",
+    "noReadings": "No readings yet."
+  }
+}

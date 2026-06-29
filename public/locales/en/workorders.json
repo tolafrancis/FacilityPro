@@ -1,0 +1,28 @@
+{
+  "title": "Work orders",
+  "subtitle": "Assigned work and its progress.",
+  "empty": "No work orders yet. Create one from a request.",
+  "columns": { "title": "Work order", "asset": "Asset", "assignee": "Assignee", "priority": "Priority", "status": "Status", "due": "Due" },
+  "detail": {
+    "instructions": "Instructions",
+    "instructionsPlaceholder": "What needs doing…",
+    "assignee": "Assignee",
+    "due": "Due date",
+    "priority": "Priority",
+    "status": "Status",
+    "fromRequest": "From request",
+    "media": "Photo evidence",
+    "before": "Before",
+    "after": "After",
+    "addBefore": "Add before",
+    "addAfter": "Add after",
+    "uploading": "Uploading…",
+    "save": "Save changes"
+  },
+  "myWork": {
+    "title": "My work",
+    "subtitle": "Work orders assigned to you.",
+    "empty": "You have no assigned work right now.",
+    "open": "Open"
+  }
+}

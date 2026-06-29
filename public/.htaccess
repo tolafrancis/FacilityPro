@@ -1,0 +1,10 @@
+# SPA routing for Apache / Hostinger.
+# Vite copies files in /public to the deploy root, so this ships with your build.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>

@@ -1,0 +1,38 @@
+{
+  "title": "Tài sản",
+  "subtitle": "Danh mục thiết bị của bạn. Mỗi tài sản có một mã QR để truy cập nhanh tại hiện trường.",
+  "add": "Thêm tài sản",
+  "empty": "Chưa có tài sản. Thêm thiết bị đầu tiên của bạn.",
+  "columns": { "name": "Tài sản", "type": "Loại", "location": "Vị trí", "serial": "Số sê-ri", "status": "Trạng thái" },
+  "form": {
+    "type": "Loại tài sản",
+    "location": "Vị trí",
+    "serial": "Số sê-ri",
+    "manufacturer": "Nhà sản xuất",
+    "model": "Kiểu máy",
+    "warranty": "Hạn bảo hành",
+    "create": "Tạo tài sản",
+    "title": "Thêm tài sản"
+  },
+  "detail": {
+    "info": "Chi tiết",
+    "history": "Lịch sử",
+    "qr": "Mã QR",
+    "qrHint": "In và dán mã này lên tài sản. Quét mã sẽ mở tài sản này để bất kỳ ai cũng có thể báo cáo sự cố.",
+    "noHistory": "Chưa có yêu cầu hoặc lệnh công việc cho tài sản này.",
+    "warranty": "Bảo hành đến",
+    "type": "Loại",
+    "location": "Vị trí",
+    "serial": "Số sê-ri"
+  },
+  "meters": {
+    "tab": "Đồng hồ",
+    "add": "Thêm đồng hồ",
+    "unit": "Đơn vị (vd: giờ, km)",
+    "value": "Giá trị",
+    "logReading": "Ghi chỉ số",
+    "latest": "Mới nhất",
+    "empty": "Tài sản này chưa có đồng hồ.",
+    "noReadings": "Chưa có chỉ số."
+  }
+}

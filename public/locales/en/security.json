@@ -1,0 +1,35 @@
+{
+  "title": "Security",
+  "subtitle": "Protect your account and choose how you're notified.",
+  "mfa": {
+    "title": "Two-factor authentication",
+    "hint": "Add a time-based code from an authenticator app as a second step when signing in.",
+    "enable": "Enable 2FA",
+    "addAnother": "Add another device",
+    "active": "Active",
+    "authenticatorApp": "Authenticator app",
+    "remove": "Remove",
+    "scan": "Scan this QR code with your authenticator app, then enter the 6-digit code.",
+    "code": "Verification code",
+    "verify": "Verify & enable",
+    "cancel": "Cancel"
+  },
+  "email": {
+    "title": "Email notifications",
+    "hint": "Also receive your in-app notifications by email.",
+    "toggle": "Email me notifications",
+    "deliverTo": "Delivered to {{email}}"
+  },
+  "sms": {
+    "title": "Text messages (SMS)",
+    "hint": "Also receive notifications by SMS. Standard rates may apply.",
+    "toggle": "Text me notifications",
+    "phone": "Mobile number",
+    "phoneHint": "Include the country code, e.g. +84…"
+  },
+  "push": {
+    "title": "Push notifications",
+    "hint": "Get browser/phone push alerts even when FacilityPro is closed.",
+    "toggle": "Enable push on this device"
+  }
+}

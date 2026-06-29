@@ -1,0 +1,14 @@
+{
+  "title": "Approvals",
+  "subtitle": "Work orders awaiting a decision.",
+  "empty": "Nothing waiting for approval.",
+  "requestedBy": "Requested by {{who}}",
+  "notePlaceholder": "Add a note (optional)",
+  "approve": "Approve",
+  "reject": "Reject",
+  "request": "Request approval",
+  "printSheet": "Print job sheet",
+  "woTitle": "Approval",
+  "woNone": "No approval requested.",
+  "status": { "pending": "Pending", "approved": "Approved", "rejected": "Rejected" }
+}

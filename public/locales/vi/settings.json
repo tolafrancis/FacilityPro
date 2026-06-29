@@ -1,0 +1,45 @@
+{
+  "title": "Cài đặt",
+  "subtitle": "Cấu hình các thành phần nền tảng mà nhóm của bạn dùng để báo cáo và phân loại công việc.",
+  "faultTypes": {
+    "title": "Loại sự cố",
+    "add": "Thêm loại sự cố",
+    "empty": "Chưa có loại sự cố.",
+    "priority": "Mức ưu tiên mặc định"
+  },
+  "assetTypes": {
+    "title": "Loại tài sản",
+    "add": "Thêm loại tài sản",
+    "empty": "Chưa có loại tài sản."
+  },
+  "dialog": {
+    "addFaultType": "Thêm loại sự cố",
+    "addAssetType": "Thêm loại tài sản"
+  },
+  "sla": {
+    "title": "Mục tiêu SLA",
+    "hint": "Thời gian xử lý theo mức ưu tiên. Lệnh công việc mới sẽ tự động có hạn chót từ đây.",
+    "hours": "Số giờ xử lý",
+    "save": "Lưu"
+  },
+  "assign": {
+    "title": "Tự động phân công",
+    "hint": "Khi tạo lệnh công việc, quy tắc khớp đầu tiên sẽ gán người phụ trách.",
+    "add": "Thêm quy tắc",
+    "priority": "Mức ưu tiên",
+    "faultType": "Loại sự cố",
+    "assignee": "Giao cho",
+    "any": "Bất kỳ",
+    "empty": "Chưa có quy tắc.",
+    "arrow": "→"
+  },
+  "automation": {
+    "title": "Tự động hóa",
+    "hint": "Tiếp nhận và điều phối tự động.",
+    "publicRequests": "Cho phép báo cáo sự cố công khai",
+    "publicHint": "Cho phép bất kỳ ai có mã QR hoặc liên kết báo cáo sự cố mà không cần đăng nhập.",
+    "autoWo": "Tự động tạo lệnh công việc",
+    "autoHint": "Tự động biến mỗi báo cáo sự cố thành lệnh công việc — sau đó áp dụng tự động phân công và SLA.",
+    "reportLink": "Liên kết báo cáo công khai"
+  }
+}

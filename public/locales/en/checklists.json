@@ -1,0 +1,34 @@
+{
+  "title": "Checklists",
+  "subtitle": "Reusable inspection templates for work orders and maintenance.",
+  "empty": "No checklist templates yet. Create one to standardise inspections.",
+  "addTemplate": "New checklist",
+  "newTemplateTitle": "New checklist template",
+  "items": "Items",
+  "addItem": "Add item",
+  "noItems": "No items yet. Add the first check.",
+  "itemLabelEn": "Item (English)",
+  "itemLabelVi": "Item (Tiếng Việt)",
+  "type": "Type",
+  "required": "Required",
+  "delete": "Delete",
+  "types": {
+    "pass_fail": "Pass / Fail",
+    "value": "Value",
+    "photo": "Photo",
+    "text": "Text note"
+  },
+  "runner": {
+    "title": "Checklist",
+    "pass": "Pass",
+    "fail": "Fail",
+    "done": "Done",
+    "valuePlaceholder": "Enter a value",
+    "notePlaceholder": "Add a note",
+    "photoHint": "Attach the photo in Photo evidence below.",
+    "save": "Save checklist",
+    "completed": "Completed {{when}}",
+    "attach": "Attach a checklist…",
+    "none": "No checklist attached."
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Inbox",
+  "subtitle": "Conversations with occupants and contacts across channels.",
+  "new": "New conversation",
+  "empty": "No conversations yet.",
+  "selectPrompt": "Select a conversation to view the thread.",
+  "noMessages": "No messages yet.",
+  "replyPlaceholder": "Type a reply…",
+  "send": "Send",
+  "unknownContact": "Unknown contact",
+  "newTitle": "New conversation",
+  "contactName": "Contact name",
+  "channel": "Channel",
+  "handle": "Handle / number",
+  "firstMessage": "First message (optional)",
+  "channels": {
+    "manual": "Manual",
+    "web": "Web",
+    "whatsapp": "WhatsApp",
+    "zalo": "Zalo",
+    "line": "LINE",
+    "email": "Email"
+  },
+  "createTicket": "Create work order",
+  "ticketCreated": "Report created"
+}

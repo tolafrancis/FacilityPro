@@ -1,0 +1,15 @@
+{
+  "title": "Report an issue",
+  "unavailable": "This reporting link isn't available.",
+  "asset": "Asset",
+  "what": "What's the problem?",
+  "whatPlaceholder": "e.g. Air conditioner not cooling",
+  "details": "Details",
+  "detailsPlaceholder": "Add anything that helps us fix it.",
+  "severity": "How urgent is it?",
+  "reporter": "Your name or contact (optional)",
+  "reporterPlaceholder": "So we can follow up",
+  "submit": "Submit report",
+  "thanksTitle": "Thank you!",
+  "thanksBody": "Your report has been received. The facilities team will take it from here."
+}

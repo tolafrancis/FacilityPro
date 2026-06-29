@@ -1,0 +1,16 @@
+{
+  "title": "Phiếu công việc",
+  "print": "In / Lưu PDF",
+  "parts": "Phụ tùng đã dùng",
+  "noParts": "Chưa ghi nhận phụ tùng.",
+  "fields": {
+    "title": "Tiêu đề",
+    "asset": "Tài sản",
+    "status": "Trạng thái",
+    "priority": "Mức ưu tiên",
+    "assignee": "Người phụ trách",
+    "due": "Hạn chót",
+    "instructions": "Hướng dẫn"
+  },
+  "sign": { "technician": "Chữ ký kỹ thuật viên", "supervisor": "Chữ ký giám sát" }
+}

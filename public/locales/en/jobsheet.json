@@ -1,0 +1,16 @@
+{
+  "title": "Work order job sheet",
+  "print": "Print / Save as PDF",
+  "parts": "Parts used",
+  "noParts": "No parts recorded.",
+  "fields": {
+    "title": "Title",
+    "asset": "Asset",
+    "status": "Status",
+    "priority": "Priority",
+    "assignee": "Assignee",
+    "due": "Due date",
+    "instructions": "Instructions"
+  },
+  "sign": { "technician": "Technician signature", "supervisor": "Supervisor signature" }
+}

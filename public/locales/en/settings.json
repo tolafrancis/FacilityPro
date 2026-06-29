@@ -1,0 +1,45 @@
+{
+  "title": "Settings",
+  "subtitle": "Configure the building blocks your team uses to report and categorise work.",
+  "faultTypes": {
+    "title": "Fault types",
+    "add": "Add fault type",
+    "empty": "No fault types yet.",
+    "priority": "Default priority"
+  },
+  "assetTypes": {
+    "title": "Asset types",
+    "add": "Add asset type",
+    "empty": "No asset types yet."
+  },
+  "dialog": {
+    "addFaultType": "Add fault type",
+    "addAssetType": "Add asset type"
+  },
+  "sla": {
+    "title": "SLA targets",
+    "hint": "Resolution time per priority. New work orders get a due date from this automatically.",
+    "hours": "Resolution hours",
+    "save": "Save"
+  },
+  "assign": {
+    "title": "Auto-assignment",
+    "hint": "When a work order is created, the first matching rule sets the assignee.",
+    "add": "Add rule",
+    "priority": "Priority",
+    "faultType": "Fault type",
+    "assignee": "Assign to",
+    "any": "Any",
+    "empty": "No rules yet.",
+    "arrow": "→"
+  },
+  "automation": {
+    "title": "Automation",
+    "hint": "Hands-free intake and routing.",
+    "publicRequests": "Allow public fault reports",
+    "publicHint": "Let anyone with the QR code or link report a fault without signing in.",
+    "autoWo": "Auto-create work orders",
+    "autoHint": "Turn every new fault report into a work order automatically — then auto-assignment and SLA targets apply.",
+    "reportLink": "Public report link"
+  }
+}

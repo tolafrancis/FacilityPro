@@ -1,0 +1,28 @@
+{
+  "title": "Lệnh công việc",
+  "subtitle": "Công việc được phân công và tiến độ.",
+  "empty": "Chưa có lệnh công việc. Tạo từ một yêu cầu.",
+  "columns": { "title": "Lệnh công việc", "asset": "Tài sản", "assignee": "Người phụ trách", "priority": "Ưu tiên", "status": "Trạng thái", "due": "Hạn" },
+  "detail": {
+    "instructions": "Hướng dẫn",
+    "instructionsPlaceholder": "Việc cần làm…",
+    "assignee": "Người phụ trách",
+    "due": "Hạn hoàn thành",
+    "priority": "Ưu tiên",
+    "status": "Trạng thái",
+    "fromRequest": "Từ yêu cầu",
+    "media": "Ảnh bằng chứng",
+    "before": "Trước",
+    "after": "Sau",
+    "addBefore": "Thêm ảnh trước",
+    "addAfter": "Thêm ảnh sau",
+    "uploading": "Đang tải lên…",
+    "save": "Lưu thay đổi"
+  },
+  "myWork": {
+    "title": "Công việc của tôi",
+    "subtitle": "Các lệnh công việc được phân công cho bạn.",
+    "empty": "Hiện bạn chưa có công việc được phân công.",
+    "open": "Mở"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Báo cáo sự cố",
+  "unavailable": "Liên kết báo cáo này không khả dụng.",
+  "asset": "Tài sản",
+  "what": "Vấn đề là gì?",
+  "whatPlaceholder": "vd: Máy lạnh không mát",
+  "details": "Chi tiết",
+  "detailsPlaceholder": "Thêm bất kỳ thông tin nào giúp chúng tôi xử lý.",
+  "severity": "Mức độ khẩn cấp?",
+  "reporter": "Tên hoặc liên hệ của bạn (tùy chọn)",
+  "reporterPlaceholder": "Để chúng tôi liên hệ lại",
+  "submit": "Gửi báo cáo",
+  "thanksTitle": "Cảm ơn bạn!",
+  "thanksBody": "Báo cáo của bạn đã được tiếp nhận. Đội kỹ thuật sẽ xử lý ngay."
+}

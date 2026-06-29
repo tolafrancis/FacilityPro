@@ -1,0 +1,28 @@
+{
+  "title": "Nhà cung cấp & hợp đồng",
+  "subtitle": "Nhà cung cấp, hợp đồng và giấy phép kèm theo dõi hết hạn.",
+  "vendors": "Nhà cung cấp",
+  "contracts": "Hợp đồng",
+  "licenses": "Giấy phép",
+  "addVendor": "Nhà cung cấp mới",
+  "addContract": "Hợp đồng mới",
+  "addLicense": "Giấy phép mới",
+  "emptyVendors": "Chưa có nhà cung cấp.",
+  "emptyContracts": "Chưa có hợp đồng.",
+  "emptyLicenses": "Chưa có giấy phép.",
+  "expires": "Hết hạn",
+  "expired": "Đã hết hạn",
+  "expiringSoon": "Sắp hết hạn",
+  "noExpiry": "Không hết hạn",
+  "fields": {
+    "name": "Tên",
+    "category": "Danh mục",
+    "email": "Email",
+    "phone": "Điện thoại",
+    "ctitle": "Tiêu đề",
+    "vendor": "Nhà cung cấp",
+    "documentUrl": "Đường dẫn tài liệu",
+    "expiry": "Ngày hết hạn",
+    "holder": "Người giữ"
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "app": {
+    "name": "FacilityPro"
+  },
+  "loading": "Loading…",
+  "comingSoon": "Coming in a later phase",
+  "nav": {
+    "dashboard": "Dashboard",
+    "locations": "Locations",
+    "assets": "Assets",
+    "requests": "Requests",
+    "workOrders": "Work orders",
+    "myWork": "My work",
+    "maintenance": "Maintenance",
+    "checklists": "Checklists",
+    "parts": "Parts",
+    "vendors": "Vendors",
+    "reports": "Reports",
+    "settings": "Settings",
+    "approvals": "Approvals",
+    "security": "Security",
+    "inbox": "Inbox",
+    "billing": "Billing",
+    "devices": "Devices"
+  },
+  "actions": {
+    "signOut": "Sign out",
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "add": "Add",
+    "back": "Back",
+    "assign": "Assign",
+    "edit": "Edit",
+    "search": "Search",
+    "printQr": "Print QR",
+    "reportFault": "Report fault",
+    "createWorkOrder": "Create work order",
+    "viewAll": "View all"
+  },
+  "roles": {
+    "super_admin": "Super admin",
+    "org_admin": "Administrator",
+    "manager": "Manager",
+    "technician": "Technician",
+    "occupant": "Occupant",
+    "vendor": "Vendor"
+  },
+  "dashboard": {
+    "open": "Open requests",
+    "overdue": "Overdue work",
+    "inProgress": "In progress",
+    "resolved": "Resolved (30d)",
+    "recentRequests": "Recent requests",
+    "hint": "Report a fault to see it flow through to a work order here."
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "severity": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "requestStatus": {
+    "new": "New",
+    "triaged": "Triaged",
+    "assigned": "Assigned",
+    "in_progress": "In progress",
+    "on_hold": "On hold",
+    "resolved": "Resolved",
+    "closed": "Closed",
+    "rejected": "Rejected"
+  },
+  "woStatus": {
+    "assigned": "Assigned",
+    "in_progress": "In progress",
+    "on_hold": "On hold",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "form": {
+    "nameEn": "Name (English)",
+    "nameVi": "Name (Tiếng Việt)"
+  },
+  "common": {
+    "unassigned": "Unassigned",
+    "all": "All",
+    "optional": "optional",
+    "none": "None",
+    "empty": "Nothing here yet."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "You're all caught up.",
+    "markAllRead": "Mark all read"
+  },
+  "offline": "You're offline. Changes may not save until you reconnect.",
+  "sync": {
+    "pending": "{{count}} to sync",
+    "syncing": "Syncing…"
+  },
+  "free": "Free"
+}

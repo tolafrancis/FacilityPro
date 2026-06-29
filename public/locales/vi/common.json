@@ -1,0 +1,108 @@
+{
+  "app": {
+    "name": "FacilityPro"
+  },
+  "loading": "Đang tải…",
+  "comingSoon": "Sẽ có trong giai đoạn sau",
+  "nav": {
+    "dashboard": "Bảng điều khiển",
+    "locations": "Vị trí",
+    "assets": "Tài sản",
+    "requests": "Yêu cầu",
+    "workOrders": "Lệnh công việc",
+    "myWork": "Công việc của tôi",
+    "maintenance": "Bảo trì",
+    "checklists": "Danh sách kiểm tra",
+    "settings": "Cài đặt",
+    "parts": "Phụ tùng",
+    "vendors": "Nhà cung cấp",
+    "reports": "Báo cáo",
+    "approvals": "Phê duyệt",
+    "security": "Bảo mật",
+    "inbox": "Hộp thư",
+    "billing": "Thanh toán",
+    "devices": "Thiết bị"
+  },
+  "actions": {
+    "signOut": "Đăng xuất",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "create": "Tạo",
+    "add": "Thêm",
+    "back": "Quay lại",
+    "assign": "Phân công",
+    "edit": "Sửa",
+    "search": "Tìm kiếm",
+    "printQr": "In mã QR",
+    "reportFault": "Báo cáo sự cố",
+    "createWorkOrder": "Tạo lệnh công việc",
+    "viewAll": "Xem tất cả"
+  },
+  "roles": {
+    "super_admin": "Quản trị cấp cao",
+    "org_admin": "Quản trị viên",
+    "manager": "Quản lý",
+    "technician": "Kỹ thuật viên",
+    "occupant": "Người sử dụng",
+    "vendor": "Nhà cung cấp"
+  },
+  "dashboard": {
+    "open": "Yêu cầu đang mở",
+    "overdue": "Công việc quá hạn",
+    "inProgress": "Đang xử lý",
+    "resolved": "Đã xử lý (30 ngày)",
+    "recentRequests": "Yêu cầu gần đây",
+    "hint": "Báo cáo một sự cố để xem nó chuyển thành lệnh công việc tại đây."
+  },
+  "priority": {
+    "low": "Thấp",
+    "medium": "Trung bình",
+    "high": "Cao",
+    "critical": "Khẩn cấp"
+  },
+  "severity": {
+    "low": "Thấp",
+    "medium": "Trung bình",
+    "high": "Cao",
+    "critical": "Nghiêm trọng"
+  },
+  "requestStatus": {
+    "new": "Mới",
+    "triaged": "Đã phân loại",
+    "assigned": "Đã phân công",
+    "in_progress": "Đang xử lý",
+    "on_hold": "Tạm dừng",
+    "resolved": "Đã xử lý",
+    "closed": "Đã đóng",
+    "rejected": "Từ chối"
+  },
+  "woStatus": {
+    "assigned": "Đã phân công",
+    "in_progress": "Đang xử lý",
+    "on_hold": "Tạm dừng",
+    "resolved": "Đã xử lý",
+    "closed": "Đã đóng"
+  },
+  "form": {
+    "nameEn": "Tên (Tiếng Anh)",
+    "nameVi": "Tên (Tiếng Việt)"
+  },
+  "common": {
+    "unassigned": "Chưa phân công",
+    "all": "Tất cả",
+    "optional": "tùy chọn",
+    "none": "Không có",
+    "empty": "Chưa có gì ở đây."
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Bạn đã xem hết.",
+    "markAllRead": "Đánh dấu đã đọc"
+  },
+  "offline": "Bạn đang ngoại tuyến. Thay đổi có thể không được lưu cho đến khi kết nối lại.",
+  "sync": {
+    "pending": "{{count}} chờ đồng bộ",
+    "syncing": "Đang đồng bộ…"
+  },
+  "free": "Miễn phí"
+}

@@ -1,0 +1,41 @@
+{
+  "title": "Billing & plans",
+  "subtitle": "Your subscription and what each plan includes.",
+  "currentPlan": "Current plan",
+  "renews": "Renews",
+  "usage": "Usage",
+  "assets": "Assets",
+  "members": "Members",
+  "sites": "Sites",
+  "perMonth": "/mo",
+  "perYear": "/yr",
+  "choose": "Subscribe via PayPal",
+  "current": "Current plan",
+  "linkMissing": "Payment link not set",
+  "markActive": "Mark active",
+  "cancel": "Cancel plan",
+  "pendingNote": "After paying in PayPal, mark this plan active.",
+  "editPlan": "Edit plan",
+  "limitsUnlimited": "Unlimited",
+  "statusLabels": {
+    "active": "Active",
+    "pending": "Pending payment",
+    "past_due": "Past due",
+    "canceled": "Canceled",
+    "trialing": "Trial"
+  },
+  "dialog": {
+    "title": "Edit plan",
+    "price": "Price",
+    "currency": "Currency",
+    "interval": "Interval",
+    "month": "Monthly",
+    "year": "Yearly",
+    "limitAssets": "Assets",
+    "limitMembers": "Members",
+    "limitSites": "Sites",
+    "limitHint": "Leave a limit blank for unlimited.",
+    "paymentUrl": "PayPal payment link",
+    "paymentHint": "Paste your PayPal payment or subscription link. The Subscribe button opens it."
+  }
+}

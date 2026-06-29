@@ -1,0 +1,30 @@
+{
+  "title": "Parts & inventory",
+  "subtitle": "Stock levels and what gets consumed on work orders.",
+  "empty": "No parts yet. Add one to start tracking stock.",
+  "add": "New part",
+  "lowStock": "Low stock",
+  "columns": {
+    "name": "Part",
+    "sku": "SKU",
+    "stock": "In stock",
+    "reorder": "Reorder at",
+    "cost": "Unit cost"
+  },
+  "restock": "Restock",
+  "dialog": {
+    "title": "New part",
+    "sku": "SKU (optional)",
+    "unit": "Unit (e.g. pcs, L)",
+    "initialStock": "Initial stock",
+    "reorder": "Reorder level",
+    "cost": "Unit cost"
+  },
+  "use": {
+    "title": "Parts used",
+    "part": "Part",
+    "qty": "Quantity",
+    "add": "Log part",
+    "empty": "No parts logged on this work order."
+  }
+}

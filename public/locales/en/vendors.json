@@ -1,0 +1,28 @@
+{
+  "title": "Vendors & contracts",
+  "subtitle": "Suppliers, contracts and licenses with expiry tracking.",
+  "vendors": "Vendors",
+  "contracts": "Contracts",
+  "licenses": "Licenses",
+  "addVendor": "New vendor",
+  "addContract": "New contract",
+  "addLicense": "New license",
+  "emptyVendors": "No vendors yet.",
+  "emptyContracts": "No contracts yet.",
+  "emptyLicenses": "No licenses yet.",
+  "expires": "Expires",
+  "expired": "Expired",
+  "expiringSoon": "Expiring soon",
+  "noExpiry": "No expiry",
+  "fields": {
+    "name": "Name",
+    "category": "Category",
+    "email": "Email",
+    "phone": "Phone",
+    "ctitle": "Title",
+    "vendor": "Vendor",
+    "documentUrl": "Document URL",
+    "expiry": "Expiry date",
+    "holder": "Holder"
+  }
+}

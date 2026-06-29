@@ -1,0 +1,31 @@
+{
+  "title": "Bảo trì phòng ngừa",
+  "subtitle": "Lên lịch công việc định kỳ để không bỏ sót.",
+  "empty": "Chưa có lịch bảo trì nào.",
+  "addSchedule": "Lịch mới",
+  "runDue": "Tạo công việc đến hạn",
+  "generated": "Đã tạo {{count}} lệnh công việc.",
+  "noneDue": "Hiện không có việc đến hạn.",
+  "upcoming": "Lịch bảo trì",
+  "overdue": "Quá hạn",
+  "every_days": "Mỗi {{count}} ngày",
+  "every_units": "Mỗi {{count}} đơn vị",
+  "meterTriggered": "Theo đồng hồ",
+  "pause": "Tạm dừng",
+  "resume": "Tiếp tục",
+  "dialog": {
+    "title": "Lịch bảo trì mới",
+    "asset": "Tài sản",
+    "triggerType": "Kích hoạt",
+    "triggerCalendar": "Theo lịch (ngày)",
+    "triggerMeter": "Theo mức sử dụng đồng hồ",
+    "interval": "Lặp lại sau (ngày)",
+    "meter": "Đồng hồ",
+    "meterThreshold": "Mỗi (đơn vị)",
+    "meterRequired": "Hãy chọn đồng hồ cho lịch theo đồng hồ.",
+    "checklist": "Danh sách kiểm tra (tùy chọn)",
+    "assignee": "Giao cho (tùy chọn)",
+    "priority": "Mức ưu tiên",
+    "firstDue": "Ngày đến hạn đầu tiên"
+  }
+}

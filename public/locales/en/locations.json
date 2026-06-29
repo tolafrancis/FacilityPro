@@ -1,0 +1,27 @@
+{
+  "title": "Locations",
+  "subtitle": "Build your site, building, floor and room hierarchy.",
+  "empty": "No sites yet. Add your first site to start mapping your facilities.",
+  "addSite": "Add site",
+  "addBuilding": "Add building",
+  "addFloor": "Add floor",
+  "addRoom": "Add room",
+  "addZone": "Add zone",
+  "site": "Site",
+  "building": "Building",
+  "floor": "Floor",
+  "room": "Room",
+  "zone": "Zone",
+  "save": "Save",
+  "cancel": "Cancel",
+  "form": {
+    "nameEn": "Name (English)",
+    "nameVi": "Name (Tiếng Việt)",
+    "address": "Address (optional)",
+    "namePlaceholder": "e.g. Main Building"
+  },
+  "dialog": {
+    "addSiteTitle": "Add a site",
+    "addChildTitle": "Add {{kind}}"
+  }
+}

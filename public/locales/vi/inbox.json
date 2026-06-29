@@ -1,0 +1,26 @@
+{
+  "title": "Hộp thư",
+  "subtitle": "Trò chuyện với cư dân và liên hệ qua nhiều kênh.",
+  "new": "Cuộc trò chuyện mới",
+  "empty": "Chưa có cuộc trò chuyện nào.",
+  "selectPrompt": "Chọn một cuộc trò chuyện để xem nội dung.",
+  "noMessages": "Chưa có tin nhắn.",
+  "replyPlaceholder": "Nhập câu trả lời…",
+  "send": "Gửi",
+  "unknownContact": "Liên hệ chưa rõ",
+  "newTitle": "Cuộc trò chuyện mới",
+  "contactName": "Tên liên hệ",
+  "channel": "Kênh",
+  "handle": "Tài khoản / số",
+  "firstMessage": "Tin nhắn đầu tiên (tùy chọn)",
+  "channels": {
+    "manual": "Thủ công",
+    "web": "Web",
+    "whatsapp": "WhatsApp",
+    "zalo": "Zalo",
+    "line": "LINE",
+    "email": "Email"
+  },
+  "createTicket": "Tạo lệnh công việc",
+  "ticketCreated": "Đã tạo báo cáo"
+}

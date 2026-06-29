@@ -1,0 +1,19 @@
+{
+  "name": "FacilityPro",
+  "short_name": "FacilityPro",
+  "description": "Multilingual facility maintenance — report faults and complete work orders.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F7F8",
+  "theme_color": "#E8552D",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

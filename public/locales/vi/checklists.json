@@ -1,0 +1,34 @@
+{
+  "title": "Danh sách kiểm tra",
+  "subtitle": "Mẫu kiểm tra tái sử dụng cho lệnh công việc và bảo trì.",
+  "empty": "Chưa có mẫu kiểm tra. Tạo một mẫu để chuẩn hóa việc kiểm tra.",
+  "addTemplate": "Danh sách mới",
+  "newTemplateTitle": "Mẫu danh sách kiểm tra mới",
+  "items": "Hạng mục",
+  "addItem": "Thêm hạng mục",
+  "noItems": "Chưa có hạng mục nào. Thêm mục kiểm tra đầu tiên.",
+  "itemLabelEn": "Hạng mục (Tiếng Anh)",
+  "itemLabelVi": "Hạng mục (Tiếng Việt)",
+  "type": "Loại",
+  "required": "Bắt buộc",
+  "delete": "Xóa",
+  "types": {
+    "pass_fail": "Đạt / Không đạt",
+    "value": "Giá trị",
+    "photo": "Hình ảnh",
+    "text": "Ghi chú"
+  },
+  "runner": {
+    "title": "Danh sách kiểm tra",
+    "pass": "Đạt",
+    "fail": "Không đạt",
+    "done": "Hoàn tất",
+    "valuePlaceholder": "Nhập giá trị",
+    "notePlaceholder": "Thêm ghi chú",
+    "photoHint": "Đính kèm ảnh ở phần Bằng chứng hình ảnh bên dưới.",
+    "save": "Lưu danh sách",
+    "completed": "Hoàn tất {{when}}",
+    "attach": "Đính kèm danh sách kiểm tra…",
+    "none": "Chưa đính kèm danh sách kiểm tra."
+  }
+}

@@ -1,0 +1,21 @@
+-- seed.sql
+-- Optional starter content. Run AFTER you have created an org and know its id.
+-- Replace :org_id with your organisation's UUID, then run in the SQL editor.
+--
+-- Example:
+--   \set org_id 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+--
+-- These are EN/VI bilingual defaults to get a new org started.
+
+-- insert into fp_fault_types (org_id, name_i18n, default_priority) values
+--   (:'org_id', '{"en":"Leaking Pipe","vi":"Đường ống rò rỉ"}', 'high'),
+--   (:'org_id', '{"en":"Electrical Fault","vi":"Sự cố điện"}', 'high'),
+--   (:'org_id', '{"en":"Air Conditioning","vi":"Điều hòa không khí"}', 'medium'),
+--   (:'org_id', '{"en":"Lighting","vi":"Chiếu sáng"}', 'low'),
+--   (:'org_id', '{"en":"Cleaning","vi":"Vệ sinh"}', 'low');
+
+-- insert into fp_asset_types (org_id, name_i18n) values
+--   (:'org_id', '{"en":"HVAC Unit","vi":"Máy điều hòa"}'),
+--   (:'org_id', '{"en":"Elevator","vi":"Thang máy"}'),
+--   (:'org_id', '{"en":"Water Pump","vi":"Máy bơm nước"}'),
+--   (:'org_id', '{"en":"Generator","vi":"Máy phát điện"}');

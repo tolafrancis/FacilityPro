@@ -1,0 +1,32 @@
+{
+  "title": "Requests",
+  "subtitle": "Reported faults and service requests.",
+  "new": "New request",
+  "empty": "No requests yet.",
+  "columns": { "title": "Request", "type": "Fault type", "location": "Location", "priority": "Priority", "status": "Status", "created": "Created" },
+  "filter": { "status": "Status", "all": "All statuses" },
+  "form": {
+    "title": "Report a fault",
+    "summary": "Summary",
+    "summaryPlaceholder": "Short title for the issue",
+    "faultType": "Fault type",
+    "location": "Location",
+    "asset": "Asset",
+    "severity": "Severity",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe what is wrong…",
+    "photo": "Photo",
+    "submit": "Submit report",
+    "none": "None"
+  },
+  "detail": {
+    "reported": "Reported",
+    "description": "Description",
+    "noDescription": "No description provided.",
+    "convert": "Create work order",
+    "status": "Status",
+    "linkedWo": "Linked work order",
+    "channel": "Channel",
+    "sourceLng": "Reported in"
+  }
+}

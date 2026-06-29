@@ -1,0 +1,14 @@
+{
+  "title": "Phê duyệt",
+  "subtitle": "Lệnh công việc đang chờ quyết định.",
+  "empty": "Không có gì chờ phê duyệt.",
+  "requestedBy": "Yêu cầu bởi {{who}}",
+  "notePlaceholder": "Thêm ghi chú (tùy chọn)",
+  "approve": "Phê duyệt",
+  "reject": "Từ chối",
+  "request": "Yêu cầu phê duyệt",
+  "printSheet": "In phiếu công việc",
+  "woTitle": "Phê duyệt",
+  "woNone": "Chưa yêu cầu phê duyệt.",
+  "status": { "pending": "Đang chờ", "approved": "Đã duyệt", "rejected": "Đã từ chối" }
+}

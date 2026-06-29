@@ -1,0 +1,41 @@
+{
+  "title": "Thanh toán & gói",
+  "subtitle": "Gói đăng ký của bạn và những gì mỗi gói bao gồm.",
+  "currentPlan": "Gói hiện tại",
+  "renews": "Gia hạn",
+  "usage": "Sử dụng",
+  "assets": "Tài sản",
+  "members": "Thành viên",
+  "sites": "Cơ sở",
+  "perMonth": "/tháng",
+  "perYear": "/năm",
+  "choose": "Đăng ký qua PayPal",
+  "current": "Gói hiện tại",
+  "linkMissing": "Chưa đặt liên kết thanh toán",
+  "markActive": "Đánh dấu kích hoạt",
+  "cancel": "Hủy gói",
+  "pendingNote": "Sau khi thanh toán qua PayPal, hãy đánh dấu kích hoạt gói này.",
+  "editPlan": "Sửa gói",
+  "limitsUnlimited": "Không giới hạn",
+  "statusLabels": {
+    "active": "Đang hoạt động",
+    "pending": "Chờ thanh toán",
+    "past_due": "Quá hạn",
+    "canceled": "Đã hủy",
+    "trialing": "Dùng thử"
+  },
+  "dialog": {
+    "title": "Sửa gói",
+    "price": "Giá",
+    "currency": "Tiền tệ",
+    "interval": "Chu kỳ",
+    "month": "Hàng tháng",
+    "year": "Hàng năm",
+    "limitAssets": "Tài sản",
+    "limitMembers": "Thành viên",
+    "limitSites": "Cơ sở",
+    "limitHint": "Để trống nếu không giới hạn.",
+    "paymentUrl": "Liên kết thanh toán PayPal",
+    "paymentHint": "Dán liên kết thanh toán hoặc đăng ký PayPal của bạn. Nút Đăng ký sẽ mở liên kết này."
+  }
+}

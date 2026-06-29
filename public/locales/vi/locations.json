@@ -1,0 +1,27 @@
+{
+  "title": "Vị trí",
+  "subtitle": "Xây dựng cấu trúc khu vực, tòa nhà, tầng và phòng.",
+  "empty": "Chưa có khu vực nào. Thêm khu vực đầu tiên để bắt đầu lập bản đồ cơ sở của bạn.",
+  "addSite": "Thêm khu vực",
+  "addBuilding": "Thêm tòa nhà",
+  "addFloor": "Thêm tầng",
+  "addRoom": "Thêm phòng",
+  "addZone": "Thêm khu",
+  "site": "Khu vực",
+  "building": "Tòa nhà",
+  "floor": "Tầng",
+  "room": "Phòng",
+  "zone": "Khu",
+  "save": "Lưu",
+  "cancel": "Hủy",
+  "form": {
+    "nameEn": "Tên (Tiếng Anh)",
+    "nameVi": "Tên (Tiếng Việt)",
+    "address": "Địa chỉ (tùy chọn)",
+    "namePlaceholder": "vd: Tòa nhà chính"
+  },
+  "dialog": {
+    "addSiteTitle": "Thêm khu vực",
+    "addChildTitle": "Thêm {{kind}}"
+  }
+}

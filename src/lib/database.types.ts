@@ -1,0 +1,430 @@
+export type I18nText = Record<string, string>;
+
+export type Role =
+  | 'super_admin'
+  | 'org_admin'
+  | 'manager'
+  | 'technician'
+  | 'occupant'
+  | 'vendor';
+
+export interface Organization {
+  id: string;
+  name: string;
+  default_lng: string;
+  active_languages: string[];
+  subscription_tier: string;
+  allow_public_requests?: boolean;
+  auto_create_work_orders?: boolean;
+}
+
+export interface Membership {
+  org_id: string;
+  role: Role;
+  fp_organizations: Organization;
+}
+
+export interface Site {
+  id: string;
+  org_id: string;
+  name_i18n: I18nText;
+  address: string | null;
+  created_at: string;
+}
+
+export type LocationKind = 'building' | 'floor' | 'room' | 'zone';
+
+export interface LocationRow {
+  id: string;
+  org_id: string;
+  site_id: string | null;
+  parent_id: string | null;
+  name_i18n: I18nText;
+  kind: LocationKind;
+  created_at: string;
+}
+
+export type Priority = 'low' | 'medium' | 'high' | 'critical';
+
+export interface AssetType {
+  id: string;
+  org_id: string;
+  name_i18n: I18nText;
+}
+
+export interface FaultType {
+  id: string;
+  org_id: string;
+  name_i18n: I18nText;
+  default_priority: Priority;
+}
+
+export interface Asset {
+  id: string;
+  org_id: string;
+  location_id: string | null;
+  asset_type_id: string | null;
+  name_i18n: I18nText;
+  serial: string | null;
+  manufacturer: string | null;
+  model: string | null;
+  warranty_expiry: string | null;
+  qr_code: string | null;
+  status: string;
+  created_at: string;
+}
+
+export type RequestStatus =
+  | 'new'
+  | 'triaged'
+  | 'assigned'
+  | 'in_progress'
+  | 'on_hold'
+  | 'resolved'
+  | 'closed'
+  | 'rejected';
+
+export interface RequestRow {
+  id: string;
+  org_id: string;
+  asset_id: string | null;
+  location_id: string | null;
+  fault_type_id: string | null;
+  title: string | null;
+  body_original: string | null;
+  source_lng: string;
+  severity: string | null;
+  priority: Priority;
+  channel: string;
+  status: RequestStatus;
+  created_by: string | null;
+  created_at: string;
+}
+
+export type WorkOrderStatus =
+  | 'assigned'
+  | 'in_progress'
+  | 'on_hold'
+  | 'resolved'
+  | 'closed';
+
+export interface WorkOrder {
+  id: string;
+  org_id: string;
+  request_id: string | null;
+  asset_id: string | null;
+  assigned_to: string | null;
+  title: string | null;
+  instructions: string | null;
+  priority: Priority;
+  status: WorkOrderStatus;
+  due_at: string | null;
+  closed_at: string | null;
+  labour_minutes: number;
+  cost: number;
+  checklist_template_id: string | null;
+  pm_schedule_id: string | null;
+  created_at: string;
+}
+
+export interface Media {
+  id: string;
+  org_id: string;
+  work_order_id: string | null;
+  request_id: string | null;
+  path: string;
+  kind: string;
+  phase: string | null;
+  created_at: string;
+}
+
+export interface OrgMember {
+  user_id: string;
+  email: string;
+  role: Role;
+}
+
+export type ChecklistItemType = 'pass_fail' | 'value' | 'photo' | 'text';
+
+export interface ChecklistTemplate {
+  id: string;
+  org_id: string;
+  name_i18n: I18nText;
+  created_at: string;
+}
+
+export interface ChecklistItem {
+  id: string;
+  org_id: string;
+  template_id: string;
+  ord: number;
+  label_i18n: I18nText;
+  item_type: ChecklistItemType;
+  required: boolean;
+}
+
+export interface ChecklistResult {
+  status?: 'pass' | 'fail' | 'done';
+  value?: string;
+  note?: string;
+}
+
+export interface ChecklistRun {
+  id: string;
+  org_id: string;
+  template_id: string | null;
+  work_order_id: string | null;
+  performed_by: string | null;
+  results: Record<string, ChecklistResult>;
+  completed_at: string | null;
+  created_at: string;
+}
+
+export type PmTriggerType = 'calendar' | 'meter';
+
+export interface PmSchedule {
+  id: string;
+  org_id: string;
+  asset_id: string | null;
+  name_i18n: I18nText;
+  interval_days: number;
+  checklist_template_id: string | null;
+  assigned_to: string | null;
+  priority: Priority;
+  next_due_at: string | null;
+  last_run_at: string | null;
+  active: boolean;
+  trigger_type: PmTriggerType;
+  meter_id: string | null;
+  meter_threshold: number | null;
+  last_meter_value: number | null;
+  created_at: string;
+}
+
+export interface Part {
+  id: string;
+  org_id: string;
+  name_i18n: I18nText;
+  sku: string | null;
+  unit: string | null;
+  stock_balance: number;
+  reorder_level: number;
+  unit_cost: number;
+  created_at: string;
+}
+
+export interface WoPart {
+  id: string;
+  org_id: string;
+  work_order_id: string;
+  part_id: string;
+  quantity: number;
+  created_at: string;
+}
+
+export interface Meter {
+  id: string;
+  org_id: string;
+  asset_id: string;
+  name_i18n: I18nText;
+  unit: string | null;
+  created_at: string;
+}
+
+export interface MeterReading {
+  id: string;
+  org_id: string;
+  meter_id: string;
+  value: number;
+  read_at: string;
+  read_by: string | null;
+}
+
+export interface Vendor {
+  id: string;
+  org_id: string;
+  name: string;
+  category: string | null;
+  email: string | null;
+  phone: string | null;
+  created_at: string;
+}
+
+export interface Contract {
+  id: string;
+  org_id: string;
+  vendor_id: string | null;
+  title: string;
+  document_url: string | null;
+  start_date: string | null;
+  expiry_date: string | null;
+  reminder_days: number;
+  created_at: string;
+}
+
+export interface License {
+  id: string;
+  org_id: string;
+  name: string;
+  holder: string | null;
+  document_url: string | null;
+  expiry_date: string | null;
+  reminder_days: number;
+  created_at: string;
+}
+
+export interface SlaPolicy {
+  id: string;
+  org_id: string;
+  priority: Priority;
+  resolution_hours: number;
+}
+
+export interface AssignmentRule {
+  id: string;
+  org_id: string;
+  fault_type_id: string | null;
+  priority: Priority | null;
+  assigned_to: string;
+  ord: number;
+}
+
+export interface NotificationRow {
+  id: string;
+  org_id: string;
+  user_id: string;
+  kind: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export interface ApprovalRow {
+  id: string;
+  org_id: string;
+  work_order_id: string;
+  status: ApprovalStatus;
+  note: string | null;
+  requested_by: string | null;
+  decided_by: string | null;
+  created_at: string;
+  decided_at: string | null;
+}
+
+export interface NotificationPref {
+  user_id: string;
+  email_enabled: boolean;
+  sms_enabled: boolean;
+  push_enabled: boolean;
+  phone: string | null;
+  updated_at: string;
+}
+
+export type ConversationChannel = 'manual' | 'web' | 'whatsapp' | 'zalo' | 'line' | 'email';
+
+export interface Conversation {
+  id: string;
+  org_id: string;
+  channel: ConversationChannel;
+  contact_name: string | null;
+  contact_handle: string | null;
+  status: 'open' | 'closed';
+  last_message_at: string;
+  created_at: string;
+}
+
+export interface Message {
+  id: string;
+  org_id: string;
+  conversation_id: string;
+  direction: 'in' | 'out';
+  body: string;
+  sender: string | null;
+  created_at: string;
+}
+
+export interface PlanLimits {
+  assets?: number;
+  members?: number;
+  sites?: number;
+}
+
+export interface Plan {
+  code: string;
+  name_i18n: I18nText;
+  price: number;
+  currency: string;
+  interval: 'month' | 'year';
+  limits: PlanLimits;
+  payment_url: string | null;
+  sort: number;
+  active: boolean;
+}
+
+export type SubscriptionStatus =
+  | 'active'
+  | 'pending'
+  | 'past_due'
+  | 'canceled'
+  | 'trialing';
+
+export interface Subscription {
+  org_id: string;
+  plan_code: string | null;
+  status: SubscriptionStatus;
+  provider: string | null;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  note: string | null;
+  updated_at: string;
+}
+
+export interface Device {
+  id: string;
+  org_id: string;
+  asset_id: string | null;
+  name: string;
+  kind: string | null;
+  device_key: string;
+  meter_id: string | null;
+  metric_map: Record<string, string>;
+  last_seen_at: string | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Telemetry {
+  id: string;
+  org_id: string;
+  device_id: string;
+  metric: string;
+  value: number | null;
+  unit: string | null;
+  ts: string;
+  meta: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export type DeviceRuleOp = 'gt' | 'gte' | 'lt' | 'lte' | 'eq';
+export type DeviceRuleAction = 'notify' | 'work_order' | 'both';
+
+export interface DeviceRule {
+  id: string;
+  org_id: string;
+  device_id: string;
+  metric: string | null;
+  op: DeviceRuleOp;
+  threshold: number;
+  action: DeviceRuleAction;
+  severity: string;
+  message: string | null;
+  cooldown_minutes: number;
+  last_fired_at: string | null;
+  active: boolean;
+  created_at: string;
+}

@@ -1,0 +1,19 @@
+{
+  "title": "Báo cáo",
+  "subtitle": "Chỉ số vận hành, xuất dữ liệu và nhật ký hoạt động.",
+  "kpis": {
+    "openRequests": "Yêu cầu đang mở",
+    "openWork": "Lệnh đang mở",
+    "overdue": "Lệnh quá hạn",
+    "avgResolution": "TB xử lý (giờ)",
+    "pmDue": "Bảo trì đến hạn",
+    "lowStock": "Phụ tùng sắp hết",
+    "expiringContracts": "Hợp đồng sắp hết hạn (30 ngày)"
+  },
+  "exports": "Xuất dữ liệu",
+  "exportRequests": "Xuất yêu cầu (CSV)",
+  "exportWorkOrders": "Xuất lệnh công việc (CSV)",
+  "auditLog": "Nhật ký hoạt động",
+  "auditEmpty": "Chưa có hoạt động nào được ghi nhận.",
+  "columns": { "when": "Thời gian", "entity": "Đối tượng", "action": "Hành động" }
+}

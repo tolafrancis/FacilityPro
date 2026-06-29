@@ -1,0 +1,32 @@
+{
+  "title": "Yêu cầu",
+  "subtitle": "Các sự cố và yêu cầu dịch vụ đã báo cáo.",
+  "new": "Yêu cầu mới",
+  "empty": "Chưa có yêu cầu.",
+  "columns": { "title": "Yêu cầu", "type": "Loại sự cố", "location": "Vị trí", "priority": "Ưu tiên", "status": "Trạng thái", "created": "Tạo lúc" },
+  "filter": { "status": "Trạng thái", "all": "Tất cả trạng thái" },
+  "form": {
+    "title": "Báo cáo sự cố",
+    "summary": "Tóm tắt",
+    "summaryPlaceholder": "Tiêu đề ngắn cho sự cố",
+    "faultType": "Loại sự cố",
+    "location": "Vị trí",
+    "asset": "Tài sản",
+    "severity": "Mức độ nghiêm trọng",
+    "description": "Mô tả",
+    "descriptionPlaceholder": "Mô tả sự cố…",
+    "photo": "Ảnh",
+    "submit": "Gửi báo cáo",
+    "none": "Không có"
+  },
+  "detail": {
+    "reported": "Đã báo cáo",
+    "description": "Mô tả",
+    "noDescription": "Không có mô tả.",
+    "convert": "Tạo lệnh công việc",
+    "status": "Trạng thái",
+    "linkedWo": "Lệnh công việc liên kết",
+    "channel": "Kênh",
+    "sourceLng": "Báo cáo bằng"
+  }
+}

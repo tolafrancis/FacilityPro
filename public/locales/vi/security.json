@@ -1,0 +1,35 @@
+{
+  "title": "Bảo mật",
+  "subtitle": "Bảo vệ tài khoản và chọn cách bạn nhận thông báo.",
+  "mfa": {
+    "title": "Xác thực hai lớp",
+    "hint": "Thêm mã thời gian từ ứng dụng xác thực làm bước thứ hai khi đăng nhập.",
+    "enable": "Bật 2FA",
+    "addAnother": "Thêm thiết bị khác",
+    "active": "Đang bật",
+    "authenticatorApp": "Ứng dụng xác thực",
+    "remove": "Gỡ bỏ",
+    "scan": "Quét mã QR này bằng ứng dụng xác thực, sau đó nhập mã 6 chữ số.",
+    "code": "Mã xác minh",
+    "verify": "Xác minh & bật",
+    "cancel": "Hủy"
+  },
+  "email": {
+    "title": "Thông báo qua email",
+    "hint": "Nhận thêm thông báo trong ứng dụng qua email.",
+    "toggle": "Gửi thông báo cho tôi qua email",
+    "deliverTo": "Gửi đến {{email}}"
+  },
+  "sms": {
+    "title": "Tin nhắn (SMS)",
+    "hint": "Nhận thêm thông báo qua SMS. Có thể áp dụng cước phí thông thường.",
+    "toggle": "Nhắn tin thông báo cho tôi",
+    "phone": "Số di động",
+    "phoneHint": "Bao gồm mã quốc gia, vd: +84…"
+  },
+  "push": {
+    "title": "Thông báo đẩy",
+    "hint": "Nhận thông báo đẩy trên trình duyệt/điện thoại ngay cả khi đã đóng FacilityPro.",
+    "toggle": "Bật thông báo đẩy trên thiết bị này"
+  }
+}
