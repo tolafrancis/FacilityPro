@@ -1,29 +1,177 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2 } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus, Trash2, Copy, Cpu, Pencil, Power, Workflow as WorkflowIcon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
-import {
-  useAssetTypes,
-  useAssignmentRules,
-  useFaultTypes,
-  useOrgMembers,
-  useSlaPolicies,
-} from '../lib/queries';
+import { useAuth } from '../contexts/AuthContext';
+import { useAssetTypes, useFaultTypes, useOrgMembers, useSlaPolicies } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { PRIORITIES, PRIORITY_CLASS } from '../lib/ui';
-import type { Priority } from '../lib/database.types';
+import type { AssetType, FaultType, Priority, Role } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
 
-type DialogKind = 'fault' | 'asset' | null;
+type TabKey = 'general' | 'catalogs' | 'sla' | 'automation' | 'team' | 'integrations';
+
+const TABS: { key: TabKey; label: string }[] = [
+  { key: 'general', label: 'General' },
+  { key: 'catalogs', label: 'Catalogs' },
+  { key: 'sla', label: 'SLA' },
+  { key: 'automation', label: 'Automation' },
+  { key: 'team', label: 'Team & roles' },
+  { key: 'integrations', label: 'Integrations' },
+];
 
 export default function Settings() {
-  const { t, i18n } = useTranslation('settings');
+  const { t } = useTranslation('settings');
+  const { role } = useOrg();
+  const [tab, setTab] = useState<TabKey>('general');
+  const visibleTabs = TABS.filter((tabItem) => tabItem.key !== 'team' || role === 'org_admin');
+
+  const selectTab = (key: TabKey) => {
+    setTab(key);
+    if (typeof document !== 'undefined') document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="max-w-3xl">
+      <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
+      <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
+
+      <div className="mt-6 flex flex-wrap gap-1 border-b border-line">
+        {visibleTabs.map((tabItem) => (
+          <button
+            key={tabItem.key}
+            type="button"
+            onClick={() => selectTab(tabItem.key)}
+            className={`rounded-t-lg px-4 py-2 text-sm font-medium transition ${
+              tab === tabItem.key ? 'border-b-2 border-brand text-brand' : 'text-ink-muted hover:text-ink'
+            }`}
+          >
+            {tabItem.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-6">
+        {tab === 'general' && <GeneralSection />}
+        {tab === 'catalogs' && <CatalogsSection />}
+        {tab === 'sla' && <SlaSection />}
+        {tab === 'automation' && <AutomationSection />}
+        {tab === 'team' && role === 'org_admin' && <TeamSection />}
+        {tab === 'integrations' && <IntegrationsSection />}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// General — org profile (name, languages, timezone, currency)
+// ---------------------------------------------------------------------------
+function GeneralSection() {
+  const { currentOrg, role } = useOrg();
+  const orgId = currentOrg?.id;
+  const queryClient = useQueryClient();
+  const canEdit = role === 'org_admin';
+  const langs = (currentOrg?.active_languages as string[] | undefined) ?? ['en', 'vi'];
+
+  const settingsQuery = useQuery({
+    queryKey: ['org_settings', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('fp_organizations').select('settings').eq('id', orgId!).single();
+      if (error) throw error;
+      return (data?.settings ?? {}) as Record<string, string>;
+    },
+  });
+
+  const [name, setName] = useState('');
+  const [lng, setLng] = useState('en');
+  const [timezone, setTimezone] = useState('');
+  const [currency, setCurrency] = useState('');
+  const [msg, setMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    setName(currentOrg?.name ?? '');
+    setLng(currentOrg?.default_lng ?? 'en');
+  }, [currentOrg]);
+  useEffect(() => {
+    if (settingsQuery.data) {
+      setTimezone(settingsQuery.data.timezone ?? '');
+      setCurrency(settingsQuery.data.currency ?? '');
+    }
+  }, [settingsQuery.data]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const settings = { ...(settingsQuery.data ?? {}), timezone, currency };
+      const { error } = await supabase
+        .from('fp_organizations')
+        .update({ name, default_lng: lng, settings })
+        .eq('id', orgId!);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['memberships'] });
+      void queryClient.invalidateQueries({ queryKey: ['org_settings', orgId] });
+      setMsg('Saved.');
+    },
+    onError: (e) => setMsg(e instanceof Error ? e.message : 'Unable to save.'),
+  });
+
+  return (
+    <section className="rounded-xl border border-line bg-white p-4">
+      <h2 className="font-semibold text-ink">Organisation profile</h2>
+      <p className="mt-1 text-sm text-ink-muted">Basic details used across the workspace.</p>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-ink">Name</label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} disabled={!canEdit} />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-ink">Default language</label>
+          <Select value={lng} onChange={(e) => setLng(e.target.value)} disabled={!canEdit}>
+            {langs.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
+          </Select>
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-ink">Timezone</label>
+          <Input value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder="e.g. Asia/Ho_Chi_Minh" disabled={!canEdit} />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-ink">Currency</label>
+          <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="e.g. USD" disabled={!canEdit} />
+        </div>
+      </div>
+      {canEdit && (
+        <div className="mt-4 flex items-center gap-3">
+          <Button onClick={() => save.mutate()} loading={save.isPending}>Save</Button>
+          {msg && <span className="text-sm text-ink-muted">{msg}</span>}
+        </div>
+      )}
+      {!canEdit && <p className="mt-4 text-sm text-ink-muted">Only an organisation admin can edit these.</p>}
+    </section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Catalogs — fault types & asset types
+// ---------------------------------------------------------------------------
+type CatalogDialogState =
+  | { kind: 'fault'; mode: 'create' }
+  | { kind: 'fault'; mode: 'edit'; row: FaultType }
+  | { kind: 'asset'; mode: 'create' }
+  | { kind: 'asset'; mode: 'edit'; row: AssetType }
+  | null;
+
+function CatalogsSection() {
+  const { i18n } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg } = useOrg();
@@ -31,118 +179,144 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const faults = useFaultTypes();
   const assetTypes = useAssetTypes();
-  const [dialog, setDialog] = useState<DialogKind>(null);
+  const [dialog, setDialog] = useState<CatalogDialogState>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const addFault = useMutation({
-    mutationFn: async (v: { en: string; vi: string; priority: Priority }) => {
-      const { error } = await supabase.from('fp_fault_types').insert({
-        org_id: orgId,
-        name_i18n: { en: v.en, vi: v.vi || v.en },
-        default_priority: v.priority,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['fault_types', orgId] });
-      setDialog(null);
-    },
-  });
+  const invFault = () => queryClient.invalidateQueries({ queryKey: ['fault_types', orgId] });
+  const invAsset = () => queryClient.invalidateQueries({ queryKey: ['asset_types', orgId] });
 
-  const addAssetType = useMutation({
-    mutationFn: async (v: { en: string; vi: string }) => {
-      const { error } = await supabase.from('fp_asset_types').insert({
-        org_id: orgId,
-        name_i18n: { en: v.en, vi: v.vi || v.en },
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['asset_types', orgId] });
-      setDialog(null);
-    },
-  });
+  const saveFault = async (v: { id?: string; en: string; vi: string; priority: Priority }) => {
+    const payload = { name_i18n: { en: v.en, vi: v.vi || v.en }, default_priority: v.priority };
+    const { error } = v.id
+      ? await supabase.from('fp_fault_types').update(payload).eq('id', v.id)
+      : await supabase.from('fp_fault_types').insert({ org_id: orgId, ...payload });
+    if (error) { setMsg(error.message); return; }
+    invFault();
+    setDialog(null);
+  };
+
+  const saveAsset = async (v: { id?: string; en: string; vi: string }) => {
+    const payload = { name_i18n: { en: v.en, vi: v.vi || v.en } };
+    const { error } = v.id
+      ? await supabase.from('fp_asset_types').update(payload).eq('id', v.id)
+      : await supabase.from('fp_asset_types').insert({ org_id: orgId, ...payload });
+    if (error) { setMsg(error.message); return; }
+    invAsset();
+    setDialog(null);
+  };
+
+  const toggleFault = async (ft: FaultType) => {
+    await supabase.from('fp_fault_types').update({ is_active: ft.is_active === false }).eq('id', ft.id);
+    invFault();
+  };
+  const toggleAsset = async (at: AssetType) => {
+    await supabase.from('fp_asset_types').update({ is_active: at.is_active === false }).eq('id', at.id);
+    invAsset();
+  };
+
+  const deleteFault = async (ft: FaultType) => {
+    setMsg(null);
+    const { count } = await supabase.from('fp_requests').select('id', { count: 'exact', head: true }).eq('fault_type_id', ft.id);
+    if ((count ?? 0) > 0) { setMsg(`"${resolveI18n(ft.name_i18n, lng)}" is used by ${count} request(s) — deactivate it instead of deleting.`); return; }
+    await supabase.from('fp_fault_types').delete().eq('id', ft.id);
+    invFault();
+  };
+  const deleteAsset = async (at: AssetType) => {
+    setMsg(null);
+    const { count } = await supabase.from('fp_assets').select('id', { count: 'exact', head: true }).eq('asset_type_id', at.id);
+    if ((count ?? 0) > 0) { setMsg(`"${resolveI18n(at.name_i18n, lng)}" is used by ${count} asset(s) — deactivate it instead of deleting.`); return; }
+    await supabase.from('fp_asset_types').delete().eq('id', at.id);
+    invAsset();
+  };
+
+  const loadDefaults = async () => {
+    setBusy(true);
+    setMsg(null);
+    const { error } = await supabase.rpc('fp_load_default_catalogs', { p_org: orgId });
+    setBusy(false);
+    if (error) { setMsg(error.message); return; }
+    invFault();
+    invAsset();
+    setMsg('Default types loaded (only added when a catalog was empty).');
+  };
 
   return (
-    <div className="max-w-3xl">
-      <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
-      <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-ink-muted">Manage the fault and asset types your team can choose from.</p>
+        <Button variant="secondary" onClick={loadDefaults} loading={busy}>Load default types</Button>
+      </div>
+      {msg && <p className="text-sm text-status-crit">{msg}</p>}
 
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         <section className="rounded-xl border border-line bg-white p-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-ink">{t('faultTypes.title')}</h2>
-            <button
-              type="button"
-              onClick={() => setDialog('fault')}
-              className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600"
-            >
-              <Plus size={15} /> {t('faultTypes.add')}
+            <h2 className="font-semibold text-ink">Fault types</h2>
+            <button type="button" onClick={() => setDialog({ kind: 'fault', mode: 'create' })} className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600">
+              <Plus size={15} /> Add
             </button>
           </div>
           <ul className="mt-3 space-y-2">
             {(faults.data ?? []).map((ft) => (
-              <li
-                key={ft.id}
-                className="flex items-center justify-between rounded-lg border border-line px-3 py-2 text-sm"
-              >
-                <span className="text-ink">{resolveI18n(ft.name_i18n, lng)}</span>
-                <Pill className={PRIORITY_CLASS[ft.default_priority]}>
-                  {tc(`priority.${ft.default_priority}`)}
-                </Pill>
+              <li key={ft.id} className={`flex items-center justify-between gap-2 rounded-lg border border-line px-3 py-2 text-sm ${ft.is_active === false ? 'opacity-60' : ''}`}>
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="truncate text-ink">{resolveI18n(ft.name_i18n, lng)}</span>
+                  <Pill className={PRIORITY_CLASS[ft.default_priority]}>{tc(`priority.${ft.default_priority}`)}</Pill>
+                  {ft.is_active === false && <span className="rounded-full bg-ink-muted/10 px-2 py-0.5 text-xs text-ink-muted">Inactive</span>}
+                </span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <button type="button" onClick={() => setDialog({ kind: 'fault', mode: 'edit', row: ft })} className="text-ink-muted hover:text-brand" aria-label="Edit"><Pencil size={14} /></button>
+                  <button type="button" onClick={() => toggleFault(ft)} className="text-ink-muted hover:text-brand" aria-label="Toggle active"><Power size={14} /></button>
+                  <button type="button" onClick={() => deleteFault(ft)} className="text-ink-muted hover:text-status-crit" aria-label="Delete"><Trash2 size={14} /></button>
+                </span>
               </li>
             ))}
-            {faults.data?.length === 0 && (
-              <li className="text-sm text-ink-muted">{t('faultTypes.empty')}</li>
-            )}
+            {faults.data?.length === 0 && <li className="text-sm text-ink-muted">No fault types yet.</li>}
           </ul>
         </section>
 
         <section className="rounded-xl border border-line bg-white p-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-ink">{t('assetTypes.title')}</h2>
-            <button
-              type="button"
-              onClick={() => setDialog('asset')}
-              className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600"
-            >
-              <Plus size={15} /> {t('assetTypes.add')}
+            <h2 className="font-semibold text-ink">Asset types</h2>
+            <button type="button" onClick={() => setDialog({ kind: 'asset', mode: 'create' })} className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600">
+              <Plus size={15} /> Add
             </button>
           </div>
           <ul className="mt-3 space-y-2">
             {(assetTypes.data ?? []).map((at) => (
-              <li
-                key={at.id}
-                className="rounded-lg border border-line px-3 py-2 text-sm text-ink"
-              >
-                {resolveI18n(at.name_i18n, lng)}
+              <li key={at.id} className={`flex items-center justify-between gap-2 rounded-lg border border-line px-3 py-2 text-sm ${at.is_active === false ? 'opacity-60' : ''}`}>
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="truncate text-ink">{resolveI18n(at.name_i18n, lng)}</span>
+                  {at.is_active === false && <span className="rounded-full bg-ink-muted/10 px-2 py-0.5 text-xs text-ink-muted">Inactive</span>}
+                </span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <button type="button" onClick={() => setDialog({ kind: 'asset', mode: 'edit', row: at })} className="text-ink-muted hover:text-brand" aria-label="Edit"><Pencil size={14} /></button>
+                  <button type="button" onClick={() => toggleAsset(at)} className="text-ink-muted hover:text-brand" aria-label="Toggle active"><Power size={14} /></button>
+                  <button type="button" onClick={() => deleteAsset(at)} className="text-ink-muted hover:text-status-crit" aria-label="Delete"><Trash2 size={14} /></button>
+                </span>
               </li>
             ))}
-            {assetTypes.data?.length === 0 && (
-              <li className="text-sm text-ink-muted">{t('assetTypes.empty')}</li>
-            )}
+            {assetTypes.data?.length === 0 && <li className="text-sm text-ink-muted">No asset types yet.</li>}
           </ul>
         </section>
       </div>
 
-      <SlaSection />
-      <AssignmentSection />
-      <AutomationSection />
-
-      {dialog === 'fault' && (
+      {dialog?.kind === 'fault' && (
         <CatalogDialog
-          title={t('dialog.addFaultType')}
+          title={dialog.mode === 'edit' ? 'Edit fault type' : 'Add fault type'}
           withPriority
-          busy={addFault.isPending}
+          initial={dialog.mode === 'edit' ? { en: dialog.row.name_i18n.en ?? '', vi: dialog.row.name_i18n.vi ?? '', priority: dialog.row.default_priority } : null}
           onCancel={() => setDialog(null)}
-          onSubmit={(v) => addFault.mutate({ en: v.en, vi: v.vi, priority: v.priority })}
+          onSubmit={(v) => saveFault({ id: dialog.mode === 'edit' ? dialog.row.id : undefined, en: v.en, vi: v.vi, priority: v.priority })}
         />
       )}
-      {dialog === 'asset' && (
+      {dialog?.kind === 'asset' && (
         <CatalogDialog
-          title={t('dialog.addAssetType')}
-          busy={addAssetType.isPending}
+          title={dialog.mode === 'edit' ? 'Edit asset type' : 'Add asset type'}
+          initial={dialog.mode === 'edit' ? { en: dialog.row.name_i18n.en ?? '', vi: dialog.row.name_i18n.vi ?? '', priority: 'medium' } : null}
           onCancel={() => setDialog(null)}
-          onSubmit={(v) => addAssetType.mutate({ en: v.en, vi: v.vi })}
+          onSubmit={(v) => saveAsset({ id: dialog.mode === 'edit' ? dialog.row.id : undefined, en: v.en, vi: v.vi })}
         />
       )}
     </div>
@@ -152,61 +326,53 @@ export default function Settings() {
 interface CatalogDialogProps {
   title: string;
   withPriority?: boolean;
-  busy: boolean;
+  initial?: { en: string; vi: string; priority: Priority } | null;
   onCancel: () => void;
   onSubmit: (v: { en: string; vi: string; priority: Priority }) => void;
 }
 
-function CatalogDialog({ title, withPriority, busy, onCancel, onSubmit }: CatalogDialogProps) {
+function CatalogDialog({ title, withPriority, initial, onCancel, onSubmit }: CatalogDialogProps) {
   const { t } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
-  const [en, setEn] = useState('');
-  const [vi, setVi] = useState('');
-  const [priority, setPriority] = useState<Priority>('medium');
+  const [en, setEn] = useState(initial?.en ?? '');
+  const [vi, setVi] = useState(initial?.vi ?? '');
+  const [priority, setPriority] = useState<Priority>(initial?.priority ?? 'medium');
+  const [busy, setBusy] = useState(false);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!en) return;
+    setBusy(true);
     onSubmit({ en, vi, priority });
   };
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/30 p-4">
-      <form
-        onSubmit={submit}
-        className="w-full max-w-md rounded-xl border border-line bg-white p-6 shadow-lg"
-      >
+      <form onSubmit={submit} className="w-full max-w-md rounded-xl border border-line bg-white p-6 shadow-lg">
         <h2 className="text-lg font-semibold text-ink">{title}</h2>
         <div className="mt-4 space-y-4">
           <BilingualName en={en} vi={vi} onEn={setEn} onVi={setVi} />
           {withPriority && (
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">
-                {t('faultTypes.priority')}
-              </label>
+              <label className="mb-1 block text-sm font-medium text-ink">{t('faultTypes.priority')}</label>
               <Select value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
-                {PRIORITIES.map((p) => (
-                  <option key={p} value={p}>
-                    {tc(`priority.${p}`)}
-                  </option>
-                ))}
+                {PRIORITIES.map((p) => <option key={p} value={p}>{tc(`priority.${p}`)}</option>)}
               </Select>
             </div>
           )}
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <Button type="button" variant="secondary" onClick={onCancel}>
-            {tc('actions.cancel')}
-          </Button>
-          <Button type="submit" loading={busy}>
-            {tc('actions.save')}
-          </Button>
+          <Button type="button" variant="secondary" onClick={onCancel}>{tc('actions.cancel')}</Button>
+          <Button type="submit" loading={busy}>{tc('actions.save')}</Button>
         </div>
       </form>
     </div>
   );
 }
 
+// ---------------------------------------------------------------------------
+// SLA targets
+// ---------------------------------------------------------------------------
 function SlaSection() {
   const { t } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
@@ -221,7 +387,7 @@ function SlaSection() {
   };
 
   return (
-    <section className="mt-6 rounded-xl border border-line bg-white p-4">
+    <section className="rounded-xl border border-line bg-white p-4">
       <h2 className="font-semibold text-ink">{t('sla.title')}</h2>
       <p className="mt-1 text-sm text-ink-muted">{t('sla.hint')}</p>
       <div className="mt-3 space-y-2">
@@ -234,12 +400,7 @@ function SlaSection() {
             hoursLabel={t('sla.hours')}
             saveLabel={t('sla.save')}
             onSave={async (hours) => {
-              await supabase
-                .from('fp_sla_policies')
-                .upsert(
-                  { org_id: orgId, priority: p, resolution_hours: hours },
-                  { onConflict: 'org_id,priority' }
-                );
+              await supabase.from('fp_sla_policies').upsert({ org_id: orgId, priority: p, resolution_hours: hours }, { onConflict: 'org_id,priority' });
               void queryClient.invalidateQueries({ queryKey: ['sla_policies', orgId] });
             }}
           />
@@ -249,34 +410,13 @@ function SlaSection() {
   );
 }
 
-function SlaRow({
-  priority,
-  initial,
-  label,
-  hoursLabel,
-  saveLabel,
-  onSave,
-}: {
-  priority: Priority;
-  initial: string;
-  label: string;
-  hoursLabel: string;
-  saveLabel: string;
-  onSave: (hours: number) => Promise<void>;
-}) {
+function SlaRow({ priority, initial, label, hoursLabel, saveLabel, onSave }: { priority: Priority; initial: string; label: string; hoursLabel: string; saveLabel: string; onSave: (hours: number) => Promise<void> }) {
   const [hours, setHours] = useState(initial);
   const [saving, setSaving] = useState(false);
   return (
     <div className="flex items-center gap-3">
       <Pill className={`${PRIORITY_CLASS[priority]} w-20 justify-center`}>{label}</Pill>
-      <Input
-        type="number"
-        min={1}
-        value={hours}
-        onChange={(e) => setHours(e.target.value)}
-        placeholder={hoursLabel}
-        className="max-w-[140px]"
-      />
+      <Input type="number" min={1} value={hours} onChange={(e) => setHours(e.target.value)} placeholder={hoursLabel} className="max-w-[140px]" />
       <button
         type="button"
         disabled={saving || !hours}
@@ -295,121 +435,9 @@ function SlaRow({
   );
 }
 
-function AssignmentSection() {
-  const { t, i18n } = useTranslation('settings');
-  const { t: tc } = useTranslation('common');
-  const lng = i18n.resolvedLanguage ?? 'en';
-  const { currentOrg } = useOrg();
-  const orgId = currentOrg?.id;
-  const queryClient = useQueryClient();
-  const rules = useAssignmentRules();
-  const faults = useFaultTypes();
-  const members = useOrgMembers();
-
-  const [priority, setPriority] = useState<string>('');
-  const [faultTypeId, setFaultTypeId] = useState<string>('');
-  const [assignee, setAssignee] = useState<string>('');
-
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['assignment_rules', orgId] });
-
-  const add = useMutation({
-    mutationFn: async () => {
-      if (!assignee) return;
-      const nextOrd = rules.data?.length
-        ? Math.max(...rules.data.map((r) => r.ord)) + 1
-        : 0;
-      const { error } = await supabase.from('fp_assignment_rules').insert({
-        org_id: orgId,
-        priority: priority || null,
-        fault_type_id: faultTypeId || null,
-        assigned_to: assignee,
-        ord: nextOrd,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      void invalidate();
-      setPriority('');
-      setFaultTypeId('');
-      setAssignee('');
-    },
-  });
-
-  const remove = useMutation({
-    mutationFn: async (idToDelete: string) => {
-      const { error } = await supabase.from('fp_assignment_rules').delete().eq('id', idToDelete);
-      if (error) throw error;
-    },
-    onSuccess: () => invalidate(),
-  });
-
-  const memberEmail = (uid: string) =>
-    members.data?.find((m) => m.user_id === uid)?.email ?? uid;
-  const faultName = (fid: string | null) =>
-    fid ? resolveI18n(faults.data?.find((f) => f.id === fid)?.name_i18n, lng) : t('assign.any');
-
-  return (
-    <section className="mt-6 rounded-xl border border-line bg-white p-4">
-      <h2 className="font-semibold text-ink">{t('assign.title')}</h2>
-      <p className="mt-1 text-sm text-ink-muted">{t('assign.hint')}</p>
-
-      <ul className="mt-3 space-y-2">
-        {(rules.data ?? []).map((r) => (
-          <li
-            key={r.id}
-            className="flex items-center justify-between rounded-lg border border-line px-3 py-2 text-sm"
-          >
-            <span className="text-ink">
-              {r.priority ? tc(`priority.${r.priority}`) : t('assign.any')} · {faultName(r.fault_type_id)}{' '}
-              <span className="text-ink-muted">{t('assign.arrow')}</span> {memberEmail(r.assigned_to)}
-            </span>
-            <button
-              type="button"
-              onClick={() => remove.mutate(r.id)}
-              className="text-ink-muted hover:text-status-crit"
-              aria-label={tc('actions.cancel')}
-            >
-              <Trash2 size={15} />
-            </button>
-          </li>
-        ))}
-        {rules.data?.length === 0 && <li className="text-sm text-ink-muted">{t('assign.empty')}</li>}
-      </ul>
-
-      <div className="mt-3 grid gap-2 sm:grid-cols-4">
-        <Select value={priority} onChange={(e) => setPriority(e.target.value)}>
-          <option value="">{t('assign.any')}</option>
-          {PRIORITIES.map((p) => (
-            <option key={p} value={p}>
-              {tc(`priority.${p}`)}
-            </option>
-          ))}
-        </Select>
-        <Select value={faultTypeId} onChange={(e) => setFaultTypeId(e.target.value)}>
-          <option value="">{t('assign.any')}</option>
-          {(faults.data ?? []).map((f) => (
-            <option key={f.id} value={f.id}>
-              {resolveI18n(f.name_i18n, lng)}
-            </option>
-          ))}
-        </Select>
-        <Select value={assignee} onChange={(e) => setAssignee(e.target.value)}>
-          <option value="">{t('assign.assignee')}</option>
-          {(members.data ?? []).map((m) => (
-            <option key={m.user_id} value={m.user_id}>
-              {m.email}
-            </option>
-          ))}
-        </Select>
-        <Button onClick={() => add.mutate()} loading={add.isPending} disabled={!assignee}>
-          <Plus size={16} /> {t('assign.add')}
-        </Button>
-      </div>
-    </section>
-  );
-}
-
+// ---------------------------------------------------------------------------
+// Automation toggles (assignment now lives in Workflows)
+// ---------------------------------------------------------------------------
 function AutomationSection() {
   const { t } = useTranslation('settings');
   const { currentOrg, role } = useOrg();
@@ -426,54 +454,245 @@ function AutomationSection() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['memberships'] }),
   });
 
-  if (role !== 'org_admin') return null;
+  if (role !== 'org_admin') return <p className="text-sm text-ink-muted">Only an organisation admin can change automation.</p>;
 
-  const reportLink =
-    typeof window !== 'undefined' ? `${window.location.origin}/report?org=${orgId}` : '';
+  const reportLink = typeof window !== 'undefined' ? `${window.location.origin}/report?org=${orgId}` : '';
 
   return (
-    <section className="mt-6 rounded-xl border border-line bg-white p-4">
-      <h2 className="font-semibold text-ink">{t('automation.title')}</h2>
-      <p className="mt-1 text-sm text-ink-muted">{t('automation.hint')}</p>
+    <div className="space-y-6">
+      <section className="rounded-xl border border-line bg-white p-4">
+        <h2 className="font-semibold text-ink">{t('automation.title')}</h2>
+        <p className="mt-1 text-sm text-ink-muted">{t('automation.hint')}</p>
 
-      <label className="mt-3 flex items-start gap-2 text-sm text-ink">
-        <input
-          type="checkbox"
-          checked={pub}
-          onChange={(e) => {
-            setPub(e.target.checked);
-            update.mutate({ allow_public_requests: e.target.checked });
-          }}
-          className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30"
-        />
-        <span>
-          {t('automation.publicRequests')}
-          <span className="block text-xs text-ink-muted">{t('automation.publicHint')}</span>
-        </span>
-      </label>
+        <label className="mt-3 flex items-start gap-2 text-sm text-ink">
+          <input type="checkbox" checked={pub} onChange={(e) => { setPub(e.target.checked); update.mutate({ allow_public_requests: e.target.checked }); }} className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30" />
+          <span>{t('automation.publicRequests')}<span className="block text-xs text-ink-muted">{t('automation.publicHint')}</span></span>
+        </label>
 
-      <label className="mt-3 flex items-start gap-2 text-sm text-ink">
-        <input
-          type="checkbox"
-          checked={autoWo}
-          onChange={(e) => {
-            setAutoWo(e.target.checked);
-            update.mutate({ auto_create_work_orders: e.target.checked });
-          }}
-          className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30"
-        />
-        <span>
-          {t('automation.autoWo')}
-          <span className="block text-xs text-ink-muted">{t('automation.autoHint')}</span>
-        </span>
-      </label>
+        <label className="mt-3 flex items-start gap-2 text-sm text-ink">
+          <input type="checkbox" checked={autoWo} onChange={(e) => { setAutoWo(e.target.checked); update.mutate({ auto_create_work_orders: e.target.checked }); }} className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30" />
+          <span>{t('automation.autoWo')}<span className="block text-xs text-ink-muted">{t('automation.autoHint')}</span></span>
+        </label>
 
-      {pub && (
-        <div className="mt-3 rounded-lg bg-surface p-3">
-          <p className="text-xs text-ink-muted">{t('automation.reportLink')}</p>
-          <code className="mt-1 block break-all text-xs text-ink">{reportLink}</code>
+        {pub && (
+          <div className="mt-3 rounded-lg bg-surface p-3">
+            <p className="text-xs text-ink-muted">{t('automation.reportLink')}</p>
+            <code className="mt-1 block break-all text-xs text-ink">{reportLink}</code>
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-xl border border-line bg-surface p-4">
+        <div className="flex items-start gap-3">
+          <WorkflowIcon size={18} className="mt-0.5 text-brand" aria-hidden />
+          <div>
+            <p className="font-medium text-ink">Assignment &amp; event automations moved to Workflows</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              Auto-assignment is now a workflow (trigger: <em>Work Order Created</em> → action: <em>Assign To</em>), alongside email/SMS, surveys, and more.
+            </p>
+            <Link to="/workflows" className="mt-2 inline-flex text-sm font-medium text-brand hover:text-brand-600">Open Workflows →</Link>
+          </div>
         </div>
-      )}
-    </section>
+      </section>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Team & roles — members + invites (org admin only)
+// ---------------------------------------------------------------------------
+const ROLES: Role[] = ['org_admin', 'manager', 'technician', 'occupant', 'vendor'];
+
+function TeamSection() {
+  const { t: tc } = useTranslation('common');
+  const { currentOrg } = useOrg();
+  const { user } = useAuth();
+  const orgId = currentOrg?.id;
+  const queryClient = useQueryClient();
+  const members = useOrgMembers();
+  const [email, setEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<Role>('technician');
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const invites = useQuery({
+    queryKey: ['invites', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('fp_invites').select('id, email, role, token, accepted_at').eq('org_id', orgId!).is('accepted_at', null).order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as { id: string; email: string; role: Role; token: string; accepted_at: string | null }[];
+    },
+  });
+
+  const changeRole = useMutation({
+    mutationFn: async (v: { userId: string; role: Role }) => {
+      const { error } = await supabase.from('fp_users_orgs').update({ role: v.role }).eq('org_id', orgId!).eq('user_id', v.userId);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['org_members', orgId] }),
+    onError: (e) => setMsg(e instanceof Error ? e.message : 'Unable to update role.'),
+  });
+
+  const removeMember = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase.from('fp_users_orgs').delete().eq('org_id', orgId!).eq('user_id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['org_members', orgId] }),
+    onError: (e) => setMsg(e instanceof Error ? e.message : 'Unable to remove member.'),
+  });
+
+  const sendInvite = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.from('fp_invites').insert({ org_id: orgId, email, role: inviteRole, invited_by: user?.id ?? null }).select('token').single();
+      if (error) throw error;
+      return data.token as string;
+    },
+    onSuccess: (token) => {
+      setInviteLink(`${window.location.origin}/invite?token=${token}`);
+      setEmail('');
+      void queryClient.invalidateQueries({ queryKey: ['invites', orgId] });
+    },
+    onError: (e) => setMsg(e instanceof Error ? e.message : 'Unable to create invite.'),
+  });
+
+  const revokeInvite = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('fp_invites').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['invites', orgId] }),
+  });
+
+  return (
+    <div className="space-y-6">
+      <section className="rounded-xl border border-line bg-white p-4">
+        <h2 className="font-semibold text-ink">Members</h2>
+        <ul className="mt-3 space-y-2">
+          {(members.data ?? []).map((m) => (
+            <li key={m.user_id} className="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2 text-sm">
+              <span className="truncate text-ink">{m.email}</span>
+              <span className="flex items-center gap-2">
+                <Select
+                  value={m.role}
+                  onChange={(e) => changeRole.mutate({ userId: m.user_id, role: e.target.value as Role })}
+                  disabled={m.user_id === user?.id}
+                  className="w-40"
+                >
+                  {ROLES.map((r) => <option key={r} value={r}>{tc(`roles.${r}`)}</option>)}
+                </Select>
+                {m.user_id !== user?.id && (
+                  <button type="button" onClick={() => removeMember.mutate(m.user_id)} className="text-ink-muted hover:text-status-crit" aria-label="Remove member">
+                    <Trash2 size={15} />
+                  </button>
+                )}
+              </span>
+            </li>
+          ))}
+          {members.data?.length === 0 && <li className="text-sm text-ink-muted">No members yet.</li>}
+        </ul>
+      </section>
+
+      <section className="rounded-xl border border-line bg-white p-4">
+        <h2 className="font-semibold text-ink">Invite a member</h2>
+        <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" />
+          <Select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as Role)}>
+            {ROLES.map((r) => <option key={r} value={r}>{tc(`roles.${r}`)}</option>)}
+          </Select>
+          <Button onClick={() => sendInvite.mutate()} loading={sendInvite.isPending} disabled={!email}>
+            <Plus size={16} /> Invite
+          </Button>
+        </div>
+        {inviteLink && (
+          <div className="mt-3 rounded-lg bg-surface p-3">
+            <p className="text-xs text-ink-muted">Share this invite link:</p>
+            <div className="mt-1 flex items-center gap-2">
+              <code className="block flex-1 break-all text-xs text-ink">{inviteLink}</code>
+              <button type="button" onClick={() => void navigator.clipboard?.writeText(inviteLink)} className="text-ink-muted hover:text-brand" aria-label="Copy link">
+                <Copy size={15} />
+              </button>
+            </div>
+          </div>
+        )}
+        {msg && <p className="mt-2 text-sm text-status-crit">{msg}</p>}
+
+        {(invites.data ?? []).length > 0 && (
+          <div className="mt-4">
+            <p className="text-sm font-medium text-ink">Pending invites</p>
+            <ul className="mt-2 space-y-2">
+              {(invites.data ?? []).map((inv) => (
+                <li key={inv.id} className="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2 text-sm">
+                  <span className="truncate text-ink">{inv.email} · <span className="text-ink-muted">{tc(`roles.${inv.role}`)}</span></span>
+                  <span className="flex items-center gap-2">
+                    <button type="button" onClick={() => void navigator.clipboard?.writeText(`${window.location.origin}/invite?token=${inv.token}`)} className="text-ink-muted hover:text-brand" aria-label="Copy invite link">
+                      <Copy size={15} />
+                    </button>
+                    <button type="button" onClick={() => revokeInvite.mutate(inv.id)} className="text-ink-muted hover:text-status-crit" aria-label="Revoke invite">
+                      <Trash2 size={15} />
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Integrations & notifications
+// ---------------------------------------------------------------------------
+function IntegrationsSection() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const pref = useQuery({
+    queryKey: ['notification_pref', user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('fp_notification_prefs').select('email_enabled').eq('user_id', user!.id).maybeSingle();
+      if (error) throw error;
+      return data as { email_enabled: boolean } | null;
+    },
+  });
+
+  const setEmailPref = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const { error } = await supabase.from('fp_notification_prefs').upsert({ user_id: user!.id, email_enabled: enabled }, { onConflict: 'user_id' });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notification_pref', user?.id] }),
+  });
+
+  const emailOn = !!pref.data?.email_enabled;
+
+  return (
+    <div className="space-y-6">
+      <section className="rounded-xl border border-line bg-white p-4">
+        <div className="flex items-start gap-3">
+          <Cpu size={18} className="mt-0.5 text-brand" aria-hidden />
+          <div>
+            <h2 className="font-semibold text-ink">IoT & sensors</h2>
+            <p className="mt-1 text-sm text-ink-muted">Manage device keys and ingest endpoints from the Devices page.</p>
+            <Link to="/devices" className="mt-2 inline-flex text-sm font-medium text-brand hover:text-brand-600">Manage devices →</Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-line bg-white p-4">
+        <h2 className="font-semibold text-ink">Email, SMS &amp; push delivery</h2>
+        <p className="mt-1 text-sm text-ink-muted">
+          Outbound messages are delivered by the <code className="text-xs">process-outbox</code> function (Resend / Twilio / web-push). Set the provider secrets and schedule the function to enable delivery.
+        </p>
+        <label className="mt-3 flex items-start gap-2 text-sm text-ink">
+          <input type="checkbox" checked={emailOn} onChange={(e) => setEmailPref.mutate(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30" />
+          <span>Email me my notifications<span className="block text-xs text-ink-muted">When on, in-app notifications addressed to you are also emailed.</span></span>
+        </label>
+      </section>
+    </div>
   );
 }

@@ -11,9 +11,16 @@ import type {
   ChecklistTemplate,
   Contract,
   Conversation,
+  Desk,
+  DeskBooking,
   Device,
   DeviceRule,
+  Facility,
+  FacilityBooking,
   FaultType,
+  FinanceBudget,
+  FinanceExpenditure,
+  FinanceRate,
   License,
   LocationRow,
   Media,
@@ -29,6 +36,7 @@ import type {
   RequestRow,
   SlaPolicy,
   Subscription,
+  Survey,
   Telemetry,
   Vendor,
   WoPart,
@@ -237,6 +245,144 @@ export function useOrgMembers() {
   });
 }
 
+export function useFacilities() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['facilities', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_facilities')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at');
+      if (error) throw error;
+      return data as Facility[];
+    },
+  });
+}
+
+export function useFacilityBookings() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['facility_bookings', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_facility_bookings')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data as FacilityBooking[];
+    },
+  });
+}
+
+export function useDesks() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['desks', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_desks')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at');
+      if (error) throw error;
+      return data as Desk[];
+    },
+  });
+}
+
+export function useDeskBookings() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['desk_bookings', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_desk_bookings')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data as DeskBooking[];
+    },
+  });
+}
+
+export function useExpenditures() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['finance_expenditures', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_finance_expenditures')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as FinanceExpenditure[];
+    },
+  });
+}
+
+export function useRates() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['finance_rates', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_finance_rates')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as FinanceRate[];
+    },
+  });
+}
+
+export function useBudgets() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['finance_budgets', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_finance_budgets')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as FinanceBudget[];
+    },
+  });
+}
+
+export function useSurveys() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['surveys', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_surveys')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at');
+      if (error) throw error;
+      return data as Survey[];
+    },
+  });
+}
+
 export function useChecklistTemplates() {
   const orgId = useOrgId();
   return useQuery({
@@ -350,6 +496,23 @@ export function useWoParts(workOrderId: string | undefined) {
         .order('created_at');
       if (error) throw error;
       return data as WoPart[];
+    },
+  });
+}
+
+export function useMetersAll() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['meters_all', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_meters')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at');
+      if (error) throw error;
+      return data as Meter[];
     },
   });
 }

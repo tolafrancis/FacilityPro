@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "FacilityPro"
+    "name": "FacilitySpace"
   },
   "loading": "Đang tải…",
   "comingSoon": "Sẽ có trong giai đoạn sau",
@@ -21,7 +21,11 @@
     "security": "Bảo mật",
     "inbox": "Hộp thư",
     "billing": "Thanh toán",
-    "devices": "Thiết bị"
+    "devices": "Thiết bị",
+    "workflows": "Quy trình",
+    "surveys": "Khảo sát",
+    "desks": "Bàn làm việc",
+    "facilities": "Cơ sở vật chất"
   },
   "actions": {
     "signOut": "Đăng xuất",

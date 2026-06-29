@@ -11,7 +11,7 @@ export interface QueuedWrite {
   createdAt: number;
 }
 
-const DB_NAME = 'facilitypro';
+const DB_NAME = 'facilityspace';
 const STORE = 'outbox';
 
 function openDb(): Promise<IDBDatabase> {

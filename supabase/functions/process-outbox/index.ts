@@ -1,6 +1,6 @@
 // supabase/functions/process-outbox/index.ts
 //
-// Delivers pending FacilityPro email notifications from fp_notification_outbox.
+// Delivers pending FacilitySpace email notifications from fp_notification_outbox.
 // This is a standalone Supabase Edge Function (Deno) — it is NOT bundled with
 // the web app and does not affect the frontend build.
 //
@@ -9,7 +9,7 @@
 //
 // Secrets (set once):
 //   supabase secrets set RESEND_API_KEY=re_xxx
-//   supabase secrets set OUTBOX_FROM="FacilityPro <notifications@yourdomain.com>"
+//   supabase secrets set OUTBOX_FROM="FacilitySpace <notifications@yourdomain.com>"
 //   # For SMS (optional):
 //   supabase secrets set TWILIO_ACCOUNT_SID=ACxxx
 //   supabase secrets set TWILIO_AUTH_TOKEN=xxx
@@ -38,7 +38,7 @@ import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supa
 import webpush from 'https://esm.sh/web-push@3.6.7';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
-const OUTBOX_FROM = Deno.env.get('OUTBOX_FROM') ?? 'FacilityPro <onboarding@resend.dev>';
+const OUTBOX_FROM = Deno.env.get('OUTBOX_FROM') ?? 'FacilitySpace <onboarding@resend.dev>';
 const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID') ?? '';
 const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN') ?? '';
 const TWILIO_FROM = Deno.env.get('TWILIO_FROM') ?? '';

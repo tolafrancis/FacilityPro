@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "FacilityPro"
+    "name": "FacilitySpace"
   },
   "loading": "Loading…",
   "comingSoon": "Coming in a later phase",
@@ -21,7 +21,24 @@
     "security": "Security",
     "inbox": "Inbox",
     "billing": "Billing",
-    "devices": "Devices"
+    "devices": "Devices",
+    "documents": "Documents",
+    "workflows": "Workflows",
+    "surveys": "Surveys",
+    "desks": "Desks",
+    "facilities": "Facilities",
+    "permits": "Permits to work",
+    "attendance": "Technician attendance",
+    "smartAssistant": "Smart assistant",
+    "tenantExperience": "Tenant experience",
+    "broadcasts": "Broadcasts",
+    "financial": "Financial"
+  },
+  "navGroups": {
+    "maintenance": "Maintenance Operations",
+    "operations": "Operations & control",
+    "finance": "Financial",
+    "ai": "Intelligence & settings"
   },
   "actions": {
     "signOut": "Sign out",

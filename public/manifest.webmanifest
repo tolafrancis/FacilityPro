@@ -1,6 +1,6 @@
 {
-  "name": "FacilityPro",
-  "short_name": "FacilityPro",
+  "name": "FacilitySpace",
+  "short_name": "FacilitySpace",
   "description": "Multilingual facility maintenance — report faults and complete work orders.",
   "start_url": "/",
   "scope": "/",

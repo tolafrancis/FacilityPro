@@ -50,6 +50,7 @@ export interface AssetType {
   id: string;
   org_id: string;
   name_i18n: I18nText;
+  is_active?: boolean;
 }
 
 export interface FaultType {
@@ -57,6 +58,7 @@ export interface FaultType {
   org_id: string;
   name_i18n: I18nText;
   default_priority: Priority;
+  is_active?: boolean;
 }
 
 export interface Asset {
@@ -150,6 +152,84 @@ export interface ChecklistTemplate {
   id: string;
   org_id: string;
   name_i18n: I18nText;
+  created_at: string;
+}
+
+export interface Survey {
+  id: string;
+  org_id: string;
+  name_i18n: I18nText;
+  questions: string[];
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface Desk {
+  id: string;
+  org_id: string;
+  name_i18n: I18nText;
+  zone_id: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface DeskBooking {
+  id: string;
+  org_id: string;
+  desk_id: string;
+  booked_by: string | null;
+  booker_name: string | null;
+  booked_for: string | null;
+  created_at: string;
+}
+
+export interface Facility {
+  id: string;
+  org_id: string;
+  name_i18n: I18nText;
+  location_id: string | null;
+  capacity: number | null;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface FacilityBooking {
+  id: string;
+  org_id: string;
+  facility_id: string;
+  booked_by: string | null;
+  booker_name: string | null;
+  booked_for: string | null;
+  created_at: string;
+}
+
+export interface FinanceExpenditure {
+  id: string;
+  org_id: string;
+  description: string;
+  category: string;
+  amount: number;
+  vendor: string | null;
+  created_at: string;
+}
+
+export interface FinanceRate {
+  id: string;
+  org_id: string;
+  service: string;
+  unit: string;
+  rate: number;
+  currency: string;
+  created_at: string;
+}
+
+export interface FinanceBudget {
+  id: string;
+  org_id: string;
+  name: string;
+  amount: number;
+  period: string;
+  notes: string | null;
   created_at: string;
 }
 

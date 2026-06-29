@@ -1,4 +1,4 @@
-# FacilityPro — Phase 1 (Core CMMS)
+# FacilitySpace — Phase 1 (Core CMMS)
 
 Multilingual (English + Vietnamese) CMMS. Phase 1 makes the platform a usable maintenance system: **a fault can be reported and resolved end-to-end, in Vietnamese, with photo evidence.**
 
@@ -85,7 +85,7 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0024**, in the dash
 > ```
 > supabase functions deploy process-outbox --no-verify-jwt
 > supabase secrets set RESEND_API_KEY=re_xxx
-> supabase secrets set OUTBOX_FROM="FacilityPro <notifications@yourdomain.com>"
+> supabase secrets set OUTBOX_FROM="FacilitySpace <notifications@yourdomain.com>"
 > ```
 >
 > Then schedule it (Dashboard → Edge Functions → Schedules, e.g. every 5 minutes) so the outbox drains. Each user opts in under **Security → Email notifications**. The provider call is isolated in one `sendEmail()` function, so SMTP/SES/Postmark — or SMS/push as new channels — drop in without touching the queue.

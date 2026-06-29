@@ -1,8 +1,8 @@
-// FacilityPro service worker — caches the app shell so the PWA loads offline.
+// FacilitySpace service worker — caches the app shell so the PWA loads offline.
 // Data requests (Supabase, other origins) are never cached here; offline writes
 // are handled in-app by the IndexedDB queue.
 
-const CACHE = 'facilitypro-shell-v1';
+const CACHE = 'facilityspace-shell-v1';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -19,7 +19,7 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-  let data = { title: 'FacilityPro', body: '' };
+  let data = { title: 'FacilitySpace', body: '' };
   try {
     if (event.data) data = { ...data, ...event.data.json() };
   } catch (e) {

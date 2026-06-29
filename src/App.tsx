@@ -32,6 +32,17 @@ import Billing from './pages/Billing';
 import Devices from './pages/Devices';
 import DeviceDetail from './pages/DeviceDetail';
 import PublicReport from './pages/PublicReport';
+import Landing from './pages/Landing';
+import Documents from './pages/Documents';
+import Permits from './pages/Permits';
+import Attendance from './pages/Attendance';
+import SmartAssistant from './pages/SmartAssistant';
+import TenantExperience from './pages/TenantExperience';
+import Financial from './pages/Financial';
+import Workflows from './pages/Workflows';
+import Surveys from './pages/Surveys';
+import Desks from './pages/Desks';
+import Facilities from './pages/Facilities';
 
 function FullPageLoader() {
   const { t } = useTranslation();
@@ -51,11 +62,12 @@ export default function App() {
     const next = encodeURIComponent(location.pathname + location.search);
     return (
       <Routes>
+        <Route path="/" element={<Landing />} />
         <Route path="/report" element={<PublicReport />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/invite" element={<Navigate to={`/signin?next=${next}`} replace />} />
-        <Route path="*" element={<Navigate to="/signin" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }
@@ -90,6 +102,10 @@ export default function App() {
             <Route path="/assets/:id" element={<AssetDetail />} />
             <Route path="/maintenance" element={<Maintenance />} />
             <Route path="/checklists" element={<Checklists />} />
+            <Route path="/workflows" element={<Workflows />} />
+            <Route path="/surveys" element={<Surveys />} />
+            <Route path="/desks" element={<Desks />} />
+            <Route path="/facilities" element={<Facilities />} />
             <Route path="/checklists/:id" element={<ChecklistTemplate />} />
             <Route path="/parts" element={<Parts />} />
             <Route path="/vendors" element={<Vendors />} />
@@ -100,6 +116,12 @@ export default function App() {
             <Route path="/security" element={<Security />} />
             <Route path="/billing" element={<Billing />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/documents" element={<Documents />} />
+            <Route path="/permits" element={<Permits />} />
+            <Route path="/attendance" element={<Attendance />} />
+            <Route path="/smart-assistant" element={<SmartAssistant />} />
+            <Route path="/tenant-experience" element={<TenantExperience />} />
+            <Route path="/financial" element={<Financial />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </>

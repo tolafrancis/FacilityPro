@@ -13,12 +13,15 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false } },
 });
 
+const routerBasename = new URL(import.meta.env.BASE_URL, window.location.href).pathname.replace(/\/$/, '') || '/';
+const serviceWorkerUrl = `${import.meta.env.BASE_URL}sw.js`;
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <Suspense fallback={<div />}>
       <QueryClientProvider client={queryClient}>
         <SyncProvider>
-          <BrowserRouter>
+          <BrowserRouter basename={routerBasename}>
             <AuthProvider>
               <OrgProvider>
                 <App />
@@ -33,7 +36,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
+    navigator.serviceWorker.register(serviceWorkerUrl).catch(() => {
       /* offline shell unavailable; app still works online */
     });
   });

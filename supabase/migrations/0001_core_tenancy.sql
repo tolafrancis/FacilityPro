@@ -1,5 +1,5 @@
 -- 0001_core_tenancy.sql
--- FacilityPro Phase 0: organisations, membership/roles, helper functions, audit.
+-- FacilitySpace Phase 0: organisations, membership/roles, helper functions, audit.
 
 create extension if not exists "pgcrypto";
 

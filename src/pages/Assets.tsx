@@ -10,7 +10,7 @@ import { resolveI18n } from '../i18n/resolver';
 import type { LocationRow } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-import Select from '../components/ui/Select';
+import SearchSelect from '../components/ui/SearchSelect';
 import BilingualName from '../components/ui/BilingualName';
 
 export default function Assets() {
@@ -62,6 +62,32 @@ export default function Assets() {
       setOpen(false);
     },
   });
+
+  // Inline "Other / create new" for the dialog's type & location pickers.
+  const createType = async (name: string): Promise<string | null> => {
+    const nm = name.trim();
+    if (!nm) return null;
+    const { data, error } = await supabase
+      .from('fp_asset_types')
+      .insert({ org_id: orgId, name_i18n: { en: nm, vi: nm } })
+      .select('id')
+      .single();
+    if (error) return null;
+    await queryClient.invalidateQueries({ queryKey: ['asset_types', orgId] });
+    return data.id as string;
+  };
+  const createLocation = async (name: string): Promise<string | null> => {
+    const nm = name.trim();
+    if (!nm) return null;
+    const { data, error } = await supabase
+      .from('fp_locations')
+      .insert({ org_id: orgId, name_i18n: { en: nm, vi: nm }, kind: 'room' })
+      .select('id')
+      .single();
+    if (error) return null;
+    await queryClient.invalidateQueries({ queryKey: ['locations', orgId] });
+    return data.id as string;
+  };
 
   return (
     <div className="max-w-5xl">
@@ -117,6 +143,8 @@ export default function Assets() {
             label: resolveI18n(at.name_i18n, lng),
           }))}
           locationLabel={(l) => resolveI18n(l.name_i18n, lng)}
+          onCreateType={createType}
+          onCreateLocation={createLocation}
           busy={create.isPending}
           onCancel={() => setOpen(false)}
           onSubmit={(v) => create.mutate(v)}
@@ -142,6 +170,8 @@ interface AssetDialogProps {
   locations: LocationRow[];
   assetTypeOptions: { id: string; label: string }[];
   locationLabel: (l: LocationRow) => string;
+  onCreateType: (name: string) => Promise<string | null>;
+  onCreateLocation: (name: string) => Promise<string | null>;
   busy: boolean;
   onCancel: () => void;
   onSubmit: (v: {
@@ -161,6 +191,8 @@ function AssetDialog({
   locations,
   assetTypeOptions,
   locationLabel,
+  onCreateType,
+  onCreateLocation,
   busy,
   onCancel,
   onSubmit,
@@ -179,6 +211,7 @@ function AssetDialog({
     () => locations.filter((l) => l.kind === 'room' || l.kind === 'zone' || l.kind === 'floor'),
     [locations]
   );
+  const locOptions = placeableLocations.map((l) => ({ id: l.id, label: locationLabel(l) }));
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -197,25 +230,27 @@ function AssetDialog({
           <BilingualName en={en} vi={vi} onEn={setEn} onVi={setVi} />
           <div>
             <label className="mb-1 block text-sm font-medium text-ink">{labels.type}</label>
-            <Select value={assetTypeId} onChange={(e) => setAssetTypeId(e.target.value)}>
-              <option value="">{labels.none}</option>
-              {assetTypeOptions.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.label}
-                </option>
-              ))}
-            </Select>
+            <SearchSelect
+              value={assetTypeId}
+              onChange={setAssetTypeId}
+              options={assetTypeOptions}
+              placeholder="Search or type to add…"
+              emptyLabel={labels.none}
+              createLabel="Other — create new type"
+              onCreate={async (q) => { const id = await onCreateType(q); if (id) setAssetTypeId(id); }}
+            />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-ink">{labels.location}</label>
-            <Select value={locationId} onChange={(e) => setLocationId(e.target.value)}>
-              <option value="">{labels.none}</option>
-              {placeableLocations.map((l) => (
-                <option key={l.id} value={l.id}>
-                  {locationLabel(l)}
-                </option>
-              ))}
-            </Select>
+            <SearchSelect
+              value={locationId}
+              onChange={setLocationId}
+              options={locOptions}
+              placeholder="Search or type to add…"
+              emptyLabel={labels.none}
+              createLabel="Add new location"
+              onCreate={async (q) => { const id = await onCreateLocation(q); if (id) setLocationId(id); }}
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
