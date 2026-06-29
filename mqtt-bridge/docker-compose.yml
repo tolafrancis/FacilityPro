@@ -1,0 +1,22 @@
+# FacilitySpace MQTT bridge.
+#   cd mqtt-bridge
+#   cp .env.example .env   # fill SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
+#   docker compose up -d
+#
+# Logs:    docker compose logs -f
+# Update:  docker compose pull || docker compose build && docker compose up -d
+services:
+  mqtt-bridge:
+    build: .
+    image: facilityspace-mqtt-bridge
+    container_name: facilityspace-mqtt-bridge
+    restart: unless-stopped
+    env_file:
+      - .env
+    # No inbound ports: the worker only makes OUTBOUND connections
+    # (to Supabase and to your MQTT broker).
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

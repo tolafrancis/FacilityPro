@@ -508,3 +508,24 @@ export interface DeviceRule {
   active: boolean;
   created_at: string;
 }
+
+export type DeviceConnProtocol = 'mqtt' | 'mqtts' | 'ws' | 'wss';
+
+export interface DeviceConnection {
+  id: string;
+  org_id: string;
+  device_id: string;
+  protocol: DeviceConnProtocol;
+  host: string;
+  port: number;
+  topic: string;
+  username: string | null;
+  password: string | null;
+  client_id: string | null;
+  qos: 0 | 1 | 2;
+  enabled: boolean;
+  last_connected_at: string | null;
+  last_error: string | null;
+  created_at: string;
+  updated_at: string;
+}

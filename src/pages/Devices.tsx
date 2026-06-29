@@ -123,6 +123,16 @@ function AddDeviceDialog({
   const [meterId, setMeterId] = useState('');
   const meters = useMeters(assetId || undefined);
 
+  // Only selectable assets: active ones, sorted by localized name.
+  const assetOptions = (assets.data ?? [])
+    .filter((a) => a.status === 'active')
+    .sort((x, y) => resolveI18n(x.name_i18n, lng).localeCompare(resolveI18n(y.name_i18n, lng)));
+
+  // Meters have no status to filter on; sort by localized name.
+  const meterOptions = (meters.data ?? [])
+    .slice()
+    .sort((x, y) => resolveI18n(x.name_i18n, lng).localeCompare(resolveI18n(y.name_i18n, lng)));
+
   const create = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase
@@ -175,7 +185,7 @@ function AddDeviceDialog({
               <label className="mb-1 block text-sm font-medium text-ink">{t('asset')}</label>
               <Select value={assetId} onChange={(e) => { setAssetId(e.target.value); setMeterId(''); }}>
                 <option value="">{t('noAsset')}</option>
-                {(assets.data ?? []).map((a) => (
+                {assetOptions.map((a) => (
                   <option key={a.id} value={a.id}>
                     {resolveI18n(a.name_i18n, lng)}
                   </option>
@@ -183,12 +193,12 @@ function AddDeviceDialog({
               </Select>
             </div>
           </div>
-          {assetId && (meters.data ?? []).length > 0 && (
+          {assetId && meterOptions.length > 0 && (
             <div>
               <label className="mb-1 block text-sm font-medium text-ink">{t('meter')}</label>
               <Select value={meterId} onChange={(e) => setMeterId(e.target.value)}>
                 <option value="">{t('noMeter')}</option>
-                {(meters.data ?? []).map((m) => (
+                {meterOptions.map((m) => (
                   <option key={m.id} value={m.id}>
                     {resolveI18n(m.name_i18n, lng)}
                   </option>

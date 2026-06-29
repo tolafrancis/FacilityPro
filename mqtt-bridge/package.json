@@ -1,0 +1,16 @@
+{
+  "name": "facilityspace-mqtt-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Persistent worker that subscribes to MQTT brokers configured per device and forwards messages to FacilitySpace's fp_device_ingest RPC.",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env index.mjs",
+    "test-publish": "node --env-file-if-exists=.env test-publish.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "mqtt": "^5.10.0"
+  }
+}

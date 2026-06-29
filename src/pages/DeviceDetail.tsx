@@ -5,9 +5,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Copy, RefreshCw, Trash2, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
-import { useDevice, useDeviceRules, useTelemetry } from '../lib/queries';
+import { useDevice, useDeviceConnection, useDeviceRules, useTelemetry } from '../lib/queries';
 import { formatDate, PRIORITIES } from '../lib/ui';
-import type { DeviceRuleAction, DeviceRuleOp, Priority } from '../lib/database.types';
+import type { DeviceConnProtocol, DeviceRuleAction, DeviceRuleOp, Priority } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
@@ -141,6 +141,9 @@ export default function DeviceDetail() {
         <p className="mt-2 text-xs text-ink-muted">{t('mqttHint')}</p>
       </section>
 
+      {/* Broker connection (outbound MQTT) */}
+      {isAdmin && id && <BrokerConnection deviceId={id} orgId={d.org_id} />}
+
       {/* Rules */}
       <section className="mt-6 rounded-xl border border-line bg-white p-4">
         <div className="flex items-center justify-between">
@@ -244,6 +247,172 @@ function CodeBlock({
       <pre className="mt-1 overflow-x-auto rounded-lg bg-ink/95 p-3 text-xs text-white">{code}</pre>
       {copied && <p className="mt-1 text-xs text-status-ok">{copiedLabel}</p>}
     </div>
+  );
+}
+
+const PROTOCOLS: DeviceConnProtocol[] = ['mqtt', 'mqtts', 'ws', 'wss'];
+const DEFAULT_PORT: Record<DeviceConnProtocol, number> = { mqtt: 1883, mqtts: 8883, ws: 80, wss: 443 };
+
+function BrokerConnection({ deviceId, orgId }: { deviceId: string; orgId: string }) {
+  const { t, i18n } = useTranslation('devices');
+  const { t: tc } = useTranslation('common');
+  const lng = i18n.resolvedLanguage ?? 'en';
+  const queryClient = useQueryClient();
+  const conn = useDeviceConnection(deviceId);
+  const c = conn.data;
+
+  const [protocol, setProtocol] = useState<DeviceConnProtocol>('mqtt');
+  const [host, setHost] = useState('');
+  const [port, setPort] = useState('1883');
+  const [topic, setTopic] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [clientId, setClientId] = useState('');
+  const [qos, setQos] = useState('0');
+  const [hydratedId, setHydratedId] = useState<string | null>(null);
+
+  // Hydrate the form once from the saved row (and again if it's replaced/deleted).
+  const sig = c?.id ?? 'none';
+  if (hydratedId !== sig) {
+    setHydratedId(sig);
+    setProtocol(c?.protocol ?? 'mqtt');
+    setHost(c?.host ?? '');
+    setPort(String(c?.port ?? DEFAULT_PORT[c?.protocol ?? 'mqtt']));
+    setTopic(c?.topic ?? '');
+    setUsername(c?.username ?? '');
+    setPassword(c?.password ?? '');
+    setClientId(c?.client_id ?? '');
+    setQos(String(c?.qos ?? 0));
+  }
+
+  const save = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const row = {
+        org_id: orgId,
+        device_id: deviceId,
+        protocol,
+        host: host.trim(),
+        port: parseInt(port, 10) || DEFAULT_PORT[protocol],
+        topic: topic.trim(),
+        username: username.trim() || null,
+        password: password.trim() || null,
+        client_id: clientId.trim() || null,
+        qos: (parseInt(qos, 10) || 0) as 0 | 1 | 2,
+        enabled,
+      };
+      const { error } = await supabase
+        .from('fp_device_connections')
+        .upsert(row, { onConflict: 'device_id' });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['device_connection', deviceId] }),
+  });
+
+  const remove = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from('fp_device_connections').delete().eq('device_id', deviceId);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['device_connection', deviceId] }),
+  });
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!host.trim() || !topic.trim()) return;
+    save.mutate(c?.enabled ?? true);
+  };
+
+  const onProtocol = (p: DeviceConnProtocol) => {
+    setProtocol(p);
+    // Only auto-fill the port if it still matches a known default (don't clobber a custom one).
+    if (!port || Object.values(DEFAULT_PORT).includes(parseInt(port, 10))) setPort(String(DEFAULT_PORT[p]));
+  };
+
+  return (
+    <section className="mt-6 rounded-xl border border-line bg-white p-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold text-ink">{t('broker')}</h2>
+        {c && (
+          <label className="inline-flex items-center gap-2 text-sm text-ink">
+            <input
+              type="checkbox"
+              checked={c.enabled}
+              onChange={(e) => save.mutate(e.target.checked)}
+              className="h-4 w-4 rounded border-line text-brand focus:ring-brand/30"
+            />
+            {t('brokerEnabled')}
+          </label>
+        )}
+      </div>
+      <p className="mt-1 text-sm text-ink-muted">{t('brokerHint')}</p>
+
+      {c && (
+        <div className="mt-3 rounded-lg bg-surface px-3 py-2 text-xs">
+          {c.last_error ? (
+            <p className="text-status-crit">{t('brokerError', { error: c.last_error })}</p>
+          ) : c.last_connected_at ? (
+            <p className="text-status-ok">{t('brokerConnected', { when: formatDate(c.last_connected_at, lng) })}</p>
+          ) : (
+            <p className="text-ink-muted">{t('brokerPending')}</p>
+          )}
+        </div>
+      )}
+
+      <form onSubmit={submit} className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-ink">{t('brokerProtocol')}</label>
+          <Select value={protocol} onChange={(e) => onProtocol(e.target.value as DeviceConnProtocol)}>
+            {PROTOCOLS.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="col-span-2">
+          <label className="mb-1 block text-xs font-medium text-ink">{t('brokerHost')}</label>
+          <Input value={host} onChange={(e) => setHost(e.target.value)} placeholder={t('brokerHostPlaceholder')} />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-ink">{t('brokerPort')}</label>
+          <Input type="number" value={port} onChange={(e) => setPort(e.target.value)} />
+        </div>
+        <div className="col-span-2 sm:col-span-4">
+          <label className="mb-1 block text-xs font-medium text-ink">{t('brokerTopic')}</label>
+          <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder={t('brokerTopicPlaceholder')} />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-ink">{t('brokerUsername')}</label>
+          <Input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="off" />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-ink">{t('brokerPassword')}</label>
+          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-ink">{t('brokerClientId')}</label>
+          <Input value={clientId} onChange={(e) => setClientId(e.target.value)} placeholder={t('brokerClientIdPlaceholder')} />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-ink">{t('brokerQos')}</label>
+          <Select value={qos} onChange={(e) => setQos(e.target.value)}>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+          </Select>
+        </div>
+        <div className="col-span-2 mt-1 flex items-end gap-2 sm:col-span-4">
+          <Button type="submit" loading={save.isPending} disabled={!host.trim() || !topic.trim()}>
+            {c ? tc('actions.save') : tc('actions.create')}
+          </Button>
+          {c && (
+            <Button type="button" variant="secondary" loading={remove.isPending} onClick={() => remove.mutate()}>
+              {t('brokerRemove')}
+            </Button>
+          )}
+        </div>
+      </form>
+    </section>
   );
 }
 

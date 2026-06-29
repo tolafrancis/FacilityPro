@@ -14,6 +14,7 @@ import type {
   Desk,
   DeskBooking,
   Device,
+  DeviceConnection,
   DeviceRule,
   Facility,
   FacilityBooking,
@@ -836,6 +837,23 @@ export function useDeviceRules(deviceId: string | undefined) {
         .order('created_at');
       if (error) throw error;
       return data as DeviceRule[];
+    },
+  });
+}
+
+export function useDeviceConnection(deviceId: string | undefined) {
+  return useQuery({
+    queryKey: ['device_connection', deviceId],
+    enabled: !!deviceId,
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_device_connections')
+        .select('*')
+        .eq('device_id', deviceId!)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as DeviceConnection | null) ?? null;
     },
   });
 }
