@@ -2,7 +2,12 @@
 // Data requests (Supabase, other origins) are never cached here; offline writes
 // are handled in-app by the IndexedDB queue.
 
-const CACHE = 'facilityspace-shell-v1';
+// Bump this version string on every deploy that changes app shell files
+// (index.html, manifest, favicon) — it's the only thing that forces
+// `install`/`activate` to actually run again and purge the old cache.
+// Without a bump, a returning visitor's browser has no way to notice the
+// shell changed, since sw.js's own bytes are otherwise identical.
+const CACHE = 'facilityspace-shell-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
