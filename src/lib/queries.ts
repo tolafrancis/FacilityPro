@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { supabase } from './supabase';
 import { useOrg } from '../contexts/OrgContext';
 import type {
@@ -10,6 +10,10 @@ import type {
   ChecklistRun,
   ChecklistTemplate,
   Contract,
+  CostCenter,
+  DocumentEntityType,
+  DocumentLink,
+  DocumentRecord,
   Conversation,
   Desk,
   DeskBooking,
@@ -21,7 +25,9 @@ import type {
   FaultType,
   FinanceBudget,
   FinanceExpenditure,
+  FinancePayment,
   FinanceRate,
+  InventoryTransaction,
   License,
   LocationRow,
   Media,
@@ -32,20 +38,73 @@ import type {
   NotificationRow,
   OrgMember,
   Part,
+  PartCategory,
   Plan,
+  PmRequiredPart,
   PmSchedule,
+  Priority,
+  ProcurementLine,
+  ProcurementOrder,
+  ProcurementReceipt,
+  ProcurementReceiptLine,
   RequestRow,
+  RequestStatus,
   SlaPolicy,
+  Site,
   Subscription,
   Survey,
   Telemetry,
+  UserSite,
   Vendor,
+  VendorInvoice,
+  WoLabor,
   WoPart,
   WorkOrder,
+  WorkOrderStatus,
 } from './database.types';
+
+export interface PagedResult<T> {
+  rows: T[];
+  count: number;
+}
 
 function useOrgId() {
   return useOrg().currentOrg?.id;
+}
+
+export function useSites() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['sites', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_sites')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at');
+      if (error) throw error;
+      return data as Site[];
+    },
+  });
+}
+
+/** Which sites a member is restricted to — an empty array means unrestricted (org-wide), not "no access". */
+export function useUserSites(userId: string | undefined) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['user_sites', orgId, userId],
+    enabled: !!orgId && !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_user_sites')
+        .select('*')
+        .eq('org_id', orgId!)
+        .eq('user_id', userId!);
+      if (error) throw error;
+      return data as UserSite[];
+    },
+  });
 }
 
 export function useAssetTypes() {
@@ -133,6 +192,32 @@ export function useAsset(id: string | undefined) {
   });
 }
 
+export interface AssetPageFilters {
+  assetTypeId?: string;
+  locationId?: string;
+}
+
+/** Server-paginated asset list for Assets.tsx — dropdowns elsewhere keep using useAssets(). */
+export function useAssetsPage(page: number, pageSize: number, filters: AssetPageFilters) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['assets_page', orgId, page, pageSize, filters],
+    enabled: !!orgId,
+    placeholderData: keepPreviousData,
+    queryFn: async (): Promise<PagedResult<Asset>> => {
+      const from = (page - 1) * pageSize;
+      let q = supabase.from('fp_assets').select('*', { count: 'exact' }).eq('org_id', orgId!);
+      if (filters.assetTypeId) q = q.eq('asset_type_id', filters.assetTypeId);
+      if (filters.locationId) q = q.eq('location_id', filters.locationId);
+      const { data, error, count } = await q
+        .order('created_at', { ascending: false })
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      return { rows: (data ?? []) as Asset[], count: count ?? 0 };
+    },
+  });
+}
+
 export function useRequests() {
   const orgId = useOrgId();
   return useQuery({
@@ -166,6 +251,32 @@ export function useRequest(id: string | undefined) {
   });
 }
 
+export interface RequestPageFilters {
+  status?: RequestStatus | 'all';
+  locationId?: string;
+}
+
+/** Server-paginated request list for Requests.tsx. */
+export function useRequestsPage(page: number, pageSize: number, filters: RequestPageFilters) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['requests_page', orgId, page, pageSize, filters],
+    enabled: !!orgId,
+    placeholderData: keepPreviousData,
+    queryFn: async (): Promise<PagedResult<RequestRow>> => {
+      const from = (page - 1) * pageSize;
+      let q = supabase.from('fp_requests').select('*', { count: 'exact' }).eq('org_id', orgId!);
+      if (filters.status && filters.status !== 'all') q = q.eq('status', filters.status);
+      if (filters.locationId) q = q.eq('location_id', filters.locationId);
+      const { data, error, count } = await q
+        .order('created_at', { ascending: false })
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      return { rows: (data ?? []) as RequestRow[], count: count ?? 0 };
+    },
+  });
+}
+
 export function useWorkOrders() {
   const orgId = useOrgId();
   return useQuery({
@@ -179,6 +290,36 @@ export function useWorkOrders() {
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data as WorkOrder[];
+    },
+  });
+}
+
+export interface WorkOrderPageFilters {
+  status?: WorkOrderStatus | 'all';
+  locationId?: string;
+  assignedTo?: string;
+  priority?: Priority | 'all';
+}
+
+/** Server-paginated work-order list for WorkOrders.tsx. */
+export function useWorkOrdersPage(page: number, pageSize: number, filters: WorkOrderPageFilters) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['work_orders_page', orgId, page, pageSize, filters],
+    enabled: !!orgId,
+    placeholderData: keepPreviousData,
+    queryFn: async (): Promise<PagedResult<WorkOrder>> => {
+      const from = (page - 1) * pageSize;
+      let q = supabase.from('fp_work_orders').select('*', { count: 'exact' }).eq('org_id', orgId!);
+      if (filters.status && filters.status !== 'all') q = q.eq('status', filters.status);
+      if (filters.locationId) q = q.eq('location_id', filters.locationId);
+      if (filters.assignedTo) q = q.eq('assigned_to', filters.assignedTo);
+      if (filters.priority && filters.priority !== 'all') q = q.eq('priority', filters.priority);
+      const { data, error, count } = await q
+        .order('created_at', { ascending: false })
+        .range(from, from + pageSize - 1);
+      if (error) throw error;
+      return { rows: (data ?? []) as WorkOrder[], count: count ?? 0 };
     },
   });
 }
@@ -468,6 +609,44 @@ export function usePmSchedules() {
   });
 }
 
+export function usePmRequiredParts(pmScheduleId: string | undefined) {
+  return useQuery({
+    queryKey: ['pm_required_parts', pmScheduleId],
+    enabled: !!pmScheduleId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_pm_required_parts')
+        .select('*')
+        .eq('pm_schedule_id', pmScheduleId!)
+        .order('created_at');
+      if (error) throw error;
+      return data as PmRequiredPart[];
+    },
+  });
+}
+
+export interface PartPageFilters {
+  categoryId?: string;
+}
+
+/** Server-paginated parts list for Parts.tsx. */
+export function usePartsPage(page: number, pageSize: number, filters: PartPageFilters) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['parts_page', orgId, page, pageSize, filters],
+    enabled: !!orgId,
+    placeholderData: keepPreviousData,
+    queryFn: async (): Promise<PagedResult<Part>> => {
+      const from = (page - 1) * pageSize;
+      let q = supabase.from('fp_parts').select('*', { count: 'exact' }).eq('org_id', orgId!);
+      if (filters.categoryId) q = q.eq('category_id', filters.categoryId);
+      const { data, error, count } = await q.order('created_at').range(from, from + pageSize - 1);
+      if (error) throw error;
+      return { rows: (data ?? []) as Part[], count: count ?? 0 };
+    },
+  });
+}
+
 export function useParts() {
   const orgId = useOrgId();
   return useQuery({
@@ -485,6 +664,40 @@ export function useParts() {
   });
 }
 
+export function usePartCategories() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['part_categories', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_part_categories')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at');
+      if (error) throw error;
+      return data as PartCategory[];
+    },
+  });
+}
+
+export function useInventoryTransactions(partId: string | undefined) {
+  return useQuery({
+    queryKey: ['inventory_transactions', partId],
+    enabled: !!partId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_inventory_transactions')
+        .select('*')
+        .eq('part_id', partId!)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data as InventoryTransaction[];
+    },
+  });
+}
+
 export function useWoParts(workOrderId: string | undefined) {
   return useQuery({
     queryKey: ['wo_parts', workOrderId],
@@ -497,6 +710,22 @@ export function useWoParts(workOrderId: string | undefined) {
         .order('created_at');
       if (error) throw error;
       return data as WoPart[];
+    },
+  });
+}
+
+export function useWoLabor(workOrderId: string | undefined) {
+  return useQuery({
+    queryKey: ['wo_labor', workOrderId],
+    enabled: !!workOrderId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_wo_labor')
+        .select('*')
+        .eq('work_order_id', workOrderId!)
+        .order('logged_at');
+      if (error) throw error;
+      return data as WoLabor[];
     },
   });
 }
@@ -551,6 +780,28 @@ export function useMeterReadings(meterId: string | undefined) {
   });
 }
 
+export interface VendorPageFilters {
+  category?: string;
+}
+
+/** Server-paginated vendor list for Vendors.tsx. */
+export function useVendorsPage(page: number, pageSize: number, filters: VendorPageFilters) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['vendors_page', orgId, page, pageSize, filters],
+    enabled: !!orgId,
+    placeholderData: keepPreviousData,
+    queryFn: async (): Promise<PagedResult<Vendor>> => {
+      const from = (page - 1) * pageSize;
+      let q = supabase.from('fp_vendors').select('*', { count: 'exact' }).eq('org_id', orgId!);
+      if (filters.category) q = q.eq('category', filters.category);
+      const { data, error, count } = await q.order('name').range(from, from + pageSize - 1);
+      if (error) throw error;
+      return { rows: (data ?? []) as Vendor[], count: count ?? 0 };
+    },
+  });
+}
+
 export function useVendors() {
   const orgId = useOrgId();
   return useQuery({
@@ -598,6 +849,189 @@ export function useLicenses() {
         .order('expiry_date', { nullsFirst: false });
       if (error) throw error;
       return data as License[];
+    },
+  });
+}
+
+export function useCostCenters() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['cost_centers', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_cost_centers')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('name');
+      if (error) throw error;
+      return data as CostCenter[];
+    },
+  });
+}
+
+export function useProcurementOrders() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['procurement_orders', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_finance_procurement')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as ProcurementOrder[];
+    },
+  });
+}
+
+export function useProcurementLines(procurementId: string | undefined) {
+  return useQuery({
+    queryKey: ['procurement_lines', procurementId],
+    enabled: !!procurementId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_procurement_lines')
+        .select('*')
+        .eq('procurement_id', procurementId!)
+        .order('created_at');
+      if (error) throw error;
+      return data as ProcurementLine[];
+    },
+  });
+}
+
+export function useProcurementReceipts(procurementId: string | undefined) {
+  return useQuery({
+    queryKey: ['procurement_receipts', procurementId],
+    enabled: !!procurementId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_procurement_receipts')
+        .select('*')
+        .eq('procurement_id', procurementId!)
+        .order('received_at', { ascending: false });
+      if (error) throw error;
+      return data as ProcurementReceipt[];
+    },
+  });
+}
+
+export function useProcurementReceiptLines(procurementId: string | undefined) {
+  return useQuery({
+    queryKey: ['procurement_receipt_lines', procurementId],
+    enabled: !!procurementId,
+    queryFn: async () => {
+      // Receipt lines don't carry procurement_id directly; join through the
+      // receipt so "received so far per line" can be computed for a PO.
+      const { data, error } = await supabase
+        .from('fp_procurement_receipt_lines')
+        .select('*, fp_procurement_receipts!inner(procurement_id)')
+        .eq('fp_procurement_receipts.procurement_id', procurementId!);
+      if (error) throw error;
+      return data as ProcurementReceiptLine[];
+    },
+  });
+}
+
+export function useVendorInvoices(procurementId: string | undefined) {
+  return useQuery({
+    queryKey: ['vendor_invoices', procurementId],
+    enabled: !!procurementId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_vendor_invoices')
+        .select('*')
+        .eq('procurement_id', procurementId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as VendorInvoice[];
+    },
+  });
+}
+
+export function useAllVendorInvoices() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['vendor_invoices_all', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_vendor_invoices')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as VendorInvoice[];
+    },
+  });
+}
+
+export function useFinancePayments() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['finance_payments_full', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_finance_payments')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as FinancePayment[];
+    },
+  });
+}
+
+export function useDocuments() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['documents', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_documents')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data as DocumentRecord[];
+    },
+  });
+}
+
+export function useOrgDocumentLinks() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['document_links_all', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_document_links')
+        .select('*')
+        .eq('org_id', orgId!);
+      if (error) throw error;
+      return data as DocumentLink[];
+    },
+  });
+}
+
+export function useDocumentLinks(entityType: DocumentEntityType, entityId: string | undefined) {
+  return useQuery({
+    queryKey: ['document_links', entityType, entityId],
+    enabled: !!entityId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_document_links')
+        .select('*')
+        .eq('entity_type', entityType)
+        .eq('entity_id', entityId!)
+        .order('created_at');
+      if (error) throw error;
+      return data as DocumentLink[];
     },
   });
 }

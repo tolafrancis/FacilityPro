@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,13 +13,27 @@ import {
   useChecklistTemplates,
   useParts,
   useWoParts,
+  useWoLabor,
+  useRates,
   useApprovalsForWo,
+  useLocations,
+  useFaultTypes,
+  useCostCenters,
+  useVendors,
+  useContracts,
+  usePmRequiredParts,
 } from '../lib/queries';
 import { uploadMedia, signedUrl } from '../lib/media';
 import { writeOrQueue } from '../lib/sync';
 import { formatDate, PRIORITY_CLASS, WO_STATUS_CLASS, WO_STATUSES } from '../lib/ui';
 import { resolveI18n } from '../i18n/resolver';
-import type { Media, WorkOrderStatus } from '../lib/database.types';
+import type {
+  Media,
+  WorkOrderStatus,
+  FailureCode,
+  CompletionCode,
+} from '../lib/database.types';
+import { FAILURE_CODES, COMPLETION_CODES } from '../lib/database.types';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
 import ChecklistRunner from '../components/ChecklistRunner';
@@ -35,7 +49,7 @@ export default function WorkOrderDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { currentOrg } = useOrg();
+  const { currentOrg, role } = useOrg();
   const orgId = currentOrg?.id;
 
   const woQuery = useWorkOrder(id);
@@ -44,7 +58,16 @@ export default function WorkOrderDetail() {
   const templates = useChecklistTemplates();
   const partsCatalog = useParts();
   const woPartsQuery = useWoParts(id);
+  const woLaborQuery = useWoLabor(id);
+  const ratesQuery = useRates();
   const approvalsQuery = useApprovalsForWo(id);
+  const locations = useLocations();
+  const faultTypes = useFaultTypes();
+  const canSeeFinancials = role === 'org_admin' || role === 'manager';
+  const costCentersQuery = useCostCenters();
+  const vendorsQuery = useVendors();
+  const contractsQuery = useContracts();
+  const requiredPartsQuery = usePmRequiredParts(woQuery.data?.pm_schedule_id ?? undefined);
 
   const requestApproval = useMutation({
     mutationFn: async () => {
@@ -63,6 +86,18 @@ export default function WorkOrderDetail() {
   const [uploadingPhase, setUploadingPhase] = useState<'before' | 'after' | null>(null);
   const [partId, setPartId] = useState('');
   const [qty, setQty] = useState('1');
+  const [minutes, setMinutes] = useState('');
+  const [rate, setRate] = useState('0');
+  const [rateInitialized, setRateInitialized] = useState(false);
+
+  // Quietly pre-fill the rate field from the org's rate card the first time it
+  // loads, without ever overwriting a value the technician has already typed.
+  useEffect(() => {
+    if (!rateInitialized && ratesQuery.data && ratesQuery.data.length > 0) {
+      setRate(String(ratesQuery.data[0].rate));
+      setRateInitialized(true);
+    }
+  }, [ratesQuery.data, rateInitialized]);
 
   const logPart = useMutation({
     mutationFn: async () => {
@@ -77,8 +112,32 @@ export default function WorkOrderDetail() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['wo_parts', id] });
       void queryClient.invalidateQueries({ queryKey: ['parts', orgId] });
+      void queryClient.invalidateQueries({ queryKey: ['work_order', id] });
       setPartId('');
       setQty('1');
+    },
+  });
+
+  const logLabor = useMutation({
+    mutationFn: async () => {
+      const mins = Math.max(1, parseInt(minutes, 10) || 0);
+      if (!mins || !orgId || !id) return;
+      await writeOrQueue({
+        op: 'insert',
+        table: 'fp_wo_labor',
+        values: {
+          org_id: orgId,
+          work_order_id: id,
+          user_id: user?.id ?? null,
+          minutes: mins,
+          rate_snapshot: Math.max(0, parseFloat(rate) || 0),
+        },
+      });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['wo_labor', id] });
+      void queryClient.invalidateQueries({ queryKey: ['work_order', id] });
+      setMinutes('');
     },
   });
 
@@ -88,6 +147,11 @@ export default function WorkOrderDetail() {
         status: WorkOrderStatus;
         assigned_to: string | null;
         checklist_template_id: string | null;
+        failure_code: FailureCode | null;
+        completion_code: CompletionCode | null;
+        downtime_minutes: number | null;
+        cost_center_id: string | null;
+        vendor_id: string | null;
       }>
     ) => {
       const payload: Record<string, unknown> = { ...changes };
@@ -184,6 +248,23 @@ export default function WorkOrderDetail() {
           </dd>
         </div>
         <div className="rounded-lg border border-line bg-white px-3 py-2">
+          <dt className="text-xs text-ink-muted">{t('detail.vendor')}</dt>
+          <dd className="mt-0.5">
+            <Select
+              value={wo.vendor_id ?? ''}
+              onChange={(e) => patch.mutate({ vendor_id: e.target.value || null })}
+              className="mt-0.5 w-full"
+            >
+              <option value="">{t('detail.noVendor')}</option>
+              {(vendorsQuery.data ?? []).map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name}
+                </option>
+              ))}
+            </Select>
+          </dd>
+        </div>
+        <div className="rounded-lg border border-line bg-white px-3 py-2">
           <dt className="text-xs text-ink-muted">{t('detail.due')}</dt>
           <dd className="mt-0.5 text-ink">{formatDate(wo.due_at, lng)}</dd>
         </div>
@@ -191,12 +272,127 @@ export default function WorkOrderDetail() {
           <dt className="text-xs text-ink-muted">{t('detail.priority')}</dt>
           <dd className="mt-0.5 text-ink">{tc(`priority.${wo.priority}`)}</dd>
         </div>
+        <div className="rounded-lg border border-line bg-white px-3 py-2">
+          <dt className="text-xs text-ink-muted">{t('detail.location')}</dt>
+          <dd className="mt-0.5 text-ink">
+            {wo.location_id
+              ? resolveI18n(locations.data?.find((l) => l.id === wo.location_id)?.name_i18n, lng)
+              : '—'}
+          </dd>
+        </div>
+        <div className="rounded-lg border border-line bg-white px-3 py-2">
+          <dt className="text-xs text-ink-muted">{t('detail.faultType')}</dt>
+          <dd className="mt-0.5 text-ink">
+            {wo.fault_type_id
+              ? resolveI18n(faultTypes.data?.find((f) => f.id === wo.fault_type_id)?.name_i18n, lng)
+              : '—'}
+          </dd>
+        </div>
+        <div className="rounded-lg border border-line bg-white px-3 py-2">
+          <dt className="text-xs text-ink-muted">{t('detail.cost')}</dt>
+          <dd className="mt-0.5 text-ink tabular-nums">
+            {new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-US', {
+              style: 'currency',
+              currency: 'USD',
+            }).format(wo.cost)}
+          </dd>
+        </div>
+        {canSeeFinancials && (
+          <div className="rounded-lg border border-line bg-white px-3 py-2">
+            <dt className="text-xs text-ink-muted">{t('detail.costCenter')}</dt>
+            <dd className="mt-0.5">
+              <Select
+                value={wo.cost_center_id ?? ''}
+                onChange={(e) => patch.mutate({ cost_center_id: e.target.value || null })}
+              >
+                <option value="">{tc('common.none')}</option>
+                {(costCentersQuery.data ?? []).map((cc) => (
+                  <option key={cc.id} value={cc.id}>
+                    {cc.code ? `${cc.code} — ${cc.name}` : cc.name}
+                  </option>
+                ))}
+              </Select>
+            </dd>
+          </div>
+        )}
       </dl>
+
+      {wo.vendor_id && canSeeFinancials && (() => {
+        const activeContracts = (contractsQuery.data ?? []).filter((c) => c.vendor_id === wo.vendor_id);
+        if (activeContracts.length === 0) return null;
+        return (
+          <div className="mt-4 rounded-xl border border-line bg-white p-4">
+            <p className="text-xs text-ink-muted">{t('detail.vendorContracts')}</p>
+            <ul className="mt-2 space-y-1 text-sm">
+              {activeContracts.map((c) => (
+                <li key={c.id} className="flex items-center justify-between text-ink">
+                  <span>{c.title}</span>
+                  <span className="text-xs text-ink-muted">{formatDate(c.expiry_date, lng)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })()}
 
       {wo.instructions && (
         <div className="mt-4 rounded-xl border border-line bg-white p-4">
           <p className="text-xs text-ink-muted">{t('detail.instructions')}</p>
           <p className="mt-1 whitespace-pre-wrap text-sm text-ink">{wo.instructions}</p>
+        </div>
+      )}
+
+      {(wo.status === 'resolved' || wo.status === 'closed') && (
+        <div className="mt-4 rounded-xl border border-line bg-white p-4">
+          <p className="text-sm font-medium text-ink">{t('detail.closingDetails')}</p>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block text-xs text-ink-muted">{t('detail.failureCode')}</label>
+              <Select
+                value={wo.failure_code ?? ''}
+                onChange={(e) =>
+                  patch.mutate({ failure_code: (e.target.value || null) as FailureCode | null })
+                }
+              >
+                <option value="">{t('detail.selectFailure')}</option>
+                {FAILURE_CODES.map((code) => (
+                  <option key={code} value={code}>
+                    {tc(`failureCode.${code}`)}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-muted">{t('detail.completionCode')}</label>
+              <Select
+                value={wo.completion_code ?? ''}
+                onChange={(e) =>
+                  patch.mutate({ completion_code: (e.target.value || null) as CompletionCode | null })
+                }
+              >
+                <option value="">{t('detail.selectCompletion')}</option>
+                {COMPLETION_CODES.map((code) => (
+                  <option key={code} value={code}>
+                    {tc(`completionCode.${code}`)}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="col-span-2">
+              <label className="mb-1 block text-xs text-ink-muted">{t('detail.downtime')}</label>
+              <input
+                type="number"
+                min={0}
+                defaultValue={wo.downtime_minutes ?? ''}
+                onBlur={(e) =>
+                  patch.mutate({
+                    downtime_minutes: e.target.value === '' ? null : Math.max(0, parseInt(e.target.value, 10) || 0),
+                  })
+                }
+                className="w-32 rounded-lg border border-line px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -259,6 +455,35 @@ export default function WorkOrderDetail() {
         </div>
       )}
 
+      {wo.pm_schedule_id && (requiredPartsQuery.data ?? []).length > 0 && (
+        <div className="mt-5 rounded-xl border border-line bg-white p-4">
+          <p className="text-sm font-medium text-ink">{tp('suggested.title')}</p>
+          <p className="mt-0.5 text-xs text-ink-muted">{tp('suggested.hint')}</p>
+          <ul className="mt-2 space-y-1 text-sm">
+            {(requiredPartsQuery.data ?? []).map((rp) => {
+              const part = (partsCatalog.data ?? []).find((p) => p.id === rp.part_id);
+              return (
+                <li key={rp.id} className="flex items-center justify-between text-ink">
+                  <span>
+                    {part ? resolveI18n(part.name_i18n, lng) : rp.part_id} × {rp.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPartId(rp.part_id);
+                      setQty(String(rp.quantity));
+                    }}
+                    className="text-xs font-medium text-brand hover:text-brand-600"
+                  >
+                    {tp('suggested.use')}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
       <div className="mt-5 rounded-xl border border-line bg-white p-4">
         <p className="text-sm font-medium text-ink">{tp('use.title')}</p>
         <ul className="mt-2 space-y-1 text-sm">
@@ -304,6 +529,63 @@ export default function WorkOrderDetail() {
             className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
           >
             {tp('use.add')}
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-xl border border-line bg-white p-4">
+        <p className="text-sm font-medium text-ink">{t('labor.title')}</p>
+        <ul className="mt-2 space-y-1 text-sm">
+          {(woLaborQuery.data ?? []).map((entry) => {
+            const who = members.data?.find((m) => m.user_id === entry.user_id)?.email ?? '—';
+            const entryCost = (entry.minutes / 60) * entry.rate_snapshot;
+            return (
+              <li key={entry.id} className="flex justify-between text-ink">
+                <span>
+                  {who} · {entry.minutes} {tc('common.minutesShort')}
+                </span>
+                <span className="text-ink-muted tabular-nums">
+                  {new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                  }).format(entryCost)}
+                </span>
+              </li>
+            );
+          })}
+          {(woLaborQuery.data ?? []).length === 0 && (
+            <li className="text-ink-muted">{t('labor.empty')}</li>
+          )}
+        </ul>
+        <div className="mt-3 flex items-end gap-2">
+          <div className="w-24">
+            <label className="mb-1 block text-xs text-ink-muted">{t('labor.minutes')}</label>
+            <input
+              type="number"
+              min={1}
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="w-28">
+            <label className="mb-1 block text-xs text-ink-muted">{t('labor.rate')}</label>
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={rate}
+              onChange={(e) => setRate(e.target.value)}
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm"
+            />
+          </div>
+          <button
+            type="button"
+            disabled={!minutes || logLabor.isPending}
+            onClick={() => logLabor.mutate()}
+            className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50"
+          >
+            {t('labor.add')}
           </button>
         </div>
       </div>

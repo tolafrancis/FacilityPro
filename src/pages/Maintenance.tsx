@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, ChevronLeft, ChevronRight, Plus, RefreshCw } from 'lucide-react';
+import { CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
 import {
@@ -9,6 +9,8 @@ import {
   useChecklistTemplates,
   useMeters,
   useOrgMembers,
+  useParts,
+  usePmRequiredParts,
   usePmSchedules,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
@@ -36,6 +38,7 @@ export default function Maintenance() {
   const [open, setOpen] = useState(false);
   const [monthOffset, setMonthOffset] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const schedules = schedulesQuery.data ?? [];
   const assets = assetsQuery.data ?? [];
@@ -206,7 +209,7 @@ export default function Maintenance() {
                           : `${overdue ? `${t('overdue')} · ` : ''}${formatDate(s.next_due_at, lng)}`}
                       </span>
                     </div>
-                    <div className="mt-2">
+                    <div className="mt-2 flex items-center gap-3">
                       <button
                         type="button"
                         onClick={() => toggleActive.mutate({ id: s.id, active: !s.active })}
@@ -214,7 +217,19 @@ export default function Maintenance() {
                       >
                         {s.active ? t('pause') : t('resume')}
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setExpanded(expanded === s.id ? null : s.id)}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-ink-muted hover:text-ink"
+                      >
+                        <ChevronDown
+                          size={13}
+                          className={`transition-transform ${expanded === s.id ? '' : '-rotate-90'}`}
+                        />
+                        {t('requiredParts.toggle')}
+                      </button>
                     </div>
+                    {expanded === s.id && <RequiredPartsEditor orgId={orgId!} pmScheduleId={s.id} />}
                   </li>
                 );
               })}
@@ -275,6 +290,7 @@ function ScheduleDialog({
   const [priority, setPriority] = useState<Priority>('medium');
   const today = new Date().toISOString().slice(0, 10);
   const [firstDue, setFirstDue] = useState(today);
+  const [leadTime, setLeadTime] = useState('0');
   const [error, setError] = useState<string | null>(null);
 
   const metersQuery = useMeters(assetId || undefined);
@@ -295,6 +311,7 @@ function ScheduleDialog({
         next_due_at: isCalendar ? new Date(firstDue + 'T09:00:00').toISOString() : null,
         meter_id: isCalendar ? null : meterId || null,
         meter_threshold: isCalendar ? null : Math.max(1, parseFloat(threshold) || 1),
+        lead_time_days: Math.max(0, parseInt(leadTime, 10) || 0),
       });
       if (err) throw err;
     },
@@ -364,6 +381,18 @@ function ScheduleDialog({
                   {t('dialog.firstDue')}
                 </label>
                 <Input type="date" value={firstDue} onChange={(e) => setFirstDue(e.target.value)} />
+              </div>
+              <div className="col-span-2">
+                <label className="mb-1 block text-sm font-medium text-ink">
+                  {t('dialog.leadTime')}
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={leadTime}
+                  onChange={(e) => setLeadTime(e.target.value)}
+                />
+                <p className="mt-1 text-xs text-ink-muted">{t('dialog.leadTimeHint')}</p>
               </div>
             </div>
           ) : (
@@ -443,6 +472,111 @@ function ScheduleDialog({
           </Button>
         </div>
       </form>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Required parts kit: what a PM schedule's generated work order usually
+// needs. Shown as suggestions on the work order, not auto-consumed — the
+// technician still confirms actual usage against real stock.
+// ---------------------------------------------------------------------------
+function RequiredPartsEditor({ orgId, pmScheduleId }: { orgId: string; pmScheduleId: string }) {
+  const { t, i18n } = useTranslation('maintenance');
+  const { t: tc } = useTranslation('common');
+  const lng = i18n.resolvedLanguage ?? 'en';
+  const queryClient = useQueryClient();
+  const requiredQuery = usePmRequiredParts(pmScheduleId);
+  const partsQuery = useParts();
+  const [partId, setPartId] = useState('');
+  const [qty, setQty] = useState('1');
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['pm_required_parts', pmScheduleId] });
+
+  const addPart = useMutation({
+    mutationFn: async () => {
+      if (!partId) return;
+      const { error } = await supabase.from('fp_pm_required_parts').insert({
+        org_id: orgId,
+        pm_schedule_id: pmScheduleId,
+        part_id: partId,
+        quantity: Math.max(0.01, parseFloat(qty) || 1),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidate();
+      setPartId('');
+      setQty('1');
+    },
+  });
+
+  const removePart = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('fp_pm_required_parts').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+
+  const required = requiredQuery.data ?? [];
+  const parts = partsQuery.data ?? [];
+  const partName = (id: string) => {
+    const p = parts.find((x) => x.id === id);
+    return p ? resolveI18n(p.name_i18n, lng) : id;
+  };
+
+  return (
+    <div className="mt-2 rounded-lg border border-line bg-surface p-3">
+      <p className="text-xs font-medium text-ink-muted">{t('requiredParts.title')}</p>
+      <ul className="mt-2 space-y-1 text-sm">
+        {required.map((r) => (
+          <li key={r.id} className="flex items-center justify-between text-ink">
+            <span>
+              {partName(r.part_id)} × {r.quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => removePart.mutate(r.id)}
+              className="text-ink-muted hover:text-status-crit"
+              aria-label={tc('actions.cancel')}
+            >
+              <Trash2 size={13} />
+            </button>
+          </li>
+        ))}
+        {required.length === 0 && <li className="text-ink-muted">{t('requiredParts.empty')}</li>}
+      </ul>
+      <div className="mt-2 flex items-end gap-2">
+        <div className="flex-1">
+          <Select value={partId} onChange={(e) => setPartId(e.target.value)}>
+            <option value="">{tc('common.none')}</option>
+            {parts.map((p) => (
+              <option key={p.id} value={p.id}>
+                {resolveI18n(p.name_i18n, lng)}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="w-16">
+          <input
+            type="number"
+            min={0.01}
+            step="0.01"
+            value={qty}
+            onChange={(e) => setQty(e.target.value)}
+            className="w-full rounded-lg border border-line px-2 py-2 text-sm"
+          />
+        </div>
+        <button
+          type="button"
+          disabled={!partId || addPart.isPending}
+          onClick={() => addPart.mutate()}
+          className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-brand hover:bg-white disabled:opacity-50"
+        >
+          {tc('actions.add')}
+        </button>
+      </div>
     </div>
   );
 }

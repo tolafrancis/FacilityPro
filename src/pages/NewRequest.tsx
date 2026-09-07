@@ -9,7 +9,7 @@ import { useOrg } from '../contexts/OrgContext';
 import { useAssetTypes, useAssets, useFaultTypes, useLocations } from '../lib/queries';
 import { uploadMedia } from '../lib/media';
 import { resolveI18n } from '../i18n/resolver';
-import { PRIORITIES } from '../lib/ui';
+import { PRIORITIES, friendlyError } from '../lib/ui';
 import type { Priority } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -269,7 +269,7 @@ function CreateAssetTypeModal({ orgId, initialName, onCreated, onCancel }: { org
       .select('id')
       .single();
     setBusy(false);
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(friendlyError(error, tc)); return; }
     onCreated(data.id as string);
   };
 
@@ -318,7 +318,7 @@ function CreateAssetModal({ orgId, initialName, onCreated, onCancel }: { orgId: 
       .insert({ org_id: orgId, name_i18n: { en: nm, vi: nm } })
       .select('id')
       .single();
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(friendlyError(error, tc)); return; }
     await queryClient.invalidateQueries({ queryKey: ['asset_types', orgId] });
     setAssetTypeId(data.id as string);
   };
@@ -330,7 +330,7 @@ function CreateAssetModal({ orgId, initialName, onCreated, onCancel }: { orgId: 
       .insert({ org_id: orgId, name_i18n: { en: nm, vi: nm }, kind: 'room' })
       .select('id')
       .single();
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(friendlyError(error, tc)); return; }
     await queryClient.invalidateQueries({ queryKey: ['locations', orgId] });
     setLocationId(data.id as string);
   };
@@ -345,7 +345,7 @@ function CreateAssetModal({ orgId, initialName, onCreated, onCancel }: { orgId: 
       .select('id')
       .single();
     setBusy(false);
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(friendlyError(error, tc)); return; }
     onCreated(data.id as string);
   };
 
@@ -407,7 +407,7 @@ function CreateFaultModal({ orgId, initialName, onCreated, onCancel }: { orgId: 
       .select('id')
       .single();
     setBusy(false);
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(friendlyError(error, tc)); return; }
     onCreated(data.id as string);
   };
 
@@ -451,7 +451,7 @@ function CreateLocationModal({ orgId, initialName, onCreated, onCancel }: { orgI
       .select('id')
       .single();
     setBusy(false);
-    if (error) { setErr(error.message); return; }
+    if (error) { setErr(friendlyError(error, tc)); return; }
     onCreated(data.id as string);
   };
 

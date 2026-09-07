@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrg } from '../contexts/OrgContext';
+import type { Role } from '../lib/database.types';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationBell from './NotificationBell';
 import OfflineBanner from './OfflineBanner';
@@ -52,6 +53,16 @@ interface NavItem {
 interface NavGroup {
   title: string;
   items: NavItem[];
+}
+
+// Nav items whose underlying data is admin/manager-only at the RLS layer
+// (fp_finance_* tables, fp_devices) — hiding them for other roles avoids a
+// dead-end click into a page that will just come back empty.
+const ADMIN_MANAGER_ONLY_KEYS = new Set(['financial', 'devices']);
+
+function isNavItemVisible(key: string, role: Role | null): boolean {
+  if (!ADMIN_MANAGER_ONLY_KEYS.has(key)) return true;
+  return role === 'org_admin' || role === 'manager';
 }
 
 const NAV_GROUPS: NavGroup[] = [
@@ -122,6 +133,11 @@ export default function AppShell() {
     setOpenGroups((prev) => ({ ...prev, [group]: !prev[group] }));
   };
 
+  const visibleNavGroups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => isNavItemVisible(item.key, role)),
+  })).filter((group) => group.items.length > 0);
+
   return (
     <div className="flex min-h-screen bg-surface">
       <aside className="hidden w-60 flex-col border-r border-line bg-white lg:flex">
@@ -132,7 +148,7 @@ export default function AppShell() {
           <span className="font-semibold text-ink">{t('app.name')}</span>
         </div>
         <nav className="flex-1 space-y-2 px-3 py-2">
-          {NAV_GROUPS.map((group) => {
+          {visibleNavGroups.map((group) => {
             const isOpen = openGroups[group.title];
             return (
               <div key={group.title}>

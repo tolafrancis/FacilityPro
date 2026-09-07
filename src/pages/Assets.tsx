@@ -5,13 +5,17 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Boxes } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
-import { useAssets, useAssetTypes, useLocations } from '../lib/queries';
+import { useAssetsPage, useAssetTypes, useLocations } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import type { LocationRow } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
 import SearchSelect from '../components/ui/SearchSelect';
 import BilingualName from '../components/ui/BilingualName';
+import Pagination from '../components/ui/Pagination';
+
+const PAGE_SIZE = 25;
 
 export default function Assets() {
   const { t, i18n } = useTranslation('assets');
@@ -20,10 +24,19 @@ export default function Assets() {
   const { currentOrg } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
-  const assets = useAssets();
   const assetTypes = useAssetTypes();
   const locations = useLocations();
   const [open, setOpen] = useState(false);
+  const [filterTypeId, setFilterTypeId] = useState('');
+  const [filterLocationId, setFilterLocationId] = useState('');
+  const [page, setPage] = useState(1);
+
+  const assets = useAssetsPage(page, PAGE_SIZE, {
+    assetTypeId: filterTypeId || undefined,
+    locationId: filterLocationId || undefined,
+  });
+  const rows = assets.data?.rows ?? [];
+  const total = assets.data?.count ?? 0;
 
   const typeName = (id: string | null) => {
     const at = assetTypes.data?.find((x) => x.id === id);
@@ -59,6 +72,7 @@ export default function Assets() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['assets', orgId] });
+      void queryClient.invalidateQueries({ queryKey: ['assets_page'] });
       setOpen(false);
     },
   });
@@ -101,13 +115,46 @@ export default function Assets() {
         </Button>
       </div>
 
-      {assets.data?.length === 0 ? (
+      <div className="mt-5 flex flex-wrap items-end gap-3">
+        <div className="min-w-[160px]">
+          <label className="mb-1 block text-xs text-ink-muted">{t('columns.type')}</label>
+          <Select
+            value={filterTypeId}
+            onChange={(e) => {
+              setFilterTypeId(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">{tc('common.all')}</option>
+            {(assetTypes.data ?? []).map((at) => (
+              <option key={at.id} value={at.id}>{resolveI18n(at.name_i18n, lng)}</option>
+            ))}
+          </Select>
+        </div>
+        <div className="min-w-[160px]">
+          <label className="mb-1 block text-xs text-ink-muted">{t('columns.location')}</label>
+          <Select
+            value={filterLocationId}
+            onChange={(e) => {
+              setFilterLocationId(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">{tc('common.all')}</option>
+            {(locations.data ?? []).map((l) => (
+              <option key={l.id} value={l.id}>{resolveI18n(l.name_i18n, lng)}</option>
+            ))}
+          </Select>
+        </div>
+      </div>
+
+      {rows.length === 0 ? (
         <div className="mt-6 rounded-xl border border-dashed border-line bg-white p-8 text-center">
           <Boxes className="mx-auto text-ink-muted" aria-hidden />
           <p className="mt-2 text-sm text-ink-muted">{t('empty')}</p>
         </div>
       ) : (
-        <div className="mt-6 overflow-hidden rounded-xl border border-line bg-white">
+        <div className="mt-4 overflow-hidden rounded-xl border border-line bg-white">
           <table className="w-full text-sm">
             <thead className="border-b border-line bg-surface text-left text-xs text-ink-muted">
               <tr>
@@ -118,7 +165,7 @@ export default function Assets() {
               </tr>
             </thead>
             <tbody>
-              {(assets.data ?? []).map((a) => (
+              {rows.map((a) => (
                 <tr key={a.id} className="border-b border-line last:border-0 hover:bg-surface">
                   <td className="px-4 py-2">
                     <Link to={`/assets/${a.id}`} className="font-medium text-brand hover:text-brand-600">
@@ -134,6 +181,16 @@ export default function Assets() {
           </table>
         </div>
       )}
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        total={total}
+        onPageChange={setPage}
+        summary={(p, tp, tt) => tc('pagination.summary', { page: p, totalPages: tp, total: tt })}
+        prevLabel={tc('pagination.prev')}
+        nextLabel={tc('pagination.next')}
+      />
 
       {open && (
         <AssetDialog

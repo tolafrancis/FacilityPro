@@ -18,7 +18,12 @@
     "unit": "Đơn vị (vd: cái, L)",
     "initialStock": "Tồn kho ban đầu",
     "reorder": "Mức đặt lại",
-    "cost": "Đơn giá"
+    "cost": "Đơn giá",
+    "category": "Danh mục",
+    "categoryPlaceholder": "Tìm hoặc nhập để thêm…",
+    "createCategory": "Tạo danh mục mới",
+    "vendor": "Nhà cung cấp ưu tiên",
+    "vendorPlaceholder": "Tìm nhà cung cấp…"
   },
   "use": {
     "title": "Phụ tùng đã dùng",
@@ -26,5 +31,20 @@
     "qty": "Số lượng",
     "add": "Ghi nhận",
     "empty": "Chưa ghi nhận phụ tùng nào cho lệnh này."
+  },
+  "suggested": {
+    "title": "Phụ tùng gợi ý",
+    "hint": "Từ bộ phụ tùng cần dùng của lịch bảo trì này — hãy xác nhận số lượng thực tế bên dưới.",
+    "use": "Dùng"
+  },
+  "history": {
+    "title": "Lịch sử giao dịch",
+    "empty": "Chưa có biến động tồn kho nào được ghi nhận.",
+    "types": {
+      "issue": "Xuất kho",
+      "receipt": "Nhập kho",
+      "adjustment": "Điều chỉnh",
+      "cycle_count": "Kiểm kê"
+    }
   }
 }

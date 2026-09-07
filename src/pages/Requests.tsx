@@ -2,23 +2,29 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Plus, ClipboardList } from 'lucide-react';
-import { useRequests, useFaultTypes, useLocations } from '../lib/queries';
+import { useRequestsPage, useFaultTypes, useLocations } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { formatDate, PRIORITY_CLASS, REQUEST_STATUS_CLASS, REQUEST_STATUSES } from '../lib/ui';
 import type { RequestStatus } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
+import Pagination from '../components/ui/Pagination';
+
+const PAGE_SIZE = 25;
 
 export default function Requests() {
   const { t, i18n } = useTranslation('requests');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
   const navigate = useNavigate();
-  const requests = useRequests();
   const faultTypes = useFaultTypes();
   const locations = useLocations();
   const [status, setStatus] = useState<RequestStatus | 'all'>('all');
+  const [locationId, setLocationId] = useState('');
+  const [page, setPage] = useState(1);
+
+  const requests = useRequestsPage(page, PAGE_SIZE, { status, locationId: locationId || undefined });
 
   const faultName = (id: string | null) => {
     const ft = faultTypes.data?.find((x) => x.id === id);
@@ -29,7 +35,8 @@ export default function Requests() {
     return l ? resolveI18n(l.name_i18n, lng) : '—';
   };
 
-  const rows = (requests.data ?? []).filter((r) => status === 'all' || r.status === status);
+  const rows = requests.data?.rows ?? [];
+  const total = requests.data?.count ?? 0;
 
   return (
     <div className="max-w-5xl">
@@ -43,20 +50,40 @@ export default function Requests() {
         </Button>
       </div>
 
-      <div className="mt-5 flex items-center gap-2">
-        <span className="text-sm text-ink-muted">{t('filter.status')}</span>
-        <Select
-          value={status}
-          onChange={(e) => setStatus(e.target.value as RequestStatus | 'all')}
-          className="w-auto"
-        >
-          <option value="all">{t('filter.all')}</option>
-          {REQUEST_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {tc(`requestStatus.${s}`)}
-            </option>
-          ))}
-        </Select>
+      <div className="mt-5 flex flex-wrap items-end gap-3">
+        <div>
+          <label className="mb-1 block text-xs text-ink-muted">{t('filter.status')}</label>
+          <Select
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value as RequestStatus | 'all');
+              setPage(1);
+            }}
+            className="w-auto"
+          >
+            <option value="all">{t('filter.all')}</option>
+            {REQUEST_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {tc(`requestStatus.${s}`)}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="min-w-[160px]">
+          <label className="mb-1 block text-xs text-ink-muted">{t('columns.location')}</label>
+          <Select
+            value={locationId}
+            onChange={(e) => {
+              setLocationId(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">{t('filter.all')}</option>
+            {(locations.data ?? []).map((l) => (
+              <option key={l.id} value={l.id}>{resolveI18n(l.name_i18n, lng)}</option>
+            ))}
+          </Select>
+        </div>
       </div>
 
       {rows.length === 0 ? (
@@ -66,45 +93,57 @@ export default function Requests() {
         </div>
       ) : (
         <div className="mt-4 overflow-hidden rounded-xl border border-line bg-white">
-          <table className="w-full text-sm">
-            <thead className="border-b border-line bg-surface text-left text-xs text-ink-muted">
-              <tr>
-                <th className="px-4 py-2 font-medium">{t('columns.title')}</th>
-                <th className="px-4 py-2 font-medium">{t('columns.type')}</th>
-                <th className="px-4 py-2 font-medium">{t('columns.location')}</th>
-                <th className="px-4 py-2 font-medium">{t('columns.priority')}</th>
-                <th className="px-4 py-2 font-medium">{t('columns.status')}</th>
-                <th className="px-4 py-2 font-medium">{t('columns.created')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} className="border-b border-line last:border-0 hover:bg-surface">
-                  <td className="px-4 py-2">
-                    <Link
-                      to={`/requests/${r.id}`}
-                      className="font-medium text-brand hover:text-brand-600"
-                    >
-                      {r.title ?? '—'}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2 text-ink-muted">{faultName(r.fault_type_id)}</td>
-                  <td className="px-4 py-2 text-ink-muted">{locName(r.location_id)}</td>
-                  <td className="px-4 py-2">
-                    <Pill className={PRIORITY_CLASS[r.priority]}>{tc(`priority.${r.priority}`)}</Pill>
-                  </td>
-                  <td className="px-4 py-2">
-                    <Pill className={REQUEST_STATUS_CLASS[r.status]}>
-                      {tc(`requestStatus.${r.status}`)}
-                    </Pill>
-                  </td>
-                  <td className="px-4 py-2 text-ink-muted">{formatDate(r.created_at, lng)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead className="border-b border-line bg-surface text-left text-xs text-ink-muted">
+                <tr>
+                  <th className="px-4 py-2 font-medium">{t('columns.title')}</th>
+                  <th className="px-4 py-2 font-medium">{t('columns.type')}</th>
+                  <th className="px-4 py-2 font-medium">{t('columns.location')}</th>
+                  <th className="px-4 py-2 font-medium">{t('columns.priority')}</th>
+                  <th className="px-4 py-2 font-medium">{t('columns.status')}</th>
+                  <th className="px-4 py-2 font-medium">{t('columns.created')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.id} className="border-b border-line last:border-0 hover:bg-surface">
+                    <td className="px-4 py-2">
+                      <Link
+                        to={`/requests/${r.id}`}
+                        className="font-medium text-brand hover:text-brand-600"
+                      >
+                        {r.title ?? '—'}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2 text-ink-muted">{faultName(r.fault_type_id)}</td>
+                    <td className="px-4 py-2 text-ink-muted">{locName(r.location_id)}</td>
+                    <td className="px-4 py-2">
+                      <Pill className={PRIORITY_CLASS[r.priority]}>{tc(`priority.${r.priority}`)}</Pill>
+                    </td>
+                    <td className="px-4 py-2">
+                      <Pill className={REQUEST_STATUS_CLASS[r.status]}>
+                        {tc(`requestStatus.${r.status}`)}
+                      </Pill>
+                    </td>
+                    <td className="px-4 py-2 text-ink-muted">{formatDate(r.created_at, lng)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
+
+      <Pagination
+        page={page}
+        pageSize={PAGE_SIZE}
+        total={total}
+        onPageChange={setPage}
+        summary={(p, tp, tt) => tc('pagination.summary', { page: p, totalPages: tp, total: tt })}
+        prevLabel={tc('pagination.prev')}
+        nextLabel={tc('pagination.next')}
+      />
     </div>
   );
 }

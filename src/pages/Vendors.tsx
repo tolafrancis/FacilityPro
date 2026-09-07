@@ -4,14 +4,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
-import { useContracts, useLicenses, useVendors } from '../lib/queries';
+import { useContracts, useLicenses, useVendors, useVendorsPage } from '../lib/queries';
 import { daysUntil, formatDateOnly } from '../lib/ui';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
+import Pagination from '../components/ui/Pagination';
 
 type Dialog = 'vendor' | 'contract' | 'license' | null;
+const PAGE_SIZE = 25;
 
 export default function Vendors() {
   const { t, i18n } = useTranslation('vendors');
@@ -21,12 +23,21 @@ export default function Vendors() {
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
 
-  const vendorsQuery = useVendors();
+  // Full list for name lookups and the contract dialog's vendor picker;
+  // the page below (vendorsPageQuery) is what the visible table paginates.
+  const allVendorsQuery = useVendors();
   const contractsQuery = useContracts();
   const licensesQuery = useLicenses();
   const [dialog, setDialog] = useState<Dialog>(null);
+  const [filterCategory, setFilterCategory] = useState('');
+  const [page, setPage] = useState(1);
 
-  const vendors = vendorsQuery.data ?? [];
+  const vendorsPageQuery = useVendorsPage(page, PAGE_SIZE, { category: filterCategory || undefined });
+
+  const vendors = allVendorsQuery.data ?? [];
+  const vendorRows = vendorsPageQuery.data?.rows ?? [];
+  const vendorTotal = vendorsPageQuery.data?.count ?? 0;
+  const vendorCategories = Array.from(new Set(vendors.map((v) => v.category).filter((c): c is string => !!c)));
   const vendorName = (id: string | null) => vendors.find((v) => v.id === id)?.name ?? '—';
 
   const addVendor = useMutation({
@@ -42,6 +53,7 @@ export default function Vendors() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['vendors', orgId] });
+      void queryClient.invalidateQueries({ queryKey: ['vendors_page'] });
       setDialog(null);
     },
   });
@@ -102,19 +114,47 @@ export default function Vendors() {
           <AddButton label={t('addVendor')} onClick={() => setDialog('vendor')} />
         }
       >
-        {vendors.length === 0 ? (
+        {vendorCategories.length > 0 && (
+          <div className="mb-3">
+            <Select
+              value={filterCategory}
+              onChange={(e) => {
+                setFilterCategory(e.target.value);
+                setPage(1);
+              }}
+              className="w-56"
+            >
+              <option value="">{tc('common.all')}</option>
+              {vendorCategories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </Select>
+          </div>
+        )}
+        {vendorRows.length === 0 ? (
           <Empty text={t('emptyVendors')} />
         ) : (
-          <ul className="divide-y divide-line">
-            {vendors.map((v) => (
-              <li key={v.id} className="flex items-center justify-between py-2 text-sm">
-                <span className="text-ink">{v.name}</span>
-                <span className="text-xs text-ink-muted">
-                  {[v.category, v.email, v.phone].filter(Boolean).join(' · ') || '—'}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="divide-y divide-line">
+              {vendorRows.map((v) => (
+                <li key={v.id} className="flex items-center justify-between py-2 text-sm">
+                  <span className="text-ink">{v.name}</span>
+                  <span className="text-xs text-ink-muted">
+                    {[v.category, v.email, v.phone].filter(Boolean).join(' · ') || '—'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <Pagination
+              page={page}
+              pageSize={PAGE_SIZE}
+              total={vendorTotal}
+              onPageChange={setPage}
+              summary={(p, tp, tt) => tc('pagination.summary', { page: p, totalPages: tp, total: tt })}
+              prevLabel={tc('pagination.prev')}
+              nextLabel={tc('pagination.next')}
+            />
+          </>
         )}
       </Section>
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Pencil } from 'lucide-react';
 import Button from '../components/ui/Button';
@@ -421,8 +421,9 @@ const ACTION_TARGET_LABEL: Record<WorkflowActionType, string> = {
 };
 
 export default function Workflows() {
-  const { currentOrg } = useOrg();
+  const { currentOrg, role } = useOrg();
   const { i18n } = useTranslation();
+  const { t: ts } = useTranslation('settings');
   const lng = i18n.resolvedLanguage ?? 'en';
   const queryClient = useQueryClient();
   const members = useOrgMembers();
@@ -439,6 +440,17 @@ export default function Workflows() {
   const [message, setMessage] = useState<string | null>(null);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [publicRequests, setPublicRequests] = useState(!!currentOrg?.allow_public_requests);
+  const [autoCreateWo, setAutoCreateWo] = useState(!!currentOrg?.auto_create_work_orders);
+
+  const updateIntakeSettings = useMutation({
+    mutationFn: async (patch: Record<string, boolean>) => {
+      if (!currentOrg?.id) return;
+      const { error } = await supabase.from('fp_organizations').update(patch).eq('id', currentOrg.id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['memberships'] }),
+  });
 
   const { data: workflows = [] } = useQuery({
     queryKey: ['workflows', currentOrg?.id],
@@ -910,6 +922,54 @@ export default function Workflows() {
           Create reusable automations for requests, work orders, telemetry, and reminders, then keep an audit trail of each run.
         </p>
       </div>
+
+      {role === 'org_admin' && (
+        <section className="rounded-2xl border border-line bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-ink">{ts('automation.title')}</h2>
+          <p className="mt-1 text-sm text-ink-muted">{ts('automation.hint')}</p>
+
+          <label className="mt-3 flex items-start gap-2 text-sm text-ink">
+            <input
+              type="checkbox"
+              checked={publicRequests}
+              onChange={(e) => {
+                setPublicRequests(e.target.checked);
+                updateIntakeSettings.mutate({ allow_public_requests: e.target.checked });
+              }}
+              className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30"
+            />
+            <span>
+              {ts('automation.publicRequests')}
+              <span className="block text-xs text-ink-muted">{ts('automation.publicHint')}</span>
+            </span>
+          </label>
+
+          <label className="mt-3 flex items-start gap-2 text-sm text-ink">
+            <input
+              type="checkbox"
+              checked={autoCreateWo}
+              onChange={(e) => {
+                setAutoCreateWo(e.target.checked);
+                updateIntakeSettings.mutate({ auto_create_work_orders: e.target.checked });
+              }}
+              className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30"
+            />
+            <span>
+              {ts('automation.autoWo')}
+              <span className="block text-xs text-ink-muted">{ts('automation.autoHint')}</span>
+            </span>
+          </label>
+
+          {publicRequests && currentOrg?.id && (
+            <div className="mt-3 rounded-lg bg-surface p-3">
+              <p className="text-xs text-ink-muted">{ts('automation.reportLink')}</p>
+              <code className="mt-1 block break-all text-xs text-ink">
+                {typeof window !== 'undefined' ? `${window.location.origin}/report?org=${currentOrg.id}` : ''}
+              </code>
+            </div>
+          )}
+        </section>
+      )}
 
       {message && <div className="rounded-xl border border-brand/30 bg-brand/10 px-4 py-3 text-sm text-brand">{message}</div>}
 

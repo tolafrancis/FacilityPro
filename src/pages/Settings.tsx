@@ -2,27 +2,26 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Copy, Cpu, Pencil, Power, Workflow as WorkflowIcon } from 'lucide-react';
+import { Plus, Trash2, Copy, Cpu, Pencil, Power } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useAssetTypes, useFaultTypes, useOrgMembers, useSlaPolicies } from '../lib/queries';
+import { useAssetTypes, useFaultTypes, useOrgMembers, useSites, useSlaPolicies, useUserSites } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { PRIORITIES, PRIORITY_CLASS } from '../lib/ui';
-import type { AssetType, FaultType, Priority, Role } from '../lib/database.types';
+import { PRIORITIES, PRIORITY_CLASS, friendlyError } from '../lib/ui';
+import type { AssetType, FaultType, Priority, Role, Site } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
 
-type TabKey = 'general' | 'catalogs' | 'sla' | 'automation' | 'team' | 'integrations';
+type TabKey = 'general' | 'catalogs' | 'sla' | 'team' | 'integrations';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'general', label: 'General' },
   { key: 'catalogs', label: 'Catalogs' },
   { key: 'sla', label: 'SLA' },
-  { key: 'automation', label: 'Automation' },
   { key: 'team', label: 'Team & roles' },
   { key: 'integrations', label: 'Integrations' },
 ];
@@ -63,7 +62,6 @@ export default function Settings() {
         {tab === 'general' && <GeneralSection />}
         {tab === 'catalogs' && <CatalogsSection />}
         {tab === 'sla' && <SlaSection />}
-        {tab === 'automation' && <AutomationSection />}
         {tab === 'team' && role === 'org_admin' && <TeamSection />}
         {tab === 'integrations' && <IntegrationsSection />}
       </div>
@@ -191,7 +189,7 @@ function CatalogsSection() {
     const { error } = v.id
       ? await supabase.from('fp_fault_types').update(payload).eq('id', v.id)
       : await supabase.from('fp_fault_types').insert({ org_id: orgId, ...payload });
-    if (error) { setMsg(error.message); return; }
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invFault();
     setDialog(null);
   };
@@ -201,7 +199,7 @@ function CatalogsSection() {
     const { error } = v.id
       ? await supabase.from('fp_asset_types').update(payload).eq('id', v.id)
       : await supabase.from('fp_asset_types').insert({ org_id: orgId, ...payload });
-    if (error) { setMsg(error.message); return; }
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invAsset();
     setDialog(null);
   };
@@ -235,7 +233,7 @@ function CatalogsSection() {
     setMsg(null);
     const { error } = await supabase.rpc('fp_load_default_catalogs', { p_org: orgId });
     setBusy(false);
-    if (error) { setMsg(error.message); return; }
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invFault();
     invAsset();
     setMsg('Default types loaded (only added when a catalog was empty).');
@@ -436,69 +434,6 @@ function SlaRow({ priority, initial, label, hoursLabel, saveLabel, onSave }: { p
 }
 
 // ---------------------------------------------------------------------------
-// Automation toggles (assignment now lives in Workflows)
-// ---------------------------------------------------------------------------
-function AutomationSection() {
-  const { t } = useTranslation('settings');
-  const { currentOrg, role } = useOrg();
-  const orgId = currentOrg?.id;
-  const queryClient = useQueryClient();
-  const [pub, setPub] = useState(!!currentOrg?.allow_public_requests);
-  const [autoWo, setAutoWo] = useState(!!currentOrg?.auto_create_work_orders);
-
-  const update = useMutation({
-    mutationFn: async (patch: Record<string, boolean>) => {
-      const { error } = await supabase.from('fp_organizations').update(patch).eq('id', orgId!);
-      if (error) throw error;
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['memberships'] }),
-  });
-
-  if (role !== 'org_admin') return <p className="text-sm text-ink-muted">Only an organisation admin can change automation.</p>;
-
-  const reportLink = typeof window !== 'undefined' ? `${window.location.origin}/report?org=${orgId}` : '';
-
-  return (
-    <div className="space-y-6">
-      <section className="rounded-xl border border-line bg-white p-4">
-        <h2 className="font-semibold text-ink">{t('automation.title')}</h2>
-        <p className="mt-1 text-sm text-ink-muted">{t('automation.hint')}</p>
-
-        <label className="mt-3 flex items-start gap-2 text-sm text-ink">
-          <input type="checkbox" checked={pub} onChange={(e) => { setPub(e.target.checked); update.mutate({ allow_public_requests: e.target.checked }); }} className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30" />
-          <span>{t('automation.publicRequests')}<span className="block text-xs text-ink-muted">{t('automation.publicHint')}</span></span>
-        </label>
-
-        <label className="mt-3 flex items-start gap-2 text-sm text-ink">
-          <input type="checkbox" checked={autoWo} onChange={(e) => { setAutoWo(e.target.checked); update.mutate({ auto_create_work_orders: e.target.checked }); }} className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30" />
-          <span>{t('automation.autoWo')}<span className="block text-xs text-ink-muted">{t('automation.autoHint')}</span></span>
-        </label>
-
-        {pub && (
-          <div className="mt-3 rounded-lg bg-surface p-3">
-            <p className="text-xs text-ink-muted">{t('automation.reportLink')}</p>
-            <code className="mt-1 block break-all text-xs text-ink">{reportLink}</code>
-          </div>
-        )}
-      </section>
-
-      <section className="rounded-xl border border-line bg-surface p-4">
-        <div className="flex items-start gap-3">
-          <WorkflowIcon size={18} className="mt-0.5 text-brand" aria-hidden />
-          <div>
-            <p className="font-medium text-ink">Assignment &amp; event automations moved to Workflows</p>
-            <p className="mt-1 text-sm text-ink-muted">
-              Auto-assignment is now a workflow (trigger: <em>Work Order Created</em> → action: <em>Assign To</em>), alongside email/SMS, surveys, and more.
-            </p>
-            <Link to="/workflows" className="mt-2 inline-flex text-sm font-medium text-brand hover:text-brand-600">Open Workflows →</Link>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Team & roles — members + invites (org admin only)
 // ---------------------------------------------------------------------------
 const ROLES: Role[] = ['org_admin', 'manager', 'technician', 'occupant', 'vendor'];
@@ -510,10 +445,13 @@ function TeamSection() {
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
   const members = useOrgMembers();
+  const sitesQuery = useSites();
+  const sites = sitesQuery.data ?? [];
   const [email, setEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<Role>('technician');
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [siteAccessFor, setSiteAccessFor] = useState<string | null>(null);
 
   const invites = useQuery({
     queryKey: ['invites', orgId],
@@ -531,7 +469,7 @@ function TeamSection() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['org_members', orgId] }),
-    onError: (e) => setMsg(e instanceof Error ? e.message : 'Unable to update role.'),
+    onError: (e) => setMsg(friendlyError(e as { code?: string; message?: string }, tc)),
   });
 
   const removeMember = useMutation({
@@ -540,7 +478,7 @@ function TeamSection() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['org_members', orgId] }),
-    onError: (e) => setMsg(e instanceof Error ? e.message : 'Unable to remove member.'),
+    onError: (e) => setMsg(friendlyError(e as { code?: string; message?: string }, tc)),
   });
 
   const sendInvite = useMutation({
@@ -554,7 +492,7 @@ function TeamSection() {
       setEmail('');
       void queryClient.invalidateQueries({ queryKey: ['invites', orgId] });
     },
-    onError: (e) => setMsg(e instanceof Error ? e.message : 'Unable to create invite.'),
+    onError: (e) => setMsg(friendlyError(e as { code?: string; message?: string }, tc)),
   });
 
   const revokeInvite = useMutation({
@@ -571,23 +509,35 @@ function TeamSection() {
         <h2 className="font-semibold text-ink">Members</h2>
         <ul className="mt-3 space-y-2">
           {(members.data ?? []).map((m) => (
-            <li key={m.user_id} className="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2 text-sm">
-              <span className="truncate text-ink">{m.email}</span>
-              <span className="flex items-center gap-2">
-                <Select
-                  value={m.role}
-                  onChange={(e) => changeRole.mutate({ userId: m.user_id, role: e.target.value as Role })}
-                  disabled={m.user_id === user?.id}
-                  className="w-40"
-                >
-                  {ROLES.map((r) => <option key={r} value={r}>{tc(`roles.${r}`)}</option>)}
-                </Select>
-                {m.user_id !== user?.id && (
-                  <button type="button" onClick={() => removeMember.mutate(m.user_id)} className="text-ink-muted hover:text-status-crit" aria-label="Remove member">
-                    <Trash2 size={15} />
-                  </button>
-                )}
-              </span>
+            <li key={m.user_id} className="rounded-lg border border-line px-3 py-2 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="truncate text-ink">{m.email}</span>
+                <span className="flex items-center gap-2">
+                  <Select
+                    value={m.role}
+                    onChange={(e) => changeRole.mutate({ userId: m.user_id, role: e.target.value as Role })}
+                    disabled={m.user_id === user?.id}
+                    className="w-40"
+                  >
+                    {ROLES.map((r) => <option key={r} value={r}>{tc(`roles.${r}`)}</option>)}
+                  </Select>
+                  {sites.length > 1 && m.role !== 'org_admin' && (
+                    <button
+                      type="button"
+                      onClick={() => setSiteAccessFor(siteAccessFor === m.user_id ? null : m.user_id)}
+                      className="whitespace-nowrap text-xs font-medium text-brand hover:text-brand-600"
+                    >
+                      Site access
+                    </button>
+                  )}
+                  {m.user_id !== user?.id && (
+                    <button type="button" onClick={() => removeMember.mutate(m.user_id)} className="text-ink-muted hover:text-status-crit" aria-label="Remove member">
+                      <Trash2 size={15} />
+                    </button>
+                  )}
+                </span>
+              </div>
+              {siteAccessFor === m.user_id && <MemberSiteAccess userId={m.user_id} sites={sites} orgId={orgId!} />}
             </li>
           ))}
           {members.data?.length === 0 && <li className="text-sm text-ink-muted">No members yet.</li>}
@@ -639,6 +589,55 @@ function TeamSection() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Per-member site restriction. No rows for a member = unrestricted (the
+// default for every member until an admin opts them into scoping).
+// ---------------------------------------------------------------------------
+function MemberSiteAccess({ userId, sites, orgId }: { userId: string; sites: Site[]; orgId: string }) {
+  const { i18n } = useTranslation();
+  const lng = i18n.resolvedLanguage ?? 'en';
+  const queryClient = useQueryClient();
+  const userSitesQuery = useUserSites(userId);
+  const assignedIds = new Set((userSitesQuery.data ?? []).map((s) => s.site_id));
+  const unrestricted = (userSitesQuery.data ?? []).length === 0;
+
+  const toggleSite = useMutation({
+    mutationFn: async (v: { siteId: string; checked: boolean }) => {
+      if (v.checked) {
+        const { error } = await supabase.from('fp_user_sites').insert({ user_id: userId, org_id: orgId, site_id: v.siteId });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('fp_user_sites').delete().eq('user_id', userId).eq('org_id', orgId).eq('site_id', v.siteId);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['user_sites', orgId, userId] }),
+  });
+
+  return (
+    <div className="mt-2 rounded-lg border border-line bg-surface p-3">
+      <p className="text-xs text-ink-muted">
+        {unrestricted
+          ? 'Unrestricted — this member sees every site. Check a site below to confine them to it.'
+          : 'Confined to the checked site(s) only.'}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-3">
+        {sites.map((site) => (
+          <label key={site.id} className="inline-flex items-center gap-1.5 text-sm text-ink">
+            <input
+              type="checkbox"
+              checked={assignedIds.has(site.id)}
+              onChange={(e) => toggleSite.mutate({ siteId: site.id, checked: e.target.checked })}
+              className="h-4 w-4 rounded border-line text-brand focus:ring-brand/30"
+            />
+            {resolveI18n(site.name_i18n, lng)}
+          </label>
+        ))}
+      </div>
     </div>
   );
 }

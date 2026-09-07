@@ -18,7 +18,12 @@
     "unit": "Unit (e.g. pcs, L)",
     "initialStock": "Initial stock",
     "reorder": "Reorder level",
-    "cost": "Unit cost"
+    "cost": "Unit cost",
+    "category": "Category",
+    "categoryPlaceholder": "Search or type to add…",
+    "createCategory": "Create new category",
+    "vendor": "Preferred supplier",
+    "vendorPlaceholder": "Search suppliers…"
   },
   "use": {
     "title": "Parts used",
@@ -26,5 +31,20 @@
     "qty": "Quantity",
     "add": "Log part",
     "empty": "No parts logged on this work order."
+  },
+  "suggested": {
+    "title": "Suggested parts",
+    "hint": "From this PM schedule's required-parts kit — confirm what you actually use below.",
+    "use": "Use"
+  },
+  "history": {
+    "title": "Transaction history",
+    "empty": "No stock movements recorded yet.",
+    "types": {
+      "issue": "Issued",
+      "receipt": "Received",
+      "adjustment": "Adjustment",
+      "cycle_count": "Cycle count"
+    }
   }
 }

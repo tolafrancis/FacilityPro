@@ -3,6 +3,8 @@
   "print": "Print / Save as PDF",
   "parts": "Parts used",
   "noParts": "No parts recorded.",
+  "labor": "Labor",
+  "noLabor": "No labor recorded.",
   "fields": {
     "title": "Title",
     "asset": "Asset",
@@ -10,7 +12,14 @@
     "priority": "Priority",
     "assignee": "Assignee",
     "due": "Due date",
-    "instructions": "Instructions"
+    "instructions": "Instructions",
+    "location": "Location",
+    "faultType": "Fault type",
+    "cost": "Cost",
+    "failureCode": "Cause of failure",
+    "completionCode": "Completion code",
+    "downtime": "Downtime (minutes)"
   },
+  "closingDetails": "Closing details",
   "sign": { "technician": "Technician signature", "supervisor": "Supervisor signature" }
 }

@@ -70,6 +70,27 @@
     "high": "Cao",
     "critical": "Nghiêm trọng"
   },
+  "failureCode": {
+    "wear": "Hao mòn",
+    "misuse": "Sử dụng sai",
+    "defect": "Lỗi sản xuất",
+    "external": "Nguyên nhân bên ngoài",
+    "unknown": "Không rõ"
+  },
+  "completionCode": {
+    "repaired": "Đã sửa chữa",
+    "replaced": "Đã thay thế",
+    "no_fault_found": "Không phát hiện lỗi",
+    "deferred": "Hoãn lại"
+  },
+  "errors": {
+    "permissionDenied": "Bạn không có quyền thực hiện việc này — hãy liên hệ quản trị viên.",
+    "duplicate": "Mục này đã tồn tại.",
+    "stillInUse": "Mục này đang được sử dụng ở nơi khác nên không thể thay đổi.",
+    "invalidValue": "Giá trị này không hợp lệ.",
+    "offline": "Bạn đang ngoại tuyến — vui lòng thử lại khi có kết nối.",
+    "generic": "Đã xảy ra lỗi. Vui lòng thử lại."
+  },
   "requestStatus": {
     "new": "Mới",
     "triaged": "Đã phân loại",
@@ -96,12 +117,18 @@
     "all": "Tất cả",
     "optional": "tùy chọn",
     "none": "Không có",
-    "empty": "Chưa có gì ở đây."
+    "empty": "Chưa có gì ở đây.",
+    "minutesShort": "phút"
   },
   "notifications": {
     "title": "Thông báo",
     "empty": "Bạn đã xem hết.",
     "markAllRead": "Đánh dấu đã đọc"
+  },
+  "pagination": {
+    "summary": "Trang {{page}} / {{totalPages}} · Tổng {{total}}",
+    "prev": "Trước",
+    "next": "Sau"
   },
   "offline": "Bạn đang ngoại tuyến. Thay đổi có thể không được lưu cho đến khi kết nối lại.",
   "sync": {

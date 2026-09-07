@@ -18,6 +18,7 @@
     "info": "Details",
     "history": "History",
     "qr": "QR code",
+    "documents": "Documents",
     "qrHint": "Print and attach this code to the asset. Scanning it opens this asset so anyone can report a fault.",
     "noHistory": "No requests or work orders for this asset yet.",
     "warranty": "Warranty until",
@@ -34,5 +35,12 @@
     "latest": "Latest",
     "empty": "No meters on this asset yet.",
     "noReadings": "No readings yet."
+  },
+  "documents": {
+    "empty": "No documents linked to this asset yet.",
+    "open": "Open",
+    "attach": "Attach an existing document",
+    "choose": "Choose a document…",
+    "attachAction": "Attach"
   }
 }

@@ -32,6 +32,12 @@ export interface Site {
   created_at: string;
 }
 
+export interface UserSite {
+  user_id: string;
+  org_id: string;
+  site_id: string;
+}
+
 export type LocationKind = 'building' | 'floor' | 'room' | 'zone';
 
 export interface LocationRow {
@@ -126,6 +132,46 @@ export interface WorkOrder {
   cost: number;
   checklist_template_id: string | null;
   pm_schedule_id: string | null;
+  location_id: string | null;
+  fault_type_id: string | null;
+  severity: string | null;
+  failure_code: string | null;
+  completion_code: string | null;
+  downtime_minutes: number | null;
+  cost_center_id: string | null;
+  vendor_id: string | null;
+  created_at: string;
+}
+
+export const FAILURE_CODES = ['wear', 'misuse', 'defect', 'external', 'unknown'] as const;
+export type FailureCode = (typeof FAILURE_CODES)[number];
+
+export const COMPLETION_CODES = ['repaired', 'replaced', 'no_fault_found', 'deferred'] as const;
+export type CompletionCode = (typeof COMPLETION_CODES)[number];
+
+export type DocumentEntityType = 'asset' | 'work_order' | 'vendor' | 'contract' | 'location' | 'part';
+
+export interface DocumentLink {
+  id: string;
+  org_id: string;
+  document_id: string;
+  entity_type: DocumentEntityType;
+  entity_id: string;
+  created_at: string;
+}
+
+export interface DocumentRecord {
+  id: string;
+  org_id: string;
+  title: string;
+  category: string;
+  owner: string;
+  summary: string | null;
+  link: string | null;
+  file_name: string | null;
+  file_path: string | null;
+  mime_type: string | null;
+  file_size: number | null;
   created_at: string;
 }
 
@@ -210,6 +256,93 @@ export interface FinanceExpenditure {
   category: string;
   amount: number;
   vendor: string | null;
+  vendor_id: string | null;
+  work_order_id: string | null;
+  asset_id: string | null;
+  cost_center_id: string | null;
+  created_at: string;
+}
+
+export interface CostCenter {
+  id: string;
+  org_id: string;
+  name: string;
+  code: string | null;
+  created_at: string;
+}
+
+export type ProcurementStatus = 'rfq' | 'po' | 'received' | 'approved';
+
+export interface ProcurementOrder {
+  id: string;
+  org_id: string;
+  title: string;
+  vendor: string | null; // legacy free-text label, pre-vendor_id rows only
+  vendor_id: string | null;
+  cost_center_id: string | null;
+  po_number: string | null;
+  amount: number;
+  status: ProcurementStatus;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface ProcurementLine {
+  id: string;
+  org_id: string;
+  procurement_id: string;
+  part_id: string | null;
+  description: string;
+  quantity: number;
+  unit_cost: number;
+  created_at: string;
+}
+
+export interface ProcurementReceipt {
+  id: string;
+  org_id: string;
+  procurement_id: string;
+  received_by: string | null;
+  received_at: string;
+  note: string | null;
+  created_at: string;
+}
+
+export interface ProcurementReceiptLine {
+  id: string;
+  org_id: string;
+  receipt_id: string;
+  procurement_line_id: string;
+  quantity_received: number;
+  created_at: string;
+}
+
+export interface FinancePayment {
+  id: string;
+  org_id: string;
+  description: string;
+  amount: number;
+  method: string;
+  reference: string | null;
+  status: 'pending' | 'completed';
+  procurement_id: string | null;
+  vendor_id: string | null;
+  invoice_id: string | null;
+  created_at: string;
+}
+
+export type VendorInvoiceStatus = 'pending' | 'matched' | 'disputed' | 'paid';
+
+export interface VendorInvoice {
+  id: string;
+  org_id: string;
+  procurement_id: string | null;
+  vendor_id: string | null;
+  invoice_number: string | null;
+  amount: number;
+  invoice_date: string | null;
+  status: VendorInvoiceStatus;
+  notes: string | null;
   created_at: string;
 }
 
@@ -230,6 +363,7 @@ export interface FinanceBudget {
   amount: number;
   period: string;
   notes: string | null;
+  cost_center_id: string | null;
   created_at: string;
 }
 
@@ -278,6 +412,16 @@ export interface PmSchedule {
   meter_id: string | null;
   meter_threshold: number | null;
   last_meter_value: number | null;
+  lead_time_days: number;
+  created_at: string;
+}
+
+export interface PmRequiredPart {
+  id: string;
+  org_id: string;
+  pm_schedule_id: string;
+  part_id: string;
+  quantity: number;
   created_at: string;
 }
 
@@ -290,6 +434,30 @@ export interface Part {
   stock_balance: number;
   reorder_level: number;
   unit_cost: number;
+  preferred_vendor_id: string | null;
+  category_id: string | null;
+  created_at: string;
+}
+
+export interface PartCategory {
+  id: string;
+  org_id: string;
+  name_i18n: I18nText;
+  created_at: string;
+}
+
+export type InventoryTransactionType = 'issue' | 'receipt' | 'adjustment' | 'cycle_count';
+
+export interface InventoryTransaction {
+  id: string;
+  org_id: string;
+  part_id: string;
+  type: InventoryTransactionType;
+  quantity_delta: number;
+  ref_table: string | null;
+  ref_id: string | null;
+  note: string | null;
+  created_by: string | null;
   created_at: string;
 }
 
@@ -299,6 +467,18 @@ export interface WoPart {
   work_order_id: string;
   part_id: string;
   quantity: number;
+  unit_cost_snapshot: number | null;
+  created_at: string;
+}
+
+export interface WoLabor {
+  id: string;
+  org_id: string;
+  work_order_id: string;
+  user_id: string | null;
+  minutes: number;
+  rate_snapshot: number;
+  logged_at: string;
   created_at: string;
 }
 

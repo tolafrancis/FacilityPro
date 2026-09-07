@@ -17,7 +17,29 @@
     "addBefore": "Thêm ảnh trước",
     "addAfter": "Thêm ảnh sau",
     "uploading": "Đang tải lên…",
-    "save": "Lưu thay đổi"
+    "save": "Lưu thay đổi",
+    "location": "Vị trí",
+    "faultType": "Loại sự cố",
+    "cost": "Chi phí",
+    "costCenter": "Trung tâm chi phí",
+    "vendor": "Nhà thầu",
+    "noVendor": "Nội bộ",
+    "vendorContracts": "Hợp đồng đang hiệu lực của nhà thầu",
+    "closingDetails": "Chi tiết đóng lệnh",
+    "failureCode": "Nguyên nhân hỏng",
+    "completionCode": "Mã hoàn thành",
+    "downtime": "Thời gian ngừng hoạt động (phút)",
+    "selectFailure": "Chọn nguyên nhân…",
+    "selectCompletion": "Chọn kết quả xử lý…"
+  },
+  "labor": {
+    "title": "Nhân công",
+    "who": "Kỹ thuật viên",
+    "minutes": "Số phút",
+    "rate": "Đơn giá / giờ",
+    "cost": "Chi phí",
+    "add": "Ghi nhận nhân công",
+    "empty": "Chưa ghi nhận nhân công cho lệnh này."
   },
   "myWork": {
     "title": "Công việc của tôi",

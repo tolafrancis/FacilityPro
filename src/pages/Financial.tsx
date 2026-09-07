@@ -2,8 +2,12 @@ import { useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import SearchSelect from '../components/ui/SearchSelect';
+import ProcurementManager from '../components/ProcurementManager';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
+import { useAssets, useCostCenters, useProcurementOrders, useVendorInvoices, useVendors, useWorkOrders } from '../lib/queries';
+import { resolveI18n } from '../i18n/resolver';
 
 interface CustomerRecord {
   id: string;
@@ -15,16 +19,6 @@ interface CustomerRecord {
   created_at: string;
 }
 
-interface ProcurementRecord {
-  id: string;
-  title: string;
-  vendor: string;
-  amount: number;
-  status: string;
-  notes: string | null;
-  created_at: string;
-}
-
 interface PaymentRecord {
   id: string;
   description: string;
@@ -32,6 +26,9 @@ interface PaymentRecord {
   method: string;
   status: string;
   reference: string;
+  vendor_id: string | null;
+  procurement_id: string | null;
+  invoice_id: string | null;
   created_at: string;
 }
 
@@ -40,7 +37,11 @@ interface ExpenditureRecord {
   description: string;
   category: string;
   amount: number;
-  vendor: string;
+  vendor: string | null;
+  vendor_id: string | null;
+  work_order_id: string | null;
+  asset_id: string | null;
+  cost_center_id: string | null;
   created_at: string;
 }
 
@@ -59,6 +60,7 @@ interface BudgetRecord {
   amount: number;
   period: string;
   notes: string | null;
+  cost_center_id: string | null;
   created_at: string;
 }
 
@@ -67,13 +69,6 @@ async function fetchCustomers(orgId: string | undefined) {
   const { data, error } = await supabase.from('fp_finance_customers').select('*').eq('org_id', orgId).order('created_at', { ascending: false });
   if (error) throw error;
   return (data ?? []) as CustomerRecord[];
-}
-
-async function fetchProcurement(orgId: string | undefined) {
-  if (!orgId) return [] as ProcurementRecord[];
-  const { data, error } = await supabase.from('fp_finance_procurement').select('*').eq('org_id', orgId).order('created_at', { ascending: false });
-  if (error) throw error;
-  return (data ?? []) as ProcurementRecord[];
 }
 
 async function fetchPayments(orgId: string | undefined) {
@@ -112,16 +107,45 @@ export default function Financial() {
   const { currentOrg } = useOrg();
   const queryClient = useQueryClient();
   const [customerForm, setCustomerForm] = useState({ name: '', company: '', email: '', phone: '', notes: '' });
-  const [procurementForm, setProcurementForm] = useState({ title: '', vendor: '', amount: '', status: 'rfq', notes: '' });
-  const [paymentForm, setPaymentForm] = useState({ description: '', amount: '', method: 'Manual transfer', reference: '', status: 'pending' });
-  const [expenditureForm, setExpenditureForm] = useState({ description: '', category: 'Parts', amount: '', vendor: '' });
+  const [paymentForm, setPaymentForm] = useState({
+    description: '',
+    amount: '',
+    method: 'Manual transfer',
+    reference: '',
+    status: 'pending',
+    vendorId: '',
+    procurementId: '',
+    invoiceId: '',
+  });
+  const [expenditureForm, setExpenditureForm] = useState({
+    description: '',
+    category: 'Parts',
+    amount: '',
+    vendorId: '',
+    workOrderId: '',
+    assetId: '',
+    cost_center_id: '',
+  });
   const [rateForm, setRateForm] = useState({ service: '', unit: 'hour', rate: '', currency: 'USD' });
-  const [budgetForm, setBudgetForm] = useState({ name: 'Operating budget', amount: '', period: 'Monthly', notes: '' });
+  const [budgetForm, setBudgetForm] = useState({ name: 'Operating budget', amount: '', period: 'Monthly', notes: '', cost_center_id: '' });
+  const [costCenterForm, setCostCenterForm] = useState({ name: '', code: '' });
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  const costCentersQuery = useCostCenters();
+  const costCenters = costCentersQuery.data ?? [];
+  const vendorsQuery = useVendors();
+  const vendors = vendorsQuery.data ?? [];
+  const procurementOrdersQuery = useProcurementOrders();
+  const procurementOrders = procurementOrdersQuery.data ?? [];
+  const paymentInvoicesQuery = useVendorInvoices(paymentForm.procurementId || undefined);
+  const paymentInvoices = paymentInvoicesQuery.data ?? [];
+  const workOrdersQuery = useWorkOrders();
+  const workOrders = workOrdersQuery.data ?? [];
+  const assetsQuery = useAssets();
+  const assets = assetsQuery.data ?? [];
+
   const { data: customers = [] } = useQuery({ queryKey: ['finance-customers', currentOrg?.id], queryFn: () => fetchCustomers(currentOrg?.id), enabled: !!currentOrg?.id });
-  const { data: procurement = [] } = useQuery({ queryKey: ['finance-procurement', currentOrg?.id], queryFn: () => fetchProcurement(currentOrg?.id), enabled: !!currentOrg?.id });
   useQuery({ queryKey: ['finance-payments', currentOrg?.id], queryFn: () => fetchPayments(currentOrg?.id), enabled: !!currentOrg?.id });
   const { data: expenditures = [] } = useQuery({ queryKey: ['finance-expenditures', currentOrg?.id], queryFn: () => fetchExpenditures(currentOrg?.id), enabled: !!currentOrg?.id });
   useQuery({ queryKey: ['finance-rates', currentOrg?.id], queryFn: () => fetchRates(currentOrg?.id), enabled: !!currentOrg?.id });
@@ -129,6 +153,7 @@ export default function Financial() {
 
   const totalSpend = expenditures.reduce((sum, item) => sum + item.amount, 0);
   const totalBudget = budgets.reduce((sum, item) => sum + item.amount, 0);
+  const openProcurementCount = procurementOrders.filter((item) => item.status !== 'approved').length;
 
   const saveRecord = async (table: string, values: Record<string, unknown>, invalidateKey: string) => {
     if (!currentOrg?.id) return;
@@ -153,30 +178,27 @@ export default function Financial() {
     }
   };
 
-  const submitProcurement = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!currentOrg?.id || !procurementForm.title) return;
-    setBusy('procurement');
-    setMessage(null);
-    try {
-      await saveRecord('fp_finance_procurement', { ...procurementForm, amount: Number(procurementForm.amount || 0) }, 'finance-procurement');
-      setProcurementForm({ title: '', vendor: '', amount: '', status: 'rfq', notes: '' });
-      setMessage('Procurement request saved.');
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to save procurement request.');
-    } finally {
-      setBusy(null);
-    }
-  };
-
   const submitPayment = async (event: FormEvent) => {
     event.preventDefault();
     if (!currentOrg?.id || !paymentForm.description) return;
     setBusy('payment');
     setMessage(null);
     try {
-      await saveRecord('fp_finance_payments', { ...paymentForm, amount: Number(paymentForm.amount || 0) }, 'finance-payments');
-      setPaymentForm({ description: '', amount: '', method: 'Manual transfer', reference: '', status: 'pending' });
+      await saveRecord(
+        'fp_finance_payments',
+        {
+          description: paymentForm.description,
+          amount: Number(paymentForm.amount || 0),
+          method: paymentForm.method,
+          reference: paymentForm.reference,
+          status: paymentForm.status,
+          vendor_id: paymentForm.vendorId || null,
+          procurement_id: paymentForm.procurementId || null,
+          invoice_id: paymentForm.invoiceId || null,
+        },
+        'finance-payments'
+      );
+      setPaymentForm({ description: '', amount: '', method: 'Manual transfer', reference: '', status: 'pending', vendorId: '', procurementId: '', invoiceId: '' });
       setMessage('Payment entry saved.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to save payment.');
@@ -191,8 +213,20 @@ export default function Financial() {
     setBusy('expenditure');
     setMessage(null);
     try {
-      await saveRecord('fp_finance_expenditures', { ...expenditureForm, amount: Number(expenditureForm.amount || 0) }, 'finance-expenditures');
-      setExpenditureForm({ description: '', category: 'Parts', amount: '', vendor: '' });
+      await saveRecord(
+        'fp_finance_expenditures',
+        {
+          description: expenditureForm.description,
+          category: expenditureForm.category,
+          amount: Number(expenditureForm.amount || 0),
+          vendor_id: expenditureForm.vendorId || null,
+          work_order_id: expenditureForm.workOrderId || null,
+          asset_id: expenditureForm.assetId || null,
+          cost_center_id: expenditureForm.cost_center_id || null,
+        },
+        'finance-expenditures'
+      );
+      setExpenditureForm({ description: '', category: 'Parts', amount: '', vendorId: '', workOrderId: '', assetId: '', cost_center_id: '' });
       setMessage('Expenditure recorded.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to save expenditure.');
@@ -223,11 +257,33 @@ export default function Financial() {
     setBusy('budget');
     setMessage(null);
     try {
-      await saveRecord('fp_finance_budgets', { ...budgetForm, amount: Number(budgetForm.amount || 0) }, 'finance-budgets');
-      setBudgetForm({ name: 'Operating budget', amount: '', period: 'Monthly', notes: '' });
+      await saveRecord(
+        'fp_finance_budgets',
+        { ...budgetForm, amount: Number(budgetForm.amount || 0), cost_center_id: budgetForm.cost_center_id || null },
+        'finance-budgets'
+      );
+      setBudgetForm({ name: 'Operating budget', amount: '', period: 'Monthly', notes: '', cost_center_id: '' });
       setMessage('Budget target saved.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to save budget.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const submitCostCenter = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!currentOrg?.id || !costCenterForm.name) return;
+    setBusy('costCenter');
+    setMessage(null);
+    try {
+      const { error } = await supabase.from('fp_cost_centers').insert({ org_id: currentOrg.id, ...costCenterForm });
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ['cost_centers', currentOrg.id] });
+      setCostCenterForm({ name: '', code: '' });
+      setMessage('Cost center saved.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to save cost center.');
     } finally {
       setBusy(null);
     }
@@ -238,7 +294,7 @@ export default function Financial() {
       <div>
         <h1 className="text-2xl font-semibold text-ink">Financial operations</h1>
         <p className="mt-2 max-w-2xl text-sm text-ink-muted">
-          Track customers, procurements, payments, expenditures, rate cards, and budget targets in one place.
+          Track customers, procurement, payments, expenditures, rate cards, and budget targets in one place.
         </p>
       </div>
 
@@ -254,10 +310,12 @@ export default function Financial() {
           <p className="mt-2 text-2xl font-semibold text-ink">{currency(totalSpend)}</p>
         </div>
         <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
-          <p className="text-sm text-ink-muted">Open procurement</p>
-          <p className="mt-2 text-2xl font-semibold text-ink">{procurement.filter((item) => item.status !== 'approved').length}</p>
+          <p className="text-sm text-ink-muted">Open purchase orders</p>
+          <p className="mt-2 text-2xl font-semibold text-ink">{openProcurementCount}</p>
         </div>
       </div>
+
+      <ProcurementManager />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <form onSubmit={submitCustomer} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
@@ -272,28 +330,52 @@ export default function Financial() {
           </div>
         </form>
 
-        <form onSubmit={submitProcurement} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-ink">Procurement</h2>
-          <div className="mt-4 space-y-3">
-            <Input value={procurementForm.title} onChange={(event) => setProcurementForm({ ...procurementForm, title: event.target.value })} placeholder="RFQ / PO / receipt title" />
-            <Input value={procurementForm.vendor} onChange={(event) => setProcurementForm({ ...procurementForm, vendor: event.target.value })} placeholder="Vendor" />
-            <Input type="number" value={procurementForm.amount} onChange={(event) => setProcurementForm({ ...procurementForm, amount: event.target.value })} placeholder="Amount" />
-            <select value={procurementForm.status} onChange={(event) => setProcurementForm({ ...procurementForm, status: event.target.value })} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
-              <option value="rfq">RFQ</option>
-              <option value="po">PO</option>
-              <option value="received">Received</option>
-              <option value="approved">Approved</option>
-            </select>
-            <textarea value={procurementForm.notes} onChange={(event) => setProcurementForm({ ...procurementForm, notes: event.target.value })} rows={3} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" placeholder="Notes" />
-            <Button type="submit" loading={busy === 'procurement'}>Save request</Button>
-          </div>
-        </form>
-
         <form onSubmit={submitPayment} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-ink">Payments</h2>
           <div className="mt-4 space-y-3">
             <Input value={paymentForm.description} onChange={(event) => setPaymentForm({ ...paymentForm, description: event.target.value })} placeholder="Invoice or payment description" />
             <Input type="number" value={paymentForm.amount} onChange={(event) => setPaymentForm({ ...paymentForm, amount: event.target.value })} placeholder="Amount" />
+            <div>
+              <label className="mb-1 block text-xs text-ink-muted">Vendor</label>
+              <SearchSelect
+                value={paymentForm.vendorId}
+                onChange={(id) => setPaymentForm({ ...paymentForm, vendorId: id })}
+                options={vendors.map((v) => ({ id: v.id, label: v.name }))}
+                placeholder="Search vendors…"
+                emptyLabel="No vendor"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-muted">Purchase order</label>
+              <select
+                value={paymentForm.procurementId}
+                onChange={(event) => setPaymentForm({ ...paymentForm, procurementId: event.target.value, invoiceId: '' })}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+              >
+                <option value="">No purchase order</option>
+                {procurementOrders.map((po) => (
+                  <option key={po.id} value={po.id}>{po.po_number ? `${po.po_number} — ${po.title}` : po.title}</option>
+                ))}
+              </select>
+            </div>
+            {paymentForm.procurementId && (
+              <div>
+                <label className="mb-1 block text-xs text-ink-muted">Invoice (three-way match)</label>
+                <select
+                  value={paymentForm.invoiceId}
+                  onChange={(event) => setPaymentForm({ ...paymentForm, invoiceId: event.target.value })}
+                  className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+                >
+                  <option value="">No specific invoice</option>
+                  {paymentInvoices.map((inv) => (
+                    <option key={inv.id} value={inv.id}>{inv.invoice_number || 'No invoice #'} · {currency(inv.amount)}</option>
+                  ))}
+                </select>
+                {paymentInvoices.length === 0 && (
+                  <p className="mt-1 text-xs text-ink-muted">No invoices recorded on this PO yet — add one from the Procurement panel above.</p>
+                )}
+              </div>
+            )}
             <Input value={paymentForm.method} onChange={(event) => setPaymentForm({ ...paymentForm, method: event.target.value })} placeholder="Method" />
             <Input value={paymentForm.reference} onChange={(event) => setPaymentForm({ ...paymentForm, reference: event.target.value })} placeholder="Reference" />
             <select value={paymentForm.status} onChange={(event) => setPaymentForm({ ...paymentForm, status: event.target.value })} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
@@ -310,7 +392,58 @@ export default function Financial() {
             <Input value={expenditureForm.description} onChange={(event) => setExpenditureForm({ ...expenditureForm, description: event.target.value })} placeholder="Description" />
             <Input value={expenditureForm.category} onChange={(event) => setExpenditureForm({ ...expenditureForm, category: event.target.value })} placeholder="Category" />
             <Input type="number" value={expenditureForm.amount} onChange={(event) => setExpenditureForm({ ...expenditureForm, amount: event.target.value })} placeholder="Amount" />
-            <Input value={expenditureForm.vendor} onChange={(event) => setExpenditureForm({ ...expenditureForm, vendor: event.target.value })} placeholder="Vendor" />
+            <div>
+              <label className="mb-1 block text-xs text-ink-muted">Work order (optional)</label>
+              <select
+                value={expenditureForm.workOrderId}
+                onChange={(event) => {
+                  const workOrderId = event.target.value;
+                  const wo = workOrders.find((w) => w.id === workOrderId);
+                  setExpenditureForm({
+                    ...expenditureForm,
+                    workOrderId,
+                    // Pick up the work order's vendor automatically, but never
+                    // overwrite a vendor the user already chose themselves.
+                    vendorId: !expenditureForm.vendorId && wo?.vendor_id ? wo.vendor_id : expenditureForm.vendorId,
+                  });
+                }}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+              >
+                <option value="">No work order</option>
+                {workOrders.map((wo) => (
+                  <option key={wo.id} value={wo.id}>{wo.title ?? wo.id.slice(0, 8)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-muted">Asset (optional)</label>
+              <select
+                value={expenditureForm.assetId}
+                onChange={(event) => setExpenditureForm({ ...expenditureForm, assetId: event.target.value })}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+              >
+                <option value="">No asset</option>
+                {assets.map((asset) => (
+                  <option key={asset.id} value={asset.id}>{resolveI18n(asset.name_i18n, 'en')}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ink-muted">Vendor</label>
+              <SearchSelect
+                value={expenditureForm.vendorId}
+                onChange={(id) => setExpenditureForm({ ...expenditureForm, vendorId: id })}
+                options={vendors.map((v) => ({ id: v.id, label: v.name }))}
+                placeholder="Search vendors…"
+                emptyLabel="No vendor"
+              />
+            </div>
+            <select value={expenditureForm.cost_center_id} onChange={(event) => setExpenditureForm({ ...expenditureForm, cost_center_id: event.target.value })} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+              <option value="">No cost center</option>
+              {costCenters.map((cc) => (
+                <option key={cc.id} value={cc.id}>{cc.code ? `${cc.code} — ${cc.name}` : cc.name}</option>
+              ))}
+            </select>
             <Button type="submit" loading={busy === 'expenditure'}>Record spend</Button>
           </div>
         </form>
@@ -332,39 +465,44 @@ export default function Financial() {
             <Input value={budgetForm.name} onChange={(event) => setBudgetForm({ ...budgetForm, name: event.target.value })} placeholder="Budget name" />
             <Input type="number" value={budgetForm.amount} onChange={(event) => setBudgetForm({ ...budgetForm, amount: event.target.value })} placeholder="Amount" />
             <Input value={budgetForm.period} onChange={(event) => setBudgetForm({ ...budgetForm, period: event.target.value })} placeholder="Period" />
+            <select value={budgetForm.cost_center_id} onChange={(event) => setBudgetForm({ ...budgetForm, cost_center_id: event.target.value })} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+              <option value="">No cost center</option>
+              {costCenters.map((cc) => (
+                <option key={cc.id} value={cc.id}>{cc.code ? `${cc.code} — ${cc.name}` : cc.name}</option>
+              ))}
+            </select>
             <textarea value={budgetForm.notes} onChange={(event) => setBudgetForm({ ...budgetForm, notes: event.target.value })} rows={3} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" placeholder="Notes" />
             <Button type="submit" loading={busy === 'budget'}>Save budget</Button>
           </div>
         </form>
+
+        <form onSubmit={submitCostCenter} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-ink">Cost centers</h2>
+          <div className="mt-4 space-y-3">
+            <Input value={costCenterForm.name} onChange={(event) => setCostCenterForm({ ...costCenterForm, name: event.target.value })} placeholder="Name (e.g. Facilities — HVAC)" />
+            <Input value={costCenterForm.code} onChange={(event) => setCostCenterForm({ ...costCenterForm, code: event.target.value })} placeholder="Code (optional)" />
+            <Button type="submit" loading={busy === 'costCenter'}>Save cost center</Button>
+            {costCenters.length > 0 && (
+              <ul className="mt-2 space-y-1 text-sm text-ink-muted">
+                {costCenters.map((cc) => (
+                  <li key={cc.id}>{cc.code ? `${cc.code} — ${cc.name}` : cc.name}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </form>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <div className="rounded-2xl border border-line bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-ink">Recent customers</h2>
-          <div className="mt-4 space-y-2">
-            {customers.length === 0 && <p className="text-sm text-ink-muted">No customer records yet.</p>}
-            {customers.slice(0, 5).map((item) => (
-              <div key={item.id} className="rounded-lg border border-line bg-surface px-3 py-2">
-                <p className="font-medium text-ink">{item.name}</p>
-                <p className="text-sm text-ink-muted">{item.company || 'Client'} · {item.email}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="rounded-2xl border border-line bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-ink">Open procurement</h2>
-          <div className="mt-4 space-y-2">
-            {procurement.length === 0 && <p className="text-sm text-ink-muted">No requests yet.</p>}
-            {procurement.slice(0, 5).map((item) => (
-              <div key={item.id} className="rounded-lg border border-line bg-surface px-3 py-2">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-medium text-ink">{item.title}</p>
-                  <span className="text-xs uppercase tracking-[0.2em] text-ink-muted">{item.status}</span>
-                </div>
-                <p className="text-sm text-ink-muted">{item.vendor} · {currency(item.amount)}</p>
-              </div>
-            ))}
-          </div>
+      <div className="rounded-2xl border border-line bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-ink">Recent customers</h2>
+        <div className="mt-4 space-y-2">
+          {customers.length === 0 && <p className="text-sm text-ink-muted">No customer records yet.</p>}
+          {customers.slice(0, 5).map((item) => (
+            <div key={item.id} className="rounded-lg border border-line bg-surface px-3 py-2">
+              <p className="font-medium text-ink">{item.name}</p>
+              <p className="text-sm text-ink-muted">{item.company || 'Client'} · {item.email}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

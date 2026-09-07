@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Printer } from 'lucide-react';
-import { useAsset, useOrgMembers, useParts, useWorkOrder, useWoParts } from '../lib/queries';
+import { useAsset, useFaultTypes, useLocations, useOrgMembers, useParts, useWorkOrder, useWoLabor, useWoParts } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { formatDate } from '../lib/ui';
 
@@ -18,8 +18,14 @@ export default function JobSheet() {
   const members = useOrgMembers();
   const parts = useParts();
   const woParts = useWoParts(id);
+  const woLabor = useWoLabor(id);
+  const locations = useLocations();
+  const faultTypes = useFaultTypes();
 
   if (!wo) return <p className="p-6 text-sm text-ink-muted">{tc('loading')}</p>;
+
+  const location = wo.location_id ? locations.data?.find((l) => l.id === wo.location_id) : null;
+  const faultType = wo.fault_type_id ? faultTypes.data?.find((f) => f.id === wo.fault_type_id) : null;
 
   const assignee = wo.assigned_to
     ? members.data?.find((m) => m.user_id === wo.assigned_to)?.email ?? '—'
@@ -68,6 +74,15 @@ export default function JobSheet() {
           <Row label={t('fields.priority')} value={tc(`priority.${wo.priority}`)} />
           <Row label={t('fields.assignee')} value={assignee} />
           <Row label={t('fields.due')} value={formatDate(wo.due_at, lng)} />
+          {location && <Row label={t('fields.location')} value={resolveI18n(location.name_i18n, lng)} />}
+          {faultType && <Row label={t('fields.faultType')} value={resolveI18n(faultType.name_i18n, lng)} />}
+          <Row
+            label={t('fields.cost')}
+            value={new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-US', {
+              style: 'currency',
+              currency: 'USD',
+            }).format(wo.cost)}
+          />
         </tbody>
       </table>
 
@@ -77,6 +92,27 @@ export default function JobSheet() {
             {t('fields.instructions')}
           </p>
           <p className="mt-1 whitespace-pre-wrap text-sm">{wo.instructions}</p>
+        </div>
+      )}
+
+      {(wo.failure_code || wo.completion_code || wo.downtime_minutes != null) && (
+        <div className="mt-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            {t('closingDetails')}
+          </p>
+          <table className="mt-1 w-full text-sm">
+            <tbody>
+              {wo.failure_code && (
+                <Row label={t('fields.failureCode')} value={tc(`failureCode.${wo.failure_code}`)} />
+              )}
+              {wo.completion_code && (
+                <Row label={t('fields.completionCode')} value={tc(`completionCode.${wo.completion_code}`)} />
+              )}
+              {wo.downtime_minutes != null && (
+                <Row label={t('fields.downtime')} value={String(wo.downtime_minutes)} />
+              )}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -95,6 +131,29 @@ export default function JobSheet() {
                   <tr key={wp.id} className="border-b border-line">
                     <td className="py-1">{part ? resolveI18n(part.name_i18n, lng) : wp.part_id}</td>
                     <td className="py-1 text-right">×{wp.quantity}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div className="mt-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+          {t('labor')}
+        </p>
+        {(woLabor.data ?? []).length === 0 ? (
+          <p className="mt-1 text-sm text-ink-muted">{t('noLabor')}</p>
+        ) : (
+          <table className="mt-1 w-full text-sm">
+            <tbody>
+              {(woLabor.data ?? []).map((entry) => {
+                const who = members.data?.find((m) => m.user_id === entry.user_id)?.email ?? '—';
+                return (
+                  <tr key={entry.id} className="border-b border-line">
+                    <td className="py-1">{who}</td>
+                    <td className="py-1 text-right">{entry.minutes} {tc('common.minutesShort')}</td>
                   </tr>
                 );
               })}

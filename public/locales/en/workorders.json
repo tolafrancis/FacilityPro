@@ -17,7 +17,29 @@
     "addBefore": "Add before",
     "addAfter": "Add after",
     "uploading": "Uploading…",
-    "save": "Save changes"
+    "save": "Save changes",
+    "location": "Location",
+    "faultType": "Fault type",
+    "cost": "Cost",
+    "costCenter": "Cost center",
+    "vendor": "Vendor",
+    "noVendor": "In-house",
+    "vendorContracts": "Vendor's active contracts",
+    "closingDetails": "Closing details",
+    "failureCode": "Cause of failure",
+    "completionCode": "Completion code",
+    "downtime": "Downtime (minutes)",
+    "selectFailure": "Select a cause…",
+    "selectCompletion": "Select what was done…"
+  },
+  "labor": {
+    "title": "Labor",
+    "who": "Technician",
+    "minutes": "Minutes",
+    "rate": "Rate / hour",
+    "cost": "Cost",
+    "add": "Log labor",
+    "empty": "No labor logged on this work order."
   },
   "myWork": {
     "title": "My work",

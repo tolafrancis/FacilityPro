@@ -26,6 +26,13 @@
     "checklist": "Checklist (optional)",
     "assignee": "Assign to (optional)",
     "priority": "Priority",
-    "firstDue": "First due date"
+    "firstDue": "First due date",
+    "leadTime": "Generate this many days early",
+    "leadTimeHint": "The work order's due date stays the real due date — this only controls when it's created."
+  },
+  "requiredParts": {
+    "toggle": "Required parts",
+    "title": "Required parts kit",
+    "empty": "No parts required yet — suggestions only, technicians still confirm what they actually use."
   }
 }

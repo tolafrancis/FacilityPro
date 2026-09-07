@@ -10,6 +10,8 @@ import { useOrg } from '../contexts/OrgContext';
 import {
   useAsset,
   useAssetTypes,
+  useDocumentLinks,
+  useDocuments,
   useLocations,
   useMeterReadings,
   useMeters,
@@ -23,8 +25,9 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
+import Select from '../components/ui/Select';
 
-type Tab = 'info' | 'history' | 'meters' | 'qr';
+type Tab = 'info' | 'history' | 'meters' | 'documents' | 'qr';
 
 export default function AssetDetail() {
   const { id } = useParams<{ id: string }>();
@@ -65,6 +68,7 @@ export default function AssetDetail() {
     { key: 'info', label: t('detail.info') },
     { key: 'history', label: t('detail.history') },
     { key: 'meters', label: t('meters.tab') },
+    { key: 'documents', label: t('detail.documents') },
     { key: 'qr', label: t('detail.qr') },
   ];
 
@@ -155,6 +159,8 @@ export default function AssetDetail() {
       )}
 
       {tab === 'meters' && id && <MetersTab assetId={id} />}
+
+      {tab === 'documents' && id && <DocumentsTab assetId={id} />}
 
       {tab === 'qr' && (
         <div className="mt-5 rounded-xl border border-line bg-white p-6 text-center">
@@ -353,6 +359,78 @@ function MeterDialog({
           </Button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function DocumentsTab({ assetId }: { assetId: string }) {
+  const { t } = useTranslation('assets');
+  const { currentOrg } = useOrg();
+  const orgId = currentOrg?.id;
+  const queryClient = useQueryClient();
+  const linksQuery = useDocumentLinks('asset', assetId);
+  const documentsQuery = useDocuments();
+  const [pickedId, setPickedId] = useState('');
+
+  const links = linksQuery.data ?? [];
+  const documents = documentsQuery.data ?? [];
+  const linked = links
+    .map((l) => documents.find((d) => d.id === l.document_id))
+    .filter((d): d is NonNullable<typeof d> => !!d);
+  const linkedIds = new Set(links.map((l) => l.document_id));
+  const attachable = documents.filter((d) => !linkedIds.has(d.id));
+
+  const attach = useMutation({
+    mutationFn: async () => {
+      if (!orgId || !pickedId) return;
+      const { error } = await supabase.from('fp_document_links').insert({
+        org_id: orgId,
+        document_id: pickedId,
+        entity_type: 'asset',
+        entity_id: assetId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['document_links', 'asset', assetId] });
+      setPickedId('');
+    },
+  });
+
+  return (
+    <div className="mt-5 space-y-3">
+      {linked.length === 0 ? (
+        <p className="text-sm text-ink-muted">{t('documents.empty')}</p>
+      ) : (
+        linked.map((doc) => (
+          <div key={doc.id} className="rounded-lg border border-line bg-white px-3 py-2">
+            <p className="text-sm font-medium text-ink">{doc.title}</p>
+            <p className="text-xs text-ink-muted">{doc.category} · {doc.owner}</p>
+            {doc.link && (
+              <a href={doc.link} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs font-medium text-brand hover:text-brand-600">
+                {t('documents.open')}
+              </a>
+            )}
+          </div>
+        ))
+      )}
+
+      {attachable.length > 0 && (
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <label className="mb-1 block text-xs text-ink-muted">{t('documents.attach')}</label>
+            <Select value={pickedId} onChange={(e) => setPickedId(e.target.value)}>
+              <option value="">{t('documents.choose')}</option>
+              {attachable.map((doc) => (
+                <option key={doc.id} value={doc.id}>{doc.title}</option>
+              ))}
+            </Select>
+          </div>
+          <Button type="button" disabled={!pickedId || attach.isPending} onClick={() => attach.mutate()}>
+            {t('documents.attachAction')}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

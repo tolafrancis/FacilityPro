@@ -83,6 +83,27 @@
     "high": "High",
     "critical": "Critical"
   },
+  "failureCode": {
+    "wear": "Wear and tear",
+    "misuse": "Misuse",
+    "defect": "Manufacturing defect",
+    "external": "External cause",
+    "unknown": "Unknown"
+  },
+  "completionCode": {
+    "repaired": "Repaired",
+    "replaced": "Replaced",
+    "no_fault_found": "No fault found",
+    "deferred": "Deferred"
+  },
+  "errors": {
+    "permissionDenied": "You don't have permission to do that — ask an admin.",
+    "duplicate": "That already exists.",
+    "stillInUse": "That's still in use elsewhere and can't be changed.",
+    "invalidValue": "That value isn't allowed.",
+    "offline": "You're offline — try again once you're back online.",
+    "generic": "Something went wrong. Please try again."
+  },
   "requestStatus": {
     "new": "New",
     "triaged": "Triaged",
@@ -109,12 +130,18 @@
     "all": "All",
     "optional": "optional",
     "none": "None",
-    "empty": "Nothing here yet."
+    "empty": "Nothing here yet.",
+    "minutesShort": "min"
   },
   "notifications": {
     "title": "Notifications",
     "empty": "You're all caught up.",
     "markAllRead": "Mark all read"
+  },
+  "pagination": {
+    "summary": "Page {{page}} of {{totalPages}} · {{total}} total",
+    "prev": "Previous",
+    "next": "Next"
   },
   "offline": "You're offline. Changes may not save until you reconnect.",
   "sync": {

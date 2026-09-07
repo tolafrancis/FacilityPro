@@ -7,6 +7,7 @@
     "overdue": "Lệnh quá hạn",
     "avgResolution": "TB xử lý (giờ)",
     "pmDue": "Bảo trì đến hạn",
+    "pmCompliance": "Bảo trì hoàn thành đúng hạn",
     "lowStock": "Phụ tùng sắp hết",
     "expiringContracts": "Hợp đồng sắp hết hạn (30 ngày)"
   },
@@ -15,5 +16,27 @@
   "exportWorkOrders": "Xuất lệnh công việc (CSV)",
   "auditLog": "Nhật ký hoạt động",
   "auditEmpty": "Chưa có hoạt động nào được ghi nhận.",
-  "columns": { "when": "Thời gian", "entity": "Đối tượng", "action": "Hành động" }
+  "columns": { "when": "Thời gian", "entity": "Đối tượng", "action": "Hành động" },
+  "filters": {
+    "from": "Từ ngày",
+    "to": "Đến ngày",
+    "location": "Vị trí",
+    "allLocations": "Tất cả vị trí",
+    "technician": "Kỹ thuật viên",
+    "allTechnicians": "Tất cả kỹ thuật viên",
+    "priority": "Ưu tiên",
+    "allPriorities": "Tất cả mức ưu tiên",
+    "clear": "Xóa bộ lọc"
+  },
+  "cost": {
+    "title": "Chi phí & chi tiêu",
+    "total": "Tổng chi phí (đã lọc)",
+    "budgetUsed": "So với tổng ngân sách",
+    "plannedShare": "Bảo trì có kế hoạch so với đột xuất",
+    "mtbf": "Thời gian trung bình giữa các lần hỏng",
+    "days": "{{count}} ngày",
+    "byMonth": "Chi phí theo tháng (6 tháng gần nhất)",
+    "byVendor": "Chi tiêu theo nhà cung cấp",
+    "noVendorSpend": "Chưa có chi tiêu nào liên kết với nhà cung cấp."
+  }
 }

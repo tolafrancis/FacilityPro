@@ -7,6 +7,7 @@
     "overdue": "Overdue work orders",
     "avgResolution": "Avg resolution (hrs)",
     "pmDue": "PM due",
+    "pmCompliance": "PM on-time completion",
     "lowStock": "Low-stock parts",
     "expiringContracts": "Contracts expiring (30d)"
   },
@@ -15,5 +16,27 @@
   "exportWorkOrders": "Export work orders (CSV)",
   "auditLog": "Activity log",
   "auditEmpty": "No activity recorded yet.",
-  "columns": { "when": "When", "entity": "Entity", "action": "Action" }
+  "columns": { "when": "When", "entity": "Entity", "action": "Action" },
+  "filters": {
+    "from": "From",
+    "to": "To",
+    "location": "Location",
+    "allLocations": "All locations",
+    "technician": "Technician",
+    "allTechnicians": "All technicians",
+    "priority": "Priority",
+    "allPriorities": "All priorities",
+    "clear": "Clear filters"
+  },
+  "cost": {
+    "title": "Cost & spend",
+    "total": "Total cost (filtered)",
+    "budgetUsed": "Of total budget",
+    "plannedShare": "Planned vs. reactive",
+    "mtbf": "Mean time between failures",
+    "days": "{{count}} day(s)",
+    "byMonth": "Cost by month (last 6 months)",
+    "byVendor": "Top vendor spend",
+    "noVendorSpend": "No vendor-linked spend recorded yet."
+  }
 }

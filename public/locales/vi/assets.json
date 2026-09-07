@@ -18,6 +18,7 @@
     "info": "Chi tiết",
     "history": "Lịch sử",
     "qr": "Mã QR",
+    "documents": "Tài liệu",
     "qrHint": "In và dán mã này lên tài sản. Quét mã sẽ mở tài sản này để bất kỳ ai cũng có thể báo cáo sự cố.",
     "noHistory": "Chưa có yêu cầu hoặc lệnh công việc cho tài sản này.",
     "warranty": "Bảo hành đến",
@@ -34,5 +35,12 @@
     "latest": "Mới nhất",
     "empty": "Tài sản này chưa có đồng hồ.",
     "noReadings": "Chưa có chỉ số."
+  },
+  "documents": {
+    "empty": "Chưa có tài liệu nào được liên kết với tài sản này.",
+    "open": "Mở",
+    "attach": "Đính kèm tài liệu có sẵn",
+    "choose": "Chọn tài liệu…",
+    "attachAction": "Đính kèm"
   }
 }

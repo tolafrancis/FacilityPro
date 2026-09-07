@@ -73,3 +73,20 @@ export function daysUntil(value: string | null): number | null {
   const ms = new Date(value).getTime() - Date.now();
   return Math.ceil(ms / 86400000);
 }
+
+/**
+ * Turn a raw Postgres/PostgREST error into something a non-technical user can
+ * act on, instead of surfacing "new row violates row-level security policy
+ * for table ..." or a bare constraint name. Falls back to the original
+ * message for anything not recognized, so nothing is ever silently swallowed.
+ */
+export function friendlyError(error: { code?: string; message?: string } | null | undefined, t: (key: string) => string): string {
+  const code = error?.code;
+  const msg = error?.message ?? '';
+  if (code === '42501' || /row-level security/i.test(msg)) return t('errors.permissionDenied');
+  if (code === '23505' || /duplicate key/i.test(msg)) return t('errors.duplicate');
+  if (code === '23503' || /foreign key/i.test(msg)) return t('errors.stillInUse');
+  if (code === '23514' || /check constraint/i.test(msg)) return t('errors.invalidValue');
+  if (!navigator.onLine) return t('errors.offline');
+  return msg || t('errors.generic');
+}
