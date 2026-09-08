@@ -259,6 +259,7 @@ export interface FinanceExpenditure {
   vendor_id: string | null;
   work_order_id: string | null;
   asset_id: string | null;
+  part_id: string | null;
   cost_center_id: string | null;
   created_at: string;
 }

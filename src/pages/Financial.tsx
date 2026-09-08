@@ -6,7 +6,7 @@ import SearchSelect from '../components/ui/SearchSelect';
 import ProcurementManager from '../components/ProcurementManager';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
-import { useAssets, useCostCenters, useProcurementOrders, useVendorInvoices, useVendors, useWorkOrders } from '../lib/queries';
+import { useAssets, useCostCenters, useParts, useProcurementOrders, useVendorInvoices, useVendors, useWorkOrders } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 
 interface CustomerRecord {
@@ -41,6 +41,7 @@ interface ExpenditureRecord {
   vendor_id: string | null;
   work_order_id: string | null;
   asset_id: string | null;
+  part_id: string | null;
   cost_center_id: string | null;
   created_at: string;
 }
@@ -124,6 +125,7 @@ export default function Financial() {
     vendorId: '',
     workOrderId: '',
     assetId: '',
+    partId: '',
     cost_center_id: '',
   });
   const [rateForm, setRateForm] = useState({ service: '', unit: 'hour', rate: '', currency: 'USD' });
@@ -144,6 +146,8 @@ export default function Financial() {
   const workOrders = workOrdersQuery.data ?? [];
   const assetsQuery = useAssets();
   const assets = assetsQuery.data ?? [];
+  const partsQuery = useParts();
+  const parts = partsQuery.data ?? [];
 
   const { data: customers = [] } = useQuery({ queryKey: ['finance-customers', currentOrg?.id], queryFn: () => fetchCustomers(currentOrg?.id), enabled: !!currentOrg?.id });
   useQuery({ queryKey: ['finance-payments', currentOrg?.id], queryFn: () => fetchPayments(currentOrg?.id), enabled: !!currentOrg?.id });
@@ -209,24 +213,27 @@ export default function Financial() {
 
   const submitExpenditure = async (event: FormEvent) => {
     event.preventDefault();
-    if (!currentOrg?.id || !expenditureForm.description) return;
+    const selectedPart = parts.find((p) => p.id === expenditureForm.partId);
+    const description = expenditureForm.description || (selectedPart ? resolveI18n(selectedPart.name_i18n, 'en') : '');
+    if (!currentOrg?.id || !description) return;
     setBusy('expenditure');
     setMessage(null);
     try {
       await saveRecord(
         'fp_finance_expenditures',
         {
-          description: expenditureForm.description,
+          description,
           category: expenditureForm.category,
           amount: Number(expenditureForm.amount || 0),
           vendor_id: expenditureForm.vendorId || null,
           work_order_id: expenditureForm.workOrderId || null,
           asset_id: expenditureForm.assetId || null,
+          part_id: expenditureForm.partId || null,
           cost_center_id: expenditureForm.cost_center_id || null,
         },
         'finance-expenditures'
       );
-      setExpenditureForm({ description: '', category: 'Parts', amount: '', vendorId: '', workOrderId: '', assetId: '', cost_center_id: '' });
+      setExpenditureForm({ description: '', category: 'Parts', amount: '', vendorId: '', workOrderId: '', assetId: '', partId: '', cost_center_id: '' });
       setMessage('Expenditure recorded.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to save expenditure.');
@@ -389,6 +396,27 @@ export default function Financial() {
         <form onSubmit={submitExpenditure} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-ink">Expenditures</h2>
           <div className="mt-4 space-y-3">
+            <div>
+              <label className="mb-1 block text-xs text-ink-muted">Part (optional)</label>
+              <SearchSelect
+                value={expenditureForm.partId}
+                onChange={(id) => {
+                  const part = parts.find((p) => p.id === id);
+                  setExpenditureForm({
+                    ...expenditureForm,
+                    partId: id,
+                    // Pre-fill a blank description from the part name, and
+                    // suggest its preferred vendor — never overwriting
+                    // either if the user already set them.
+                    description: !expenditureForm.description && part ? resolveI18n(part.name_i18n, 'en') : expenditureForm.description,
+                    vendorId: !expenditureForm.vendorId && part?.preferred_vendor_id ? part.preferred_vendor_id : expenditureForm.vendorId,
+                  });
+                }}
+                options={parts.map((p) => ({ id: p.id, label: resolveI18n(p.name_i18n, 'en') }))}
+                placeholder="Search parts…"
+                emptyLabel="Not a part / service"
+              />
+            </div>
             <Input value={expenditureForm.description} onChange={(event) => setExpenditureForm({ ...expenditureForm, description: event.target.value })} placeholder="Description" />
             <Input value={expenditureForm.category} onChange={(event) => setExpenditureForm({ ...expenditureForm, category: event.target.value })} placeholder="Category" />
             <Input type="number" value={expenditureForm.amount} onChange={(event) => setExpenditureForm({ ...expenditureForm, amount: event.target.value })} placeholder="Amount" />
