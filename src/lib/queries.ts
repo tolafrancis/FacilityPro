@@ -14,6 +14,7 @@ import type {
   DocumentEntityType,
   DocumentLink,
   DocumentRecord,
+  ExpenseCategory,
   Conversation,
   Desk,
   DeskBooking,
@@ -903,6 +904,23 @@ export function useLicenses() {
         .order('expiry_date', { nullsFirst: false });
       if (error) throw error;
       return data as License[];
+    },
+  });
+}
+
+export function useExpenseCategories() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['expense_categories', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_expense_categories')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('name');
+      if (error) throw error;
+      return data as ExpenseCategory[];
     },
   });
 }

@@ -6,7 +6,7 @@ import SearchSelect from '../components/ui/SearchSelect';
 import ProcurementManager from '../components/ProcurementManager';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
-import { useAssets, useCostCenters, useParts, useProcurementOrders, useVendorInvoices, useVendors, useWorkOrders } from '../lib/queries';
+import { useAssets, useCostCenters, useExpenseCategories, useParts, useProcurementOrders, useVendorInvoices, useVendors, useWorkOrders } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 
 interface CustomerRecord {
@@ -42,6 +42,7 @@ interface ExpenditureRecord {
   work_order_id: string | null;
   asset_id: string | null;
   part_id: string | null;
+  category_id: string | null;
   cost_center_id: string | null;
   created_at: string;
 }
@@ -104,6 +105,11 @@ function currency(value: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 }
 
+// Small, fixed vocabularies — not business entities that need their own
+// manageable table, same treatment as a status/priority field elsewhere.
+const RATE_UNITS = ['hour', 'day', 'week', 'month', 'job', 'visit'];
+const BUDGET_PERIODS = ['Monthly', 'Quarterly', 'Annual', 'One-time'];
+
 export default function Financial() {
   const { currentOrg } = useOrg();
   const queryClient = useQueryClient();
@@ -120,7 +126,7 @@ export default function Financial() {
   });
   const [expenditureForm, setExpenditureForm] = useState({
     description: '',
-    category: 'Parts',
+    categoryId: '',
     amount: '',
     vendorId: '',
     workOrderId: '',
@@ -131,11 +137,14 @@ export default function Financial() {
   const [rateForm, setRateForm] = useState({ service: '', unit: 'hour', rate: '', currency: 'USD' });
   const [budgetForm, setBudgetForm] = useState({ name: 'Operating budget', amount: '', period: 'Monthly', notes: '', cost_center_id: '' });
   const [costCenterForm, setCostCenterForm] = useState({ name: '', code: '' });
+  const [expenseCategoryForm, setExpenseCategoryForm] = useState({ name: '' });
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const costCentersQuery = useCostCenters();
   const costCenters = costCentersQuery.data ?? [];
+  const expenseCategoriesQuery = useExpenseCategories();
+  const expenseCategories = expenseCategoriesQuery.data ?? [];
   const vendorsQuery = useVendors();
   const vendors = vendorsQuery.data ?? [];
   const procurementOrdersQuery = useProcurementOrders();
@@ -223,7 +232,8 @@ export default function Financial() {
         'fp_finance_expenditures',
         {
           description,
-          category: expenditureForm.category,
+          category: expenseCategories.find((c) => c.id === expenditureForm.categoryId)?.name ?? 'Other',
+          category_id: expenditureForm.categoryId || null,
           amount: Number(expenditureForm.amount || 0),
           vendor_id: expenditureForm.vendorId || null,
           work_order_id: expenditureForm.workOrderId || null,
@@ -233,7 +243,7 @@ export default function Financial() {
         },
         'finance-expenditures'
       );
-      setExpenditureForm({ description: '', category: 'Parts', amount: '', vendorId: '', workOrderId: '', assetId: '', partId: '', cost_center_id: '' });
+      setExpenditureForm({ description: '', categoryId: '', amount: '', vendorId: '', workOrderId: '', assetId: '', partId: '', cost_center_id: '' });
       setMessage('Expenditure recorded.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to save expenditure.');
@@ -291,6 +301,24 @@ export default function Financial() {
       setMessage('Cost center saved.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to save cost center.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const submitExpenseCategory = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!currentOrg?.id || !expenseCategoryForm.name) return;
+    setBusy('expenseCategory');
+    setMessage(null);
+    try {
+      const { error } = await supabase.from('fp_expense_categories').insert({ org_id: currentOrg.id, ...expenseCategoryForm });
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ['expense_categories', currentOrg.id] });
+      setExpenseCategoryForm({ name: '' });
+      setMessage('Expense category saved.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to save expense category.');
     } finally {
       setBusy(null);
     }
@@ -418,7 +446,12 @@ export default function Financial() {
               />
             </div>
             <Input value={expenditureForm.description} onChange={(event) => setExpenditureForm({ ...expenditureForm, description: event.target.value })} placeholder="Description" />
-            <Input value={expenditureForm.category} onChange={(event) => setExpenditureForm({ ...expenditureForm, category: event.target.value })} placeholder="Category" />
+            <select value={expenditureForm.categoryId} onChange={(event) => setExpenditureForm({ ...expenditureForm, categoryId: event.target.value })} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+              <option value="">Select a category…</option>
+              {expenseCategories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
             <Input type="number" value={expenditureForm.amount} onChange={(event) => setExpenditureForm({ ...expenditureForm, amount: event.target.value })} placeholder="Amount" />
             <div>
               <label className="mb-1 block text-xs text-ink-muted">Work order (optional)</label>
@@ -480,7 +513,11 @@ export default function Financial() {
           <h2 className="text-lg font-semibold text-ink">Schedule of rates</h2>
           <div className="mt-4 space-y-3">
             <Input value={rateForm.service} onChange={(event) => setRateForm({ ...rateForm, service: event.target.value })} placeholder="Service or labour item" />
-            <Input value={rateForm.unit} onChange={(event) => setRateForm({ ...rateForm, unit: event.target.value })} placeholder="Unit" />
+            <select value={rateForm.unit} onChange={(event) => setRateForm({ ...rateForm, unit: event.target.value })} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+              {RATE_UNITS.map((u) => (
+                <option key={u} value={u}>{u}</option>
+              ))}
+            </select>
             <Input type="number" value={rateForm.rate} onChange={(event) => setRateForm({ ...rateForm, rate: event.target.value })} placeholder="Rate" />
             <Input value={rateForm.currency} onChange={(event) => setRateForm({ ...rateForm, currency: event.target.value })} placeholder="Currency" />
             <Button type="submit" loading={busy === 'rate'}>Save rate</Button>
@@ -492,7 +529,11 @@ export default function Financial() {
           <div className="mt-4 space-y-3">
             <Input value={budgetForm.name} onChange={(event) => setBudgetForm({ ...budgetForm, name: event.target.value })} placeholder="Budget name" />
             <Input type="number" value={budgetForm.amount} onChange={(event) => setBudgetForm({ ...budgetForm, amount: event.target.value })} placeholder="Amount" />
-            <Input value={budgetForm.period} onChange={(event) => setBudgetForm({ ...budgetForm, period: event.target.value })} placeholder="Period" />
+            <select value={budgetForm.period} onChange={(event) => setBudgetForm({ ...budgetForm, period: event.target.value })} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
+              {BUDGET_PERIODS.map((p) => (
+                <option key={p} value={p}>{p}</option>
+              ))}
+            </select>
             <select value={budgetForm.cost_center_id} onChange={(event) => setBudgetForm({ ...budgetForm, cost_center_id: event.target.value })} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20">
               <option value="">No cost center</option>
               {costCenters.map((cc) => (
@@ -514,6 +555,21 @@ export default function Financial() {
               <ul className="mt-2 space-y-1 text-sm text-ink-muted">
                 {costCenters.map((cc) => (
                   <li key={cc.id}>{cc.code ? `${cc.code} — ${cc.name}` : cc.name}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </form>
+
+        <form onSubmit={submitExpenseCategory} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-ink">Expense categories</h2>
+          <div className="mt-4 space-y-3">
+            <Input value={expenseCategoryForm.name} onChange={(event) => setExpenseCategoryForm({ name: event.target.value })} placeholder="Name (e.g. Contracted services)" />
+            <Button type="submit" loading={busy === 'expenseCategory'}>Save category</Button>
+            {expenseCategories.length > 0 && (
+              <ul className="mt-2 space-y-1 text-sm text-ink-muted">
+                {expenseCategories.map((c) => (
+                  <li key={c.id}>{c.name}</li>
                 ))}
               </ul>
             )}

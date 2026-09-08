@@ -282,7 +282,15 @@ export interface FinanceExpenditure {
   work_order_id: string | null;
   asset_id: string | null;
   part_id: string | null;
+  category_id: string | null;
   cost_center_id: string | null;
+  created_at: string;
+}
+
+export interface ExpenseCategory {
+  id: string;
+  org_id: string;
+  name: string;
   created_at: string;
 }
 
