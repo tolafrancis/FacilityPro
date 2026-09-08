@@ -22,6 +22,8 @@ import {
   useVendors,
   useContracts,
   usePmRequiredParts,
+  useTechnicianProfile,
+  useTechnicianProfiles,
 } from '../lib/queries';
 import { uploadMedia, signedUrl } from '../lib/media';
 import { writeOrQueue } from '../lib/sync';
@@ -60,6 +62,8 @@ export default function WorkOrderDetail() {
   const woPartsQuery = useWoParts(id);
   const woLaborQuery = useWoLabor(id);
   const ratesQuery = useRates();
+  const myProfileQuery = useTechnicianProfile(user?.id);
+  const technicianProfiles = useTechnicianProfiles();
   const approvalsQuery = useApprovalsForWo(id);
   const locations = useLocations();
   const faultTypes = useFaultTypes();
@@ -90,14 +94,19 @@ export default function WorkOrderDetail() {
   const [rate, setRate] = useState('0');
   const [rateInitialized, setRateInitialized] = useState(false);
 
-  // Quietly pre-fill the rate field from the org's rate card the first time it
-  // loads, without ever overwriting a value the technician has already typed.
+  // Quietly pre-fill the rate field the first time it's available, without
+  // ever overwriting a value the technician has already typed. Prefers the
+  // logged-in technician's own profile rate over the generic rate card.
   useEffect(() => {
-    if (!rateInitialized && ratesQuery.data && ratesQuery.data.length > 0) {
+    if (rateInitialized) return;
+    if (myProfileQuery.data?.labor_rate != null) {
+      setRate(String(myProfileQuery.data.labor_rate));
+      setRateInitialized(true);
+    } else if (ratesQuery.data && ratesQuery.data.length > 0) {
       setRate(String(ratesQuery.data[0].rate));
       setRateInitialized(true);
     }
-  }, [ratesQuery.data, rateInitialized]);
+  }, [ratesQuery.data, myProfileQuery.data, rateInitialized]);
 
   const logPart = useMutation({
     mutationFn: async () => {
@@ -239,11 +248,15 @@ export default function WorkOrderDetail() {
               className="mt-0.5 w-full"
             >
               <option value="">{tc('common.unassigned')}</option>
-              {(members.data ?? []).map((m) => (
-                <option key={m.user_id} value={m.user_id}>
-                  {m.email}
-                </option>
-              ))}
+              {(members.data ?? []).map((m) => {
+                const skills = technicianProfiles.data?.find((p) => p.user_id === m.user_id)?.skills;
+                return (
+                  <option key={m.user_id} value={m.user_id}>
+                    {m.email}
+                    {skills && skills.length > 0 ? ` — ${skills.join(', ')}` : ''}
+                  </option>
+                );
+              })}
             </Select>
           </dd>
         </div>

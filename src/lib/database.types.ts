@@ -38,6 +38,28 @@ export interface UserSite {
   site_id: string;
 }
 
+export interface TechnicianProfile {
+  id: string;
+  org_id: string;
+  user_id: string;
+  employee_id: string | null;
+  phone: string | null;
+  labor_rate: number | null;
+  shift: string | null;
+  skills: string[];
+  created_at: string;
+}
+
+export interface TechnicianCertification {
+  id: string;
+  org_id: string;
+  technician_profile_id: string;
+  name: string;
+  issuer: string | null;
+  expiry_date: string | null;
+  created_at: string;
+}
+
 export type LocationKind = 'building' | 'floor' | 'room' | 'zone';
 
 export interface LocationRow {

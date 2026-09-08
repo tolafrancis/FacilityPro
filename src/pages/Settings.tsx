@@ -6,9 +6,18 @@ import { Plus, Trash2, Copy, Cpu, Pencil, Power } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useAssetTypes, useFaultTypes, useOrgMembers, useSites, useSlaPolicies, useUserSites } from '../lib/queries';
+import {
+  useAssetTypes,
+  useFaultTypes,
+  useOrgMembers,
+  useSites,
+  useSlaPolicies,
+  useTechnicianCertifications,
+  useTechnicianProfile,
+  useUserSites,
+} from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { PRIORITIES, PRIORITY_CLASS, friendlyError } from '../lib/ui';
+import { daysUntil, PRIORITIES, PRIORITY_CLASS, friendlyError } from '../lib/ui';
 import type { AssetType, FaultType, Priority, Role, Site } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -452,6 +461,7 @@ function TeamSection() {
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [siteAccessFor, setSiteAccessFor] = useState<string | null>(null);
+  const [profileFor, setProfileFor] = useState<string | null>(null);
 
   const invites = useQuery({
     queryKey: ['invites', orgId],
@@ -530,6 +540,13 @@ function TeamSection() {
                       Site access
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => setProfileFor(profileFor === m.user_id ? null : m.user_id)}
+                    className="whitespace-nowrap text-xs font-medium text-brand hover:text-brand-600"
+                  >
+                    Profile
+                  </button>
                   {m.user_id !== user?.id && (
                     <button type="button" onClick={() => removeMember.mutate(m.user_id)} className="text-ink-muted hover:text-status-crit" aria-label="Remove member">
                       <Trash2 size={15} />
@@ -538,6 +555,7 @@ function TeamSection() {
                 </span>
               </div>
               {siteAccessFor === m.user_id && <MemberSiteAccess userId={m.user_id} sites={sites} orgId={orgId!} />}
+              {profileFor === m.user_id && <MemberProfile userId={m.user_id} orgId={orgId!} />}
             </li>
           ))}
           {members.data?.length === 0 && <li className="text-sm text-ink-muted">No members yet.</li>}
@@ -638,6 +656,157 @@ function MemberSiteAccess({ userId, sites, orgId }: { userId: string; sites: Sit
           </label>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Technician profile: employee ID, phone, labor rate, shift, skills, and
+// certifications with expiry tracking — closes the "technician is just a
+// role" gap. Admin/manager only, matching the rate card's sensitivity.
+// ---------------------------------------------------------------------------
+function MemberProfile({ userId, orgId }: { userId: string; orgId: string }) {
+  const queryClient = useQueryClient();
+  const profileQuery = useTechnicianProfile(userId);
+  const profile = profileQuery.data;
+  const certsQuery = useTechnicianCertifications(profile?.id);
+
+  const [employeeId, setEmployeeId] = useState('');
+  const [phone, setPhone] = useState('');
+  const [laborRate, setLaborRate] = useState('');
+  const [shift, setShift] = useState('');
+  const [skillsText, setSkillsText] = useState('');
+  const [certName, setCertName] = useState('');
+  const [certIssuer, setCertIssuer] = useState('');
+  const [certExpiry, setCertExpiry] = useState('');
+
+  useEffect(() => {
+    setEmployeeId(profile?.employee_id ?? '');
+    setPhone(profile?.phone ?? '');
+    setLaborRate(profile?.labor_rate != null ? String(profile.labor_rate) : '');
+    setShift(profile?.shift ?? '');
+    setSkillsText((profile?.skills ?? []).join(', '));
+  }, [profile]);
+
+  const saveProfile = useMutation({
+    mutationFn: async () => {
+      const skills = skillsText.split(',').map((s) => s.trim()).filter(Boolean);
+      const { error } = await supabase.from('fp_technician_profiles').upsert(
+        {
+          org_id: orgId,
+          user_id: userId,
+          employee_id: employeeId || null,
+          phone: phone || null,
+          labor_rate: laborRate === '' ? null : Math.max(0, parseFloat(laborRate) || 0),
+          shift: shift || null,
+          skills,
+        },
+        { onConflict: 'org_id,user_id' }
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['technician_profile', orgId, userId] }),
+  });
+
+  const addCert = useMutation({
+    mutationFn: async () => {
+      if (!profile?.id || !certName) return;
+      const { error } = await supabase.from('fp_technician_certifications').insert({
+        org_id: orgId,
+        technician_profile_id: profile.id,
+        name: certName,
+        issuer: certIssuer || null,
+        expiry_date: certExpiry || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['technician_certifications', profile?.id] });
+      setCertName('');
+      setCertIssuer('');
+      setCertExpiry('');
+    },
+  });
+
+  const removeCert = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('fp_technician_certifications').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['technician_certifications', profile?.id] }),
+  });
+
+  return (
+    <div className="mt-2 space-y-3 rounded-lg border border-line bg-surface p-3">
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div>
+          <label className="mb-1 block text-xs text-ink-muted">Employee ID</label>
+          <Input value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-ink-muted">Phone</label>
+          <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-ink-muted">Labor rate ($ / hour)</label>
+          <Input type="number" min={0} value={laborRate} onChange={(e) => setLaborRate(e.target.value)} />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-ink-muted">Shift</label>
+          <Input value={shift} onChange={(e) => setShift(e.target.value)} placeholder="Day, Night, Rotating…" />
+        </div>
+      </div>
+      <div>
+        <label className="mb-1 block text-xs text-ink-muted">Skills (comma-separated)</label>
+        <Input value={skillsText} onChange={(e) => setSkillsText(e.target.value)} placeholder="HVAC, Electrical, Plumbing" />
+      </div>
+      <Button type="button" onClick={() => saveProfile.mutate()} loading={saveProfile.isPending}>
+        Save profile
+      </Button>
+
+      {profile?.id ? (
+        <div className="border-t border-line pt-3">
+          <p className="text-xs font-medium text-ink-muted">Certifications</p>
+          <ul className="mt-2 space-y-1 text-sm">
+            {(certsQuery.data ?? []).map((c) => {
+              const d = daysUntil(c.expiry_date);
+              const flag = d !== null && d <= 30;
+              return (
+                <li key={c.id} className="flex items-center justify-between gap-2 text-ink">
+                  <span>
+                    {c.name}
+                    {c.issuer && ` · ${c.issuer}`}
+                    {c.expiry_date && (
+                      <span className={flag ? 'ml-2 text-status-crit' : 'ml-2 text-ink-muted'}>
+                        {d !== null && d < 0 ? 'Expired' : `Expires ${c.expiry_date}`}
+                      </span>
+                    )}
+                  </span>
+                  <button type="button" onClick={() => removeCert.mutate(c.id)} className="text-ink-muted hover:text-status-crit" aria-label="Remove certification">
+                    <Trash2 size={13} />
+                  </button>
+                </li>
+              );
+            })}
+            {(certsQuery.data ?? []).length === 0 && <li className="text-ink-muted">No certifications recorded.</li>}
+          </ul>
+          <div className="mt-2 flex flex-wrap items-end gap-2">
+            <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Certification name" className="w-40" />
+            <Input value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} placeholder="Issuer (optional)" className="w-32" />
+            <Input type="date" value={certExpiry} onChange={(e) => setCertExpiry(e.target.value)} className="w-36" />
+            <button
+              type="button"
+              disabled={!certName || addCert.isPending}
+              onClick={() => addCert.mutate()}
+              className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-brand hover:bg-white disabled:opacity-50"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p className="text-xs text-ink-muted">Save the profile once to start adding certifications.</p>
+      )}
     </div>
   );
 }

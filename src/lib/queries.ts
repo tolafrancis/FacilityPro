@@ -53,6 +53,8 @@ import type {
   Site,
   Subscription,
   Survey,
+  TechnicianCertification,
+  TechnicianProfile,
   Telemetry,
   UserSite,
   Vendor,
@@ -103,6 +105,58 @@ export function useUserSites(userId: string | undefined) {
         .eq('user_id', userId!);
       if (error) throw error;
       return data as UserSite[];
+    },
+  });
+}
+
+/** All technician profiles in the org — admin/manager view (see fp_technician_profiles RLS). */
+export function useTechnicianProfiles() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['technician_profiles', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_technician_profiles')
+        .select('*')
+        .eq('org_id', orgId!);
+      if (error) throw error;
+      return data as TechnicianProfile[];
+    },
+  });
+}
+
+/** One member's profile — visible to that member themselves, or admin/manager. */
+export function useTechnicianProfile(userId: string | undefined) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['technician_profile', orgId, userId],
+    enabled: !!orgId && !!userId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_technician_profiles')
+        .select('*')
+        .eq('org_id', orgId!)
+        .eq('user_id', userId!)
+        .maybeSingle();
+      if (error) throw error;
+      return (data as TechnicianProfile | null) ?? null;
+    },
+  });
+}
+
+export function useTechnicianCertifications(profileId: string | undefined) {
+  return useQuery({
+    queryKey: ['technician_certifications', profileId],
+    enabled: !!profileId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_technician_certifications')
+        .select('*')
+        .eq('technician_profile_id', profileId!)
+        .order('expiry_date', { nullsFirst: false });
+      if (error) throw error;
+      return data as TechnicianCertification[];
     },
   });
 }
