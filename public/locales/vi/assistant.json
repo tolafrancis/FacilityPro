@@ -1,0 +1,34 @@
+{
+  "title": "Trợ lý thông minh",
+  "subtitle": "Dùng trợ lý AI để biến một yêu cầu bằng ngôn ngữ tự nhiên thành kế hoạch hành động cho bảo trì, kiểm tra và theo dõi.",
+  "describe": "Mô tả tình huống",
+  "prompt": "Nội dung",
+  "promptPlaceholder": "Ví dụ: Máy lạnh phòng 3 phát ra tiếng ồn lớn và khách thuê đã báo sáng nay.",
+  "generate": "Tạo đề xuất",
+  "suggested": "Đề xuất",
+  "rateLimited": "Đã đạt giới hạn AI trong giờ này — đang hiển thị hướng dẫn có sẵn.",
+  "builtin": "Hướng dẫn có sẵn (trợ lý AI chưa được cấu hình).",
+  "actions": "Hành động đề xuất",
+  "empty": "Hãy nhờ trợ lý soạn mô tả công việc, danh sách kiểm tra hoặc kế hoạch bước tiếp theo.",
+  "failed": "Hiện không thể tạo hướng dẫn.",
+  "fallback": {
+    "fault": {
+      "summary": "Nên tạo phiếu bảo trì và giao cho kỹ thuật viên phù hợp nhất theo loại tài sản.",
+      "action1": "Tạo yêu cầu mới",
+      "action2": "Đính kèm ảnh và thông tin tài sản",
+      "action3": "Đặt mức ưu tiên theo mức độ ảnh hưởng"
+    },
+    "checklist": {
+      "summary": "Có thể tạo mẫu danh sách kiểm tra từ mô tả này và dùng lại cho các lần kiểm tra sau.",
+      "action1": "Soạn danh sách kiểm tra",
+      "action2": "Liên kết với tài sản liên quan",
+      "action3": "Giao cho ca làm việc tiếp theo"
+    },
+    "general": {
+      "summary": "Yêu cầu này có vẻ quan trọng với vận hành. Hãy bắt đầu bằng một mô tả công việc ngắn gọn và chuyển cho đúng nhóm.",
+      "action1": "Tóm tắt vấn đề bằng ngôn ngữ đơn giản",
+      "action2": "Đính kèm bằng chứng",
+      "action3": "Đặt thời gian theo dõi"
+    }
+  }
+}

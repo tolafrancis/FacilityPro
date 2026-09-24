@@ -1,0 +1,35 @@
+{
+  "title": "Permits to work",
+  "subtitle": "Route maintenance and contractor approvals through a structured permit workflow before work begins.",
+  "create": "Create permit",
+  "fields": {
+    "title": "Permit title",
+    "titlePlaceholder": "Hot work permit",
+    "asset": "Asset or area",
+    "assetPlaceholder": "Roof level",
+    "requester": "Requester",
+    "requesterPlaceholder": "Maintenance team",
+    "approver": "Approver",
+    "approverPlaceholder": "Site supervisor",
+    "dueDate": "Due date",
+    "status": "Status",
+    "notes": "Notes",
+    "notesPlaceholder": "Describe the work, hazards, and safety controls."
+  },
+  "status": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "defaults": {
+    "asset": "Site-wide",
+    "requester": "Operations",
+    "approver": "Safety lead"
+  },
+  "submit": "Submit permit",
+  "saved": "Permit saved.",
+  "saveFailed": "Unable to save permit.",
+  "empty": "No permits yet. Create one to track safety approvals for upcoming work.",
+  "due": "Due"
+}

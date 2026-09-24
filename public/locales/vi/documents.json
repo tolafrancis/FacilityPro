@@ -1,0 +1,50 @@
+{
+  "title": "Kho tài liệu",
+  "subtitle": "Lưu quy trình, hướng dẫn sử dụng và tài liệu hiện trường ở một nơi để kỹ thuật viên luôn mở đúng tài liệu khi cần.",
+  "add": "Thêm tài liệu",
+  "fields": {
+    "title": "Tiêu đề",
+    "titlePlaceholder": "Quy trình phòng nồi hơi",
+    "category": "Danh mục",
+    "categoryPlaceholder": "An toàn",
+    "owner": "Người phụ trách",
+    "ownerPlaceholder": "Đội quản lý tòa nhà",
+    "summary": "Tóm tắt",
+    "summaryPlaceholder": "Mô tả phiên bản mới nhất và ai nên sử dụng.",
+    "link": "Liên kết hoặc tham chiếu",
+    "linkPlaceholder": "https://… hoặc thư mục SharePoint",
+    "file": "Tải tệp lên",
+    "visibility": "Ai có thể xem"
+  },
+  "defaults": {
+    "category": "Chung",
+    "owner": "Vận hành"
+  },
+  "linkRecord": "Liên kết với một bản ghi (không bắt buộc)",
+  "linkRecordHint": "Để tài liệu hiển thị trên tài sản, nhà cung cấp hoặc lệnh công việc liên quan.",
+  "noLink": "Không liên kết",
+  "search": "Tìm…",
+  "none": "Không có",
+  "entity": {
+    "asset": "Tài sản",
+    "work_order": "Lệnh công việc",
+    "vendor": "Nhà cung cấp",
+    "contract": "Hợp đồng",
+    "location": "Vị trí",
+    "part": "Vật tư"
+  },
+  "visibility": {
+    "staffLong": "Chỉ nhân viên (quản trị, quản lý, kỹ thuật viên)",
+    "everyoneLong": "Mọi người, kể cả người thuê và nhà cung cấp",
+    "staff": "Chỉ nhân viên",
+    "everyone": "Mọi người đều xem được"
+  },
+  "save": "Lưu tài liệu",
+  "saved": "Đã lưu tài liệu.",
+  "saveFailed": "Không thể lưu tài liệu.",
+  "noAccess": "Bạn không có quyền truy cập tệp này, hoặc tệp không còn tồn tại.",
+  "empty": "Chưa có tài liệu. Hãy bắt đầu bằng cách tải lên hướng dẫn hoặc liên kết tới thư mục nội bộ.",
+  "openReference": "Mở tham chiếu",
+  "download": "Tải xuống {{name}}",
+  "attachment": "tệp đính kèm"
+}

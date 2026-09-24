@@ -1,0 +1,34 @@
+{
+  "title": "Smart assistant",
+  "subtitle": "Use a guided AI assistant to turn a natural-language request into an action plan for maintenance, inspections, and follow-up.",
+  "describe": "Describe the situation",
+  "prompt": "Prompt",
+  "promptPlaceholder": "Example: The HVAC unit in room 3 has been making a loud noise and the tenant reported it this morning.",
+  "generate": "Generate recommendation",
+  "suggested": "Suggested response",
+  "rateLimited": "AI limit reached for this hour — showing built-in guidance instead.",
+  "builtin": "Built-in guidance (the AI assistant is not configured).",
+  "actions": "Recommended actions",
+  "empty": "Ask the assistant to create a work brief, inspection checklist, or next-step plan.",
+  "failed": "Unable to generate guidance right now.",
+  "fallback": {
+    "fault": {
+      "summary": "A maintenance ticket should be created and assigned to the most relevant technician based on the asset type.",
+      "action1": "Open a new request",
+      "action2": "Attach photos and asset details",
+      "action3": "Set priority based on disruption"
+    },
+    "checklist": {
+      "summary": "A checklist template can be generated from the description and reused for future inspections.",
+      "action1": "Draft a checklist",
+      "action2": "Link it to the relevant asset",
+      "action3": "Assign it to the next shift"
+    },
+    "general": {
+      "summary": "The request looks operationally important. Start by creating a concise work brief and routing it to the right team.",
+      "action1": "Summarize the issue in plain language",
+      "action2": "Attach any evidence",
+      "action3": "Set a follow-up time"
+    }
+  }
+}

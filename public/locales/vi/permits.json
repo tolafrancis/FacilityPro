@@ -1,0 +1,35 @@
+{
+  "title": "Giấy phép làm việc",
+  "subtitle": "Đưa các phê duyệt bảo trì và nhà thầu qua quy trình cấp phép có cấu trúc trước khi bắt đầu công việc.",
+  "create": "Tạo giấy phép",
+  "fields": {
+    "title": "Tên giấy phép",
+    "titlePlaceholder": "Giấy phép làm việc nóng",
+    "asset": "Tài sản hoặc khu vực",
+    "assetPlaceholder": "Tầng mái",
+    "requester": "Người yêu cầu",
+    "requesterPlaceholder": "Đội bảo trì",
+    "approver": "Người phê duyệt",
+    "approverPlaceholder": "Giám sát công trường",
+    "dueDate": "Hạn",
+    "status": "Trạng thái",
+    "notes": "Ghi chú",
+    "notesPlaceholder": "Mô tả công việc, mối nguy và biện pháp an toàn."
+  },
+  "status": {
+    "draft": "Nháp",
+    "submitted": "Đã gửi",
+    "approved": "Đã duyệt",
+    "rejected": "Bị từ chối"
+  },
+  "defaults": {
+    "asset": "Toàn khu vực",
+    "requester": "Vận hành",
+    "approver": "Phụ trách an toàn"
+  },
+  "submit": "Gửi giấy phép",
+  "saved": "Đã lưu giấy phép.",
+  "saveFailed": "Không thể lưu giấy phép.",
+  "empty": "Chưa có giấy phép. Hãy tạo một giấy phép để theo dõi phê duyệt an toàn cho công việc sắp tới.",
+  "due": "Hạn"
+}

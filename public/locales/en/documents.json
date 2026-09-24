@@ -1,0 +1,50 @@
+{
+  "title": "Document repository",
+  "subtitle": "Keep SOPs, manuals, and site guides in one place so technicians can access the correct document when they need it.",
+  "add": "Add a document",
+  "fields": {
+    "title": "Title",
+    "titlePlaceholder": "Boiler room SOP",
+    "category": "Category",
+    "categoryPlaceholder": "Safety",
+    "owner": "Owner",
+    "ownerPlaceholder": "Facilities team",
+    "summary": "Summary",
+    "summaryPlaceholder": "Describe the latest revision and who should use it.",
+    "link": "Link or reference",
+    "linkPlaceholder": "https://… or SharePoint folder",
+    "file": "Upload file",
+    "visibility": "Who can see it"
+  },
+  "defaults": {
+    "category": "General",
+    "owner": "Operations"
+  },
+  "linkRecord": "Link to a record (optional)",
+  "linkRecordHint": "So this document shows up on the asset, vendor, or work order it actually belongs to.",
+  "noLink": "No link",
+  "search": "Search…",
+  "none": "None",
+  "entity": {
+    "asset": "Asset",
+    "work_order": "Work order",
+    "vendor": "Vendor",
+    "contract": "Contract",
+    "location": "Location",
+    "part": "Part"
+  },
+  "visibility": {
+    "staffLong": "Staff only (admins, managers, technicians)",
+    "everyoneLong": "Everyone, including occupants and vendors",
+    "staff": "Staff only",
+    "everyone": "Visible to everyone"
+  },
+  "save": "Save document",
+  "saved": "Document saved.",
+  "saveFailed": "Unable to save document.",
+  "noAccess": "You do not have access to this file, or it no longer exists.",
+  "empty": "No documents added yet. Start by uploading a guide or linking to an internal folder.",
+  "openReference": "Open reference",
+  "download": "Download {{name}}",
+  "attachment": "attachment"
+}

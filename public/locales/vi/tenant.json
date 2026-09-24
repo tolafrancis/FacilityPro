@@ -1,0 +1,23 @@
+{
+  "title": "Trải nghiệm khách thuê",
+  "subtitle": "Chia sẻ cập nhật, trả lời câu hỏi thường gặp và giữ khách thuê luôn nắm thông tin qua một kênh liên lạc đơn giản.",
+  "create": "Tạo thông báo",
+  "fields": {
+    "title": "Tiêu đề",
+    "titlePlaceholder": "Bảo trì hệ thống cấp nước",
+    "audience": "Đối tượng",
+    "message": "Nội dung",
+    "messagePlaceholder": "Nêu nội dung cập nhật, thời gian và hướng dẫn cho người bị ảnh hưởng."
+  },
+  "allTenants": "Tất cả khách thuê",
+  "publish": "Đăng thông báo",
+  "saved": "Đã lưu thông báo.",
+  "saveFailed": "Không thể lưu thông báo.",
+  "help": {
+    "title": "Trung tâm hỗ trợ khách thuê",
+    "tip1": "Dùng trang báo lỗi công khai cho các sự cố khẩn cấp.",
+    "tip2": "Thông báo lịch bảo trì và gián đoạn dịch vụ trước khi bắt đầu.",
+    "tip3": "Tổng hợp các câu hỏi lặp lại thành câu trả lời nhanh để nhân viên phản hồi nhanh hơn."
+  },
+  "empty": "Chưa có thông báo. Hãy tạo một thông báo để cập nhật cho khách thuê."
+}

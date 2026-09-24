@@ -23,7 +23,7 @@ interface DeskDraft {
 export default function Desks() {
   const { isManager } = useOrg();
   const { t: tc } = useTranslation('common');
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation('bookings');
   const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg } = useOrg();
   const { user } = useAuth();
@@ -80,14 +80,14 @@ export default function Desks() {
     <div className="max-w-3xl">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">Desks</h1>
+          <h1 className="text-2xl font-semibold text-ink">{t('desks.title')}</h1>
           <p className="mt-1 text-sm text-ink-muted">
-            Bookable desks grouped by zone. A new booking can trigger the &ldquo;Alert when Desk Booking Is Made&rdquo; workflow.
+            {t('desks.subtitle')}
           </p>
         </div>
         {isManager && (
           <Button onClick={() => setDialog({ mode: 'create' })}>
-            <Plus size={16} /> New desk
+            <Plus size={16} /> {t('desks.new')}
           </Button>
         )}
       </div>
@@ -95,7 +95,7 @@ export default function Desks() {
       {deskRows.length === 0 ? (
         <div className="mt-6 rounded-xl border border-dashed border-line bg-white p-8 text-center">
           <Armchair className="mx-auto text-ink-muted" aria-hidden />
-          <p className="mt-2 text-sm text-ink-muted">No desks yet. Add one to start taking bookings.</p>
+          <p className="mt-2 text-sm text-ink-muted">{t('desks.empty')}</p>
         </div>
       ) : (
         <ul className="mt-6 space-y-2">
@@ -104,7 +104,7 @@ export default function Desks() {
               <span className="flex items-center gap-2 text-sm font-medium text-ink">
                 <Armchair size={16} className="text-ink-muted" aria-hidden />
                 {resolveI18n(d.name_i18n, lng)}
-                <span className="text-xs font-normal text-ink-muted">Zone: {zoneName(d.zone_id)}</span>
+                <span className="text-xs font-normal text-ink-muted">{t('desks.zone')}: {zoneName(d.zone_id)}</span>
               </span>
               {isManager && (
               <span className="flex items-center gap-3">
@@ -130,13 +130,13 @@ export default function Desks() {
 
       {bookingRows.length > 0 && (
         <section className="mt-6 rounded-xl border border-line bg-white p-4">
-          <h2 className="font-semibold text-ink">Recent bookings</h2>
+          <h2 className="font-semibold text-ink">{t('recent')}</h2>
           <ul className="mt-3 space-y-2">
             {bookingRows.map((b) => (
               <li key={b.id} className="flex items-center justify-between rounded-lg border border-line px-3 py-2 text-sm">
                 <span className="text-ink">
                   {deskName(b.desk_id)}
-                  <span className="text-ink-muted"> · {b.booker_name || 'Someone'}{b.booked_for ? ` · ${b.booked_for}` : ''}</span>
+                  <span className="text-ink-muted"> · {b.booker_name || t('someone')}{b.booked_for ? ` · ${b.booked_for}` : ''}</span>
                 </span>
                 <span className="text-xs text-ink-muted">{formatDate(b.created_at, lng)}</span>
               </li>
@@ -147,7 +147,7 @@ export default function Desks() {
 
       {dialog && (
         <DeskDialog
-          title={dialog.mode === 'create' ? 'New desk' : 'Edit desk'}
+          title={dialog.mode === 'create' ? t('desks.new') : t('desks.edit')}
           initial={dialog.mode === 'edit' ? dialog.desk : null}
           zones={zones}
           lng={lng}
@@ -173,7 +173,7 @@ function BookingPanel({
   userId: string | null;
   onBooked: () => void;
 }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation('bookings');
   const lng = i18n.resolvedLanguage ?? 'en';
   const [deskId, setDeskId] = useState('');
   const [bookerName, setBookerName] = useState('');
@@ -202,19 +202,19 @@ function BookingPanel({
 
   return (
     <section className="mt-6 rounded-xl border border-line bg-white p-4">
-      <h2 className="font-semibold text-ink">Make a booking</h2>
-      <p className="mt-1 text-sm text-ink-muted">Records a desk booking (and fires the desk-booking workflow when wired).</p>
+      <h2 className="font-semibold text-ink">{t('make')}</h2>
+      <p className="mt-1 text-sm text-ink-muted">{t('desks.bookingHint')}</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-4">
         <Select value={deskId} onChange={(e) => setDeskId(e.target.value)}>
-          <option value="">Select desk</option>
+          <option value="">{t('desks.select')}</option>
           {desks.map((d) => (
             <option key={d.id} value={d.id}>{resolveI18n(d.name_i18n, lng)}</option>
           ))}
         </Select>
-        <Input value={bookerName} onChange={(e) => setBookerName(e.target.value)} placeholder="Booker name" />
+        <Input value={bookerName} onChange={(e) => setBookerName(e.target.value)} placeholder={t('bookerName')} />
         <Input type="date" value={bookedFor} onChange={(e) => setBookedFor(e.target.value)} />
         <Button onClick={() => book.mutate()} loading={book.isPending} disabled={!deskId}>
-          <CalendarPlus size={16} /> Book
+          <CalendarPlus size={16} /> {t('book')}
         </Button>
       </div>
     </section>
@@ -242,6 +242,7 @@ function DeskDialog({
   onCancel: () => void;
   onSubmit: (v: DeskDraft) => void;
 }) {
+  const { t } = useTranslation('bookings');
   const [en, setEn] = useState(initial?.name_i18n.en ?? '');
   const [vi, setVi] = useState(initial?.name_i18n.vi ?? '');
   const [zoneId, setZoneId] = useState(initial?.zone_id ?? '');
@@ -259,15 +260,15 @@ function DeskDialog({
         <div className="mt-4 space-y-4">
           <BilingualName en={en} vi={vi} onEn={setEn} onVi={setVi} />
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink">Zone</label>
+            <label className="mb-1 block text-sm font-medium text-ink">{t('desks.zone')}</label>
             <Select value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
-              <option value="">No zone</option>
+              <option value="">{t('desks.noZone')}</option>
               {zones.map((z) => (
                 <option key={z.id} value={z.id}>{resolveI18n(z.name_i18n, lng)}</option>
               ))}
             </Select>
             {zones.length === 0 && (
-              <p className="mt-1 text-xs text-ink-muted">Tip: add locations of kind &ldquo;zone&rdquo; to group desks.</p>
+              <p className="mt-1 text-xs text-ink-muted">{t('desks.zoneTip')}</p>
             )}
           </div>
         </div>

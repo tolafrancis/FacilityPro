@@ -1,0 +1,23 @@
+{
+  "title": "Tenant experience",
+  "subtitle": "Share updates, answer FAQs, and keep tenants informed with a simple communication hub.",
+  "create": "Create a broadcast",
+  "fields": {
+    "title": "Title",
+    "titlePlaceholder": "Water supply maintenance",
+    "audience": "Audience",
+    "message": "Message",
+    "messagePlaceholder": "Share the update, timing, and any instructions for affected users."
+  },
+  "allTenants": "All tenants",
+  "publish": "Publish update",
+  "saved": "Broadcast saved.",
+  "saveFailed": "Unable to save broadcast.",
+  "help": {
+    "title": "Tenant help center",
+    "tip1": "Use the public fault report page for urgent issues.",
+    "tip2": "Share maintenance windows and service interruptions before they start.",
+    "tip3": "Collect recurring questions into quick answers for faster staff response."
+  },
+  "empty": "No broadcasts yet. Create one to keep tenants updated."
+}

@@ -23,11 +23,11 @@ async function fetchBroadcasts(orgId: string | undefined) {
 }
 
 export default function TenantExperience() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation('tenant');
   const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg } = useOrg();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({ title: '', audience: 'All tenants', message: '' });
+  const [form, setForm] = useState({ title: '', audience: '', message: '' });
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -51,15 +51,15 @@ export default function TenantExperience() {
       const { error } = await supabase.from('fp_broadcasts').insert({
         org_id: currentOrg.id,
         title: form.title,
-        audience: form.audience,
+        audience: form.audience.trim() || t('allTenants'),
         message: form.message,
       });
       if (error) throw error;
-      setForm({ title: '', audience: 'All tenants', message: '' });
-      setMessage('Broadcast saved.');
+      setForm({ title: '', audience: '', message: '' });
+      setMessage(t('saved'));
       await queryClient.invalidateQueries({ queryKey: ['broadcasts', currentOrg.id] });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to save broadcast.');
+      setMessage(error instanceof Error ? error.message : t('saveFailed'));
     } finally {
       setBusy(false);
     }
@@ -68,45 +68,45 @@ export default function TenantExperience() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Tenant experience</h1>
+        <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
         <p className="mt-2 max-w-2xl text-sm text-ink-muted">
-          Share updates, answer FAQs, and keep tenants informed with a simple communication hub.
+          {t('subtitle')}
         </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <form onSubmit={submit} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-ink">Create a broadcast</h2>
+          <h2 className="text-lg font-semibold text-ink">{t('create')}</h2>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Title</label>
-              <Input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Water supply maintenance" required />
+              <label className="mb-1 block text-sm font-medium text-ink">{t('fields.title')}</label>
+              <Input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={t('fields.titlePlaceholder')} required />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Audience</label>
-              <Input value={form.audience} onChange={(event) => setForm({ ...form, audience: event.target.value })} placeholder="All tenants" />
+              <label className="mb-1 block text-sm font-medium text-ink">{t('fields.audience')}</label>
+              <Input value={form.audience} onChange={(event) => setForm({ ...form, audience: event.target.value })} placeholder={t('allTenants')} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Message</label>
-              <textarea value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} rows={5} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" placeholder="Share the update, timing, and any instructions for affected users." />
+              <label className="mb-1 block text-sm font-medium text-ink">{t('fields.message')}</label>
+              <textarea value={form.message} onChange={(event) => setForm({ ...form, message: event.target.value })} rows={5} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" placeholder={t('fields.messagePlaceholder')} />
             </div>
-            <Button type="submit" loading={busy}>Publish update</Button>
+            <Button type="submit" loading={busy}>{t('publish')}</Button>
             {message && <p className="text-sm text-brand">{message}</p>}
           </div>
         </form>
 
         <div className="space-y-4">
           <div className="rounded-2xl border border-line bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-ink">Tenant help center</h2>
+            <h2 className="text-lg font-semibold text-ink">{t('help.title')}</h2>
             <ul className="mt-3 space-y-2 text-sm text-ink-muted">
-              <li className="rounded-lg border border-line bg-surface px-3 py-2">Use the public fault report page for urgent issues.</li>
-              <li className="rounded-lg border border-line bg-surface px-3 py-2">Share maintenance windows and service interruptions before they start.</li>
-              <li className="rounded-lg border border-line bg-surface px-3 py-2">Collect recurring questions into quick answers for faster staff response.</li>
+              <li className="rounded-lg border border-line bg-surface px-3 py-2">{t('help.tip1')}</li>
+              <li className="rounded-lg border border-line bg-surface px-3 py-2">{t('help.tip2')}</li>
+              <li className="rounded-lg border border-line bg-surface px-3 py-2">{t('help.tip3')}</li>
             </ul>
           </div>
           {broadcasts.length === 0 && (
             <div className="rounded-2xl border border-dashed border-line bg-white p-8 text-center text-sm text-ink-muted">
-              No broadcasts yet. Create one to keep tenants updated.
+              {t('empty')}
             </div>
           )}
           {broadcasts.map((item) => (

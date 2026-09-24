@@ -1,0 +1,23 @@
+{
+  "title": "Chấm công kỹ thuật viên",
+  "subtitle": "Theo dõi giờ vào và ra của kỹ thuật viên để giám sát biết ai đang có mặt tại hiện trường và khi nào.",
+  "log": "Ghi chấm công",
+  "technician": "Kỹ thuật viên",
+  "select": "Chọn…",
+  "location": "Địa điểm / vị trí",
+  "searchLocations": "Tìm vị trí…",
+  "mainSite": "Địa điểm chính",
+  "mainSiteUnspecified": "Địa điểm chính (không xác định)",
+  "action": "Hành động",
+  "actions": {
+    "Checked in": "Đã vào ca",
+    "Checked out": "Đã ra ca"
+  },
+  "note": "Ghi chú",
+  "notePlaceholder": "Vị trí, công việc hoặc thông tin bàn giao",
+  "save": "Lưu",
+  "saved": "Đã lưu chấm công.",
+  "saveFailed": "Không thể lưu chấm công.",
+  "empty": "Chưa có dữ liệu chấm công. Hãy bắt đầu ghi nhận để dễ theo dõi.",
+  "noNote": "Không có ghi chú."
+}

@@ -21,17 +21,10 @@ import { resolveI18n } from '../i18n/resolver';
 import type { DocumentEntityType, DocumentRecord } from '../lib/database.types';
 import { signedUrl } from '../lib/media';
 
-const ENTITY_TYPES: { value: DocumentEntityType; label: string }[] = [
-  { value: 'asset', label: 'Asset' },
-  { value: 'work_order', label: 'Work order' },
-  { value: 'vendor', label: 'Vendor' },
-  { value: 'contract', label: 'Contract' },
-  { value: 'location', label: 'Location' },
-  { value: 'part', label: 'Part' },
-];
+const ENTITY_TYPES: DocumentEntityType[] = ['asset', 'work_order', 'vendor', 'contract', 'location', 'part'];
 
 export default function Documents() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation('documents');
   const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg, role } = useOrg();
   // Adding documents is a manager task (RLS enforces it too); everyone else
@@ -60,7 +53,7 @@ export default function Documents() {
   const entityOptions = (type: DocumentEntityType | '') => {
     switch (type) {
       case 'asset':
-        return assets.map((a) => ({ id: a.id, label: resolveI18n(a.name_i18n, 'en') }));
+        return assets.map((a) => ({ id: a.id, label: resolveI18n(a.name_i18n, lng) }));
       case 'work_order':
         return workOrders.map((w) => ({ id: w.id, label: w.title ?? w.id.slice(0, 8) }));
       case 'vendor':
@@ -68,9 +61,9 @@ export default function Documents() {
       case 'contract':
         return contracts.map((c) => ({ id: c.id, label: c.title }));
       case 'location':
-        return locations.map((l) => ({ id: l.id, label: resolveI18n(l.name_i18n, 'en') }));
+        return locations.map((l) => ({ id: l.id, label: resolveI18n(l.name_i18n, lng) }));
       case 'part':
-        return parts.map((p) => ({ id: p.id, label: resolveI18n(p.name_i18n, 'en') }));
+        return parts.map((p) => ({ id: p.id, label: resolveI18n(p.name_i18n, lng) }));
       default:
         return [];
     }
@@ -78,7 +71,7 @@ export default function Documents() {
 
   const entityLabel = (type: string, id: string) => {
     const found = entityOptions(type as DocumentEntityType).find((o) => o.id === id);
-    const typeLabel = ENTITY_TYPES.find((t) => t.value === type)?.label ?? type;
+    const typeLabel = t(`entity.${type}`, { defaultValue: type });
     return `${typeLabel}: ${found?.label ?? id.slice(0, 8)}`;
   };
 
@@ -92,7 +85,7 @@ export default function Documents() {
   const openAttachment = async (path: string) => {
     const url = await signedUrl(path);
     if (url) window.open(url, '_blank', 'noopener');
-    else setMessage('You do not have access to this file, or it no longer exists.');
+    else setMessage(t('noAccess'));
   };
 
   const submit = async (event: FormEvent) => {
@@ -124,8 +117,8 @@ export default function Documents() {
         .insert({
           org_id: currentOrg.id,
           title: form.title,
-          category: form.category || 'General',
-          owner: form.owner || 'Operations',
+          category: form.category || t('defaults.category'),
+          owner: form.owner || t('defaults.owner'),
           summary: form.summary || null,
           link: form.link || null,
           file_name: fileName,
@@ -156,11 +149,11 @@ export default function Documents() {
       setFile(null);
       setLinkEntityType('');
       setLinkEntityId('');
-      setMessage('Document saved successfully.');
+      setMessage(t('saved'));
       await queryClient.invalidateQueries({ queryKey: ['documents', currentOrg.id] });
       await queryClient.invalidateQueries({ queryKey: ['document_links_all', currentOrg.id] });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to save document.');
+      setMessage(error instanceof Error ? error.message : t('saveFailed'));
     } finally {
       setBusy(false);
     }
@@ -169,46 +162,46 @@ export default function Documents() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Document repository</h1>
+        <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
         <p className="mt-2 max-w-2xl text-sm text-ink-muted">
-          Keep SOPs, manuals, and site guides in one place so technicians can access the correct document when they need it.
+          {t('subtitle')}
         </p>
       </div>
 
       <div className={canManage ? 'grid gap-6 lg:grid-cols-[0.95fr_1.05fr]' : 'max-w-3xl'}>
         {canManage && (
         <form onSubmit={submit} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-ink">Add a document</h2>
+          <h2 className="text-lg font-semibold text-ink">{t('add')}</h2>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Title</label>
-              <Input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Boiler room SOP" required />
+              <label className="mb-1 block text-sm font-medium text-ink">{t('fields.title')}</label>
+              <Input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder={t('fields.titlePlaceholder')} required />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium text-ink">Category</label>
-                <Input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} placeholder="Safety" />
+                <label className="mb-1 block text-sm font-medium text-ink">{t('fields.category')}</label>
+                <Input value={form.category} onChange={(event) => setForm({ ...form, category: event.target.value })} placeholder={t('fields.categoryPlaceholder')} />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-ink">Owner</label>
-                <Input value={form.owner} onChange={(event) => setForm({ ...form, owner: event.target.value })} placeholder="Facilities team" />
+                <label className="mb-1 block text-sm font-medium text-ink">{t('fields.owner')}</label>
+                <Input value={form.owner} onChange={(event) => setForm({ ...form, owner: event.target.value })} placeholder={t('fields.ownerPlaceholder')} />
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Summary</label>
-              <textarea value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} rows={4} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" placeholder="Describe the latest revision and who should use it." />
+              <label className="mb-1 block text-sm font-medium text-ink">{t('fields.summary')}</label>
+              <textarea value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} rows={4} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" placeholder={t('fields.summaryPlaceholder')} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Link or reference</label>
-              <Input value={form.link} onChange={(event) => setForm({ ...form, link: event.target.value })} placeholder="https://... or SharePoint folder" />
+              <label className="mb-1 block text-sm font-medium text-ink">{t('fields.link')}</label>
+              <Input value={form.link} onChange={(event) => setForm({ ...form, link: event.target.value })} placeholder={t('fields.linkPlaceholder')} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Upload file</label>
+              <label className="mb-1 block text-sm font-medium text-ink">{t('fields.file')}</label>
               <input type="file" onChange={(event) => setFile(event.target.files?.[0] ?? null)} className="block w-full text-sm text-ink-muted file:mr-4 file:rounded-full file:border-0 file:bg-brand/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand" />
             </div>
             <div className="rounded-lg border border-line bg-surface p-3">
-              <p className="text-sm font-medium text-ink">Link to a record (optional)</p>
-              <p className="mt-0.5 text-xs text-ink-muted">So this document shows up on the asset, vendor, or work order it actually belongs to.</p>
+              <p className="text-sm font-medium text-ink">{t('linkRecord')}</p>
+              <p className="mt-0.5 text-xs text-ink-muted">{t('linkRecordHint')}</p>
               <div className="mt-2 grid gap-2 sm:grid-cols-2">
                 <select
                   value={linkEntityType}
@@ -218,9 +211,9 @@ export default function Documents() {
                   }}
                   className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
                 >
-                  <option value="">No link</option>
-                  {ENTITY_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
+                  <option value="">{t('noLink')}</option>
+                  {ENTITY_TYPES.map((type) => (
+                    <option key={type} value={type}>{t(`entity.${type}`)}</option>
                   ))}
                 </select>
                 {linkEntityType && (
@@ -228,24 +221,24 @@ export default function Documents() {
                     value={linkEntityId}
                     onChange={setLinkEntityId}
                     options={entityOptions(linkEntityType)}
-                    placeholder="Search…"
-                    emptyLabel="None"
+                    placeholder={t('search')}
+                    emptyLabel={t('none')}
                   />
                 )}
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-ink">Who can see it</label>
+              <label className="mb-1 block text-sm font-medium text-ink">{t('fields.visibility')}</label>
               <select
                 value={form.visibility}
                 onChange={(event) => setForm({ ...form, visibility: event.target.value as DocumentRecord['visibility'] })}
                 className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
               >
-                <option value="staff">Staff only (admins, managers, technicians)</option>
-                <option value="everyone">Everyone, including occupants and vendors</option>
+                <option value="staff">{t('visibility.staffLong')}</option>
+                <option value="everyone">{t('visibility.everyoneLong')}</option>
               </select>
             </div>
-            <Button type="submit" loading={busy}>Save document</Button>
+            <Button type="submit" loading={busy}>{t('save')}</Button>
             {message && <p className="text-sm text-brand">{message}</p>}
           </div>
         </form>
@@ -254,7 +247,7 @@ export default function Documents() {
         <div className="space-y-4">
           {documents.length === 0 && (
             <div className="rounded-2xl border border-dashed border-line bg-white p-8 text-center text-sm text-ink-muted">
-              No documents added yet. Start by uploading a guide or linking to an internal folder.
+              {t('empty')}
             </div>
           )}
           {documents.map((doc) => {
@@ -272,7 +265,7 @@ export default function Documents() {
                 <div className="mt-3 flex flex-wrap gap-3 text-sm">
                   {doc.link && /^https?:\/\//i.test(doc.link) && (
                     <a href={safeHref(doc.link)} target="_blank" rel="noopener noreferrer" className="font-medium text-brand">
-                      Open reference
+                      {t('openReference')}
                     </a>
                   )}
                   {doc.file_path && (
@@ -281,12 +274,12 @@ export default function Documents() {
                       onClick={() => void openAttachment(doc.file_path!)}
                       className="font-medium text-brand hover:text-brand-600"
                     >
-                      Download {doc.file_name ?? 'attachment'}
+                      {t('download', { name: doc.file_name ?? t('attachment') })}
                     </button>
                   )}
                   {canManage && (
                     <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs text-ink-muted">
-                      {doc.visibility === 'everyone' ? 'Visible to everyone' : 'Staff only'}
+                      {doc.visibility === 'everyone' ? t('visibility.everyone') : t('visibility.staff')}
                     </span>
                   )}
                 </div>

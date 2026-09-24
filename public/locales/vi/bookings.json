@@ -1,0 +1,33 @@
+{
+  "recent": "Lượt đặt gần đây",
+  "someone": "Ai đó",
+  "make": "Đặt chỗ",
+  "bookerName": "Tên người đặt",
+  "book": "Đặt",
+  "desks": {
+    "title": "Bàn làm việc",
+    "subtitle": "Bàn có thể đặt, nhóm theo khu vực. Lượt đặt mới có thể kích hoạt quy trình “Cảnh báo khi có lượt đặt bàn”.",
+    "new": "Thêm bàn",
+    "edit": "Sửa bàn",
+    "empty": "Chưa có bàn. Thêm bàn để bắt đầu nhận đặt chỗ.",
+    "zone": "Khu vực",
+    "noZone": "Không có khu vực",
+    "zoneTip": "Mẹo: thêm vị trí loại “khu vực” để nhóm các bàn.",
+    "bookingHint": "Ghi nhận lượt đặt bàn (và kích hoạt quy trình đặt bàn nếu đã thiết lập).",
+    "select": "Chọn bàn"
+  },
+  "facilities": {
+    "title": "Tiện ích",
+    "subtitle": "Tiện ích chung (phòng họp, phòng gym…). Lượt đặt mới có thể kích hoạt quy trình “Cảnh báo sau khi đặt tiện ích”.",
+    "new": "Thêm tiện ích",
+    "edit": "Sửa tiện ích",
+    "empty": "Chưa có tiện ích. Thêm tiện ích để bắt đầu nhận đặt chỗ.",
+    "seats": "{{count}} chỗ",
+    "location": "Vị trí",
+    "noLocation": "Không có vị trí",
+    "capacity": "Sức chứa",
+    "capacityPlaceholder": "Số chỗ (không bắt buộc)",
+    "bookingHint": "Ghi nhận lượt đặt tiện ích (và kích hoạt quy trình đặt tiện ích nếu đã thiết lập).",
+    "select": "Chọn tiện ích"
+  }
+}

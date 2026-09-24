@@ -1,0 +1,33 @@
+{
+  "recent": "Recent bookings",
+  "someone": "Someone",
+  "make": "Make a booking",
+  "bookerName": "Booker name",
+  "book": "Book",
+  "desks": {
+    "title": "Desks",
+    "subtitle": "Bookable desks grouped by zone. A new booking can trigger the “Alert when Desk Booking Is Made” workflow.",
+    "new": "New desk",
+    "edit": "Edit desk",
+    "empty": "No desks yet. Add one to start taking bookings.",
+    "zone": "Zone",
+    "noZone": "No zone",
+    "zoneTip": "Tip: add locations of kind “zone” to group desks.",
+    "bookingHint": "Records a desk booking (and fires the desk-booking workflow when set up).",
+    "select": "Select desk"
+  },
+  "facilities": {
+    "title": "Facilities",
+    "subtitle": "Common facilities (meeting rooms, gyms, etc.). A new booking can trigger the “Alert after Facilities Booking” workflow.",
+    "new": "New facility",
+    "edit": "Edit facility",
+    "empty": "No facilities yet. Add one to start taking bookings.",
+    "seats": "seats {{count}}",
+    "location": "Location",
+    "noLocation": "No location",
+    "capacity": "Capacity",
+    "capacityPlaceholder": "Seats (optional)",
+    "bookingHint": "Records a facility booking (and fires the facilities-booking workflow when set up).",
+    "select": "Select facility"
+  }
+}

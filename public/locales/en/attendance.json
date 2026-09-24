@@ -1,0 +1,23 @@
+{
+  "title": "Technician attendance",
+  "subtitle": "Track technician check-in and check-out activity so supervisors can see who is on site and when.",
+  "log": "Log attendance",
+  "technician": "Technician",
+  "select": "Select…",
+  "location": "Site / location",
+  "searchLocations": "Search locations…",
+  "mainSite": "Main site",
+  "mainSiteUnspecified": "Main site (unspecified)",
+  "action": "Action",
+  "actions": {
+    "Checked in": "Checked in",
+    "Checked out": "Checked out"
+  },
+  "note": "Note",
+  "notePlaceholder": "Location, task, or handoff detail",
+  "save": "Save entry",
+  "saved": "Attendance saved.",
+  "saveFailed": "Unable to save attendance.",
+  "empty": "No attendance records yet. Start logging technician activity for better visibility.",
+  "noNote": "No note provided."
+}
