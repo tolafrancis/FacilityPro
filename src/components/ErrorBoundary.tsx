@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { reportError } from '../lib/monitoring';
 
 interface Props {
@@ -51,27 +52,34 @@ export default class ErrorBoundary extends Component<Props, State> {
       if (isChunkLoadError(this.state.error) && sessionStorage.getItem(RELOAD_FLAG)) {
         return null;
       }
-      return (
-        <div className="grid min-h-screen place-items-center bg-surface p-6 text-center">
-          <div>
-            <p className="text-lg font-semibold text-ink">Something went wrong.</p>
-            <p className="mt-2 max-w-sm text-sm text-ink-muted">
-              This usually clears up with a reload — a new version may have just been deployed.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                sessionStorage.removeItem(RELOAD_FLAG);
-                window.location.reload();
-              }}
-              className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
-            >
-              Reload
-            </button>
-          </div>
-        </div>
-      );
+      return <CrashScreen />;
     }
     return this.props.children;
   }
+}
+
+// Outside Suspense and possibly after a failed translation load, so it must
+// not suspend; the English defaults cover a missing common namespace.
+function CrashScreen() {
+  const { t } = useTranslation('common', { useSuspense: false });
+  return (
+    <div className="grid min-h-screen place-items-center bg-surface p-6 text-center">
+      <div>
+        <p className="text-lg font-semibold text-ink">{t('crash.title', 'Something went wrong.')}</p>
+        <p className="mt-2 max-w-sm text-sm text-ink-muted">
+          {t('crash.body', 'This usually clears up with a reload — a new version may have just been deployed.')}
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            sessionStorage.removeItem(RELOAD_FLAG);
+            window.location.reload();
+          }}
+          className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+        >
+          {t('crash.reload', 'Reload')}
+        </button>
+      </div>
+    </div>
+  );
 }

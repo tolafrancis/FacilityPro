@@ -12,6 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Toaster, { notifyError } from './components/Toaster';
 import { friendlyError } from './lib/ui';
 import { initMonitoring, reportError } from './lib/monitoring';
+import { useTranslation } from 'react-i18next';
 
 void initMonitoring();
 window.addEventListener('unhandledrejection', (e) => reportError(e.reason, { kind: 'unhandledrejection' }));
@@ -69,12 +70,23 @@ const queryClient = new QueryClient({
   }),
 });
 
+// Shown while translations and page chunks load, so it can't suspend itself:
+// until the common namespace arrives it shows only the spinner.
+function LoadingScreen() {
+  const { t, ready } = useTranslation('common', { useSuspense: false });
+  return (
+    <div className="grid min-h-screen place-items-center text-ink-muted" role="status" aria-busy="true">
+      {ready ? t('loading') : '…'}
+    </div>
+  );
+}
+
 const serviceWorkerUrl = `${import.meta.env.BASE_URL}sw.js`;
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <Suspense fallback={<div className="grid min-h-screen place-items-center text-ink-muted">Loading…</div>}>
+      <Suspense fallback={<LoadingScreen />}>
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <AuthProvider>

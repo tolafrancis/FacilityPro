@@ -56,7 +56,8 @@
     "printQr": "Print QR",
     "reportFault": "Report fault",
     "createWorkOrder": "Create work order",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "dismiss": "Dismiss"
   },
   "roles": {
     "super_admin": "Super admin",
@@ -175,5 +176,10 @@
     "title": "Not found",
     "body": "This page or record doesn't exist, or you don't have access to it.",
     "back": "Back to dashboard"
+  },
+  "crash": {
+    "title": "Something went wrong.",
+    "body": "This usually clears up with a reload — a new version may have just been deployed.",
+    "reload": "Reload"
   }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Minimal app-wide error toasts. `notifyError()` can be called from anywhere
@@ -18,6 +19,7 @@ interface Toast {
 }
 
 export default function Toaster() {
+  const { t } = useTranslation('common');
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   useEffect(() => {
@@ -38,18 +40,18 @@ export default function Toaster() {
       aria-live="assertive"
       className="pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex flex-col items-center gap-2 px-4"
     >
-      {toasts.map((t) => (
+      {toasts.map((toast) => (
         <div
-          key={t.id}
+          key={toast.id}
           role="alert"
           className="pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-lg border border-status-crit/30 bg-white px-4 py-3 text-sm text-ink shadow-lg"
         >
-          <span className="flex-1">{t.message}</span>
+          <span className="flex-1">{toast.message}</span>
           <button
             type="button"
-            onClick={() => setToasts((list) => list.filter((x) => x.id !== t.id))}
+            onClick={() => setToasts((list) => list.filter((x) => x.id !== toast.id))}
             className="text-ink-muted hover:text-ink"
-            aria-label="Dismiss"
+            aria-label={t('actions.dismiss')}
           >
             <X size={16} />
           </button>

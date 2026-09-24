@@ -56,7 +56,8 @@
     "printQr": "In mã QR",
     "reportFault": "Báo cáo sự cố",
     "createWorkOrder": "Tạo lệnh công việc",
-    "viewAll": "Xem tất cả"
+    "viewAll": "Xem tất cả",
+    "dismiss": "Đóng"
   },
   "roles": {
     "super_admin": "Quản trị cấp cao",
@@ -175,5 +176,10 @@
     "title": "Không tìm thấy",
     "body": "Trang hoặc bản ghi này không tồn tại, hoặc bạn không có quyền truy cập.",
     "back": "Về trang tổng quan"
+  },
+  "crash": {
+    "title": "Đã xảy ra lỗi.",
+    "body": "Thường chỉ cần tải lại trang là được — có thể ứng dụng vừa được cập nhật phiên bản mới.",
+    "reload": "Tải lại"
   }
 }
