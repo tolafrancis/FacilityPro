@@ -1,6 +1,6 @@
-# FacilitySpace MQTT bridge worker.
-# Build:  docker build -t facilityspace-mqtt-bridge ./mqtt-bridge
-# Run:    docker run --env-file mqtt-bridge/.env facilityspace-mqtt-bridge
+# FacilityPro MQTT bridge worker.
+# Build:  docker build -t facilitypro-mqtt-bridge ./mqtt-bridge
+# Run:    docker run --env-file mqtt-bridge/.env facilitypro-mqtt-bridge
 FROM node:20-alpine
 
 WORKDIR /app

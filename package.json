@@ -1,9 +1,9 @@
 {
-  "name": "facilityspace",
+  "name": "facilitypro",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "FacilitySpace - multilingual CMMS (Phase 0 foundation)",
+  "description": "FacilityPro - multilingual CMMS (Phase 0 foundation)",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

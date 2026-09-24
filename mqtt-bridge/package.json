@@ -1,9 +1,9 @@
 {
-  "name": "facilityspace-mqtt-bridge",
+  "name": "facilitypro-mqtt-bridge",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Persistent worker that subscribes to MQTT brokers configured per device and forwards messages to FacilitySpace's fp_device_ingest RPC.",
+  "description": "Persistent worker that subscribes to MQTT brokers configured per device and forwards messages to FacilityPro's fp_device_ingest RPC.",
   "main": "index.mjs",
   "scripts": {
     "start": "node --env-file-if-exists=.env index.mjs",

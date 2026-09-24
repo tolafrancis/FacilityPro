@@ -894,8 +894,8 @@ function IntegrationsSection() {
       </section>
 
       {([
-        ['whatsapp', 'WhatsApp', 'No WhatsApp number is connected. Contact FacilitySpace support to connect your business number; replies to WhatsApp conversations can\'t be delivered until then.'],
-        ['zalo', 'Zalo', 'No Zalo Official Account is connected. Contact FacilitySpace support to connect your OA; replies to Zalo conversations can\'t be delivered until then.'],
+        ['whatsapp', 'WhatsApp', 'No WhatsApp number is connected. Contact FacilityPro support to connect your business number; replies to WhatsApp conversations can\'t be delivered until then.'],
+        ['zalo', 'Zalo', 'No Zalo Official Account is connected. Contact FacilityPro support to connect your OA; replies to Zalo conversations can\'t be delivered until then.'],
       ] as const).map(([channel, label, empty]) => {
         const connected = (channels.data ?? []).filter((c) => c.channel === channel && c.active);
         return (

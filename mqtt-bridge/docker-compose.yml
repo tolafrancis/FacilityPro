@@ -1,4 +1,4 @@
-# FacilitySpace MQTT bridge.
+# FacilityPro MQTT bridge.
 #   cd mqtt-bridge
 #   cp .env.example .env   # fill SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
 #   docker compose up -d
@@ -8,8 +8,8 @@
 services:
   mqtt-bridge:
     build: .
-    image: facilityspace-mqtt-bridge
-    container_name: facilityspace-mqtt-bridge
+    image: facilitypro-mqtt-bridge
+    container_name: facilitypro-mqtt-bridge
     restart: unless-stopped
     env_file:
       - .env

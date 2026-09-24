@@ -1,6 +1,6 @@
 // supabase/functions/process-outbox/index.ts
 //
-// Delivers pending FacilitySpace email notifications from fp_notification_outbox.
+// Delivers pending FacilityPro email notifications from fp_notification_outbox.
 // This is a standalone Supabase Edge Function (Deno) — it is NOT bundled with
 // the web app and does not affect the frontend build.
 //
@@ -9,7 +9,7 @@
 //
 // Secrets (set once):
 //   supabase secrets set RESEND_API_KEY=re_xxx
-//   supabase secrets set OUTBOX_FROM="FacilitySpace <notifications@yourdomain.com>"
+//   supabase secrets set OUTBOX_FROM="FacilityPro <notifications@yourdomain.com>"
 //   supabase secrets set APP_URL=https://app.yourdomain.com   # base URL for links in emails (invites)
 //   # For SMS (optional):
 //   supabase secrets set TWILIO_ACCOUNT_SID=ACxxx
@@ -145,7 +145,7 @@ async function deliver(row: OutboxRow, supabase: SupabaseClient): Promise<void> 
     await sendPush(supabase, row.to_address, row.subject, row.body ?? row.subject);
   } else {
     if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not set');
-    if (!OUTBOX_FROM) throw new Error('OUTBOX_FROM not set (e.g. "FacilitySpace <notifications@yourdomain.com>")');
+    if (!OUTBOX_FROM) throw new Error('OUTBOX_FROM not set (e.g. "FacilityPro <notifications@yourdomain.com>")');
     await sendEmail(row.to_address, row.subject, row.body ?? row.subject);
   }
 }

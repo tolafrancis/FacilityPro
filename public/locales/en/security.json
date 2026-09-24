@@ -29,7 +29,7 @@
   },
   "push": {
     "title": "Push notifications",
-    "hint": "Get browser/phone push alerts even when FacilitySpace is closed.",
+    "hint": "Get browser/phone push alerts even when FacilityPro is closed.",
     "toggle": "Enable push on this device"
   }
 }

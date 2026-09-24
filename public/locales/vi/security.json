@@ -29,7 +29,7 @@
   },
   "push": {
     "title": "Thông báo đẩy",
-    "hint": "Nhận thông báo đẩy trên trình duyệt/điện thoại ngay cả khi đã đóng FacilitySpace.",
+    "hint": "Nhận thông báo đẩy trên trình duyệt/điện thoại ngay cả khi đã đóng FacilityPro.",
     "toggle": "Bật thông báo đẩy trên thiết bị này"
   }
 }

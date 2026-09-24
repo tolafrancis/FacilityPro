@@ -80,14 +80,14 @@ and your broker). To rebuild after a code change: `docker compose up -d --build`
 
 ### systemd (bare-metal / VM, no Docker)
 
-Put the repo's `mqtt-bridge/` at `/opt/facilityspace/mqtt-bridge`, run
+Put the repo's `mqtt-bridge/` at `/opt/facilitypro/mqtt-bridge`, run
 `npm install --omit=dev`, create `.env`, then:
 
 ```bash
-sudo cp systemd/facilityspace-mqtt-bridge.service /etc/systemd/system/
+sudo cp systemd/facilitypro-mqtt-bridge.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now facilityspace-mqtt-bridge
-journalctl -u facilityspace-mqtt-bridge -f
+sudo systemctl enable --now facilitypro-mqtt-bridge
+journalctl -u facilitypro-mqtt-bridge -f
 ```
 
 Edit `User`/`WorkingDirectory`/`ExecStart` in the unit if your paths differ.

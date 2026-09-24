@@ -45,13 +45,17 @@ select t.check('the hourly health check emails platform admins about each proble
   :'r' = 'ok:1'
   and (select count(*) from fp_notification_outbox
        where to_address = 'ops@platform.test' and subject in (
-         'FacilitySpace: outbox failed needs attention',
-         'FacilitySpace: outbox backlog needs attention',
-         'FacilitySpace: workflow failures needs attention')) = 3);
+         'FacilityPro: outbox failed needs attention',
+         'FacilityPro: outbox backlog needs attention',
+         'FacilityPro: workflow failures needs attention')) = 3);
 
 select t.run('service_role', null, $q$select fp_run_job('check_job_health')$q$);
 select t.check('...and does not repeat the same alert within 6 hours',
   (select count(*) from fp_notification_outbox
    where to_address = 'ops@platform.test' and subject like '%needs attention' and subject not like '%job%') = 3);
+
+select t.check('0078: no database function still uses the former product name',
+  not exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+              where n.nspname = 'public' and p.prosrc like '%FacilitySpace%'));
 
 \ir _report.sql

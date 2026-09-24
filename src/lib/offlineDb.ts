@@ -21,6 +21,8 @@ export interface QueuedWrite {
   error?: string;
 }
 
+// Kept from the product's former name: renaming the IndexedDB database would
+// strand offline edits that devices haven't synced yet.
 const DB_NAME = 'facilityspace';
 const STORE = 'outbox';
 

@@ -109,7 +109,7 @@ export default function Landing() {
             F
           </div>
           <div>
-            <p className="text-lg font-semibold">FacilitySpace</p>
+            <p className="text-lg font-semibold">FacilityPro</p>
             <p className="text-sm text-ink-muted">Operations made simple</p>
           </div>
         </div>
@@ -141,7 +141,7 @@ export default function Landing() {
               Bring maintenance, requests, and assets into one reliable command center.
             </h1>
             <p className="mt-5 text-lg leading-8 text-ink-muted">
-              FacilitySpace helps operations leaders cut response times, keep assets healthy, and give teams a single place to work faster with less friction.
+              FacilityPro helps operations leaders cut response times, keep assets healthy, and give teams a single place to work faster with less friction.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a href="#demo" className="inline-flex items-center justify-center rounded-lg bg-brand px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-600">
@@ -235,7 +235,7 @@ export default function Landing() {
         <section id="resources" className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
           <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Resources</p>
-            <h2 className="mt-3 text-2xl font-semibold text-ink">Everything you need to get more from FacilitySpace.</h2>
+            <h2 className="mt-3 text-2xl font-semibold text-ink">Everything you need to get more from FacilityPro.</h2>
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               <a href="#demo" className="rounded-2xl border border-line p-5 hover:border-brand hover:bg-surface">
                 <p className="font-semibold text-ink">Guides & docs</p>
@@ -257,7 +257,7 @@ export default function Landing() {
           <div className="grid gap-8 rounded-3xl border border-line bg-white p-8 shadow-sm lg:grid-cols-[0.8fr_1.2fr]">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Request a demo</p>
-              <h2 className="mt-3 text-3xl font-semibold text-ink">See how FacilitySpace fits your operation.</h2>
+              <h2 className="mt-3 text-3xl font-semibold text-ink">See how FacilityPro fits your operation.</h2>
               <p className="mt-3 text-base leading-7 text-ink-muted">
                 Share a few details and our team will reach out to show you how the platform can support your maintenance and facilities workflow.
               </p>
@@ -318,7 +318,7 @@ export default function Landing() {
 
       <footer className="border-t border-line bg-white/70">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-6 text-sm text-ink-muted lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <p>© 2026 FacilitySpace. Built for modern facilities teams.</p>
+          <p>© 2026 FacilityPro. Built for modern facilities teams.</p>
           <div className="flex gap-4">
             <a href="#pricing" className="hover:text-brand">Pricing</a>
             <a href="#resources" className="hover:text-brand">Resources</a>

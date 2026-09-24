@@ -1,4 +1,4 @@
-# FacilitySpace operations runbook
+# FacilityPro operations runbook
 
 Steps that live outside the code: checking production matches the
 migrations, backups and restores, email deliverability and monitoring.
@@ -46,7 +46,7 @@ migration on a fresh database plus the security suites on each push.
 2. **Storage files aren't in database backups.** Copy them off-site:
    ```bash
    SUPABASE_URL=https://<ref>.supabase.co SUPABASE_SERVICE_ROLE_KEY=<key> \
-     node scripts/backup-storage.mjs /backups/facilityspace-storage
+     node scripts/backup-storage.mjs /backups/facilitypro-storage
    ```
    Run it daily (cron on any always-on machine, or a scheduled CI job with
    the key as a secret). It only downloads new or changed files. Keep the
@@ -104,7 +104,7 @@ not for production.
 3. **Supabase Auth SMTP**: Dashboard → Authentication → Emails → SMTP
    Settings → enable custom SMTP:
    host `smtp.resend.com`, port `465`, user `resend`, password = a Resend API
-   key, sender `FacilitySpace <no-reply@mail.yourdomain.com>`. Then raise
+   key, sender `FacilityPro <no-reply@mail.yourdomain.com>`. Then raise
    the email rate limit (Authentication → Rate Limits) to fit your sign-up
    volume.
 4. **Auth email templates** (English/Vietnamese): Authentication → Emails →
@@ -112,7 +112,7 @@ not for production.
    template (*Confirm signup* ← `confirmation.html`, *Reset password* ←
    `recovery.html`, *Magic link* ← `magic_link.html`, *Change email* ←
    `email_change.html`). They pick the language the user signed up in.
-5. **App notifications**: `supabase secrets set RESEND_API_KEY=… OUTBOX_FROM="FacilitySpace <notifications@mail.yourdomain.com>" APP_URL=https://app.yourdomain.com`.
+5. **App notifications**: `supabase secrets set RESEND_API_KEY=… OUTBOX_FROM="FacilityPro <notifications@mail.yourdomain.com>" APP_URL=https://app.yourdomain.com`.
 6. **Test**: sign up with a Gmail and an Outlook address; both emails should
    arrive in the inbox (not spam). In Gmail, *Show original* should read
    `SPF: PASS`, `DKIM: PASS`, `DMARC: PASS`.

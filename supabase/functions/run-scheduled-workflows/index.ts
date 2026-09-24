@@ -1,6 +1,6 @@
 // supabase/functions/run-scheduled-workflows/index.ts
 //
-// Fires FacilitySpace's time-based workflow triggers (request pending for N
+// Fires FacilityPro's time-based workflow triggers (request pending for N
 // minutes, asset useful life, warranty expiry near) by calling the
 // fp_run_scheduled_workflows() RPC with the service role. Workflow email
 // actions land in fp_notification_outbox; deploy/schedule process-outbox to

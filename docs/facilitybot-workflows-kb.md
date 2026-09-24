@@ -5,7 +5,7 @@
 >
 > **Precision note:** FacilityBot's KB articles are written as task walkthroughs, not as a data‑model spec. The overview page ("Automating Workflows") and the "Configuring New & Existing Workflows" page are thin and do **not** enumerate the full trigger/operator/action catalog. The model in Section A is therefore **reconstructed by aggregating the concrete dropdown labels and fields shown across all 15+ individual articles**. Items that could not be confirmed verbatim are marked *(implied)*.
 
-This document is the reference used to align FacilitySpace's **Create workflow** form (`src/pages/Workflows.tsx`) and its template gallery with FacilityBot's vocabulary.
+This document is the reference used to align FacilityPro's **Create workflow** form (`src/pages/Workflows.tsx`) and its template gallery with FacilityBot's vocabulary.
 
 ---
 
@@ -185,9 +185,9 @@ FacilityBot does not publish a master operator list. Confirmed mechanics:
 
 ---
 
-## (D) How FacilitySpace Maps to This
+## (D) How FacilityPro Maps to This
 
-FacilitySpace's workflow engine (`supabase/migrations/0028_workflow_engine.sql`) stores `trigger_type text`, `conditions jsonb`, `actions jsonb` — flexible enough to represent the full FacilityBot model. The **Create workflow** form in `src/pages/Workflows.tsx` adopts FacilityBot's vocabulary:
+FacilityPro's workflow engine (`supabase/migrations/0028_workflow_engine.sql`) stores `trigger_type text`, `conditions jsonb`, `actions jsonb` — flexible enough to represent the full FacilityBot model. The **Create workflow** form in `src/pages/Workflows.tsx` adopts FacilityBot's vocabulary:
 
 **Events (trigger_type):** `service_request`, `fault_report`, `asset_field`, `chat_with_staff`, `low_sentiment`, `expenditure_budget_exceeded`, `parts_quantity`, `desk_booking`, `facilities_booking`, `sensor_integration`, `meter_reading`, `sor_submitted`, `expenditure_approval`.
 
@@ -216,7 +216,7 @@ The Create workflow form uses **context-aware entity pickers** (mirroring the Se
 - `zone` → **Zone** picker (`fp_locations` of kind `zone`) — for the desk-booking workflow.
 
 ### Gaps / future work
-- **Email subject/body:** FacilityBot exposes only recipients (content system‑generated); FacilitySpace stores a recipient in the action `target` plus an optional free‑text message in `value`. A richer email template editor is future work.
+- **Email subject/body:** FacilityBot exposes only recipients (content system‑generated); FacilityPro stores a recipient in the action `target` plus an optional free‑text message in `value`. A richer email template editor is future work.
 - **Multiple conditions / multiple actions:** the current form supports a single condition and a single action. FacilityBot's "+ Add condition" and multi‑action support are future enhancements.
 - **Remaining backing entities:** Every entity referenced by the 15 workflows now has a table and (where the form needs it) an entity picker. The only FacilityBot Feature still without a table is **Visitors**, which no workflow uses. Assets, meters, and sensors/devices have tables but are still represented as numeric/free-text in the workflow form; bind them to entity pickers when needed.
 ### Execution (wired in `0033_workflow_execution.sql`)

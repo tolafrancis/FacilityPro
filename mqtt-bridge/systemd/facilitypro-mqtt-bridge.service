@@ -1,0 +1,35 @@
+# systemd unit for the FacilityPro MQTT bridge (bare-metal / VM, no Docker).
+#
+# Install:
+#   sudo cp /opt/facilitypro/mqtt-bridge/systemd/facilitypro-mqtt-bridge.service \
+#           /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now facilitypro-mqtt-bridge
+#   sudo systemctl status facilitypro-mqtt-bridge
+#   journalctl -u facilitypro-mqtt-bridge -f
+#
+# Assumes the repo's mqtt-bridge/ is at /opt/facilitypro/mqtt-bridge with deps
+# installed (`npm install --omit=dev`) and a populated .env alongside index.mjs.
+# Adjust WorkingDirectory / User / ExecStart paths to your host.
+
+[Unit]
+Description=FacilityPro MQTT bridge (subscribes brokers, forwards readings to Supabase)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=facilitypro
+WorkingDirectory=/opt/facilitypro/mqtt-bridge
+EnvironmentFile=/opt/facilitypro/mqtt-bridge/.env
+ExecStart=/usr/bin/node index.mjs
+Restart=on-failure
+RestartSec=5
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

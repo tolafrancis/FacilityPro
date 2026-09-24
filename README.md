@@ -1,4 +1,4 @@
-# FacilitySpace — Phase 1 (Core CMMS)
+# FacilityPro — Phase 1 (Core CMMS)
 
 Multilingual (English + Vietnamese) CMMS. Phase 1 makes the platform a usable maintenance system: **a fault can be reported and resolved end-to-end, in Vietnamese, with photo evidence.**
 
@@ -115,7 +115,7 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0075**, in the dash
 > ```
 > supabase functions deploy process-outbox --no-verify-jwt
 > supabase secrets set RESEND_API_KEY=re_xxx
-> supabase secrets set OUTBOX_FROM="FacilitySpace <notifications@yourdomain.com>"
+> supabase secrets set OUTBOX_FROM="FacilityPro <notifications@yourdomain.com>"
 > supabase secrets set APP_URL=https://app.yourdomain.com
 > ```
 >

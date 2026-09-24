@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
         {
           role: 'system',
           content:
-            'You are FacilitySpace Smart Assistant. Return a short summary and 3 bullet-point actions for a maintenance or facilities request. Reply in the language the user wrote in.',
+            'You are FacilityPro Smart Assistant. Return a short summary and 3 bullet-point actions for a maintenance or facilities request. Reply in the language the user wrote in.',
         },
         { role: 'user', content: prompt },
       ],

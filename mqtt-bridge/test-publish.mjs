@@ -1,4 +1,4 @@
-// One-shot test publisher for the FacilitySpace MQTT bridge.
+// One-shot test publisher for the FacilityPro MQTT bridge.
 //
 // Publishes a single sample reading to the broker/topic of a device's saved
 // "Broker connection", so you can watch the whole path light up:
