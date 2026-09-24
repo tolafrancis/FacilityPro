@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,6 +8,7 @@ import { SUPPORTED } from '../i18n';
 import AuthLayout from '../components/AuthLayout';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import { pendingInvite } from '../lib/redirect';
 
 export default function Onboarding() {
   const { t, i18n } = useTranslation('auth');
@@ -16,6 +18,9 @@ export default function Onboarding() {
   const [lng, setLng] = useState(i18n.resolvedLanguage ?? 'en');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Someone who opened an invite before signing up shouldn't end up creating
+  // a separate organisation by mistake.
+  const [invite] = useState(pendingInvite);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -41,6 +46,18 @@ export default function Onboarding() {
 
   return (
     <AuthLayout title={t('onboarding.title')} subtitle={t('onboarding.subtitle')}>
+      {invite && (
+        <div className="mb-5 rounded-lg border border-brand/30 bg-brand/5 p-3 text-sm text-ink">
+          <p>{t('onboarding.pendingInvite')}</p>
+          <Link
+            to={`/invite?token=${encodeURIComponent(invite)}`}
+            className="mt-2 inline-block rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-600"
+          >
+            {t('onboarding.acceptInvite')}
+          </Link>
+          <p className="mt-2 text-ink-muted">{t('onboarding.orCreate')}</p>
+        </div>
+      )}
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-ink">

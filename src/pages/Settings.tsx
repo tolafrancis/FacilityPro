@@ -467,7 +467,7 @@ function TeamSection() {
   const sites = sitesQuery.data ?? [];
   const [email, setEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<Role>('technician');
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [inviteLink, setInviteLink] = useState<{ email: string; link: string } | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [siteAccessFor, setSiteAccessFor] = useState<string | null>(null);
   const [profileFor, setProfileFor] = useState<string | null>(null);
@@ -484,6 +484,7 @@ function TeamSection() {
 
   const changeRole = useMutation({
     mutationFn: async (v: { userId: string; role: Role }) => {
+      setMsg(null);
       const { error } = await supabase.from('fp_users_orgs').update({ role: v.role }).eq('org_id', orgId!).eq('user_id', v.userId);
       if (error) throw error;
     },
@@ -493,6 +494,7 @@ function TeamSection() {
 
   const removeMember = useMutation({
     mutationFn: async (userId: string) => {
+      setMsg(null);
       const { error } = await supabase.from('fp_users_orgs').delete().eq('org_id', orgId!).eq('user_id', userId);
       if (error) throw error;
     },
@@ -502,12 +504,14 @@ function TeamSection() {
 
   const sendInvite = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.from('fp_invites').insert({ org_id: orgId, email, role: inviteRole, invited_by: user?.id ?? null }).select('token').single();
+      setMsg(null);
+      const { data, error } = await supabase.from('fp_invites').insert({ org_id: orgId, email: email.trim(), role: inviteRole, invited_by: user?.id ?? null }).select('email, token').single();
       if (error) throw error;
-      return data.token as string;
+      return data as { email: string; token: string };
     },
-    onSuccess: (token) => {
-      setInviteLink(`${window.location.origin}/invite?token=${token}`);
+    onSuccess: (inv) => {
+      // The database queues the invitation email (migration 0065).
+      setInviteLink({ email: inv.email, link: `${window.location.origin}/invite?token=${inv.token}` });
       setEmail('');
       void queryClient.invalidateQueries({ queryKey: ['invites', orgId] });
     },
@@ -524,6 +528,7 @@ function TeamSection() {
 
   return (
     <div className="space-y-6">
+      {msg && <p role="alert" className="rounded-lg border border-status-crit/30 bg-white p-3 text-sm text-status-crit">{msg}</p>}
       <section className="rounded-xl border border-line bg-white p-4">
         <h2 className="font-semibold text-ink">Members</h2>
         <ul className="mt-3 space-y-2">
@@ -584,17 +589,15 @@ function TeamSection() {
         </div>
         {inviteLink && (
           <div className="mt-3 rounded-lg bg-surface p-3">
-            <p className="text-xs text-ink-muted">Share this invite link:</p>
+            <p className="text-xs text-ink-muted">An invitation email is on its way to {inviteLink.email}. You can also share this link directly:</p>
             <div className="mt-1 flex items-center gap-2">
-              <code className="block flex-1 break-all text-xs text-ink">{inviteLink}</code>
-              <button type="button" onClick={() => void navigator.clipboard?.writeText(inviteLink)} className="text-ink-muted hover:text-brand" aria-label="Copy link">
+              <code className="block flex-1 break-all text-xs text-ink">{inviteLink.link}</code>
+              <button type="button" onClick={() => void navigator.clipboard?.writeText(inviteLink.link)} className="text-ink-muted hover:text-brand" aria-label="Copy link">
                 <Copy size={15} />
               </button>
             </div>
           </div>
         )}
-        {msg && <p className="mt-2 text-sm text-status-crit">{msg}</p>}
-
         {(invites.data ?? []).length > 0 && (
           <div className="mt-4">
             <p className="text-sm font-medium text-ink">Pending invites</p>

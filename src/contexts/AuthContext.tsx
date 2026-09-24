@@ -11,7 +11,9 @@ interface AuthContextValue {
   signUp: (
     email: string,
     password: string,
-    captchaToken?: string
+    captchaToken?: string,
+    /** Where the confirmation email's link lands, e.g. back on an invite. */
+    redirectTo?: string
   ) => Promise<{ error: string | null; needsConfirm: boolean }>;
   signOut: () => Promise<void>;
 }
@@ -42,11 +44,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   };
 
-  const signUp: AuthContextValue['signUp'] = async (email, password, captchaToken) => {
+  const signUp: AuthContextValue['signUp'] = async (email, password, captchaToken, redirectTo) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: captchaToken ? { captchaToken } : undefined,
+      options: { captchaToken, emailRedirectTo: redirectTo },
     });
     return { error: error?.message ?? null, needsConfirm: !!data.user && !data.session };
   };

@@ -76,7 +76,7 @@ supabase db push
 
 **Option B — SQL editor**
 
-Run each file in `supabase/migrations/` **in order, 0001 → 0064**, in the dashboard SQL editor.
+Run each file in `supabase/migrations/` **in order, 0001 → 0065**, in the dashboard SQL editor.
 
 > **Platform admin (required after 0059).** Migration **0059** locks the plan catalogue and subscription activation to platform operators, and makes function EXECUTE an explicit allow-list (new functions in `public` are no longer callable from the API until granted). Make yourself a platform admin once, in the SQL editor:
 >
@@ -96,7 +96,9 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0064**, in the dash
 >
 > Platform admins see every job's status under **Billing → Background jobs** and are emailed when a job is late or failing. Check it once after deploying: every job should turn **Healthy** within an hour. PM due dates use the organisation's time zone (**Settings → Time zone**, default `Asia/Ho_Chi_Minh`).
 >
-> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits, inbox/channels), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
+> **Team & invitations (0065).** An organisation always keeps at least one admin: demoting or removing the last one is refused (promote someone else first). Invitations are emailed to the invitee (see *Email delivery* below for `APP_URL`). In **Authentication → URL Configuration**, set **Site URL** to your app address and add `https://<your domain>/**` to **Redirect URLs**, so the confirmation email of someone signing up from an invitation brings them back to that invitation.
+>
+> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits, inbox/channels, membership), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
 
 > Migration **0008** creates the `fp_media` table **and a private storage bucket `fp-media`** with org-scoped access policies (objects are namespaced by org id; access via signed URLs). Migration **0009** adds `fp_org_members()` used to populate the assignee dropdown. Migrations **0010–0011** add checklists and preventive-maintenance schedules plus the `fp_generate_due_pm()` generator. Migration **0013** alters `fp_pm_schedules` (makes `next_due_at` nullable and adds meter-trigger columns) and **replaces** `fp_generate_due_pm()` to handle meter triggers. Migration **0015** adds a `BEFORE INSERT` trigger on `fp_work_orders` (SLA due-date + auto-assignment), and **0016** adds notification triggers. Migration **0017** adds the email outbox (`fp_notification_outbox`) plus a trigger that enqueues an email when an in-app notification lands for a user who opted in, and **0018** adds the approvals workflow. No manual storage setup is needed.
 
@@ -106,7 +108,10 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0064**, in the dash
 > supabase functions deploy process-outbox --no-verify-jwt
 > supabase secrets set RESEND_API_KEY=re_xxx
 > supabase secrets set OUTBOX_FROM="FacilitySpace <notifications@yourdomain.com>"
+> supabase secrets set APP_URL=https://app.yourdomain.com
 > ```
+>
+> `APP_URL` is the web app's address, used for links in emails. Invitations (migration **0065**) are emailed automatically when an admin invites someone; without `APP_URL` those emails fail and the admin has to copy the link from **Settings → Team** instead.
 >
 > Then schedule it (Dashboard → Edge Functions → Schedules, e.g. every 5 minutes) so the outbox drains. Each user opts in under **Security → Email notifications**. The provider call is isolated in one `sendEmail()` function, so SMTP/SES/Postmark — or SMS/push as new channels — drop in without touching the queue.
 >

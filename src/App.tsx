@@ -6,6 +6,7 @@ import { useOrg } from './contexts/OrgContext';
 import AppShell from './components/AppShell';
 import RequireRole from './components/RequireRole';
 import NotFound from './components/NotFound';
+import { rememberInvite } from './lib/redirect';
 
 // Every page is its own chunk, fetched on first visit rather than bundled
 // into the initial load — the whole app (Financial, Devices, Workflows and
@@ -77,6 +78,14 @@ function OrgLoadError({ onRetry }: { onRetry: () => void }) {
   );
 }
 
+// An invite opened while signed out: remember the token (it must survive
+// sign-up and email confirmation), then sign in or sign up.
+function InviteSignedOut({ next }: { next: string }) {
+  const location = useLocation();
+  rememberInvite(new URLSearchParams(location.search).get('token'));
+  return <Navigate to={`/signin?next=${next}`} replace />;
+}
+
 export default function App() {
   const { session, loading: authLoading } = useAuth();
   const { memberships, loading: orgLoading, error: orgError, refresh: refreshOrgs } = useOrg();
@@ -93,7 +102,7 @@ export default function App() {
           <Route path="/report" element={<PublicReport />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/invite" element={<Navigate to={`/signin?next=${next}`} replace />} />
+          <Route path="/invite" element={<InviteSignedOut next={next} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

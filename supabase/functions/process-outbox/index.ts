@@ -10,6 +10,7 @@
 // Secrets (set once):
 //   supabase secrets set RESEND_API_KEY=re_xxx
 //   supabase secrets set OUTBOX_FROM="FacilitySpace <notifications@yourdomain.com>"
+//   supabase secrets set APP_URL=https://app.yourdomain.com   # base URL for links in emails (invites)
 //   # For SMS (optional):
 //   supabase secrets set TWILIO_ACCOUNT_SID=ACxxx
 //   supabase secrets set TWILIO_AUTH_TOKEN=xxx
@@ -39,6 +40,9 @@ const TWILIO_FROM = Deno.env.get('TWILIO_FROM') ?? '';
 const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY') ?? '';
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY') ?? '';
 const VAPID_SUBJECT = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:ops@example.com';
+// Links in queued messages are written as {{app_url}}/... (migration 0065), so
+// the database never decides which site a platform email points to.
+const APP_URL = (Deno.env.get('APP_URL') ?? '').replace(/\/+$/, '');
 
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
@@ -124,7 +128,14 @@ async function sendPush(
   }
 }
 
+function withLinks(text: string): string {
+  if (!text.includes('{{app_url}}')) return text;
+  if (!APP_URL) throw new Error('APP_URL not set');
+  return text.replaceAll('{{app_url}}', APP_URL);
+}
+
 async function deliver(row: OutboxRow, supabase: SupabaseClient): Promise<void> {
+  row = { ...row, subject: withLinks(row.subject), body: row.body === null ? null : withLinks(row.body) };
   if (row.channel === 'sms') {
     await sendSms(row.to_address, row.body ?? row.subject);
   } else if (row.channel === 'push') {

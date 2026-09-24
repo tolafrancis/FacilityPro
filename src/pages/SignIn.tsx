@@ -6,12 +6,14 @@ import AuthLayout from '../components/AuthLayout';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Turnstile, { captchaEnabled } from '../components/Turnstile';
+import { safeNext } from '../lib/redirect';
 
 export default function SignIn() {
   const { t } = useTranslation('auth');
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const next = safeNext(params.get('next'));
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -40,11 +42,12 @@ export default function SignIn() {
       setError(err);
       return;
     }
-    navigate(params.get('next') ?? '/', { replace: true });
+    navigate(next ?? '/', { replace: true });
   };
 
   return (
     <AuthLayout title={t('signIn.title')}>
+      {next?.startsWith('/invite') && <p className="mb-4 rounded-lg bg-surface p-3 text-sm text-ink">{t('signIn.invited')}</p>}
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className="mb-1 block text-sm font-medium text-ink">{t('signIn.email')}</label>
@@ -72,7 +75,7 @@ export default function SignIn() {
       </form>
       <p className="mt-4 text-center text-sm text-ink-muted">
         {t('signIn.noAccount')}{' '}
-        <Link to="/signup" className="font-medium text-brand">
+        <Link to={next ? `/signup?next=${encodeURIComponent(next)}` : '/signup'} className="font-medium text-brand">
           {t('signIn.signUpLink')}
         </Link>
       </p>
