@@ -1,0 +1,33 @@
+# systemd unit for the FacilityPro edge gateway (bare metal / industrial PC / Raspberry Pi).
+#
+#   sudo cp systemd/facilitypro-iot-gateway.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now facilitypro-iot-gateway
+#   journalctl -u facilitypro-iot-gateway -f
+#
+# Assumes the repo's iot-gateway/ is at /opt/facilitypro/iot-gateway with
+# `npm ci --omit=dev` run and a populated .env next to index.mjs.
+
+[Unit]
+Description=FacilityPro edge gateway (Modbus / MQTT → FacilityPro)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=facilitypro
+# Serial ports (Modbus RTU) usually need the dialout group.
+SupplementaryGroups=dialout
+WorkingDirectory=/opt/facilitypro/iot-gateway
+EnvironmentFile=/opt/facilitypro/iot-gateway/.env
+Environment=BUFFER_FILE=/var/lib/facilitypro-gateway/buffer.json
+StateDirectory=facilitypro-gateway
+ExecStart=/usr/bin/node index.mjs
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

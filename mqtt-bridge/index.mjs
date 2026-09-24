@@ -1,4 +1,4 @@
-// FacilitySpace MQTT bridge worker.
+// FacilityPro MQTT bridge worker (cloud side).
 //
 // The web app is serverless and cannot hold a persistent MQTT socket, so this
 // long-running process does it instead. It periodically reads enabled rows from
@@ -18,6 +18,13 @@
 //   SUPABASE_SERVICE_ROLE_KEY   (required — service role; bypasses RLS, keep secret)
 //   SYNC_INTERVAL_MS            (optional, default 15000) how often config is re-read
 //   HEARTBEAT_MS                (optional, default 60000) min gap between last_connected_at writes
+//   COMMAND_POLL_MS             (optional, default 5000) how often to look for device commands
+//
+// Commands (0077): commands for a device reached through this bridge are
+// claimed with the device's key, published as {id, type, data_point, value}
+// to its command topic (command_topic, or the subscription topic with
+// /telemetry → /command) and acknowledged by the device on <command topic>/ack
+// with {id, ok, result|error}. Expired commands are never delivered.
 
 import mqtt from 'mqtt';
 import { createClient } from '@supabase/supabase-js';
@@ -26,6 +33,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SYNC_INTERVAL_MS = Number(process.env.SYNC_INTERVAL_MS ?? 15000);
 const HEARTBEAT_MS = Number(process.env.HEARTBEAT_MS ?? 60000);
+const COMMAND_POLL_MS = Number(process.env.COMMAND_POLL_MS ?? 5000);
+const COMMAND_ACK_MS = Number(process.env.COMMAND_ACK_MS ?? 10000);
 
 const missingEnv = [
   ['SUPABASE_URL', SUPABASE_URL],
@@ -104,7 +113,54 @@ async function setStatus(id, fields) {
 }
 
 function signature(c) {
-  return JSON.stringify([c.protocol, c.host, c.port, c.topic, c.username, c.password, c.client_id, c.qos, c.device_key]);
+  return JSON.stringify([c.protocol, c.host, c.port, c.topic, c.command_topic, c.username, c.password, c.client_id, c.qos, c.device_key]);
+}
+
+// Where commands go: explicit command_topic, else …/telemetry → …/command.
+function commandTopic(c) {
+  if (c.command_topic) return c.command_topic;
+  if (/[+#]/.test(c.topic)) return null;
+  return c.topic.replace(/\/telemetry$/, '') + '/command';
+}
+
+async function reportCommand(c, id, ok, result, error) {
+  const { error: e } = await supabase.rpc('fp_iot_command_result', {
+    p_key: c.device_key, p_command: id, p_ok: ok, p_result: result ?? null, p_error: error ?? null,
+  });
+  if (e) console.error(`[${c.id}] command ${id} result not recorded:`, e.message);
+}
+
+async function deliverCommands(c, entry) {
+  if (!entry.client.connected) return;
+  const { data, error } = await supabase.rpc('fp_iot_claim_commands', { p_key: c.device_key, p_limit: 20 });
+  if (error) {
+    console.error(`[${c.id}] command claim failed:`, error.message);
+    return;
+  }
+  const topic = commandTopic(c);
+  for (const cmd of data ?? []) {
+    if (!topic) {
+      await reportCommand(c, cmd.id, false, null, 'no command topic configured for this connection');
+      continue;
+    }
+    if (new Date(cmd.expires_at).getTime() < Date.now()) {
+      await reportCommand(c, cmd.id, false, null, 'expired before delivery');
+      continue;
+    }
+    const p = cmd.payload ?? {};
+    try {
+      await entry.client.publishAsync(topic, JSON.stringify({ id: cmd.id, type: p.type, data_point: p.data_point, value: p.value }), { qos: 1 });
+    } catch (e) {
+      await reportCommand(c, cmd.id, false, null, `publish failed: ${e instanceof Error ? e.message : e}`);
+      continue;
+    }
+    // Delivered; wait briefly for the device's ack.
+    entry.pending.set(cmd.id, setTimeout(() => {
+      entry.pending.delete(cmd.id);
+      void reportCommand(c, cmd.id, true, { delivered: true, acknowledged: false });
+    }, COMMAND_ACK_MS));
+    console.log(`[${c.id}] command ${cmd.command} published to ${topic}`);
+  }
 }
 
 function connect(c) {
@@ -117,12 +173,13 @@ function connect(c) {
     connectTimeout: 15000,
   });
 
-  const entry = { client, sig: signature(c), heartbeatAt: 0 };
+  const entry = { client, sig: signature(c), heartbeatAt: 0, pending: new Map(), conn: c };
   live.set(c.id, entry);
+  const ackTopic = commandTopic(c) ? `${commandTopic(c)}/ack` : null;
 
   client.on('connect', () => {
     console.log(`[${c.id}] connected ${url}, subscribing ${c.topic} (qos ${c.qos})`);
-    client.subscribe(c.topic, { qos: c.qos }, (err) => {
+    client.subscribe(ackTopic ? [c.topic, ackTopic] : c.topic, { qos: c.qos }, (err) => {
       if (err) {
         console.error(`[${c.id}] subscribe failed:`, err.message);
         void setStatus(c.id, { last_error: `subscribe: ${err.message}` });
@@ -134,6 +191,21 @@ function connect(c) {
   });
 
   client.on('message', async (topic, payload) => {
+    if (ackTopic && topic === ackTopic) {
+      let ack;
+      try {
+        ack = JSON.parse(payload.toString('utf8'));
+      } catch {
+        return;
+      }
+      const timer = ack && entry.pending.get(ack.id);
+      if (timer) {
+        clearTimeout(timer);
+        entry.pending.delete(ack.id);
+        await reportCommand(c, ack.id, ack.ok !== false, ack.result ?? null, ack.error ?? null);
+      }
+      return;
+    }
     const readings = normalise(payload, topic).filter((r) => r.metric);
     if (readings.length === 0) return;
 
@@ -172,6 +244,7 @@ function disconnect(id) {
   const entry = live.get(id);
   if (!entry) return;
   console.log(`[${id}] disconnecting`);
+  for (const t of entry.pending.values()) clearTimeout(t);
   entry.client.end(true);
   live.delete(id);
 }
@@ -215,9 +288,22 @@ async function loop() {
   }
 }
 
-console.log(`FacilitySpace MQTT bridge starting (sync every ${SYNC_INTERVAL_MS}ms).`);
+console.log(`FacilityPro MQTT bridge starting (sync every ${SYNC_INTERVAL_MS}ms).`);
 await loop();
 setInterval(loop, SYNC_INTERVAL_MS);
+
+let delivering = false;
+setInterval(async () => {
+  if (delivering) return;
+  delivering = true;
+  try {
+    for (const entry of live.values()) await deliverCommands(entry.conn, entry);
+  } catch (e) {
+    console.error('command delivery threw:', e instanceof Error ? e.message : String(e));
+  } finally {
+    delivering = false;
+  }
+}, COMMAND_POLL_MS);
 
 for (const sig of ['SIGINT', 'SIGTERM']) {
   process.on(sig, () => {

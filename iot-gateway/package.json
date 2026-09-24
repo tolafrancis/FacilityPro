@@ -1,0 +1,22 @@
+{
+  "name": "facilitypro-iot-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "FacilityPro edge gateway: Modbus TCP/RTU and MQTT connectors with store-and-forward and device commands.",
+  "main": "index.mjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env index.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "modbus-serial": "^8.0.25",
+    "mqtt": "^5.10.0"
+  },
+  "devDependencies": {
+    "aedes": "^0.51.3"
+  }
+}

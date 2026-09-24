@@ -1,4 +1,4 @@
-# FacilitySpace MQTT bridge
+# FacilityPro MQTT bridge
 
 A small, always-on worker that lets the app **pull** data from MQTT brokers.
 
@@ -22,6 +22,20 @@ functions can't hold. This worker is that persistent piece.
 
 Connections are reconciled on every sync: editing a row reconnects it, disabling or
 deleting it (or deactivating the device) drops the subscription.
+
+## Commands
+
+Commands sent from FacilityPro (setpoint, on/off, mode, request status) to a device this
+bridge subscribes to are published to the connection's **command topic**
+(`command_topic`, or the subscription topic with `/telemetry` replaced by `/command`) as
+`{"id", "type", "data_point", "value"}`. The device confirms by publishing
+`{"id", "ok": true, "result": {…}}` to `<command topic>/ack`; without an ack within
+`COMMAND_ACK_MS` (10 s) the command is recorded as delivered but unacknowledged. Commands
+that expired before delivery are never sent. A wildcard subscription topic needs an
+explicit `command_topic`.
+
+For devices on a building network (Modbus meters, local brokers) use the on-site
+[edge gateway](../iot-gateway/README.md) instead.
 
 ## Accepted payloads (per message)
 
