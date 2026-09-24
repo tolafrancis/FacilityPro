@@ -76,7 +76,7 @@ supabase db push
 
 **Option B — SQL editor**
 
-Run each file in `supabase/migrations/` **in order, 0001 → 0062**, in the dashboard SQL editor.
+Run each file in `supabase/migrations/` **in order, 0001 → 0063**, in the dashboard SQL editor.
 
 > **Platform admin (required after 0059).** Migration **0059** locks the plan catalogue and subscription activation to platform operators, and makes function EXECUTE an explicit allow-list (new functions in `public` are no longer callable from the API until granted). Make yourself a platform admin once, in the SQL editor:
 >
@@ -96,7 +96,7 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0062**, in the dash
 >
 > Platform admins see every job's status under **Billing → Background jobs** and are emailed when a job is late or failing. Check it once after deploying: every job should turn **Healthy** within an hour. PM due dates use the organisation's time zone (**Settings → Time zone**, default `Asia/Ho_Chi_Minh`).
 >
-> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
+> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
 
 > Migration **0008** creates the `fp_media` table **and a private storage bucket `fp-media`** with org-scoped access policies (objects are namespaced by org id; access via signed URLs). Migration **0009** adds `fp_org_members()` used to populate the assignee dropdown. Migrations **0010–0011** add checklists and preventive-maintenance schedules plus the `fp_generate_due_pm()` generator. Migration **0013** alters `fp_pm_schedules` (makes `next_due_at` nullable and adds meter-trigger columns) and **replaces** `fp_generate_due_pm()` to handle meter triggers. Migration **0015** adds a `BEFORE INSERT` trigger on `fp_work_orders` (SLA due-date + auto-assignment), and **0016** adds notification triggers. Migration **0017** adds the email outbox (`fp_notification_outbox`) plus a trigger that enqueues an email when an in-app notification lands for a user who opted in, and **0018** adds the approvals workflow. No manual storage setup is needed.
 
@@ -142,7 +142,31 @@ Copy-Item .env.example .env.local
 ```
 VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_ANON_PUBLIC_KEY
+# Optional: Cloudflare Turnstile CAPTCHA on the public report form, sign-in and sign-up
+# VITE_TURNSTILE_SITE_KEY=0x4AAAAAAA...
 ```
+
+**Abuse protection.** The public QR report form and device ingest are rate-limited in the database (migration **0063**) whether or not CAPTCHA is on:
+- Public reports:
+  - capped length
+  - 5 per 10 minutes per client
+  - 10 per hour per asset
+  - 60 per hour per organisation
+  - a repeat of the same problem within 30 minutes returns the existing request
+- Devices:
+  - at most 600 readings a minute
+  - 500 per request to `iot-ingest`
+  - future timestamps clamped
+  - duplicate readings ignored
+
+To add a CAPTCHA:
+1. Create a Turnstile widget in Cloudflare and set `VITE_TURNSTILE_SITE_KEY` in the web app.
+2. Deploy the function: `supabase functions deploy public-report`, then `supabase secrets set TURNSTILE_SECRET_KEY=…`.
+3. In Supabase → Authentication → Attack Protection, enable CAPTCHA with provider **Turnstile** and the same secret.
+4. Once the new web app is live, make the CAPTCHA mandatory for public reports:
+   `revoke execute on function fp_public_report(uuid, text, text, text, text, uuid, uuid, text, text) from anon;`
+
+Also review Authentication → Rate Limits; the defaults are low for sign-up emails, so configure custom SMTP before launch.
 
 ## 4. Install and run
 

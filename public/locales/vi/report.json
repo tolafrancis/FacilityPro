@@ -11,5 +11,15 @@
   "reporterPlaceholder": "Để chúng tôi liên hệ lại",
   "submit": "Gửi báo cáo",
   "thanksTitle": "Cảm ơn bạn!",
-  "thanksBody": "Báo cáo của bạn đã được tiếp nhận. Đội kỹ thuật sẽ xử lý ngay."
+  "thanksBody": "Báo cáo của bạn đã được tiếp nhận. Đội kỹ thuật sẽ xử lý ngay.",
+  "reference": "Mã tham chiếu",
+  "errors": {
+    "rate_limited": "Có quá nhiều báo cáo từ đây. Vui lòng thử lại sau vài phút.",
+    "report_too_long": "Báo cáo quá dài. Vui lòng rút ngắn tiêu đề hoặc nội dung.",
+    "report_invalid_asset": "Mã QR này không khớp với tài sản nào của tổ chức.",
+    "report_invalid_location": "Mã QR này không khớp với vị trí nào của tổ chức.",
+    "captcha_failed": "Kiểm tra bảo mật không thành công. Vui lòng thử lại.",
+    "captcha_required": "Vui lòng hoàn tất bước kiểm tra bảo mật.",
+    "generic": "Đã xảy ra lỗi. Vui lòng thử lại."
+  }
 }

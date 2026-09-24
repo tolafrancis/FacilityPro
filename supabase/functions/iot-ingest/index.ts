@@ -75,11 +75,20 @@ function normalise(body: Record<string, unknown>): Reading[] {
   return out;
 }
 
+// Limits for one request. The database also caps each device at 600
+// readings a minute and validates every reading (migration 0063).
+const MAX_BODY_BYTES = 256 * 1024;
+const MAX_READINGS = 500;
+
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('POST only', { status: 405 });
 
   try {
-    const body = (await req.json()) as Record<string, unknown>;
+    const raw = await req.text();
+    if (raw.length > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: `body larger than ${MAX_BODY_BYTES} bytes` }), { status: 413 });
+    }
+    const body = JSON.parse(raw) as Record<string, unknown>;
     const key =
       req.headers.get('x-device-key') ??
       (body.key as string) ??
@@ -89,6 +98,9 @@ Deno.serve(async (req) => {
 
     const readings = normalise(body).filter((r) => r.metric);
     if (readings.length === 0) return new Response('no readings', { status: 400 });
+    if (readings.length > MAX_READINGS) {
+      return new Response(JSON.stringify({ error: `at most ${MAX_READINGS} readings per request` }), { status: 413 });
+    }
 
     let ok = 0;
     const errors: string[] = [];
@@ -101,11 +113,15 @@ Deno.serve(async (req) => {
         p_ts: r.ts ?? new Date().toISOString(),
         p_meta: r.meta ?? null,
       });
-      if (error) errors.push(error.message);
-      else ok += 1;
+      if (error) {
+        errors.push(error.message);
+        // A bad key or a device over its rate limit won't get better within
+        // this request; stop instead of hammering the database.
+        if (/Invalid or inactive device key|rate_limited/.test(error.message)) break;
+      } else ok += 1;
     }
 
-    const status = ok > 0 ? 200 : 401;
+    const status = ok > 0 ? 200 : errors.some((e) => e.includes('rate_limited')) ? 429 : errors.some((e) => e.includes('device key')) ? 401 : 400;
     return new Response(JSON.stringify({ ingested: ok, errors }), {
       status,
       headers: { 'Content-Type': 'application/json' },

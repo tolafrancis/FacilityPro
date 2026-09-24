@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import AuthLayout from '../components/AuthLayout';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import Turnstile, { captchaEnabled } from '../components/Turnstile';
 
 export default function SignUp() {
   const { t } = useTranslation('auth');
@@ -13,6 +14,8 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [confirm, setConfirm] = useState(false);
 
   const onSubmit = async (e: FormEvent) => {
@@ -22,8 +25,15 @@ export default function SignUp() {
       setError(t('errors.missingFields'));
       return;
     }
+    if (captchaEnabled && !captchaToken) {
+      setError(t('errors.captchaRequired'));
+      return;
+    }
     setBusy(true);
-    const { error: err, needsConfirm } = await signUp(email, password);
+    const { error: err, needsConfirm } = await signUp(email, password, captchaToken ?? undefined);
+    // Tokens are single-use.
+    setCaptchaToken(null);
+    setCaptchaKey((k) => k + 1);
     setBusy(false);
     if (err) {
       setError(err);
@@ -67,6 +77,7 @@ export default function SignUp() {
             autoComplete="new-password"
           />
         </div>
+        <Turnstile key={captchaKey} onToken={setCaptchaToken} />
         {error && <p className="text-sm text-status-crit">{error}</p>}
         <Button type="submit" loading={busy} className="w-full">
           {t('signUp.submit')}
