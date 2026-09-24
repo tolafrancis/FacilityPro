@@ -5,12 +5,14 @@
     "title": "Loại sự cố",
     "add": "Thêm loại sự cố",
     "empty": "Chưa có loại sự cố.",
-    "priority": "Mức ưu tiên mặc định"
+    "priority": "Mức ưu tiên mặc định",
+    "edit": "Sửa loại sự cố"
   },
   "assetTypes": {
     "title": "Loại tài sản",
     "add": "Thêm loại tài sản",
-    "empty": "Chưa có loại tài sản."
+    "empty": "Chưa có loại tài sản.",
+    "edit": "Sửa loại tài sản"
   },
   "dialog": {
     "addFaultType": "Thêm loại sự cố",
@@ -41,5 +43,86 @@
     "autoWo": "Tự động tạo lệnh công việc",
     "autoHint": "Tự động biến mỗi báo cáo sự cố thành lệnh công việc — sau đó áp dụng tự động phân công và SLA.",
     "reportLink": "Liên kết báo cáo công khai"
+  },
+  "tabs": {
+    "general": "Chung",
+    "catalogs": "Danh mục",
+    "sla": "SLA",
+    "team": "Thành viên & vai trò",
+    "integrations": "Tích hợp"
+  },
+  "general": {
+    "title": "Hồ sơ tổ chức",
+    "hint": "Thông tin cơ bản dùng trong toàn bộ không gian làm việc.",
+    "name": "Tên",
+    "defaultLanguage": "Ngôn ngữ mặc định",
+    "timezone": "Múi giờ",
+    "timezonePlaceholder": "VD: Asia/Ho_Chi_Minh",
+    "currency": "Tiền tệ",
+    "currencyPlaceholder": "VD: VND",
+    "aiSentiment": "Dùng AI chấm điểm cảm xúc tin nhắn hộp thư",
+    "aiSentimentHint": "Mặc định tắt. Khi bật, nội dung tin nhắn khách hàng gửi đến sẽ được gửi tới Anthropic (Claude) để phát hiện khách hàng không hài lòng, phục vụ điều kiện kích hoạt quy trình \"cảm xúc tiêu cực\". Hãy nêu rõ điều này trong thông báo quyền riêng tư của bạn.",
+    "saved": "Đã lưu.",
+    "adminOnly": "Chỉ quản trị viên tổ chức mới có thể chỉnh sửa các mục này."
+  },
+  "catalogs": {
+    "hint": "Quản lý các loại sự cố và loại tài sản mà đội của bạn có thể chọn.",
+    "loadDefaults": "Nạp danh mục mặc định",
+    "defaultsLoaded": "Đã nạp danh mục mặc định (chỉ thêm vào danh mục đang trống).",
+    "inactive": "Ngừng dùng",
+    "toggleActive": "Bật/tắt sử dụng",
+    "delete": "Xóa",
+    "faultInUse_other": "\"{{name}}\" đang được dùng trong {{count}} yêu cầu — hãy ngừng dùng thay vì xóa.",
+    "assetInUse_other": "\"{{name}}\" đang được dùng cho {{count}} tài sản — hãy ngừng dùng thay vì xóa."
+  },
+  "team": {
+    "members": "Thành viên",
+    "siteAccess": "Quyền truy cập cơ sở",
+    "profile": "Hồ sơ",
+    "removeMember": "Xóa thành viên",
+    "noMembers": "Chưa có thành viên nào.",
+    "inviteTitle": "Mời thành viên",
+    "emailPlaceholder": "ten@congty.vn",
+    "invite": "Mời",
+    "inviteSent": "Email mời đang được gửi tới {{email}}. Bạn cũng có thể chia sẻ trực tiếp đường liên kết này:",
+    "copyLink": "Sao chép liên kết",
+    "pendingInvites": "Lời mời đang chờ",
+    "copyInviteLink": "Sao chép liên kết mời",
+    "revokeInvite": "Thu hồi lời mời"
+  },
+  "siteAccess": {
+    "unrestricted": "Không giới hạn — thành viên này xem được mọi cơ sở. Đánh dấu một cơ sở bên dưới để chỉ cho phép truy cập cơ sở đó.",
+    "confined": "Chỉ được truy cập các cơ sở đã đánh dấu."
+  },
+  "profile": {
+    "employeeId": "Mã nhân viên",
+    "phone": "Số điện thoại",
+    "laborRate": "Đơn giá nhân công ({{currency}} / giờ)",
+    "shift": "Ca làm việc",
+    "shiftPlaceholder": "Ca ngày, ca đêm, xoay ca…",
+    "skills": "Kỹ năng (cách nhau bằng dấu phẩy)",
+    "skillsPlaceholder": "Điều hòa, Điện, Cấp thoát nước",
+    "save": "Lưu hồ sơ",
+    "certifications": "Chứng chỉ",
+    "expired": "Đã hết hạn",
+    "expires": "Hết hạn ngày {{date}}",
+    "removeCert": "Xóa chứng chỉ",
+    "noCerts": "Chưa có chứng chỉ nào.",
+    "certName": "Tên chứng chỉ",
+    "certIssuer": "Nơi cấp (không bắt buộc)",
+    "addCert": "Thêm",
+    "saveFirst": "Hãy lưu hồ sơ một lần để bắt đầu thêm chứng chỉ."
+  },
+  "integrations": {
+    "iotTitle": "IoT & cảm biến",
+    "iotHint": "Quản lý khóa thiết bị và điểm nhận dữ liệu trên trang Thiết bị.",
+    "manageDevices": "Quản lý thiết bị →",
+    "whatsapp": "WhatsApp",
+    "connected": "Đã kết nối: {{name}}",
+    "whatsappNone": "Chưa kết nối số WhatsApp nào. Hãy liên hệ bộ phận hỗ trợ FacilitySpace để kết nối số doanh nghiệp của bạn; trước khi kết nối, không thể gửi trả lời cho các cuộc trò chuyện WhatsApp.",
+    "deliveryTitle": "Gửi email, SMS & thông báo đẩy",
+    "deliveryHint": "Tin nhắn gửi đi được chuyển bởi hàm <code>process-outbox</code> (Resend / Twilio / web-push). Hãy thiết lập khóa bí mật của nhà cung cấp và lên lịch chạy hàm để bật việc gửi.",
+    "emailMe": "Gửi thông báo cho tôi qua email",
+    "emailMeHint": "Khi bật, các thông báo trong ứng dụng gửi cho bạn cũng sẽ được gửi qua email."
   }
 }

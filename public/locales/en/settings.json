@@ -5,12 +5,14 @@
     "title": "Fault types",
     "add": "Add fault type",
     "empty": "No fault types yet.",
-    "priority": "Default priority"
+    "priority": "Default priority",
+    "edit": "Edit fault type"
   },
   "assetTypes": {
     "title": "Asset types",
     "add": "Add asset type",
-    "empty": "No asset types yet."
+    "empty": "No asset types yet.",
+    "edit": "Edit asset type"
   },
   "dialog": {
     "addFaultType": "Add fault type",
@@ -41,5 +43,88 @@
     "autoWo": "Auto-create work orders",
     "autoHint": "Turn every new fault report into a work order automatically — then auto-assignment and SLA targets apply.",
     "reportLink": "Public report link"
+  },
+  "tabs": {
+    "general": "General",
+    "catalogs": "Catalogs",
+    "sla": "SLA",
+    "team": "Team & roles",
+    "integrations": "Integrations"
+  },
+  "general": {
+    "title": "Organisation profile",
+    "hint": "Basic details used across the workspace.",
+    "name": "Name",
+    "defaultLanguage": "Default language",
+    "timezone": "Timezone",
+    "timezonePlaceholder": "e.g. Asia/Ho_Chi_Minh",
+    "currency": "Currency",
+    "currencyPlaceholder": "e.g. USD",
+    "aiSentiment": "Score inbox messages' sentiment with AI",
+    "aiSentimentHint": "Off by default. When on, the text of incoming customer messages is sent to Anthropic (Claude) to detect unhappy customers for the \"low sentiment\" workflow trigger. Mention this in your privacy notice.",
+    "saved": "Saved.",
+    "adminOnly": "Only an organisation admin can edit these."
+  },
+  "catalogs": {
+    "hint": "Manage the fault and asset types your team can choose from.",
+    "loadDefaults": "Load default types",
+    "defaultsLoaded": "Default types loaded (only added when a catalog was empty).",
+    "inactive": "Inactive",
+    "toggleActive": "Toggle active",
+    "delete": "Delete",
+    "faultInUse_one": "\"{{name}}\" is used by {{count}} request — deactivate it instead of deleting.",
+    "faultInUse_other": "\"{{name}}\" is used by {{count}} requests — deactivate it instead of deleting.",
+    "assetInUse_one": "\"{{name}}\" is used by {{count}} asset — deactivate it instead of deleting.",
+    "assetInUse_other": "\"{{name}}\" is used by {{count}} assets — deactivate it instead of deleting."
+  },
+  "team": {
+    "members": "Members",
+    "siteAccess": "Site access",
+    "profile": "Profile",
+    "removeMember": "Remove member",
+    "noMembers": "No members yet.",
+    "inviteTitle": "Invite a member",
+    "emailPlaceholder": "name@company.com",
+    "invite": "Invite",
+    "inviteSent": "An invitation email is on its way to {{email}}. You can also share this link directly:",
+    "copyLink": "Copy link",
+    "pendingInvites": "Pending invites",
+    "copyInviteLink": "Copy invite link",
+    "revokeInvite": "Revoke invite"
+  },
+  "siteAccess": {
+    "unrestricted": "Unrestricted — this member sees every site. Check a site below to confine them to it.",
+    "confined": "Confined to the checked site(s) only."
+  },
+  "profile": {
+    "employeeId": "Employee ID",
+    "phone": "Phone",
+    "laborRate": "Labor rate ({{currency}} / hour)",
+    "shift": "Shift",
+    "shiftPlaceholder": "Day, Night, Rotating…",
+    "skills": "Skills (comma-separated)",
+    "skillsPlaceholder": "HVAC, Electrical, Plumbing",
+    "save": "Save profile",
+    "certifications": "Certifications",
+    "expired": "Expired",
+    "expires": "Expires {{date}}",
+    "removeCert": "Remove certification",
+    "noCerts": "No certifications recorded.",
+    "certName": "Certification name",
+    "certIssuer": "Issuer (optional)",
+    "addCert": "Add",
+    "saveFirst": "Save the profile once to start adding certifications."
+  },
+  "integrations": {
+    "iotTitle": "IoT & sensors",
+    "iotHint": "Manage device keys and ingest endpoints from the Devices page.",
+    "manageDevices": "Manage devices →",
+    "whatsapp": "WhatsApp",
+    "connected": "Connected: {{name}}",
+    "whatsappNone": "No WhatsApp number is connected. Contact FacilitySpace support to connect your business number; replies to WhatsApp conversations can't be delivered until then.",
+    "deliveryTitle": "Email, SMS & push delivery",
+    "deliveryHint": "Outbound messages are delivered by the <code>process-outbox</code> function (Resend / Twilio / web-push). Set the provider secrets and schedule the function to enable delivery.",
+    "emailMe": "Email me my notifications",
+    "emailMeHint": "When on, in-app notifications addressed to you are also emailed."
   }
 }

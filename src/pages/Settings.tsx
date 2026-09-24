@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Copy, Cpu, Pencil, Power } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -17,7 +17,7 @@ import {
   useUserSites,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { daysUntil, PRIORITIES, PRIORITY_CLASS, friendlyError } from '../lib/ui';
+import { daysUntil, formatDateOnly, orgCurrency, PRIORITIES, PRIORITY_CLASS, friendlyError } from '../lib/ui';
 import { notifyError } from '../components/Toaster';
 import type { AssetType, FaultType, Priority, Role, Site } from '../lib/database.types';
 import Button from '../components/ui/Button';
@@ -28,19 +28,13 @@ import BilingualName from '../components/ui/BilingualName';
 
 type TabKey = 'general' | 'catalogs' | 'sla' | 'team' | 'integrations';
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'general', label: 'General' },
-  { key: 'catalogs', label: 'Catalogs' },
-  { key: 'sla', label: 'SLA' },
-  { key: 'team', label: 'Team & roles' },
-  { key: 'integrations', label: 'Integrations' },
-];
+const TABS: TabKey[] = ['general', 'catalogs', 'sla', 'team', 'integrations'];
 
 export default function Settings() {
   const { t } = useTranslation('settings');
   const { role } = useOrg();
   const [tab, setTab] = useState<TabKey>('general');
-  const visibleTabs = TABS.filter((tabItem) => tabItem.key !== 'team' || role === 'org_admin');
+  const visibleTabs = TABS.filter((key) => key !== 'team' || role === 'org_admin');
 
   const selectTab = (key: TabKey) => {
     setTab(key);
@@ -54,16 +48,16 @@ export default function Settings() {
       <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
 
       <div className="mt-6 flex flex-wrap gap-1 border-b border-line">
-        {visibleTabs.map((tabItem) => (
+        {visibleTabs.map((key) => (
           <button
-            key={tabItem.key}
+            key={key}
             type="button"
-            onClick={() => selectTab(tabItem.key)}
+            onClick={() => selectTab(key)}
             className={`rounded-t-lg px-4 py-2 text-sm font-medium transition ${
-              tab === tabItem.key ? 'border-b-2 border-brand text-brand' : 'text-ink-muted hover:text-ink'
+              tab === key ? 'border-b-2 border-brand text-brand' : 'text-ink-muted hover:text-ink'
             }`}
           >
-            {tabItem.label}
+            {t(`tabs.${key}`)}
           </button>
         ))}
       </div>
@@ -83,6 +77,8 @@ export default function Settings() {
 // General — org profile (name, languages, timezone, currency)
 // ---------------------------------------------------------------------------
 function GeneralSection() {
+  const { t } = useTranslation('settings');
+  const { t: tc } = useTranslation('common');
   const { currentOrg, role, refresh } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
@@ -131,33 +127,33 @@ function GeneralSection() {
       // The org name/language in the header come from OrgContext.
       void refresh();
       void queryClient.invalidateQueries({ queryKey: ['org_settings', orgId] });
-      setMsg('Saved.');
+      setMsg(t('general.saved'));
     },
-    onError: (e) => setMsg(e instanceof Error ? e.message : 'Unable to save.'),
+    onError: (e) => setMsg(friendlyError(e as { code?: string; message?: string }, tc)),
   });
 
   return (
     <section className="rounded-xl border border-line bg-white p-4">
-      <h2 className="font-semibold text-ink">Organisation profile</h2>
-      <p className="mt-1 text-sm text-ink-muted">Basic details used across the workspace.</p>
+      <h2 className="font-semibold text-ink">{t('general.title')}</h2>
+      <p className="mt-1 text-sm text-ink-muted">{t('general.hint')}</p>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm font-medium text-ink">Name</label>
+          <label className="mb-1 block text-sm font-medium text-ink">{t('general.name')}</label>
           <Input value={name} onChange={(e) => setName(e.target.value)} disabled={!canEdit} />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-ink">Default language</label>
+          <label className="mb-1 block text-sm font-medium text-ink">{t('general.defaultLanguage')}</label>
           <Select value={lng} onChange={(e) => setLng(e.target.value)} disabled={!canEdit}>
             {langs.map((l) => <option key={l} value={l}>{l.toUpperCase()}</option>)}
           </Select>
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-ink">Timezone</label>
-          <Input value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder="e.g. Asia/Ho_Chi_Minh" disabled={!canEdit} />
+          <label className="mb-1 block text-sm font-medium text-ink">{t('general.timezone')}</label>
+          <Input value={timezone} onChange={(e) => setTimezone(e.target.value)} placeholder={t('general.timezonePlaceholder')} disabled={!canEdit} />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-ink">Currency</label>
-          <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="e.g. USD" disabled={!canEdit} />
+          <label className="mb-1 block text-sm font-medium text-ink">{t('general.currency')}</label>
+          <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder={t('general.currencyPlaceholder')} disabled={!canEdit} />
         </div>
       </div>
       <label className="mt-4 flex items-start gap-2 text-sm text-ink">
@@ -169,20 +165,17 @@ function GeneralSection() {
           className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30"
         />
         <span>
-          Score inbox messages' sentiment with AI
-          <span className="block text-xs text-ink-muted">
-            Off by default. When on, the text of incoming customer messages is sent to Anthropic (Claude) to detect unhappy
-            customers for the "low sentiment" workflow trigger. Mention this in your privacy notice.
-          </span>
+          {t('general.aiSentiment')}
+          <span className="block text-xs text-ink-muted">{t('general.aiSentimentHint')}</span>
         </span>
       </label>
       {canEdit && (
         <div className="mt-4 flex items-center gap-3">
-          <Button onClick={() => save.mutate()} loading={save.isPending}>Save</Button>
+          <Button onClick={() => save.mutate()} loading={save.isPending}>{tc('actions.save')}</Button>
           {msg && <span className="text-sm text-ink-muted">{msg}</span>}
         </div>
       )}
-      {!canEdit && <p className="mt-4 text-sm text-ink-muted">Only an organisation admin can edit these.</p>}
+      {!canEdit && <p className="mt-4 text-sm text-ink-muted">{t('general.adminOnly')}</p>}
     </section>
   );
 }
@@ -198,7 +191,7 @@ type CatalogDialogState =
   | null;
 
 function CatalogsSection() {
-  const { i18n } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg } = useOrg();
@@ -247,7 +240,7 @@ function CatalogsSection() {
   const deleteFault = async (ft: FaultType) => {
     setMsg(null);
     const { count } = await supabase.from('fp_requests').select('id', { count: 'exact', head: true }).eq('fault_type_id', ft.id);
-    if ((count ?? 0) > 0) { setMsg(`"${resolveI18n(ft.name_i18n, lng)}" is used by ${count} request(s) — deactivate it instead of deleting.`); return; }
+    if ((count ?? 0) > 0) { setMsg(t('catalogs.faultInUse', { name: resolveI18n(ft.name_i18n, lng), count: count ?? 0 })); return; }
     const { error } = await supabase.from('fp_fault_types').delete().eq('id', ft.id);
     if (error) { setMsg(friendlyError(error, tc)); return; }
     invFault();
@@ -255,7 +248,7 @@ function CatalogsSection() {
   const deleteAsset = async (at: AssetType) => {
     setMsg(null);
     const { count } = await supabase.from('fp_assets').select('id', { count: 'exact', head: true }).eq('asset_type_id', at.id);
-    if ((count ?? 0) > 0) { setMsg(`"${resolveI18n(at.name_i18n, lng)}" is used by ${count} asset(s) — deactivate it instead of deleting.`); return; }
+    if ((count ?? 0) > 0) { setMsg(t('catalogs.assetInUse', { name: resolveI18n(at.name_i18n, lng), count: count ?? 0 })); return; }
     const { error } = await supabase.from('fp_asset_types').delete().eq('id', at.id);
     if (error) { setMsg(friendlyError(error, tc)); return; }
     invAsset();
@@ -269,23 +262,23 @@ function CatalogsSection() {
     if (error) { setMsg(friendlyError(error, tc)); return; }
     invFault();
     invAsset();
-    setMsg('Default types loaded (only added when a catalog was empty).');
+    setMsg(t('catalogs.defaultsLoaded'));
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-ink-muted">Manage the fault and asset types your team can choose from.</p>
-        <Button variant="secondary" onClick={loadDefaults} loading={busy}>Load default types</Button>
+        <p className="text-sm text-ink-muted">{t('catalogs.hint')}</p>
+        <Button variant="secondary" onClick={loadDefaults} loading={busy}>{t('catalogs.loadDefaults')}</Button>
       </div>
       {msg && <p className="text-sm text-status-crit">{msg}</p>}
 
       <div className="grid gap-6 md:grid-cols-2">
         <section className="rounded-xl border border-line bg-white p-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-ink">Fault types</h2>
+            <h2 className="font-semibold text-ink">{t('faultTypes.title')}</h2>
             <button type="button" onClick={() => setDialog({ kind: 'fault', mode: 'create' })} className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600">
-              <Plus size={15} /> Add
+              <Plus size={15} /> {tc('actions.add')}
             </button>
           </div>
           <ul className="mt-3 space-y-2">
@@ -294,24 +287,24 @@ function CatalogsSection() {
                 <span className="flex min-w-0 items-center gap-2">
                   <span className="truncate text-ink">{resolveI18n(ft.name_i18n, lng)}</span>
                   <Pill className={PRIORITY_CLASS[ft.default_priority]}>{tc(`priority.${ft.default_priority}`)}</Pill>
-                  {ft.is_active === false && <span className="rounded-full bg-ink-muted/10 px-2 py-0.5 text-xs text-ink-muted">Inactive</span>}
+                  {ft.is_active === false && <span className="rounded-full bg-ink-muted/10 px-2 py-0.5 text-xs text-ink-muted">{t('catalogs.inactive')}</span>}
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
-                  <button type="button" onClick={() => setDialog({ kind: 'fault', mode: 'edit', row: ft })} className="text-ink-muted hover:text-brand" aria-label="Edit"><Pencil size={14} /></button>
-                  <button type="button" onClick={() => toggleFault(ft)} className="text-ink-muted hover:text-brand" aria-label="Toggle active"><Power size={14} /></button>
-                  <button type="button" onClick={() => deleteFault(ft)} className="text-ink-muted hover:text-status-crit" aria-label="Delete"><Trash2 size={14} /></button>
+                  <button type="button" onClick={() => setDialog({ kind: 'fault', mode: 'edit', row: ft })} className="text-ink-muted hover:text-brand" aria-label={tc('actions.edit')}><Pencil size={14} /></button>
+                  <button type="button" onClick={() => toggleFault(ft)} className="text-ink-muted hover:text-brand" aria-label={t('catalogs.toggleActive')}><Power size={14} /></button>
+                  <button type="button" onClick={() => deleteFault(ft)} className="text-ink-muted hover:text-status-crit" aria-label={t('catalogs.delete')}><Trash2 size={14} /></button>
                 </span>
               </li>
             ))}
-            {faults.data?.length === 0 && <li className="text-sm text-ink-muted">No fault types yet.</li>}
+            {faults.data?.length === 0 && <li className="text-sm text-ink-muted">{t('faultTypes.empty')}</li>}
           </ul>
         </section>
 
         <section className="rounded-xl border border-line bg-white p-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-ink">Asset types</h2>
+            <h2 className="font-semibold text-ink">{t('assetTypes.title')}</h2>
             <button type="button" onClick={() => setDialog({ kind: 'asset', mode: 'create' })} className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600">
-              <Plus size={15} /> Add
+              <Plus size={15} /> {tc('actions.add')}
             </button>
           </div>
           <ul className="mt-3 space-y-2">
@@ -319,23 +312,23 @@ function CatalogsSection() {
               <li key={at.id} className={`flex items-center justify-between gap-2 rounded-lg border border-line px-3 py-2 text-sm ${at.is_active === false ? 'opacity-60' : ''}`}>
                 <span className="flex min-w-0 items-center gap-2">
                   <span className="truncate text-ink">{resolveI18n(at.name_i18n, lng)}</span>
-                  {at.is_active === false && <span className="rounded-full bg-ink-muted/10 px-2 py-0.5 text-xs text-ink-muted">Inactive</span>}
+                  {at.is_active === false && <span className="rounded-full bg-ink-muted/10 px-2 py-0.5 text-xs text-ink-muted">{t('catalogs.inactive')}</span>}
                 </span>
                 <span className="flex shrink-0 items-center gap-2">
-                  <button type="button" onClick={() => setDialog({ kind: 'asset', mode: 'edit', row: at })} className="text-ink-muted hover:text-brand" aria-label="Edit"><Pencil size={14} /></button>
-                  <button type="button" onClick={() => toggleAsset(at)} className="text-ink-muted hover:text-brand" aria-label="Toggle active"><Power size={14} /></button>
-                  <button type="button" onClick={() => deleteAsset(at)} className="text-ink-muted hover:text-status-crit" aria-label="Delete"><Trash2 size={14} /></button>
+                  <button type="button" onClick={() => setDialog({ kind: 'asset', mode: 'edit', row: at })} className="text-ink-muted hover:text-brand" aria-label={tc('actions.edit')}><Pencil size={14} /></button>
+                  <button type="button" onClick={() => toggleAsset(at)} className="text-ink-muted hover:text-brand" aria-label={t('catalogs.toggleActive')}><Power size={14} /></button>
+                  <button type="button" onClick={() => deleteAsset(at)} className="text-ink-muted hover:text-status-crit" aria-label={t('catalogs.delete')}><Trash2 size={14} /></button>
                 </span>
               </li>
             ))}
-            {assetTypes.data?.length === 0 && <li className="text-sm text-ink-muted">No asset types yet.</li>}
+            {assetTypes.data?.length === 0 && <li className="text-sm text-ink-muted">{t('assetTypes.empty')}</li>}
           </ul>
         </section>
       </div>
 
       {dialog?.kind === 'fault' && (
         <CatalogDialog
-          title={dialog.mode === 'edit' ? 'Edit fault type' : 'Add fault type'}
+          title={dialog.mode === 'edit' ? t('faultTypes.edit') : t('faultTypes.add')}
           withPriority
           initial={dialog.mode === 'edit' ? { en: dialog.row.name_i18n.en ?? '', vi: dialog.row.name_i18n.vi ?? '', priority: dialog.row.default_priority } : null}
           onCancel={() => setDialog(null)}
@@ -344,7 +337,7 @@ function CatalogsSection() {
       )}
       {dialog?.kind === 'asset' && (
         <CatalogDialog
-          title={dialog.mode === 'edit' ? 'Edit asset type' : 'Add asset type'}
+          title={dialog.mode === 'edit' ? t('assetTypes.edit') : t('assetTypes.add')}
           initial={dialog.mode === 'edit' ? { en: dialog.row.name_i18n.en ?? '', vi: dialog.row.name_i18n.vi ?? '', priority: 'medium' } : null}
           onCancel={() => setDialog(null)}
           onSubmit={(v) => saveAsset({ id: dialog.mode === 'edit' ? dialog.row.id : undefined, en: v.en, vi: v.vi })}
@@ -476,6 +469,7 @@ function SlaRow({ priority, initial, label, hoursLabel, saveLabel, onSave }: { p
 const ROLES: Role[] = ['org_admin', 'manager', 'technician', 'occupant', 'vendor'];
 
 function TeamSection() {
+  const { t } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
   const { currentOrg } = useOrg();
   const { user } = useAuth();
@@ -549,7 +543,7 @@ function TeamSection() {
     <div className="space-y-6">
       {msg && <p role="alert" className="rounded-lg border border-status-crit/30 bg-white p-3 text-sm text-status-crit">{msg}</p>}
       <section className="rounded-xl border border-line bg-white p-4">
-        <h2 className="font-semibold text-ink">Members</h2>
+        <h2 className="font-semibold text-ink">{t('team.members')}</h2>
         <ul className="mt-3 space-y-2">
           {(members.data ?? []).map((m) => (
             <li key={m.user_id} className="rounded-lg border border-line px-3 py-2 text-sm">
@@ -570,7 +564,7 @@ function TeamSection() {
                       onClick={() => setSiteAccessFor(siteAccessFor === m.user_id ? null : m.user_id)}
                       className="whitespace-nowrap text-xs font-medium text-brand hover:text-brand-600"
                     >
-                      Site access
+                      {t('team.siteAccess')}
                     </button>
                   )}
                   <button
@@ -578,10 +572,10 @@ function TeamSection() {
                     onClick={() => setProfileFor(profileFor === m.user_id ? null : m.user_id)}
                     className="whitespace-nowrap text-xs font-medium text-brand hover:text-brand-600"
                   >
-                    Profile
+                    {t('team.profile')}
                   </button>
                   {m.user_id !== user?.id && (
-                    <button type="button" onClick={() => removeMember.mutate(m.user_id)} className="text-ink-muted hover:text-status-crit" aria-label="Remove member">
+                    <button type="button" onClick={() => removeMember.mutate(m.user_id)} className="text-ink-muted hover:text-status-crit" aria-label={t('team.removeMember')}>
                       <Trash2 size={15} />
                     </button>
                   )}
@@ -591,27 +585,27 @@ function TeamSection() {
               {profileFor === m.user_id && <MemberProfile userId={m.user_id} orgId={orgId!} />}
             </li>
           ))}
-          {members.data?.length === 0 && <li className="text-sm text-ink-muted">No members yet.</li>}
+          {members.data?.length === 0 && <li className="text-sm text-ink-muted">{t('team.noMembers')}</li>}
         </ul>
       </section>
 
       <section className="rounded-xl border border-line bg-white p-4">
-        <h2 className="font-semibold text-ink">Invite a member</h2>
+        <h2 className="font-semibold text-ink">{t('team.inviteTitle')}</h2>
         <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" />
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('team.emailPlaceholder')} />
           <Select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as Role)}>
             {ROLES.map((r) => <option key={r} value={r}>{tc(`roles.${r}`)}</option>)}
           </Select>
           <Button onClick={() => sendInvite.mutate()} loading={sendInvite.isPending} disabled={!email}>
-            <Plus size={16} /> Invite
+            <Plus size={16} /> {t('team.invite')}
           </Button>
         </div>
         {inviteLink && (
           <div className="mt-3 rounded-lg bg-surface p-3">
-            <p className="text-xs text-ink-muted">An invitation email is on its way to {inviteLink.email}. You can also share this link directly:</p>
+            <p className="text-xs text-ink-muted">{t('team.inviteSent', { email: inviteLink.email })}</p>
             <div className="mt-1 flex items-center gap-2">
               <code className="block flex-1 break-all text-xs text-ink">{inviteLink.link}</code>
-              <button type="button" onClick={() => void navigator.clipboard?.writeText(inviteLink.link)} className="text-ink-muted hover:text-brand" aria-label="Copy link">
+              <button type="button" onClick={() => void navigator.clipboard?.writeText(inviteLink.link)} className="text-ink-muted hover:text-brand" aria-label={t('team.copyLink')}>
                 <Copy size={15} />
               </button>
             </div>
@@ -619,16 +613,16 @@ function TeamSection() {
         )}
         {(invites.data ?? []).length > 0 && (
           <div className="mt-4">
-            <p className="text-sm font-medium text-ink">Pending invites</p>
+            <p className="text-sm font-medium text-ink">{t('team.pendingInvites')}</p>
             <ul className="mt-2 space-y-2">
               {(invites.data ?? []).map((inv) => (
                 <li key={inv.id} className="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2 text-sm">
                   <span className="truncate text-ink">{inv.email} · <span className="text-ink-muted">{tc(`roles.${inv.role}`)}</span></span>
                   <span className="flex items-center gap-2">
-                    <button type="button" onClick={() => void navigator.clipboard?.writeText(`${window.location.origin}/invite?token=${inv.token}`)} className="text-ink-muted hover:text-brand" aria-label="Copy invite link">
+                    <button type="button" onClick={() => void navigator.clipboard?.writeText(`${window.location.origin}/invite?token=${inv.token}`)} className="text-ink-muted hover:text-brand" aria-label={t('team.copyInviteLink')}>
                       <Copy size={15} />
                     </button>
-                    <button type="button" onClick={() => revokeInvite.mutate(inv.id)} className="text-ink-muted hover:text-status-crit" aria-label="Revoke invite">
+                    <button type="button" onClick={() => revokeInvite.mutate(inv.id)} className="text-ink-muted hover:text-status-crit" aria-label={t('team.revokeInvite')}>
                       <Trash2 size={15} />
                     </button>
                   </span>
@@ -647,7 +641,7 @@ function TeamSection() {
 // default for every member until an admin opts them into scoping).
 // ---------------------------------------------------------------------------
 function MemberSiteAccess({ userId, sites, orgId }: { userId: string; sites: Site[]; orgId: string }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation('settings');
   const lng = i18n.resolvedLanguage ?? 'en';
   const queryClient = useQueryClient();
   const userSitesQuery = useUserSites(userId);
@@ -671,8 +665,8 @@ function MemberSiteAccess({ userId, sites, orgId }: { userId: string; sites: Sit
     <div className="mt-2 rounded-lg border border-line bg-surface p-3">
       <p className="text-xs text-ink-muted">
         {unrestricted
-          ? 'Unrestricted — this member sees every site. Check a site below to confine them to it.'
-          : 'Confined to the checked site(s) only.'}
+          ? t('siteAccess.unrestricted')
+          : t('siteAccess.confined')}
       </p>
       <div className="mt-2 flex flex-wrap gap-3">
         {sites.map((site) => (
@@ -697,6 +691,9 @@ function MemberSiteAccess({ userId, sites, orgId }: { userId: string; sites: Sit
 // role" gap. Admin/manager only, matching the rate card's sensitivity.
 // ---------------------------------------------------------------------------
 function MemberProfile({ userId, orgId }: { userId: string; orgId: string }) {
+  const { t, i18n } = useTranslation('settings');
+  const lng = i18n.resolvedLanguage ?? 'en';
+  const { currentOrg } = useOrg();
   const queryClient = useQueryClient();
   const profileQuery = useTechnicianProfile(userId);
   const profile = profileQuery.data;
@@ -771,33 +768,33 @@ function MemberProfile({ userId, orgId }: { userId: string; orgId: string }) {
     <div className="mt-2 space-y-3 rounded-lg border border-line bg-surface p-3">
       <div className="grid gap-2 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs text-ink-muted">Employee ID</label>
+          <label className="mb-1 block text-xs text-ink-muted">{t('profile.employeeId')}</label>
           <Input value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-ink-muted">Phone</label>
+          <label className="mb-1 block text-xs text-ink-muted">{t('profile.phone')}</label>
           <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-ink-muted">Labor rate ($ / hour)</label>
+          <label className="mb-1 block text-xs text-ink-muted">{t('profile.laborRate', { currency: orgCurrency(currentOrg) })}</label>
           <Input type="number" min={0} value={laborRate} onChange={(e) => setLaborRate(e.target.value)} />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-ink-muted">Shift</label>
-          <Input value={shift} onChange={(e) => setShift(e.target.value)} placeholder="Day, Night, Rotating…" />
+          <label className="mb-1 block text-xs text-ink-muted">{t('profile.shift')}</label>
+          <Input value={shift} onChange={(e) => setShift(e.target.value)} placeholder={t('profile.shiftPlaceholder')} />
         </div>
       </div>
       <div>
-        <label className="mb-1 block text-xs text-ink-muted">Skills (comma-separated)</label>
-        <Input value={skillsText} onChange={(e) => setSkillsText(e.target.value)} placeholder="HVAC, Electrical, Plumbing" />
+        <label className="mb-1 block text-xs text-ink-muted">{t('profile.skills')}</label>
+        <Input value={skillsText} onChange={(e) => setSkillsText(e.target.value)} placeholder={t('profile.skillsPlaceholder')} />
       </div>
       <Button type="button" onClick={() => saveProfile.mutate()} loading={saveProfile.isPending}>
-        Save profile
+        {t('profile.save')}
       </Button>
 
       {profile?.id ? (
         <div className="border-t border-line pt-3">
-          <p className="text-xs font-medium text-ink-muted">Certifications</p>
+          <p className="text-xs font-medium text-ink-muted">{t('profile.certifications')}</p>
           <ul className="mt-2 space-y-1 text-sm">
             {(certsQuery.data ?? []).map((c) => {
               const d = daysUntil(c.expiry_date);
@@ -809,21 +806,21 @@ function MemberProfile({ userId, orgId }: { userId: string; orgId: string }) {
                     {c.issuer && ` · ${c.issuer}`}
                     {c.expiry_date && (
                       <span className={flag ? 'ml-2 text-status-crit' : 'ml-2 text-ink-muted'}>
-                        {d !== null && d < 0 ? 'Expired' : `Expires ${c.expiry_date}`}
+                        {d !== null && d < 0 ? t('profile.expired') : t('profile.expires', { date: formatDateOnly(c.expiry_date, lng) })}
                       </span>
                     )}
                   </span>
-                  <button type="button" onClick={() => removeCert.mutate(c.id)} className="text-ink-muted hover:text-status-crit" aria-label="Remove certification">
+                  <button type="button" onClick={() => removeCert.mutate(c.id)} className="text-ink-muted hover:text-status-crit" aria-label={t('profile.removeCert')}>
                     <Trash2 size={13} />
                   </button>
                 </li>
               );
             })}
-            {(certsQuery.data ?? []).length === 0 && <li className="text-ink-muted">No certifications recorded.</li>}
+            {(certsQuery.data ?? []).length === 0 && <li className="text-ink-muted">{t('profile.noCerts')}</li>}
           </ul>
           <div className="mt-2 flex flex-wrap items-end gap-2">
-            <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder="Certification name" className="w-40" />
-            <Input value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} placeholder="Issuer (optional)" className="w-32" />
+            <Input value={certName} onChange={(e) => setCertName(e.target.value)} placeholder={t('profile.certName')} className="w-40" />
+            <Input value={certIssuer} onChange={(e) => setCertIssuer(e.target.value)} placeholder={t('profile.certIssuer')} className="w-32" />
             <Input type="date" value={certExpiry} onChange={(e) => setCertExpiry(e.target.value)} className="w-36" />
             <button
               type="button"
@@ -831,12 +828,12 @@ function MemberProfile({ userId, orgId }: { userId: string; orgId: string }) {
               onClick={() => addCert.mutate()}
               className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-brand hover:bg-white disabled:opacity-50"
             >
-              Add
+              {t('profile.addCert')}
             </button>
           </div>
         </div>
       ) : (
-        <p className="text-xs text-ink-muted">Save the profile once to start adding certifications.</p>
+        <p className="text-xs text-ink-muted">{t('profile.saveFirst')}</p>
       )}
     </div>
   );
@@ -846,6 +843,7 @@ function MemberProfile({ userId, orgId }: { userId: string; orgId: string }) {
 // Integrations & notifications
 // ---------------------------------------------------------------------------
 function IntegrationsSection() {
+  const { t } = useTranslation('settings');
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -886,36 +884,36 @@ function IntegrationsSection() {
         <div className="flex items-start gap-3">
           <Cpu size={18} className="mt-0.5 text-brand" aria-hidden />
           <div>
-            <h2 className="font-semibold text-ink">IoT & sensors</h2>
-            <p className="mt-1 text-sm text-ink-muted">Manage device keys and ingest endpoints from the Devices page.</p>
-            <Link to="/devices" className="mt-2 inline-flex text-sm font-medium text-brand hover:text-brand-600">Manage devices →</Link>
+            <h2 className="font-semibold text-ink">{t('integrations.iotTitle')}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{t('integrations.iotHint')}</p>
+            <Link to="/devices" className="mt-2 inline-flex text-sm font-medium text-brand hover:text-brand-600">{t('integrations.manageDevices')}</Link>
           </div>
         </div>
       </section>
 
       <section className="rounded-xl border border-line bg-white p-4">
-        <h2 className="font-semibold text-ink">WhatsApp</h2>
+        <h2 className="font-semibold text-ink">{t('integrations.whatsapp')}</h2>
         {(channels.data ?? []).filter((c) => c.channel === 'whatsapp' && c.active).length > 0 ? (
           <ul className="mt-1 text-sm text-ink">
             {(channels.data ?? []).filter((c) => c.channel === 'whatsapp' && c.active).map((c) => (
-              <li key={c.id}>Connected: {c.display_name ?? c.external_id}</li>
+              <li key={c.id}>{t('integrations.connected', { name: c.display_name ?? c.external_id })}</li>
             ))}
           </ul>
         ) : (
           <p className="mt-1 text-sm text-ink-muted">
-            No WhatsApp number is connected. Contact FacilitySpace support to connect your business number; replies to WhatsApp conversations can't be delivered until then.
+            {t('integrations.whatsappNone')}
           </p>
         )}
       </section>
 
       <section className="rounded-xl border border-line bg-white p-4">
-        <h2 className="font-semibold text-ink">Email, SMS &amp; push delivery</h2>
+        <h2 className="font-semibold text-ink">{t('integrations.deliveryTitle')}</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Outbound messages are delivered by the <code className="text-xs">process-outbox</code> function (Resend / Twilio / web-push). Set the provider secrets and schedule the function to enable delivery.
+          <Trans t={t} i18nKey="integrations.deliveryHint" components={{ code: <code className="text-xs" /> }} />
         </p>
         <label className="mt-3 flex items-start gap-2 text-sm text-ink">
           <input type="checkbox" checked={emailOn} onChange={(e) => setEmailPref.mutate(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30" />
-          <span>Email me my notifications<span className="block text-xs text-ink-muted">When on, in-app notifications addressed to you are also emailed.</span></span>
+          <span>{t('integrations.emailMe')}<span className="block text-xs text-ink-muted">{t('integrations.emailMeHint')}</span></span>
         </label>
       </section>
     </div>
