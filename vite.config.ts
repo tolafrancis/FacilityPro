@@ -3,7 +3,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: './',
+  // Absolute asset URLs: with './' a deep link such as /work-orders/123 made the
+  // browser request /work-orders/assets/*.js, which the SPA fallback answers
+  // with index.html — a blank page on refresh or when opening a shared link.
+  base: '/',
   server: {
     port: 5173,
   },

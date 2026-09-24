@@ -29,6 +29,7 @@
   },
   "actions": {
     "signOut": "Đăng xuất",
+    "retry": "Thử lại",
     "openMenu": "Mở menu",
     "closeMenu": "Đóng menu",
     "save": "Lưu",

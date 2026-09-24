@@ -7,7 +7,7 @@
 // `install`/`activate` to actually run again and purge the old cache.
 // Without a bump, a returning visitor's browser has no way to notice the
 // shell changed, since sw.js's own bytes are otherwise identical.
-const CACHE = 'facilityspace-shell-v2';
+const CACHE = 'facilityspace-shell-v3';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
@@ -70,13 +70,18 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Static assets: cache-first, then network (and cache the result).
+  // Only cache real assets: the host's SPA fallback answers a missing file with
+  // index.html (200, text/html), which must never be stored under a .js/.css URL.
   event.respondWith(
     caches.match(req).then(
       (cached) =>
         cached ||
         fetch(req).then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
+          const type = res.headers.get('content-type') || '';
+          if (res.ok && !type.includes('text/html')) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
           return res;
         })
     )

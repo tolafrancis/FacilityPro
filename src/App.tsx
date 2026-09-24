@@ -58,9 +58,27 @@ function FullPageLoader() {
   );
 }
 
+function OrgLoadError({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="grid min-h-screen place-items-center px-4">
+      <div className="max-w-sm text-center">
+        <p className="text-sm text-ink">{t('errors.generic')}</p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+        >
+          {t('actions.retry')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const { session, loading: authLoading } = useAuth();
-  const { memberships, loading: orgLoading } = useOrg();
+  const { memberships, loading: orgLoading, error: orgError, refresh: refreshOrgs } = useOrg();
   const location = useLocation();
 
   if (authLoading) return <FullPageLoader />;
@@ -82,6 +100,10 @@ export default function App() {
   }
 
   if (orgLoading) return <FullPageLoader />;
+
+  // Don't treat a failed load as "no organisation": that would send an existing
+  // member to onboarding, where they could create a duplicate org.
+  if (orgError) return <OrgLoadError onRetry={() => void refreshOrgs()} />;
 
   const hasOrg = memberships.length > 0;
 
