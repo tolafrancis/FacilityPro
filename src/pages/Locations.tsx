@@ -22,6 +22,7 @@ const KIND_ICON: Record<LocationKind, typeof Building2> = {
 };
 
 export default function Locations() {
+  const { isManager } = useOrg();
   const { t, i18n } = useTranslation('locations');
   const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg } = useOrg();
@@ -112,7 +113,7 @@ export default function Locations() {
             {resolveI18n(node.name_i18n, lng)}
             <span className="text-xs text-ink-muted">· {t(node.kind)}</span>
           </span>
-          {nextKind && (
+          {isManager && nextKind && (
             <div className="flex gap-2">
               <button
                 type="button"
@@ -151,9 +152,11 @@ export default function Locations() {
           <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
           <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
         </div>
-        <Button onClick={() => setDialog({ mode: 'site' })}>
-          <Plus size={16} /> {t('addSite')}
-        </Button>
+        {isManager && (
+          <Button onClick={() => setDialog({ mode: 'site' })}>
+            <Plus size={16} /> {t('addSite')}
+          </Button>
+        )}
       </div>
 
       {sites.length === 0 ? (
@@ -171,15 +174,17 @@ export default function Locations() {
                   {resolveI18n(site.name_i18n, lng)}
                   <span className="text-xs font-normal text-ink-muted">· {t('site')}</span>
                 </span>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setDialog({ mode: 'child', kind: 'building', siteId: site.id, parentId: null })
-                  }
-                  className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:text-brand-600"
-                >
-                  <Plus size={14} /> {t('addBuilding')}
-                </button>
+                {isManager && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDialog({ mode: 'child', kind: 'building', siteId: site.id, parentId: null })
+                    }
+                    className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:text-brand-600"
+                  >
+                    <Plus size={14} /> {t('addBuilding')}
+                  </button>
+                )}
               </div>
               {childrenOf(site.id, null).map((b) => renderNode(b, 1))}
             </section>

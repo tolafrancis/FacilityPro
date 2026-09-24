@@ -18,6 +18,7 @@ import {
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { daysUntil, PRIORITIES, PRIORITY_CLASS, friendlyError } from '../lib/ui';
+import { notifyError } from '../components/Toaster';
 import type { AssetType, FaultType, Priority, Role, Site } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -214,11 +215,13 @@ function CatalogsSection() {
   };
 
   const toggleFault = async (ft: FaultType) => {
-    await supabase.from('fp_fault_types').update({ is_active: ft.is_active === false }).eq('id', ft.id);
+    const { error } = await supabase.from('fp_fault_types').update({ is_active: ft.is_active === false }).eq('id', ft.id);
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invFault();
   };
   const toggleAsset = async (at: AssetType) => {
-    await supabase.from('fp_asset_types').update({ is_active: at.is_active === false }).eq('id', at.id);
+    const { error } = await supabase.from('fp_asset_types').update({ is_active: at.is_active === false }).eq('id', at.id);
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invAsset();
   };
 
@@ -226,14 +229,16 @@ function CatalogsSection() {
     setMsg(null);
     const { count } = await supabase.from('fp_requests').select('id', { count: 'exact', head: true }).eq('fault_type_id', ft.id);
     if ((count ?? 0) > 0) { setMsg(`"${resolveI18n(ft.name_i18n, lng)}" is used by ${count} request(s) — deactivate it instead of deleting.`); return; }
-    await supabase.from('fp_fault_types').delete().eq('id', ft.id);
+    const { error } = await supabase.from('fp_fault_types').delete().eq('id', ft.id);
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invFault();
   };
   const deleteAsset = async (at: AssetType) => {
     setMsg(null);
     const { count } = await supabase.from('fp_assets').select('id', { count: 'exact', head: true }).eq('asset_type_id', at.id);
     if ((count ?? 0) > 0) { setMsg(`"${resolveI18n(at.name_i18n, lng)}" is used by ${count} asset(s) — deactivate it instead of deleting.`); return; }
-    await supabase.from('fp_asset_types').delete().eq('id', at.id);
+    const { error } = await supabase.from('fp_asset_types').delete().eq('id', at.id);
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invAsset();
   };
 
@@ -407,7 +412,11 @@ function SlaSection() {
             hoursLabel={t('sla.hours')}
             saveLabel={t('sla.save')}
             onSave={async (hours) => {
-              await supabase.from('fp_sla_policies').upsert({ org_id: orgId, priority: p, resolution_hours: hours }, { onConflict: 'org_id,priority' });
+              const { error } = await supabase.from('fp_sla_policies').upsert({ org_id: orgId, priority: p, resolution_hours: hours }, { onConflict: 'org_id,priority' });
+              if (error) {
+                notifyError(friendlyError(error, tc));
+                return;
+              }
               void queryClient.invalidateQueries({ queryKey: ['sla_policies', orgId] });
             }}
           />

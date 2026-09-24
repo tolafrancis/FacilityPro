@@ -14,6 +14,8 @@ interface OrgContextValue {
   memberships: Membership[];
   currentOrg: Organization | null;
   role: Role | null;
+  /** org_admin or manager: may create/edit the org's configuration and records. */
+  isManager: boolean;
   loading: boolean;
   /** Set when memberships could not be loaded (e.g. network error). */
   error: string | null;
@@ -85,6 +87,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
         memberships,
         currentOrg: current?.fp_organizations ?? null,
         role: current?.role ?? null,
+        isManager: current?.role === 'org_admin' || current?.role === 'manager',
         loading,
         error,
         refresh,

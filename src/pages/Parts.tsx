@@ -19,6 +19,7 @@ import Pagination from '../components/ui/Pagination';
 const PAGE_SIZE = 25;
 
 export default function Parts() {
+  const { isManager } = useOrg();
   const { t, i18n } = useTranslation('parts');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
@@ -116,9 +117,11 @@ export default function Parts() {
           <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
           <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
         </div>
-        <Button onClick={() => setOpen(true)}>
-          <Plus size={16} /> {t('add')}
-        </Button>
+        {isManager && (
+          <Button onClick={() => setOpen(true)}>
+            <Plus size={16} /> {t('add')}
+          </Button>
+        )}
       </div>
 
       <div className="mt-5 min-w-[180px]">
@@ -232,6 +235,7 @@ function PartRow({
   historyLabel: string;
   historyEmptyLabel: string;
 }) {
+  const { isManager: canRestock } = useOrg();
   const [amount, setAmount] = useState('');
   const low = part.stock_balance <= part.reorder_level;
   const meta = [vendorName, categoryName].filter(Boolean).join(' · ');
@@ -263,6 +267,8 @@ function PartRow({
         <td className="px-4 py-2 text-ink-muted">{part.reorder_level}</td>
         <td className="px-4 py-2 text-ink-muted">{part.unit_cost}</td>
         <td className="px-4 py-2">
+          {/* Restocking writes the inventory ledger: admins/managers only (RLS). */}
+          {canRestock && (
           <div className="flex items-center justify-end gap-1">
             <input
               type="number"
@@ -286,6 +292,7 @@ function PartRow({
               {restockLabel}
             </button>
           </div>
+          )}
         </td>
       </tr>
       {expanded && (

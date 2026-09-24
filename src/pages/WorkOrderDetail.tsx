@@ -27,7 +27,7 @@ import {
 } from '../lib/queries';
 import { uploadMedia, signedUrl } from '../lib/media';
 import { writeOrQueue } from '../lib/sync';
-import { formatDate, nextWoStatuses, PRIORITY_CLASS, WO_DONE_STATUSES, WO_STATUS_CLASS } from '../lib/ui';
+import { formatDate, friendlyError, nextWoStatuses, PRIORITY_CLASS, WO_DONE_STATUSES, WO_STATUS_CLASS } from '../lib/ui';
 import { resolveI18n } from '../i18n/resolver';
 import type {
   Media,
@@ -39,6 +39,7 @@ import { FAILURE_CODES, COMPLETION_CODES } from '../lib/database.types';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
 import ChecklistRunner from '../components/ChecklistRunner';
+import NotFound from '../components/NotFound';
 
 export default function WorkOrderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -203,7 +204,8 @@ export default function WorkOrderDetail() {
     }
   };
 
-  if (!wo) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
+  if (woQuery.isLoading) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
+  if (!wo) return <NotFound backTo="/work-orders" backLabel={t('title')} />;
 
   const isManager = role === 'org_admin' || role === 'manager';
   const isAssignee = !!user && wo.assigned_to === user.id;
@@ -234,7 +236,7 @@ export default function WorkOrderDetail() {
       'wo_checklist_incomplete',
       'wo_field_not_allowed',
     ];
-    return known.includes(code) ? t(`lifecycle.errors.${code}`) : msg;
+    return known.includes(code) ? t(`lifecycle.errors.${code}`) : friendlyError(patch.error as { code?: string; message?: string }, tc);
   })();
 
   const media = mediaQuery.data ?? [];

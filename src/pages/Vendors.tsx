@@ -257,6 +257,9 @@ function Section({
 }
 
 function AddButton({ label, onClick }: { label: string; onClick: () => void }) {
+  // Vendors, contracts and licenses are managed by admins/managers (RLS).
+  const { isManager } = useOrg();
+  if (!isManager) return null;
   return (
     <button
       type="button"

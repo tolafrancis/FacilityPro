@@ -60,7 +60,16 @@ interface NavGroup {
 // Nav items whose underlying data is admin/manager-only at the RLS layer
 // (fp_finance_* tables, fp_devices) — hiding them for other roles avoids a
 // dead-end click into a page that will just come back empty.
-const ADMIN_MANAGER_ONLY_KEYS = new Set(['financial', 'devices']);
+const ADMIN_MANAGER_ONLY_KEYS = new Set([
+  'financial',
+  'devices',
+  'approvals',
+  'workflows',
+  'surveys',
+  'reports',
+  'billing',
+  'settings',
+]);
 
 function isNavItemVisible(key: string, role: Role | null): boolean {
   if (!ADMIN_MANAGER_ONLY_KEYS.has(key)) return true;

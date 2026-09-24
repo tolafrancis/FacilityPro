@@ -18,6 +18,7 @@ import Pagination from '../components/ui/Pagination';
 const PAGE_SIZE = 25;
 
 export default function Assets() {
+  const { isManager } = useOrg();
   const { t, i18n } = useTranslation('assets');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
@@ -110,9 +111,11 @@ export default function Assets() {
           <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
           <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
         </div>
-        <Button onClick={() => setOpen(true)}>
-          <Plus size={16} /> {t('add')}
-        </Button>
+        {isManager && (
+          <Button onClick={() => setOpen(true)}>
+            <Plus size={16} /> {t('add')}
+          </Button>
+        )}
       </div>
 
       <div className="mt-5 flex flex-wrap items-end gap-3">

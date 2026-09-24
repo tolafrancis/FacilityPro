@@ -11,6 +11,7 @@ import type { RequestStatus } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
+import NotFound from '../components/NotFound';
 
 export default function RequestDetail() {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +46,7 @@ export default function RequestDetail() {
   // was already converted, so a double click or two managers can't create
   // duplicates, and the request status follows the work order from there.
   const convert = useMutation({
+    meta: { errorHandled: true }, // shown inline below
     mutationFn: async () => {
       const { data, error } = await supabase.rpc('fp_convert_request', { p_request: id! });
       if (error) throw error;
@@ -60,7 +62,8 @@ export default function RequestDetail() {
     },
   });
 
-  if (!request) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
+  if (requestQuery.isLoading) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
+  if (!request) return <NotFound backTo="/requests" backLabel={t('title')} />;
 
   const faultName = request.fault_type_id
     ? resolveI18n(faultTypes.data?.find((x) => x.id === request.fault_type_id)?.name_i18n, lng)

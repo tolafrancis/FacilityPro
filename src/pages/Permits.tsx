@@ -25,7 +25,7 @@ async function fetchPermits(orgId: string | undefined) {
 }
 
 export default function Permits() {
-  const { currentOrg } = useOrg();
+  const { currentOrg, isManager } = useOrg();
   const queryClient = useQueryClient();
   const [form, setForm] = useState({ title: '', asset: '', requester: '', approver: '', dueDate: '', notes: '', status: 'submitted' as Permit['status'] });
   const [busy, setBusy] = useState(false);
@@ -78,7 +78,8 @@ export default function Permits() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+      <div className={isManager ? 'grid gap-6 lg:grid-cols-[0.95fr_1.05fr]' : 'max-w-3xl'}>
+        {isManager && (
         <form onSubmit={submit} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-ink">Create permit</h2>
           <div className="mt-4 space-y-4">
@@ -123,6 +124,7 @@ export default function Permits() {
             {message && <p className="text-sm text-brand">{message}</p>}
           </div>
         </form>
+        )}
 
         <div className="space-y-4">
           {permits.length === 0 && (

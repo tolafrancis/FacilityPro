@@ -74,13 +74,14 @@ export default function Inbox() {
         .single();
       if (error) throw error;
       if (v.first.trim()) {
-        await supabase.from('fp_messages').insert({
+        const { error: msgError } = await supabase.from('fp_messages').insert({
           org_id: orgId,
           conversation_id: data.id,
           direction: 'out',
           body: v.first.trim(),
           sender: user?.id ?? null,
         });
+        if (msgError) throw msgError;
       }
       return data.id as string;
     },

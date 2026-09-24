@@ -140,5 +140,10 @@
     "pending": "{{count}} chờ đồng bộ",
     "syncing": "Đang đồng bộ…"
   },
-  "free": "Miễn phí"
+  "free": "Miễn phí",
+  "notFound": {
+    "title": "Không tìm thấy",
+    "body": "Trang hoặc bản ghi này không tồn tại, hoặc bạn không có quyền truy cập.",
+    "back": "Về trang tổng quan"
+  }
 }

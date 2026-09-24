@@ -4,6 +4,7 @@ import { ArrowLeft, Printer } from 'lucide-react';
 import { useAsset, useFaultTypes, useLocations, useOrgMembers, useParts, useWorkOrder, useWoLabor, useWoParts } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { formatDate } from '../lib/ui';
+import NotFound from '../components/NotFound';
 
 export default function JobSheet() {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +23,8 @@ export default function JobSheet() {
   const locations = useLocations();
   const faultTypes = useFaultTypes();
 
-  if (!wo) return <p className="p-6 text-sm text-ink-muted">{tc('loading')}</p>;
+  if (woQuery.isLoading) return <p className="p-6 text-sm text-ink-muted">{tc('loading')}</p>;
+  if (!wo) return <NotFound backTo="/work-orders" />;
 
   const location = wo.location_id ? locations.data?.find((l) => l.id === wo.location_id) : null;
   const faultType = wo.fault_type_id ? faultTypes.data?.find((f) => f.id === wo.fault_type_id) : null;

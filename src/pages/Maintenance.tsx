@@ -24,6 +24,7 @@ import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
 
 export default function Maintenance() {
+  const { isManager } = useOrg();
   const { t, i18n } = useTranslation('maintenance');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
@@ -111,6 +112,7 @@ export default function Maintenance() {
           <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
           <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
         </div>
+        {isManager && (
         <div className="flex gap-2">
           <Button variant="secondary" onClick={() => runDue.mutate()} loading={runDue.isPending}>
             <RefreshCw size={16} /> {t('runDue')}
@@ -119,6 +121,7 @@ export default function Maintenance() {
             <Plus size={16} /> {t('addSchedule')}
           </Button>
         </div>
+        )}
       </div>
 
       {notice && (
@@ -215,6 +218,7 @@ export default function Maintenance() {
                       </span>
                     </div>
                     <div className="mt-2 flex items-center gap-3">
+                      {isManager && (<>
                       <button
                         type="button"
                         onClick={() => setEditing(s)}
@@ -229,6 +233,7 @@ export default function Maintenance() {
                       >
                         {s.active ? t('pause') : t('resume')}
                       </button>
+                      </>)}
                       <button
                         type="button"
                         onClick={() => setExpanded(expanded === s.id ? null : s.id)}

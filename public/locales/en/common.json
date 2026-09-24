@@ -153,5 +153,10 @@
     "pending": "{{count}} to sync",
     "syncing": "Syncing…"
   },
-  "free": "Free"
+  "free": "Free",
+  "notFound": {
+    "title": "Not found",
+    "body": "This page or record doesn't exist, or you don't have access to it.",
+    "back": "Back to dashboard"
+  }
 }

@@ -12,6 +12,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
+import NotFound from '../components/NotFound';
 
 const OPS: DeviceRuleOp[] = ['gt', 'gte', 'lt', 'lte', 'eq'];
 const OP_SYMBOL: Record<DeviceRuleOp, string> = { gt: '>', gte: '≥', lt: '<', lte: '≤', eq: '=' };
@@ -70,7 +71,7 @@ export default function DeviceDetail() {
   });
 
   if (device.isLoading) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
-  if (!d) return <p className="text-sm text-ink-muted">{t('notFound')}</p>;
+  if (!d) return <NotFound backTo="/devices" backLabel={t('title')} />;
 
   const key = d.device_key;
   const rpcExample = `curl -X POST "${SUPABASE_URL}/rest/v1/rpc/fp_device_ingest" \\

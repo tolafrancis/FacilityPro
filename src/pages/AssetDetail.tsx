@@ -26,6 +26,7 @@ import Input from '../components/ui/Input';
 import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
 import Select from '../components/ui/Select';
+import NotFound from '../components/NotFound';
 
 type Tab = 'info' | 'history' | 'meters' | 'documents' | 'qr';
 
@@ -44,9 +45,10 @@ export default function AssetDetail() {
   const workOrders = useWorkOrders();
 
   const asset = assetQuery.data;
-  if (!asset) {
+  if (assetQuery.isLoading) {
     return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
   }
+  if (!asset) return <NotFound backTo="/assets" backLabel={t('title')} />;
 
   const typeName = asset.asset_type_id
     ? resolveI18n(
@@ -190,7 +192,7 @@ function MetersTab({ assetId }: { assetId: string }) {
   const { t, i18n } = useTranslation('assets');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
-  const { currentOrg } = useOrg();
+  const { currentOrg, isManager } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
   const metersQuery = useMeters(assetId);
@@ -218,13 +220,15 @@ function MetersTab({ assetId }: { assetId: string }) {
     <div className="mt-5">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-ink">{t('meters.tab')}</p>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600"
-        >
-          <Plus size={15} /> {t('meters.add')}
-        </button>
+        {isManager && (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600"
+          >
+            <Plus size={15} /> {t('meters.add')}
+          </button>
+        )}
       </div>
 
       {meters.length === 0 ? (
@@ -365,7 +369,7 @@ function MeterDialog({
 
 function DocumentsTab({ assetId }: { assetId: string }) {
   const { t } = useTranslation('assets');
-  const { currentOrg } = useOrg();
+  const { currentOrg, isManager } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
   const linksQuery = useDocumentLinks('asset', assetId);
@@ -406,7 +410,7 @@ function DocumentsTab({ assetId }: { assetId: string }) {
           <div key={doc.id} className="rounded-lg border border-line bg-white px-3 py-2">
             <p className="text-sm font-medium text-ink">{doc.title}</p>
             <p className="text-xs text-ink-muted">{doc.category} · {doc.owner}</p>
-            {doc.link && (
+            {doc.link && /^https?:\/\//i.test(doc.link) && (
               <a href={doc.link} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs font-medium text-brand hover:text-brand-600">
                 {t('documents.open')}
               </a>
@@ -415,7 +419,7 @@ function DocumentsTab({ assetId }: { assetId: string }) {
         ))
       )}
 
-      {attachable.length > 0 && (
+      {isManager && attachable.length > 0 && (
         <div className="flex items-end gap-2">
           <div className="flex-1">
             <label className="mb-1 block text-xs text-ink-muted">{t('documents.attach')}</label>

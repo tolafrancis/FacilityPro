@@ -5,6 +5,7 @@ import { useAuth } from './contexts/AuthContext';
 import { useOrg } from './contexts/OrgContext';
 import AppShell from './components/AppShell';
 import RequireRole from './components/RequireRole';
+import NotFound from './components/NotFound';
 
 // Every page is its own chunk, fetched on first visit rather than bundled
 // into the initial load — the whole app (Financial, Devices, Workflows and
@@ -128,37 +129,37 @@ export default function App() {
               <Route path="/requests/:id" element={<RequestDetail />} />
               <Route path="/work-orders" element={<WorkOrders />} />
               <Route path="/work-orders/:id" element={<WorkOrderDetail />} />
-              <Route path="/approvals" element={<Approvals />} />
               <Route path="/inbox" element={<Inbox />} />
               <Route path="/assets" element={<Assets />} />
               <Route path="/assets/:id" element={<AssetDetail />} />
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/checklists" element={<Checklists />} />
-              <Route path="/workflows" element={<Workflows />} />
-              <Route path="/surveys" element={<Surveys />} />
               <Route path="/desks" element={<Desks />} />
               <Route path="/facilities" element={<Facilities />} />
               <Route path="/checklists/:id" element={<ChecklistTemplate />} />
               <Route path="/parts" element={<Parts />} />
               <Route path="/vendors" element={<Vendors />} />
-              <Route element={<RequireRole allow={['org_admin', 'manager']} />}>
-                <Route path="/devices" element={<Devices />} />
-                <Route path="/devices/:id" element={<DeviceDetail />} />
-              </Route>
-              <Route path="/reports" element={<Reports />} />
               <Route path="/locations" element={<Locations />} />
               <Route path="/security" element={<Security />} />
-              <Route path="/billing" element={<Billing />} />
-              <Route path="/settings" element={<Settings />} />
               <Route path="/documents" element={<Documents />} />
               <Route path="/permits" element={<Permits />} />
               <Route path="/attendance" element={<Attendance />} />
               <Route path="/smart-assistant" element={<SmartAssistant />} />
               <Route path="/tenant-experience" element={<TenantExperience />} />
+              {/* Admin/manager pages: their data and writes are limited to these
+                  roles by RLS, so other roles would only see controls that fail. */}
               <Route element={<RequireRole allow={['org_admin', 'manager']} />}>
+                <Route path="/approvals" element={<Approvals />} />
+                <Route path="/workflows" element={<Workflows />} />
+                <Route path="/surveys" element={<Surveys />} />
+                <Route path="/devices" element={<Devices />} />
+                <Route path="/devices/:id" element={<DeviceDetail />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/billing" element={<Billing />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="/financial" element={<Financial />} />
               </Route>
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Route>
           </>
         )}

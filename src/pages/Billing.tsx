@@ -53,6 +53,7 @@ export default function Billing() {
   };
 
   const requestPlan = useMutation({
+    meta: { errorHandled: true }, // shown inline below
     mutationFn: async (code: string) => {
       const { error } = await supabase.rpc('fp_request_plan', { p_org: orgId!, p_plan: code });
       if (error) throw error;
@@ -61,6 +62,7 @@ export default function Billing() {
   });
 
   const requestCancel = useMutation({
+    meta: { errorHandled: true }, // shown inline below
     mutationFn: async () => {
       const { error } = await supabase.rpc('fp_request_cancellation', { p_org: orgId! });
       if (error) throw error;
@@ -239,6 +241,7 @@ function PlatformQueue({ plans, onChanged }: { plans: Plan[]; onChanged: () => v
   const subs = usePlatformSubscriptions(true);
 
   const setSubscription = useMutation({
+    meta: { errorHandled: true }, // shown inline below
     mutationFn: async (v: { org: string; plan: string; status: 'active' | 'canceled'; interval: 'month' | 'year' }) => {
       const { error } = await supabase.rpc('fp_platform_set_subscription', {
         p_org: v.org,

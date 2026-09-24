@@ -9,26 +9,46 @@ function announce() {
 
 type WriteSpec = Omit<QueuedWrite, 'id' | 'createdAt'>;
 
-async function runWrite(spec: WriteSpec): Promise<{ error: { message: string } | null }> {
-  if (spec.op === 'insert') {
-    return supabase.from(spec.table).insert(spec.values);
+/** A failed write, keeping the database error code for friendlyError(). */
+export class WriteError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.code = code;
   }
-  return supabase
+}
+
+async function runWrite(
+  spec: WriteSpec
+): Promise<{ error: { message: string; code?: string } | null; rows: number | null }> {
+  if (spec.op === 'insert') {
+    const { error } = await supabase.from(spec.table).insert(spec.values);
+    return { error, rows: null };
+  }
+  // Ask for the changed rows back: an update that RLS doesn't allow (or whose
+  // row is gone) returns no error and simply changes nothing.
+  const { data, error } = await supabase
     .from(spec.table)
     .update(spec.values)
-    .eq(spec.matchColumn as string, spec.matchValue as string);
+    .eq(spec.matchColumn as string, spec.matchValue as string)
+    .select('id');
+  return { error, rows: data?.length ?? 0 };
 }
 
 /**
  * Perform a write, or queue it if the device is offline. Returns whether the
  * write was queued (true) or applied immediately (false). Real (non-network)
- * errors while online are thrown so the caller can surface them.
+ * errors while online are thrown so the caller can surface them — including
+ * an update that changed nothing because it wasn't permitted.
  */
 export async function writeOrQueue(spec: WriteSpec): Promise<{ queued: boolean }> {
   if (navigator.onLine) {
-    const { error } = await runWrite(spec);
-    if (!error) return { queued: false };
-    throw new Error(error.message);
+    const { error, rows } = await runWrite(spec);
+    if (error) throw new WriteError(error.message, error.code);
+    if (rows === 0) {
+      throw new WriteError('Nothing was changed: not permitted, or the record no longer exists.', '42501');
+    }
+    return { queued: false };
   }
   await addWrite({ ...spec, createdAt: Date.now() });
   announce();

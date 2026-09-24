@@ -21,6 +21,7 @@ interface FacilityDraft {
 }
 
 export default function Facilities() {
+  const { isManager } = useOrg();
   const { t: tc } = useTranslation('common');
   const { i18n } = useTranslation();
   const lng = i18n.resolvedLanguage ?? 'en';
@@ -85,9 +86,11 @@ export default function Facilities() {
             Common facilities (meeting rooms, gyms, etc.). A new booking can trigger the &ldquo;Alert after Facilities Booking&rdquo; workflow.
           </p>
         </div>
-        <Button onClick={() => setDialog({ mode: 'create' })}>
-          <Plus size={16} /> New facility
-        </Button>
+        {isManager && (
+          <Button onClick={() => setDialog({ mode: 'create' })}>
+            <Plus size={16} /> New facility
+          </Button>
+        )}
       </div>
 
       {facilityRows.length === 0 ? (
@@ -106,6 +109,7 @@ export default function Facilities() {
                   {locationName(f.location_id)}{f.capacity ? ` · seats ${f.capacity}` : ''}
                 </span>
               </span>
+              {isManager && (
               <span className="flex items-center gap-3">
                 <button type="button" onClick={() => setDialog({ mode: 'edit', facility: f })} className="text-ink-muted hover:text-brand" aria-label={tc('actions.edit')}>
                   <Pencil size={15} />
@@ -114,6 +118,7 @@ export default function Facilities() {
                   <Trash2 size={15} />
                 </button>
               </span>
+              )}
             </li>
           ))}
         </ul>

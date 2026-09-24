@@ -1328,6 +1328,7 @@ export function useJobHealth(enabled: boolean) {
   return useQuery({
     queryKey: ['job_health'],
     enabled,
+    meta: { errorHandled: true }, // the panel shows it
     refetchInterval: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('fp_job_health');
