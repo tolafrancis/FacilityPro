@@ -71,5 +71,17 @@
     "notify": "Notify",
     "work_order": "Work order",
     "both": "Notify + work order"
+  },
+  "offline": {
+    "now": "Offline: no data within the alert window. Admins and managers were notified.",
+    "label": "Offline alert",
+    "never": "Off",
+    "after": {
+      "15": "after 15 minutes",
+      "30": "after 30 minutes",
+      "60": "after 1 hour",
+      "240": "after 4 hours",
+      "1440": "after 1 day"
+    }
   }
 }

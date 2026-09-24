@@ -71,5 +71,17 @@
     "notify": "Thông báo",
     "work_order": "Lệnh công việc",
     "both": "Thông báo + lệnh công việc"
+  },
+  "offline": {
+    "now": "Mất kết nối: không có dữ liệu trong khoảng thời gian cảnh báo. Quản trị viên và quản lý đã được thông báo.",
+    "label": "Cảnh báo mất kết nối",
+    "never": "Tắt",
+    "after": {
+      "15": "sau 15 phút",
+      "30": "sau 30 phút",
+      "60": "sau 1 giờ",
+      "240": "sau 4 giờ",
+      "1440": "sau 1 ngày"
+    }
   }
 }

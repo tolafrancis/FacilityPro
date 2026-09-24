@@ -181,7 +181,7 @@ select t.check('health alerts are not repeated every run',
   (select count(*) from fp_notification_outbox where to_address = 'ops@platform.test' and subject like '%process_outbox%') = 1);
 
 select t.check('platform admin sees job health',
-  t.run('authenticated', :'ops', $q$select * from fp_job_health()$q$) = 'ok:6');
+  t.run('authenticated', :'ops', $q$select * from fp_job_health()$q$) = 'ok:' || (select count(*) from fp_jobs));
 select t.check('org admin cannot see job health',
   t.run('authenticated', :'admin', $q$select * from fp_job_health()$q$) like 'err:%');
 

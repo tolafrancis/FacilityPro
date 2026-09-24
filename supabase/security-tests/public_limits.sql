@@ -100,8 +100,8 @@ select t.run('anon', null, $q$select fp_device_ingest('devkey1', 'temp', 36, nul
 select t.check('a threshold rule fires once per cooldown',
   (select count(*) from fp_requests where title like 'Sensor:%') = 1);
 
-select t.check('last_seen_at is not rewritten (and audited) on every reading',
-  (select count(*) from fp_audit_log where entity_type = 'fp_devices' and action = 'UPDATE') = 1);
+select t.check('device heartbeats (last_seen_at) do not write audit entries',
+  (select count(*) from fp_audit_log where entity_type = 'fp_devices' and action = 'UPDATE') = 0);
 
 insert into fp_telemetry (org_id, device_id, metric, value, ts)
   select :'org', '60000000-0000-0000-0000-000000000001', 'bulk', g, now() - make_interval(secs => g)

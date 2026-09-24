@@ -733,6 +733,9 @@ export interface Device {
   meter_id: string | null;
   metric_map: Record<string, string>;
   last_seen_at: string | null;
+  /** Alert admins/managers when no data arrives for this long (0067). */
+  offline_after_minutes: number | null;
+  offline_alerted_at: string | null;
   active: boolean;
   created_at: string;
   updated_at: string;

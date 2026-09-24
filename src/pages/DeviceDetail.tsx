@@ -62,6 +62,14 @@ export default function DeviceDetail() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['device', id] }),
   });
 
+  const setOfflineAfter = useMutation({
+    mutationFn: async (minutes: number | null) => {
+      const { error } = await supabase.from('fp_devices').update({ offline_after_minutes: minutes }).eq('id', id!);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['device', id] }),
+  });
+
   const deleteRule = useMutation({
     mutationFn: async (ruleId: string) => {
       const { error } = await supabase.from('fp_device_rules').delete().eq('id', ruleId);
@@ -96,6 +104,24 @@ export default function DeviceDetail() {
             {d.kind ? t(`kinds.${d.kind}`) : ''}
             {d.last_seen_at ? ` · ${t('lastSeen')} ${formatDate(d.last_seen_at, lng)}` : ` · ${t('neverSeen')}`}
           </p>
+          {d.offline_alerted_at && (
+            <p className="mt-1 text-sm font-medium text-status-crit">{t('offline.now')}</p>
+          )}
+          {isAdmin ? (
+            <label className="mt-2 flex items-center gap-2 text-sm text-ink">
+              {t('offline.label')}
+              <select
+                value={d.offline_after_minutes ?? ''}
+                onChange={(e) => setOfflineAfter.mutate(e.target.value ? Number(e.target.value) : null)}
+                className="rounded-lg border border-line bg-white px-2 py-1 text-sm"
+              >
+                <option value="">{t('offline.never')}</option>
+                {[15, 30, 60, 240, 1440].map((m) => (
+                  <option key={m} value={m}>{t(`offline.after.${m}`)}</option>
+                ))}
+              </select>
+            </label>
+          ) : null}
         </div>
         {isAdmin && (
           <label className="inline-flex items-center gap-2 text-sm text-ink">
