@@ -1,0 +1,146 @@
+{
+  "tagline": "Vận hành thật đơn giản",
+  "nav": {
+    "pricing": "Bảng giá",
+    "features": "Tính năng",
+    "resources": "Tài nguyên",
+    "solutions": "Giải pháp",
+    "signIn": "Đăng nhập",
+    "requestDemo": "Yêu cầu demo"
+  },
+  "featuresMenu": {
+    "workOrders": "Lệnh công việc & yêu cầu",
+    "preventive": "Bảo trì phòng ngừa",
+    "assets": "Tài sản & kho",
+    "workflows": "Quy trình & tự động hóa",
+    "surveys": "Khảo sát & phản hồi",
+    "iot": "IoT & cảm biến"
+  },
+  "solutionsMenu": {
+    "facilities": "Quản lý cơ sở vật chất",
+    "property": "Quản lý bất động sản",
+    "manufacturing": "Sản xuất",
+    "healthcare": "Y tế",
+    "education": "Giáo dục",
+    "retail": "Bán lẻ & khách sạn"
+  },
+  "hero": {
+    "badge": "Dành cho đội ngũ quản lý cơ sở vật chất cần vận hành nhịp nhàng, có tổ chức",
+    "title": "Gom bảo trì, yêu cầu và tài sản về một trung tâm điều hành đáng tin cậy.",
+    "body": "FacilitySpace giúp người quản lý vận hành rút ngắn thời gian phản hồi, giữ tài sản luôn tốt và cho cả đội một nơi làm việc chung, nhanh hơn và ít vướng mắc hơn.",
+    "bookDemo": "Đặt lịch demo",
+    "explore": "Khám phá nền tảng"
+  },
+  "proofPoints": {
+    "response": "Phản hồi nhanh hơn",
+    "reliable": "Tài sản vận hành ổn định",
+    "visibility": "Cả đội nắm rõ công việc"
+  },
+  "why": {
+    "title": "Vì sao các đội chuyển sang",
+    "missed": {
+      "title": "Ít việc bị bỏ sót",
+      "body": "Nhắc việc tự động và phân công rõ ràng giúp không việc nào bị lọt."
+    },
+    "visibility": {
+      "title": "Nắm tình hình rõ hơn",
+      "body": "Mọi người đều thấy trạng thái trực tiếp, mức ưu tiên và việc cần làm tiếp theo ở cùng một nơi."
+    },
+    "admin": {
+      "title": "Bớt việc giấy tờ",
+      "body": "Chuyển từ bảng tính và tin nhắn rời rạc sang một quy trình vận hành gọn gàng hơn."
+    }
+  },
+  "featureCards": {
+    "workOrders": {
+      "title": "Quản lý lệnh công việc tập trung",
+      "description": "Theo dõi yêu cầu, phân công kỹ thuật viên và giữ mọi công việc tiến triển trong một không gian làm việc chung."
+    },
+    "maintenance": {
+      "title": "Chủ động bảo trì",
+      "description": "Lên kế hoạch bảo trì phòng ngừa, theo dõi tình trạng tài sản và giảm thời gian ngừng máy trước khi phát sinh chi phí lớn."
+    },
+    "reporting": {
+      "title": "Báo cáo thật dễ dàng",
+      "description": "Cho người quản lý cái nhìn rõ ràng về tiến độ, chi phí và hiệu suất của đội với số liệu theo thời gian thực."
+    }
+  },
+  "pricing": {
+    "eyebrow": "Bảng giá",
+    "title": "Gói dịch vụ đơn giản, mở rộng theo đội của bạn.",
+    "subtitle": "Bắt đầu miễn phí, nâng cấp khi bạn cần tự động hóa và quản lý nhiều cơ sở.",
+    "mostPopular": "Phổ biến nhất",
+    "perMonth": "mỗi tháng",
+    "custom": "tùy chỉnh",
+    "letsTalk": "Liên hệ",
+    "tiers": {
+      "starter": {
+        "name": "Khởi đầu",
+        "blurb": "Cho đội nhỏ bắt đầu làm việc có tổ chức.",
+        "features": [
+          "Tối đa 5 người dùng",
+          "Lệnh công việc & yêu cầu",
+          "Báo cáo cơ bản"
+        ],
+        "cta": "Dùng miễn phí"
+      },
+      "growth": {
+        "name": "Tăng trưởng",
+        "blurb": "Cho đội vận hành đang phát triển và cần tự động hóa.",
+        "features": [
+          "Không giới hạn người dùng",
+          "Bảo trì phòng ngừa",
+          "Quy trình & khảo sát",
+          "Cảnh báo qua email & SMS"
+        ],
+        "cta": "Đặt lịch demo"
+      },
+      "enterprise": {
+        "name": "Doanh nghiệp",
+        "blurb": "Cho đội nhiều cơ sở với nhu cầu nâng cao.",
+        "features": [
+          "SSO & bảo mật nâng cao",
+          "IoT & cảm biến",
+          "Hỗ trợ riêng",
+          "Tích hợp theo yêu cầu"
+        ],
+        "cta": "Liên hệ kinh doanh"
+      }
+    }
+  },
+  "resources": {
+    "eyebrow": "Tài nguyên",
+    "title": "Mọi thứ bạn cần để khai thác tối đa FacilitySpace.",
+    "guides": {
+      "title": "Hướng dẫn & tài liệu",
+      "body": "Hướng dẫn thiết lập từng bước và kinh nghiệm hay cho đội của bạn."
+    },
+    "blog": {
+      "title": "Blog",
+      "body": "Xu hướng và mẹo vận hành cơ sở vật chất hiện đại."
+    },
+    "help": {
+      "title": "Trung tâm trợ giúp",
+      "body": "Giải đáp, câu hỏi thường gặp và hỗ trợ khi bạn cần."
+    }
+  },
+  "demo": {
+    "eyebrow": "Yêu cầu demo",
+    "title": "Xem FacilitySpace phù hợp với hoạt động của bạn thế nào.",
+    "body": "Cho chúng tôi biết đôi chút thông tin, đội ngũ của chúng tôi sẽ liên hệ để giới thiệu cách nền tảng hỗ trợ công việc bảo trì và quản lý cơ sở vật chất của bạn.",
+    "name": "Họ tên",
+    "namePlaceholder": "Nguyễn Văn An",
+    "email": "Email công việc",
+    "emailPlaceholder": "an@congty.vn",
+    "company": "Công ty",
+    "companyPlaceholder": "Công ty Quản lý Tòa nhà ABC",
+    "message": "Giới thiệu về đội của bạn",
+    "messagePlaceholder": "Chúng tôi quản lý 12 cơ sở và muốn điều phối bảo trì định kỳ và yêu cầu tốt hơn.",
+    "replyTime": "Chúng tôi thường phản hồi trong vòng một ngày làm việc.",
+    "thanks": "Cảm ơn bạn. Chúng tôi đã nhận được yêu cầu và sẽ sớm liên hệ."
+  },
+  "footer": {
+    "copyright": "© {{year}} FacilitySpace. Dành cho đội ngũ quản lý cơ sở vật chất hiện đại.",
+    "bookDemo": "Đặt lịch demo"
+  }
+}

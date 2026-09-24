@@ -1,0 +1,146 @@
+{
+  "tagline": "Operations made simple",
+  "nav": {
+    "pricing": "Pricing",
+    "features": "Features",
+    "resources": "Resources",
+    "solutions": "Solutions",
+    "signIn": "Sign in",
+    "requestDemo": "Request demo"
+  },
+  "featuresMenu": {
+    "workOrders": "Work orders & requests",
+    "preventive": "Preventive maintenance",
+    "assets": "Assets & inventory",
+    "workflows": "Workflows & automation",
+    "surveys": "Surveys & feedback",
+    "iot": "IoT & sensors"
+  },
+  "solutionsMenu": {
+    "facilities": "Facilities management",
+    "property": "Property management",
+    "manufacturing": "Manufacturing",
+    "healthcare": "Healthcare",
+    "education": "Education",
+    "retail": "Retail & hospitality"
+  },
+  "hero": {
+    "badge": "Built for facilities teams that need calm, coordinated operations",
+    "title": "Bring maintenance, requests, and assets into one reliable command center.",
+    "body": "FacilitySpace helps operations leaders cut response times, keep assets healthy, and give teams a single place to work faster with less friction.",
+    "bookDemo": "Book a demo",
+    "explore": "Explore the platform"
+  },
+  "proofPoints": {
+    "response": "Reduce response time",
+    "reliable": "Keep assets reliable",
+    "visibility": "Improve team visibility"
+  },
+  "why": {
+    "title": "Why teams switch",
+    "missed": {
+      "title": "Fewer missed tasks",
+      "body": "Automated reminders and clear ownership keep work from slipping through the cracks."
+    },
+    "visibility": {
+      "title": "Better visibility",
+      "body": "Everyone sees live status, priorities, and the next best action in one place."
+    },
+    "admin": {
+      "title": "Less admin overhead",
+      "body": "Move from spreadsheets and chat threads to a cleaner operating flow."
+    }
+  },
+  "featureCards": {
+    "workOrders": {
+      "title": "Centralize work orders",
+      "description": "Track requests, assign technicians, and keep every job moving from one shared workspace."
+    },
+    "maintenance": {
+      "title": "Stay ahead of maintenance",
+      "description": "Plan preventive tasks, monitor asset health, and reduce downtime before it becomes costly."
+    },
+    "reporting": {
+      "title": "Make reporting effortless",
+      "description": "Give managers a clear view of progress, costs, and team performance with real-time insights."
+    }
+  },
+  "pricing": {
+    "eyebrow": "Pricing",
+    "title": "Simple plans that scale with your team.",
+    "subtitle": "Start free, upgrade when you need automation and multi-site support.",
+    "mostPopular": "Most popular",
+    "perMonth": "per month",
+    "custom": "custom",
+    "letsTalk": "Let's talk",
+    "tiers": {
+      "starter": {
+        "name": "Starter",
+        "blurb": "For small teams getting organized.",
+        "features": [
+          "Up to 5 users",
+          "Work orders & requests",
+          "Basic reporting"
+        ],
+        "cta": "Start free"
+      },
+      "growth": {
+        "name": "Growth",
+        "blurb": "For growing operations that need automation.",
+        "features": [
+          "Unlimited users",
+          "Preventive maintenance",
+          "Workflows & surveys",
+          "Email & SMS alerts"
+        ],
+        "cta": "Book a demo"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "blurb": "For multi-site teams with advanced needs.",
+        "features": [
+          "SSO & advanced security",
+          "IoT & sensors",
+          "Dedicated support",
+          "Custom integrations"
+        ],
+        "cta": "Contact sales"
+      }
+    }
+  },
+  "resources": {
+    "eyebrow": "Resources",
+    "title": "Everything you need to get more from FacilitySpace.",
+    "guides": {
+      "title": "Guides & docs",
+      "body": "Step-by-step setup and best practices for your team."
+    },
+    "blog": {
+      "title": "Blog",
+      "body": "Trends and tips for modern facilities operations."
+    },
+    "help": {
+      "title": "Help center",
+      "body": "Answers, FAQs, and support when you need it."
+    }
+  },
+  "demo": {
+    "eyebrow": "Request a demo",
+    "title": "See how FacilitySpace fits your operation.",
+    "body": "Share a few details and our team will reach out to show you how the platform can support your maintenance and facilities workflow.",
+    "name": "Name",
+    "namePlaceholder": "Alex Nguyen",
+    "email": "Work email",
+    "emailPlaceholder": "alex@company.com",
+    "company": "Company",
+    "companyPlaceholder": "Acme Facilities",
+    "message": "Tell us about your team",
+    "messagePlaceholder": "We manage 12 sites and want a better way to coordinate PMs and requests.",
+    "replyTime": "We typically reply within one business day.",
+    "thanks": "Thank you. We’ve captured your request and will be in touch shortly."
+  },
+  "footer": {
+    "copyright": "© {{year}} FacilitySpace. Built for modern facilities teams.",
+    "bookDemo": "Book demo"
+  }
+}
