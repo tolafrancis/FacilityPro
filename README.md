@@ -17,7 +17,7 @@ Multilingual (English + Vietnamese) CMMS. Phase 1 makes the platform a usable ma
 **Core CMMS (Phase 1)**
 - **Settings** — define bilingual **fault types** and **asset types**, each with a default priority
 - **Assets** — registry with bilingual names, type, location, serial/manufacturer/model/warranty; per-asset **QR code** (Asset → QR tab); asset detail with a **history** tab (its requests + work orders)
-- **Fault reporting** — `New request` form with severity → priority mapping, optional photo, and **source language captured** (report in Vietnamese and it's stored as `vi`). The QR code encodes `/requests/new?asset=…&location=…` so scanning prefills the form
+- **Fault reporting** — `New request` form with severity → priority mapping, optional photo, and **source language captured** (report in Vietnamese and it's stored as `vi`). Each asset's QR code encodes `<VITE_PUBLIC_APP_URL>/a/<code>`: staff who scan it open the asset, anyone else gets the public report form (if enabled) or sign-in. Set `VITE_PUBLIC_APP_URL` before printing codes
 - **Requests** — list + status filter, detail view, **convert to work order**
 - **Work orders** — list + status filter; detail with **assignee** (real org members), **status lifecycle**, instructions, and **before/after photo evidence** (private storage, signed URLs)
 - **My Work** — a technician's assigned, open work orders
@@ -76,7 +76,7 @@ supabase db push
 
 **Option B — SQL editor**
 
-Run each file in `supabase/migrations/` **in order, 0001 → 0073**, in the dashboard SQL editor.
+Run each file in `supabase/migrations/` **in order, 0001 → 0074**, in the dashboard SQL editor.
 
 > **Platform admin (required after 0059).** Migration **0059** locks the plan catalogue and subscription activation to platform operators, and makes function EXECUTE an explicit allow-list (new functions in `public` are no longer callable from the API until granted). Make yourself a platform admin once, in the SQL editor:
 >
@@ -104,7 +104,7 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0073**, in the dash
 >
 > **Plan limits (0072).** The limits in each plan (`fp_plans.limits`: `assets`, `members`, `sites`; a missing key means unlimited) are enforced by the database. New organisations get a 14-day Pro trial, then the Free plan's limits apply until a platform admin activates a paid plan; existing organisations without a subscription were given a 30-day trial when 0072 ran. Retired assets and nothing else is freed automatically: over-limit organisations keep their data but can't add more.
 >
-> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits, inbox/channels, membership, operations health, IoT/retention/audit, asset lifecycle, KPIs, inventory, workflows/access, plans/integrity), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
+> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits, inbox/channels, membership, operations health, IoT/retention/audit, asset lifecycle, KPIs, inventory, workflows/access, plans/integrity, asset QR), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
 
 > Migration **0008** creates the `fp_media` table **and a private storage bucket `fp-media`** with org-scoped access policies (objects are namespaced by org id; access via signed URLs). Migration **0009** adds `fp_org_members()` used to populate the assignee dropdown. Migrations **0010–0011** add checklists and preventive-maintenance schedules plus the `fp_generate_due_pm()` generator. Migration **0013** alters `fp_pm_schedules` (makes `next_due_at` nullable and adds meter-trigger columns) and **replaces** `fp_generate_due_pm()` to handle meter triggers. Migration **0015** adds a `BEFORE INSERT` trigger on `fp_work_orders` (SLA due-date + auto-assignment), and **0016** adds notification triggers. Migration **0017** adds the email outbox (`fp_notification_outbox`) plus a trigger that enqueues an email when an in-app notification lands for a user who opted in, and **0018** adds the approvals workflow. No manual storage setup is needed.
 
@@ -164,6 +164,8 @@ VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_ANON_PUBLIC_KEY
 # Optional: Cloudflare Turnstile CAPTCHA on the public report form, sign-in and sign-up
 # VITE_TURNSTILE_SITE_KEY=0x4AAAAAAA...
+# The app's public address, used in printed asset QR codes
+VITE_PUBLIC_APP_URL=https://app.yourdomain.com
 ```
 
 **Abuse protection.** The public QR report form and device ingest are rate-limited in the database (migration **0063**) whether or not CAPTCHA is on:

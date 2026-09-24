@@ -26,6 +26,7 @@ import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
 import Select from '../components/ui/Select';
 import NotFound from '../components/NotFound';
+import { publicAppUrl, publicAppUrlConfigured } from '../lib/appUrl';
 import AssetDialog, { type AssetFormValues } from '../components/AssetDialog';
 
 type Tab = 'info' | 'history' | 'meters' | 'documents' | 'qr';
@@ -121,9 +122,11 @@ export default function AssetDetail() {
   const assetRequests = history.data?.requests ?? [];
   const assetWorkOrders = history.data?.workOrders ?? [];
 
-  const reportUrl = `${window.location.origin}/report?org=${asset.org_id}&asset=${asset.id}${
-    asset.location_id ? `&location=${asset.location_id}` : ''
-  }`;
+  // One code for everyone: staff land on the asset, others on the report
+  // form (see AssetScan). Uses the configured public address.
+  const qrUrl = asset.qr_code
+    ? `${publicAppUrl()}/a/${asset.qr_code}`
+    : `${publicAppUrl()}/report?org=${asset.org_id}&asset=${asset.id}${asset.location_id ? `&location=${asset.location_id}` : ''}`;
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'info', label: t('detail.info') },
@@ -269,9 +272,13 @@ export default function AssetDetail() {
       {tab === 'qr' && (
         <div className="mt-5 rounded-xl border border-line bg-white p-6 text-center">
           <div className="inline-block rounded-lg border border-line p-4">
-            <QRCodeSVG value={reportUrl} size={180} />
+            <QRCodeSVG value={qrUrl} size={180} />
           </div>
           <p className="mx-auto mt-3 max-w-sm text-sm text-ink-muted">{t('detail.qrHint')}</p>
+          <p className="mx-auto mt-1 max-w-sm break-all text-xs text-ink-muted">{qrUrl}</p>
+          {!publicAppUrlConfigured() && (
+            <p className="mx-auto mt-2 max-w-sm text-xs text-status-warn">{t('detail.qrUrlWarning')}</p>
+          )}
           <Button variant="secondary" className="mt-4" onClick={() => window.print()}>
             <QrCode size={16} /> {tc('actions.printQr')}
           </Button>

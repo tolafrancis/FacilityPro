@@ -31,12 +31,13 @@
     "history": "History",
     "qr": "QR code",
     "documents": "Documents",
-    "qrHint": "Print and attach this code to the asset. Scanning it opens this asset so anyone can report a fault.",
+    "qrHint": "Print and attach this code to the asset. Staff who scan it open the asset; anyone else can report a fault (if public reporting is on in Settings).",
     "noHistory": "No requests or work orders for this asset yet.",
     "warranty": "Warranty until",
     "type": "Type",
     "location": "Location",
-    "serial": "Serial"
+    "serial": "Serial",
+    "qrUrlWarning": "The public app address (VITE_PUBLIC_APP_URL) isn't set, so this code uses the current address. Set it before printing codes."
   },
   "meters": {
     "tab": "Meters",
@@ -71,5 +72,11 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this asset? This can't be undone.",
     "retireHint": "Retiring stops preventive maintenance for this asset and keeps its history."
+  },
+  "scan": {
+    "title": "Asset",
+    "opening": "Opening…",
+    "unknown": "This QR code isn't recognised. It may belong to an asset that was removed.",
+    "no_access": "You don't have access to this asset. Ask your administrator."
   }
 }

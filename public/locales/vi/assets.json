@@ -31,12 +31,13 @@
     "history": "Lịch sử",
     "qr": "Mã QR",
     "documents": "Tài liệu",
-    "qrHint": "In và dán mã này lên tài sản. Quét mã sẽ mở tài sản này để bất kỳ ai cũng có thể báo cáo sự cố.",
+    "qrHint": "In và dán mã này lên tài sản. Nhân viên quét mã sẽ mở tài sản; người khác có thể báo lỗi (nếu bật báo lỗi công khai trong Cài đặt).",
     "noHistory": "Chưa có yêu cầu hoặc lệnh công việc cho tài sản này.",
     "warranty": "Bảo hành đến",
     "type": "Loại",
     "location": "Vị trí",
-    "serial": "Số sê-ri"
+    "serial": "Số sê-ri",
+    "qrUrlWarning": "Chưa đặt địa chỉ công khai của ứng dụng (VITE_PUBLIC_APP_URL), nên mã này dùng địa chỉ hiện tại. Hãy đặt trước khi in mã."
   },
   "meters": {
     "tab": "Đồng hồ",
@@ -71,5 +72,11 @@
     "delete": "Xóa",
     "deleteConfirm": "Xóa tài sản này? Không thể hoàn tác.",
     "retireHint": "Ngừng sử dụng sẽ dừng bảo trì định kỳ cho tài sản này và giữ lại lịch sử."
+  },
+  "scan": {
+    "title": "Tài sản",
+    "opening": "Đang mở…",
+    "unknown": "Không nhận ra mã QR này. Có thể tài sản đã bị xóa.",
+    "no_access": "Bạn không có quyền truy cập tài sản này. Hãy hỏi quản trị viên."
   }
 }
