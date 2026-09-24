@@ -415,6 +415,27 @@ export function useWorkOrderTitles(ids: string[]) {
   });
 }
 
+export interface PlanUsage {
+  assets: { used: number; limit: number | null };
+  members: { used: number; limit: number | null };
+  sites: { used: number; limit: number | null };
+  trial_ends_at: string | null;
+}
+
+/** Usage against the limits actually enforced (fp_plan_usage, 0072). */
+export function usePlanUsage() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['plan_usage', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_plan_usage', { p_org: orgId });
+      if (error) throw error;
+      return data as PlanUsage;
+    },
+  });
+}
+
 export function useRequests() {
   const orgId = useOrgId();
   return useQuery({

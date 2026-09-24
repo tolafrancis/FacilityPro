@@ -5,11 +5,10 @@ import { Check, ExternalLink, Pencil } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
 import {
-  useAssetCount,
+  usePlanUsage,
   useIsPlatformAdmin,
   useJobHealth,
   useSystemChecks,
-  useOrgMembers,
   usePlans,
   usePlatformSubscriptions,
   useSubscription,
@@ -34,8 +33,8 @@ export default function Billing() {
 
   const plansQuery = usePlans();
   const subQuery = useSubscription();
-  const assetCount = useAssetCount();
-  const members = useOrgMembers();
+  // The limits in force come from the database, the same ones it enforces.
+  const usage = usePlanUsage().data;
   // Only the platform operator edits the shared plan catalogue and activates
   // subscriptions (after verifying payment); customers can only request.
   const isPlatformAdmin = useIsPlatformAdmin().data === true;
@@ -115,6 +114,13 @@ export default function Billing() {
             {t(`statusLabels.${sub?.status ?? 'active'}`)}
           </Pill>
         </div>
+        {sub?.status === 'trialing' && sub.current_period_end && (
+          <p className={`mt-2 text-xs ${new Date(sub.current_period_end) < new Date() ? 'text-status-crit' : 'text-ink-muted'}`}>
+            {new Date(sub.current_period_end) < new Date()
+              ? t('trialEnded')
+              : `${t('trialEnds')}: ${formatDateOnly(sub.current_period_end, lng)}`}
+          </p>
+        )}
         {sub?.current_period_end && sub.status === 'active' && (
           <p className="mt-2 text-xs text-ink-muted">
             {t('renews')}: {formatDateOnly(sub.current_period_end, lng)}
@@ -123,8 +129,9 @@ export default function Billing() {
 
         <div className="mt-4 space-y-1 border-t border-line pt-3">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">{t('usage')}</p>
-          {usageRow(t('assets'), assetCount.data ?? 0, currentPlan?.limits.assets)}
-          {usageRow(t('members'), members.data?.length ?? 0, currentPlan?.limits.members)}
+          {usageRow(t('assets'), usage?.assets.used ?? 0, usage?.assets.limit ?? undefined)}
+          {usageRow(t('members'), usage?.members.used ?? 0, usage?.members.limit ?? undefined)}
+          {usageRow(t('sites'), usage?.sites.used ?? 0, usage?.sites.limit ?? undefined)}
         </div>
 
         {requestedPlan && (

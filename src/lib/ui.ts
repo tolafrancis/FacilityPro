@@ -108,6 +108,8 @@ export function daysUntil(value: string | null): number | null {
 export function friendlyError(error: { code?: string; message?: string } | null | undefined, t: (key: string) => string): string {
   const code = error?.code;
   const msg = error?.message ?? '';
+  const limit = /plan_limit_reached:(\w+)/.exec(msg);
+  if (limit) return t(`errors.planLimit.${limit[1]}`);
   if (code === '42501' || /row-level security/i.test(msg)) return t('errors.permissionDenied');
   if (code === '23505' || /duplicate key/i.test(msg)) return t('errors.duplicate');
   if (code === '23503' || /foreign key/i.test(msg)) return t('errors.stillInUse');

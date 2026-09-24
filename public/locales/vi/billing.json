@@ -62,5 +62,7 @@
       "outbox_backlog": "Hàng đợi tin nhắn",
       "workflow_failures": "Quy trình tự động"
     }
-  }
+  },
+  "trialEnds": "Dùng thử đến",
+  "trialEnded": "Thời gian dùng thử đã kết thúc: áp dụng giới hạn gói Miễn phí cho đến khi bạn nâng cấp."
 }

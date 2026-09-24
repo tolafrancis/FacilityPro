@@ -105,7 +105,12 @@
     "stillInUse": "That's still in use elsewhere and can't be changed.",
     "invalidValue": "That value isn't allowed.",
     "offline": "You're offline — try again once you're back online.",
-    "generic": "Something went wrong. Please try again."
+    "generic": "Something went wrong. Please try again.",
+    "planLimit": {
+      "assets": "Your plan's asset limit is reached. Retire unused assets or upgrade under Billing.",
+      "members": "Your plan's member limit is reached (pending invitations count). Upgrade under Billing to invite more people.",
+      "sites": "Your plan's site limit is reached. Upgrade under Billing to add more sites."
+    }
   },
   "requestStatus": {
     "new": "New",

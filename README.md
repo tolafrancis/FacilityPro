@@ -76,7 +76,7 @@ supabase db push
 
 **Option B — SQL editor**
 
-Run each file in `supabase/migrations/` **in order, 0001 → 0071**, in the dashboard SQL editor.
+Run each file in `supabase/migrations/` **in order, 0001 → 0072**, in the dashboard SQL editor.
 
 > **Platform admin (required after 0059).** Migration **0059** locks the plan catalogue and subscription activation to platform operators, and makes function EXECUTE an explicit allow-list (new functions in `public` are no longer callable from the API until granted). Make yourself a platform admin once, in the SQL editor:
 >
@@ -102,7 +102,9 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0071**, in the dash
 >
 > **Scheduled Edge Functions.** `process-outbox`, `run-scheduled-workflows` and `score-sentiment` only accept the scheduler: pg_cron's call (it sends the service-role key from Vault) or an external scheduler sending `x-cron-secret` equal to the optional `CRON_SECRET` secret. `score-sentiment` only scores organisations that switched on **Settings → Organisation profile → Score inbox messages' sentiment with AI** (message text is sent to Anthropic).
 >
-> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits, inbox/channels, membership, operations health, IoT/retention/audit, asset lifecycle, KPIs, inventory, workflows/access), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
+> **Plan limits (0072).** The limits in each plan (`fp_plans.limits`: `assets`, `members`, `sites`; a missing key means unlimited) are enforced by the database. New organisations get a 14-day Pro trial, then the Free plan's limits apply until a platform admin activates a paid plan; existing organisations without a subscription were given a 30-day trial when 0072 ran. Retired assets and nothing else is freed automatically: over-limit organisations keep their data but can't add more.
+>
+> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits, inbox/channels, membership, operations health, IoT/retention/audit, asset lifecycle, KPIs, inventory, workflows/access, plans/integrity), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
 
 > Migration **0008** creates the `fp_media` table **and a private storage bucket `fp-media`** with org-scoped access policies (objects are namespaced by org id; access via signed URLs). Migration **0009** adds `fp_org_members()` used to populate the assignee dropdown. Migrations **0010–0011** add checklists and preventive-maintenance schedules plus the `fp_generate_due_pm()` generator. Migration **0013** alters `fp_pm_schedules` (makes `next_due_at` nullable and adds meter-trigger columns) and **replaces** `fp_generate_due_pm()` to handle meter triggers. Migration **0015** adds a `BEFORE INSERT` trigger on `fp_work_orders` (SLA due-date + auto-assignment), and **0016** adds notification triggers. Migration **0017** adds the email outbox (`fp_notification_outbox`) plus a trigger that enqueues an email when an in-app notification lands for a user who opted in, and **0018** adds the approvals workflow. No manual storage setup is needed.
 

@@ -62,5 +62,7 @@
       "outbox_backlog": "Message queue",
       "workflow_failures": "Automation workflows"
     }
-  }
+  },
+  "trialEnds": "Trial ends",
+  "trialEnded": "Your trial has ended: the Free plan's limits apply until you upgrade."
 }

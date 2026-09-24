@@ -105,7 +105,12 @@
     "stillInUse": "Mục này đang được sử dụng ở nơi khác nên không thể thay đổi.",
     "invalidValue": "Giá trị này không hợp lệ.",
     "offline": "Bạn đang ngoại tuyến — vui lòng thử lại khi có kết nối.",
-    "generic": "Đã xảy ra lỗi. Vui lòng thử lại."
+    "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "planLimit": {
+      "assets": "Đã đạt giới hạn tài sản của gói. Hãy ngừng sử dụng tài sản không dùng hoặc nâng cấp trong mục Thanh toán.",
+      "members": "Đã đạt giới hạn thành viên của gói (tính cả lời mời đang chờ). Nâng cấp trong mục Thanh toán để mời thêm người.",
+      "sites": "Đã đạt giới hạn địa điểm của gói. Nâng cấp trong mục Thanh toán để thêm địa điểm."
+    }
   },
   "requestStatus": {
     "new": "Mới",
