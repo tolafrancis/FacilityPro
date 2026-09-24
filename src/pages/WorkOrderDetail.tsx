@@ -527,7 +527,8 @@ export default function WorkOrderDetail() {
                 <p className="mt-1 text-xs text-ink-muted">{ta('woNone')}</p>
               )}
             </div>
-            {!hasPending && (
+            {/* Only the assignee or a manager can ask for approval (0071). */}
+            {!hasPending && canWork && (
               <button
                 type="button"
                 onClick={() => requestApproval.mutate()}

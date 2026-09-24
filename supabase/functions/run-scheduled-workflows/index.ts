@@ -18,8 +18,11 @@
 // want to trigger it from outside the database as well.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { forbidden, isSchedulerRequest } from '../_shared/scheduler-auth.ts';
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  // Scheduler only (0061 pg_cron sends the service-role key).
+  if (!isSchedulerRequest(req)) return forbidden();
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!

@@ -30,6 +30,7 @@
 // in deliver().
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { forbidden, isSchedulerRequest } from '../_shared/scheduler-auth.ts';
 import webpush from 'https://esm.sh/web-push@3.6.7';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
@@ -152,7 +153,9 @@ async function deliver(row: OutboxRow, supabase: SupabaseClient): Promise<void> 
 // recorded (fp_record_job_run) so the job-health check notices if this stops.
 const MAX_ATTEMPTS = 5;
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  // Scheduler only (0061 pg_cron sends the service-role key).
+  if (!isSchedulerRequest(req)) return forbidden();
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!

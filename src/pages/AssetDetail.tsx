@@ -359,6 +359,9 @@ function MetersTab({ assetId }: { assetId: string }) {
 }
 
 function MeterRow({ meter, orgId, lng }: { meter: Meter; orgId: string; lng: string }) {
+  // Readings can create PM work orders, so only staff record them (0071).
+  const { role } = useOrg();
+  const canLog = role === 'org_admin' || role === 'manager' || role === 'technician';
   const { t } = useTranslation('assets');
   const queryClient = useQueryClient();
   const readingsQuery = useMeterReadings(meter.id);
@@ -396,6 +399,7 @@ function MeterRow({ meter, orgId, lng }: { meter: Meter; orgId: string; lng: str
             : t('meters.noReadings')}
         </span>
       </div>
+      {canLog && (
       <div className="mt-2 flex items-end gap-2">
         <Input
           type="number"
@@ -413,6 +417,7 @@ function MeterRow({ meter, orgId, lng }: { meter: Meter; orgId: string; lng: str
           {t('meters.logReading')}
         </button>
       </div>
+      )}
     </div>
   );
 }

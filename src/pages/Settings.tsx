@@ -83,7 +83,7 @@ export default function Settings() {
 // General — org profile (name, languages, timezone, currency)
 // ---------------------------------------------------------------------------
 function GeneralSection() {
-  const { currentOrg, role } = useOrg();
+  const { currentOrg, role, refresh } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
   const canEdit = role === 'org_admin';
@@ -95,11 +95,12 @@ function GeneralSection() {
     queryFn: async () => {
       const { data, error } = await supabase.from('fp_organizations').select('settings').eq('id', orgId!).single();
       if (error) throw error;
-      return (data?.settings ?? {}) as Record<string, string>;
+      return (data?.settings ?? {}) as Record<string, unknown>;
     },
   });
 
   const [name, setName] = useState('');
+  const [aiSentiment, setAiSentiment] = useState(false);
   const [lng, setLng] = useState('en');
   const [timezone, setTimezone] = useState('');
   const [currency, setCurrency] = useState('');
@@ -111,14 +112,15 @@ function GeneralSection() {
   }, [currentOrg]);
   useEffect(() => {
     if (settingsQuery.data) {
-      setTimezone(settingsQuery.data.timezone ?? '');
-      setCurrency(settingsQuery.data.currency ?? '');
+      setTimezone((settingsQuery.data.timezone as string) ?? '');
+      setCurrency((settingsQuery.data.currency as string) ?? '');
+      setAiSentiment(settingsQuery.data.ai_sentiment === true);
     }
   }, [settingsQuery.data]);
 
   const save = useMutation({
     mutationFn: async () => {
-      const settings = { ...(settingsQuery.data ?? {}), timezone, currency };
+      const settings = { ...(settingsQuery.data ?? {}), timezone, currency, ai_sentiment: aiSentiment };
       const { error } = await supabase
         .from('fp_organizations')
         .update({ name, default_lng: lng, settings })
@@ -126,7 +128,8 @@ function GeneralSection() {
       if (error) throw error;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['memberships'] });
+      // The org name/language in the header come from OrgContext.
+      void refresh();
       void queryClient.invalidateQueries({ queryKey: ['org_settings', orgId] });
       setMsg('Saved.');
     },
@@ -157,6 +160,22 @@ function GeneralSection() {
           <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="e.g. USD" disabled={!canEdit} />
         </div>
       </div>
+      <label className="mt-4 flex items-start gap-2 text-sm text-ink">
+        <input
+          type="checkbox"
+          checked={aiSentiment}
+          onChange={(e) => setAiSentiment(e.target.checked)}
+          disabled={!canEdit}
+          className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30"
+        />
+        <span>
+          Score inbox messages' sentiment with AI
+          <span className="block text-xs text-ink-muted">
+            Off by default. When on, the text of incoming customer messages is sent to Anthropic (Claude) to detect unhappy
+            customers for the "low sentiment" workflow trigger. Mention this in your privacy notice.
+          </span>
+        </span>
+      </label>
       {canEdit && (
         <div className="mt-4 flex items-center gap-3">
           <Button onClick={() => save.mutate()} loading={save.isPending}>Save</Button>
