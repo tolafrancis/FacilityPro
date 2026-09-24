@@ -25,7 +25,20 @@
     "workflows": "Quy trình",
     "surveys": "Khảo sát",
     "desks": "Bàn làm việc",
-    "facilities": "Cơ sở vật chất"
+    "facilities": "Cơ sở vật chất",
+    "documents": "Tài liệu",
+    "permits": "Giấy phép làm việc",
+    "attendance": "Chấm công",
+    "smartAssistant": "Trợ lý thông minh",
+    "tenantExperience": "Trải nghiệm khách thuê",
+    "broadcasts": "Thông báo chung",
+    "financial": "Tài chính"
+  },
+  "navGroups": {
+    "maintenance": "Vận hành bảo trì",
+    "operations": "Vận hành & kiểm soát",
+    "finance": "Tài chính",
+    "ai": "Trí tuệ & cài đặt"
   },
   "actions": {
     "signOut": "Đăng xuất",
