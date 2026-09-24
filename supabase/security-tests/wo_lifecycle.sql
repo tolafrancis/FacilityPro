@@ -126,6 +126,8 @@ select t.run('authenticated', :'tech', format($q$update fp_work_orders set statu
 select t.check('resuming clears the hold reason',
   (select status = 'in_progress' and hold_reason is null from fp_work_orders where id = :'wo'));
 
+-- Since 0070 a technician's labour is billed at their profile rate.
+insert into fp_technician_profiles (org_id, user_id, labor_rate) values (:'org', :'tech', 20);
 select t.run('authenticated', :'tech', format(
     $q$insert into fp_wo_parts (org_id, work_order_id, part_id, quantity) values (%L, %L, '30000000-0000-0000-0000-000000000001', 2)$q$, :'org', :'wo')) as r \gset
 select t.check('technician can still log parts and labour (cost rollup allowed)',
