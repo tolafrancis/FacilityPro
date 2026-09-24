@@ -8,49 +8,35 @@ Status as of 2026-09-24, branch `claude/mobile-menu-visibility-xbq60v`. It track
 |---|---|---|---|
 | Blocker | 8 | 8 | 0 |
 | High | 24 | 24 | 0 |
-| Medium | 30 | 28 | 2 (S5-M1 partly done, S1-M5 optional part) |
+| Medium | 30 | 29 | 1 (S1-M5 optional part, needs a business decision) |
 | Low | 9 | 9 | 0 |
 
 **Correction:** S1-B1 (plan limits) was missing from the first "security blockers" commit, even though it was reported as done. It was implemented later, in migration `0072`.
 
-## Left to do
+## Work items
 
-### 1. S5-M1: hard-coded English strings (in progress)
+### 1. S5-M1: hard-coded English strings (done)
 
-**Done** (each page has a namespace in `public/locales/{en,vi}/`):
-- Attendance (`attendance`)
-- Tenant experience (`tenant`)
-- Smart assistant (`assistant`)
-- Desks and Facilities (`bookings`)
-- Permits (`permits`)
-- Documents (`documents`)
+Every file on the audit's list now has EN/VI translations in `public/locales/{en,vi}/`:
 
-**Still English-only.** The last column is the rough number of candidate strings found by the scanner, including some false positives.
+| Area | Namespace |
+|---|---|
+| Attendance, Tenant experience, Smart assistant, Desks and Facilities, Permits, Documents | `attendance`, `tenant`, `assistant`, `bookings`, `permits`, `documents` |
+| Workflows | `workflows` |
+| Financial and procurement (`ProcurementManager.tsx`) | `financial` |
+| Settings | `settings` |
+| Landing page | `landing` |
+| Loading screen (`main.tsx`), crash screen (`ErrorBoundary.tsx`), toasts (`Toaster.tsx`) | `common` |
 
-| File | Suggested namespace | Strings |
-|---|---|---|
-| `src/pages/Workflows.tsx` | `workflows` | ~126 |
-| `src/pages/Financial.tsx` | `financial` | ~68 |
-| `src/pages/Settings.tsx` | `settings` (exists) | ~63 |
-| `src/pages/Landing.tsx` | `landing` | ~51 |
-| `src/components/ProcurementManager.tsx` | `financial` | ~38 |
-| `src/main.tsx` | `common` | loading fallback "Loading…" |
-| `src/components/ErrorBoundary.tsx` | `common` | 2 strings, e.g. "Something went wrong." |
-| `src/components/Toaster.tsx` | `common` | 1 string |
+Conventions used, to keep in mind for new screens:
+- Each component that renders text has its own `useTranslation(ns)`.
+- Stored codes (statuses, trigger/action codes, budget periods) keep their stored value and are translated only for display, e.g. `t(\`status.${x}\`)`. A code containing a dot (`workorder.created`) is looked up with the dot replaced by `_`, because i18next reads `.` as nesting.
+- Names from the database are resolved with `resolveI18n(x, lng)`, never `'en'`.
+- Text the app writes to the database on the user's behalf (generated workflow names, installed templates, default email text) is written in that user's language. `{{placeholders}}` for the workflow engine are passed through as values so i18next leaves them alone.
+- The loading and crash screens use `useSuspense: false`, because they render while translations are still loading or after loading failed.
+- `npm run check:i18n` fails when a key is missing in either language. It runs in CI.
 
-**How to do each file:**
-1. Add `const { t } = useTranslation('<ns>')` to every component in the file that renders text. Dialogs and sub-panels need their own call.
-2. Replace JSX text, `placeholder`, `title` and `aria-label` values, and `confirm`/`setMessage` strings.
-3. Values stored in the database, such as status or action codes, keep their stored value. Translate them only for display, e.g. `t(\`status.${x}\`)`.
-4. Use `resolveI18n(x, lng)`, not `'en'`.
-5. Add the EN and VI keys, then run `npm run check:i18n`. It fails if a key is missing in either language.
-
-**Finding the strings:** a scanner that lists candidate strings per file was used and could be recreated. It matched:
-- JSX text between tags;
-- `placeholder`, `title`, `aria-label`, `label` and `alt` attributes;
-- string literals passed to `confirm`, `alert`, `prompt`, `setMessage`, `setError` and `notifyError`.
-
-### 2. S1-M5 (optional, business decision)
+### 2. S1-M5 (open: optional, needs a business decision)
 
 Approvals are now restricted: only the assignee or a manager can request one (migration `0071`).
 
@@ -60,7 +46,7 @@ Not done: blocking the `in_progress` transition while an approval is pending. Th
 
 - Edge Functions (`supabase/functions/*`) could not be type-checked in the build environment. The network blocked `esm.sh` imports for `deno check`. Only `_shared/scheduler-auth.ts` was checked and unit-tested. Deploy to staging and exercise each function before production.
 - Database behaviour is covered by `supabase/security-tests/` (297 checks as of `0075`). CI (`.github/workflows/ci.yml`) runs them, plus the web build and the translation check, on every push.
-- UI flows were checked in Chromium against a mocked backend, not a real Supabase project.
+- UI flows were checked in Chromium against a mocked backend, not a real Supabase project. The S5-M1 pages (Landing, Workflows, Settings, Financial) were smoke-tested this way in EN and VI, with a check for untranslated keys.
 
 ## Before going live (operator steps)
 
