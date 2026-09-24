@@ -5,6 +5,7 @@ import { Plus, Send, MessageSquare } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrg } from '../contexts/OrgContext';
+import { notifyError } from '../components/Toaster';
 import { useConversations, useMessages } from '../lib/queries';
 import { formatDate } from '../lib/ui';
 import type { ConversationChannel } from '../lib/database.types';
@@ -48,9 +49,17 @@ export default function Inbox() {
         .select('id')
         .single();
       if (error) throw error;
-      // Deliver to external channels (best effort; no-op for manual/web).
+      // Deliver to external channels (no-op for manual/web). The reply is
+      // already saved; a delivery failure is reported, and shown on the message.
       if (current && current.channel !== 'manual' && current.channel !== 'web') {
-        void supabase.functions.invoke('channel-send', { body: { message_id: data.id } });
+        const { error: sendError } = await supabase.functions.invoke('channel-send', {
+          body: { message_id: data.id },
+        });
+        if (sendError) {
+          const payload = await (sendError as { context?: Response }).context?.json?.().catch(() => null);
+          const code = (payload as { error?: string } | null)?.error;
+          notifyError(t('delivery.notDelivered', { reason: code ? t(`delivery.errors.${code}`, code) : sendError.message }));
+        }
       }
     },
     onSuccess: () => {
@@ -74,13 +83,14 @@ export default function Inbox() {
         .single();
       if (error) throw error;
       if (v.first.trim()) {
-        await supabase.from('fp_messages').insert({
+        const { error: msgError } = await supabase.from('fp_messages').insert({
           org_id: orgId,
           conversation_id: data.id,
           direction: 'out',
           body: v.first.trim(),
           sender: user?.id ?? null,
         });
+        if (msgError) throw msgError;
       }
       return data.id as string;
     },
@@ -205,7 +215,16 @@ export default function Inbox() {
                       }`}
                     >
                       {formatDate(m.created_at, lng)}
+                      {m.direction === 'out' && m.delivery_status && m.delivery_status !== 'failed' && (
+                        <> · {t(`delivery.${m.delivery_status}`)}</>
+                      )}
                     </div>
+                    {m.delivery_status === 'failed' && (
+                      <div className="mt-1 rounded bg-white/90 px-2 py-0.5 text-[11px] font-medium text-status-crit">
+                        {t('delivery.failed')}
+                        {m.delivery_error ? `: ${m.delivery_error}` : ''}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {(messages.data ?? []).length === 0 && (

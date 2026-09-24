@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Button from '../components/ui/Button';
 import Select from '../components/ui/Select';
 import SearchSelect from '../components/ui/SearchSelect';
 import { supabase } from '../lib/supabase';
+import { formatDate } from '../lib/ui';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrg } from '../contexts/OrgContext';
 import { useLocations, useOrgMembers } from '../lib/queries';
@@ -28,6 +30,8 @@ async function fetchAttendance(orgId: string | undefined) {
 }
 
 export default function Attendance() {
+  const { i18n } = useTranslation();
+  const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg } = useOrg();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -155,7 +159,7 @@ export default function Attendance() {
                 <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{entry.action}</span>
               </div>
               <p className="mt-3 text-sm text-ink-muted">{entry.note || 'No note provided.'}</p>
-              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-ink-muted">{new Date(entry.checked_at).toLocaleString()}</p>
+              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-ink-muted">{formatDate(entry.checked_at, lng)}</p>
             </div>
           ))}
         </div>

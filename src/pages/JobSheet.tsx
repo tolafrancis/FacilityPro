@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Printer } from 'lucide-react';
 import { useAsset, useFaultTypes, useLocations, useOrgMembers, useParts, useWorkOrder, useWoLabor, useWoParts } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDate } from '../lib/ui';
+import { formatDate, formatMoney } from '../lib/ui';
+import { useOrg } from '../contexts/OrgContext';
+import NotFound from '../components/NotFound';
 
 export default function JobSheet() {
   const { id } = useParams<{ id: string }>();
@@ -16,13 +18,15 @@ export default function JobSheet() {
   const wo = woQuery.data;
   const asset = useAsset(wo?.asset_id ?? undefined).data;
   const members = useOrgMembers();
+  const { currency } = useOrg();
   const parts = useParts();
   const woParts = useWoParts(id);
   const woLabor = useWoLabor(id);
   const locations = useLocations();
   const faultTypes = useFaultTypes();
 
-  if (!wo) return <p className="p-6 text-sm text-ink-muted">{tc('loading')}</p>;
+  if (woQuery.isLoading) return <p className="p-6 text-sm text-ink-muted">{tc('loading')}</p>;
+  if (!wo) return <NotFound backTo="/work-orders" />;
 
   const location = wo.location_id ? locations.data?.find((l) => l.id === wo.location_id) : null;
   const faultType = wo.fault_type_id ? faultTypes.data?.find((f) => f.id === wo.fault_type_id) : null;
@@ -78,10 +82,7 @@ export default function JobSheet() {
           {faultType && <Row label={t('fields.faultType')} value={resolveI18n(faultType.name_i18n, lng)} />}
           <Row
             label={t('fields.cost')}
-            value={new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-US', {
-              style: 'currency',
-              currency: 'USD',
-            }).format(wo.cost)}
+            value={formatMoney(wo.cost, currency, lng)}
           />
         </tbody>
       </table>

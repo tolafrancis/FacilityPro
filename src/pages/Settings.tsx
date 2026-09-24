@@ -18,6 +18,7 @@ import {
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { daysUntil, PRIORITIES, PRIORITY_CLASS, friendlyError } from '../lib/ui';
+import { notifyError } from '../components/Toaster';
 import type { AssetType, FaultType, Priority, Role, Site } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -82,7 +83,7 @@ export default function Settings() {
 // General — org profile (name, languages, timezone, currency)
 // ---------------------------------------------------------------------------
 function GeneralSection() {
-  const { currentOrg, role } = useOrg();
+  const { currentOrg, role, refresh } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
   const canEdit = role === 'org_admin';
@@ -94,11 +95,12 @@ function GeneralSection() {
     queryFn: async () => {
       const { data, error } = await supabase.from('fp_organizations').select('settings').eq('id', orgId!).single();
       if (error) throw error;
-      return (data?.settings ?? {}) as Record<string, string>;
+      return (data?.settings ?? {}) as Record<string, unknown>;
     },
   });
 
   const [name, setName] = useState('');
+  const [aiSentiment, setAiSentiment] = useState(false);
   const [lng, setLng] = useState('en');
   const [timezone, setTimezone] = useState('');
   const [currency, setCurrency] = useState('');
@@ -110,14 +112,15 @@ function GeneralSection() {
   }, [currentOrg]);
   useEffect(() => {
     if (settingsQuery.data) {
-      setTimezone(settingsQuery.data.timezone ?? '');
-      setCurrency(settingsQuery.data.currency ?? '');
+      setTimezone((settingsQuery.data.timezone as string) ?? '');
+      setCurrency((settingsQuery.data.currency as string) ?? '');
+      setAiSentiment(settingsQuery.data.ai_sentiment === true);
     }
   }, [settingsQuery.data]);
 
   const save = useMutation({
     mutationFn: async () => {
-      const settings = { ...(settingsQuery.data ?? {}), timezone, currency };
+      const settings = { ...(settingsQuery.data ?? {}), timezone, currency, ai_sentiment: aiSentiment };
       const { error } = await supabase
         .from('fp_organizations')
         .update({ name, default_lng: lng, settings })
@@ -125,7 +128,8 @@ function GeneralSection() {
       if (error) throw error;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['memberships'] });
+      // The org name/language in the header come from OrgContext.
+      void refresh();
       void queryClient.invalidateQueries({ queryKey: ['org_settings', orgId] });
       setMsg('Saved.');
     },
@@ -156,6 +160,22 @@ function GeneralSection() {
           <Input value={currency} onChange={(e) => setCurrency(e.target.value)} placeholder="e.g. USD" disabled={!canEdit} />
         </div>
       </div>
+      <label className="mt-4 flex items-start gap-2 text-sm text-ink">
+        <input
+          type="checkbox"
+          checked={aiSentiment}
+          onChange={(e) => setAiSentiment(e.target.checked)}
+          disabled={!canEdit}
+          className="mt-0.5 h-4 w-4 rounded border-line text-brand focus:ring-brand/30"
+        />
+        <span>
+          Score inbox messages' sentiment with AI
+          <span className="block text-xs text-ink-muted">
+            Off by default. When on, the text of incoming customer messages is sent to Anthropic (Claude) to detect unhappy
+            customers for the "low sentiment" workflow trigger. Mention this in your privacy notice.
+          </span>
+        </span>
+      </label>
       {canEdit && (
         <div className="mt-4 flex items-center gap-3">
           <Button onClick={() => save.mutate()} loading={save.isPending}>Save</Button>
@@ -214,11 +234,13 @@ function CatalogsSection() {
   };
 
   const toggleFault = async (ft: FaultType) => {
-    await supabase.from('fp_fault_types').update({ is_active: ft.is_active === false }).eq('id', ft.id);
+    const { error } = await supabase.from('fp_fault_types').update({ is_active: ft.is_active === false }).eq('id', ft.id);
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invFault();
   };
   const toggleAsset = async (at: AssetType) => {
-    await supabase.from('fp_asset_types').update({ is_active: at.is_active === false }).eq('id', at.id);
+    const { error } = await supabase.from('fp_asset_types').update({ is_active: at.is_active === false }).eq('id', at.id);
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invAsset();
   };
 
@@ -226,14 +248,16 @@ function CatalogsSection() {
     setMsg(null);
     const { count } = await supabase.from('fp_requests').select('id', { count: 'exact', head: true }).eq('fault_type_id', ft.id);
     if ((count ?? 0) > 0) { setMsg(`"${resolveI18n(ft.name_i18n, lng)}" is used by ${count} request(s) — deactivate it instead of deleting.`); return; }
-    await supabase.from('fp_fault_types').delete().eq('id', ft.id);
+    const { error } = await supabase.from('fp_fault_types').delete().eq('id', ft.id);
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invFault();
   };
   const deleteAsset = async (at: AssetType) => {
     setMsg(null);
     const { count } = await supabase.from('fp_assets').select('id', { count: 'exact', head: true }).eq('asset_type_id', at.id);
     if ((count ?? 0) > 0) { setMsg(`"${resolveI18n(at.name_i18n, lng)}" is used by ${count} asset(s) — deactivate it instead of deleting.`); return; }
-    await supabase.from('fp_asset_types').delete().eq('id', at.id);
+    const { error } = await supabase.from('fp_asset_types').delete().eq('id', at.id);
+    if (error) { setMsg(friendlyError(error, tc)); return; }
     invAsset();
   };
 
@@ -407,7 +431,11 @@ function SlaSection() {
             hoursLabel={t('sla.hours')}
             saveLabel={t('sla.save')}
             onSave={async (hours) => {
-              await supabase.from('fp_sla_policies').upsert({ org_id: orgId, priority: p, resolution_hours: hours }, { onConflict: 'org_id,priority' });
+              const { error } = await supabase.from('fp_sla_policies').upsert({ org_id: orgId, priority: p, resolution_hours: hours }, { onConflict: 'org_id,priority' });
+              if (error) {
+                notifyError(friendlyError(error, tc));
+                return;
+              }
               void queryClient.invalidateQueries({ queryKey: ['sla_policies', orgId] });
             }}
           />
@@ -458,7 +486,7 @@ function TeamSection() {
   const sites = sitesQuery.data ?? [];
   const [email, setEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<Role>('technician');
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [inviteLink, setInviteLink] = useState<{ email: string; link: string } | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [siteAccessFor, setSiteAccessFor] = useState<string | null>(null);
   const [profileFor, setProfileFor] = useState<string | null>(null);
@@ -475,6 +503,7 @@ function TeamSection() {
 
   const changeRole = useMutation({
     mutationFn: async (v: { userId: string; role: Role }) => {
+      setMsg(null);
       const { error } = await supabase.from('fp_users_orgs').update({ role: v.role }).eq('org_id', orgId!).eq('user_id', v.userId);
       if (error) throw error;
     },
@@ -484,6 +513,7 @@ function TeamSection() {
 
   const removeMember = useMutation({
     mutationFn: async (userId: string) => {
+      setMsg(null);
       const { error } = await supabase.from('fp_users_orgs').delete().eq('org_id', orgId!).eq('user_id', userId);
       if (error) throw error;
     },
@@ -493,12 +523,14 @@ function TeamSection() {
 
   const sendInvite = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.from('fp_invites').insert({ org_id: orgId, email, role: inviteRole, invited_by: user?.id ?? null }).select('token').single();
+      setMsg(null);
+      const { data, error } = await supabase.from('fp_invites').insert({ org_id: orgId, email: email.trim(), role: inviteRole, invited_by: user?.id ?? null }).select('email, token').single();
       if (error) throw error;
-      return data.token as string;
+      return data as { email: string; token: string };
     },
-    onSuccess: (token) => {
-      setInviteLink(`${window.location.origin}/invite?token=${token}`);
+    onSuccess: (inv) => {
+      // The database queues the invitation email (migration 0065).
+      setInviteLink({ email: inv.email, link: `${window.location.origin}/invite?token=${inv.token}` });
       setEmail('');
       void queryClient.invalidateQueries({ queryKey: ['invites', orgId] });
     },
@@ -515,6 +547,7 @@ function TeamSection() {
 
   return (
     <div className="space-y-6">
+      {msg && <p role="alert" className="rounded-lg border border-status-crit/30 bg-white p-3 text-sm text-status-crit">{msg}</p>}
       <section className="rounded-xl border border-line bg-white p-4">
         <h2 className="font-semibold text-ink">Members</h2>
         <ul className="mt-3 space-y-2">
@@ -575,17 +608,15 @@ function TeamSection() {
         </div>
         {inviteLink && (
           <div className="mt-3 rounded-lg bg-surface p-3">
-            <p className="text-xs text-ink-muted">Share this invite link:</p>
+            <p className="text-xs text-ink-muted">An invitation email is on its way to {inviteLink.email}. You can also share this link directly:</p>
             <div className="mt-1 flex items-center gap-2">
-              <code className="block flex-1 break-all text-xs text-ink">{inviteLink}</code>
-              <button type="button" onClick={() => void navigator.clipboard?.writeText(inviteLink)} className="text-ink-muted hover:text-brand" aria-label="Copy link">
+              <code className="block flex-1 break-all text-xs text-ink">{inviteLink.link}</code>
+              <button type="button" onClick={() => void navigator.clipboard?.writeText(inviteLink.link)} className="text-ink-muted hover:text-brand" aria-label="Copy link">
                 <Copy size={15} />
               </button>
             </div>
           </div>
         )}
-        {msg && <p className="mt-2 text-sm text-status-crit">{msg}</p>}
-
         {(invites.data ?? []).length > 0 && (
           <div className="mt-4">
             <p className="text-sm font-medium text-ink">Pending invites</p>
@@ -838,6 +869,17 @@ function IntegrationsSection() {
 
   const emailOn = !!pref.data?.email_enabled;
 
+  // Numbers are connected by the platform operator (0064): a tenant choosing
+  // its own number id could otherwise receive another tenant's messages.
+  const channels = useQuery({
+    queryKey: ['channel_accounts'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('fp_channel_accounts').select('id, channel, display_name, external_id, active');
+      if (error) throw error;
+      return (data ?? []) as { id: string; channel: string; display_name: string | null; external_id: string; active: boolean }[];
+    },
+  });
+
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-line bg-white p-4">
@@ -849,6 +891,21 @@ function IntegrationsSection() {
             <Link to="/devices" className="mt-2 inline-flex text-sm font-medium text-brand hover:text-brand-600">Manage devices →</Link>
           </div>
         </div>
+      </section>
+
+      <section className="rounded-xl border border-line bg-white p-4">
+        <h2 className="font-semibold text-ink">WhatsApp</h2>
+        {(channels.data ?? []).filter((c) => c.channel === 'whatsapp' && c.active).length > 0 ? (
+          <ul className="mt-1 text-sm text-ink">
+            {(channels.data ?? []).filter((c) => c.channel === 'whatsapp' && c.active).map((c) => (
+              <li key={c.id}>Connected: {c.display_name ?? c.external_id}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-1 text-sm text-ink-muted">
+            No WhatsApp number is connected. Contact FacilitySpace support to connect your business number; replies to WhatsApp conversations can't be delivered until then.
+          </p>
+        )}
       </section>
 
       <section className="rounded-xl border border-line bg-white p-4">

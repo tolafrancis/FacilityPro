@@ -4,13 +4,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
-import { useFaultTypes, useLocations, useRequest, useWorkOrders } from '../lib/queries';
+import { useFaultTypes, useLocations, useRequest, useWorkOrderForRequest } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDate, PRIORITY_CLASS, REQUEST_STATUS_CLASS, REQUEST_STATUSES } from '../lib/ui';
+import { formatDate, PRIORITY_CLASS, REQUEST_STATUS_CLASS, REQUEST_STATUSES, WO_STATUS_CLASS } from '../lib/ui';
 import type { RequestStatus } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
+import NotFound from '../components/NotFound';
 
 export default function RequestDetail() {
   const { id } = useParams<{ id: string }>();
@@ -19,13 +20,14 @@ export default function RequestDetail() {
   const lng = i18n.resolvedLanguage ?? 'en';
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { currentOrg } = useOrg();
+  const { currentOrg, role } = useOrg();
+  const isManager = role === 'org_admin' || role === 'manager';
   const orgId = currentOrg?.id;
 
   const requestQuery = useRequest(id);
   const faultTypes = useFaultTypes();
   const locations = useLocations();
-  const workOrders = useWorkOrders();
+  const linkedWoQuery = useWorkOrderForRequest(id);
 
   const request = requestQuery.data;
 
@@ -40,43 +42,34 @@ export default function RequestDetail() {
     },
   });
 
+  // One atomic server call: returns the existing work order if the request
+  // was already converted, so a double click or two managers can't create
+  // duplicates, and the request status follows the work order from there.
   const convert = useMutation({
+    meta: { errorHandled: true }, // shown inline below
     mutationFn: async () => {
-      if (!request) return null;
-      const { data, error } = await supabase
-        .from('fp_work_orders')
-        .insert({
-          org_id: orgId,
-          request_id: request.id,
-          asset_id: request.asset_id,
-          location_id: request.location_id,
-          fault_type_id: request.fault_type_id,
-          severity: request.severity,
-          title: request.title,
-          instructions: request.body_original,
-          priority: request.priority,
-          status: 'assigned',
-        })
-        .select('id')
-        .single();
+      const { data, error } = await supabase.rpc('fp_convert_request', { p_request: id! });
       if (error) throw error;
-      await supabase.from('fp_requests').update({ status: 'assigned' }).eq('id', request.id);
-      return data.id as string;
+      return data as string;
     },
     onSuccess: (woId) => {
       void queryClient.invalidateQueries({ queryKey: ['request', id] });
+      void queryClient.invalidateQueries({ queryKey: ['requests', orgId] });
+      void queryClient.invalidateQueries({ queryKey: ['work_order_for_request', id] });
       void queryClient.invalidateQueries({ queryKey: ['work_orders', orgId] });
+      void queryClient.invalidateQueries({ queryKey: ['work_orders_page'] });
       if (woId) navigate(`/work-orders/${woId}`);
     },
   });
 
-  if (!request) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
+  if (requestQuery.isLoading) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
+  if (!request) return <NotFound backTo="/requests" backLabel={t('title')} />;
 
   const faultName = request.fault_type_id
     ? resolveI18n(faultTypes.data?.find((x) => x.id === request.fault_type_id)?.name_i18n, lng)
     : '—';
   const loc = locations.data?.find((x) => x.id === request.location_id);
-  const linkedWo = (workOrders.data ?? []).find((w) => w.request_id === request.id);
+  const linkedWo = linkedWoQuery.data;
 
   return (
     <div className="max-w-2xl">
@@ -136,11 +129,21 @@ export default function RequestDetail() {
             className="inline-flex items-center gap-2 text-sm font-medium text-brand hover:text-brand-600"
           >
             {t('detail.linkedWo')}: {linkedWo.title}
+            <Pill className={WO_STATUS_CLASS[linkedWo.status]}>{tc(`woStatus.${linkedWo.status}`)}</Pill>
           </Link>
         ) : (
-          <Button onClick={() => convert.mutate()} loading={convert.isPending}>
-            {t('detail.convert')}
-          </Button>
+          isManager &&
+          linkedWoQuery.isSuccess &&
+          request.status !== 'rejected' && (
+            <Button onClick={() => convert.mutate()} loading={convert.isPending}>
+              {t('detail.convert')}
+            </Button>
+          )
+        )}
+        {convert.error && (
+          <p role="alert" className="mt-2 text-sm text-status-crit">
+            {(convert.error as Error).message}
+          </p>
         )}
       </div>
     </div>

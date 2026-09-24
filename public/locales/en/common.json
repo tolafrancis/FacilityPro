@@ -42,6 +42,9 @@
   },
   "actions": {
     "signOut": "Sign out",
+    "retry": "Try again",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
     "save": "Save",
     "cancel": "Cancel",
     "create": "Create",
@@ -102,7 +105,13 @@
     "stillInUse": "That's still in use elsewhere and can't be changed.",
     "invalidValue": "That value isn't allowed.",
     "offline": "You're offline — try again once you're back online.",
-    "generic": "Something went wrong. Please try again."
+    "generic": "Something went wrong. Please try again.",
+    "planLimit": {
+      "assets": "Your plan's asset limit is reached. Retire unused assets or upgrade under Billing.",
+      "members": "Your plan's member limit is reached (pending invitations count). Upgrade under Billing to invite more people.",
+      "sites": "Your plan's site limit is reached. Upgrade under Billing to add more sites."
+    },
+    "conflict": "Someone else changed this in the meantime. It has been reloaded; check it and try again."
   },
   "requestStatus": {
     "new": "New",
@@ -115,10 +124,12 @@
     "rejected": "Rejected"
   },
   "woStatus": {
+    "open": "Open (unassigned)",
     "assigned": "Assigned",
     "in_progress": "In progress",
     "on_hold": "On hold",
     "resolved": "Resolved",
+    "verified": "Verified",
     "closed": "Closed"
   },
   "form": {
@@ -146,7 +157,23 @@
   "offline": "You're offline. Changes may not save until you reconnect.",
   "sync": {
     "pending": "{{count}} to sync",
-    "syncing": "Syncing…"
+    "syncing": "Syncing…",
+    "offline": "You're offline. Changes are saved on this device and sent when you reconnect.",
+    "failed": "{{count}} not saved",
+    "failedTitle": "Changes that couldn't be saved",
+    "failedHint": "These were made offline and refused when sent (for example, the job changed meanwhile or you no longer have access). Retry, or discard them.",
+    "retry": "Retry",
+    "discard": "Discard",
+    "op": {
+      "insert": "Add",
+      "update": "Change",
+      "upload": "Photo"
+    }
   },
-  "free": "Free"
+  "free": "Free",
+  "notFound": {
+    "title": "Not found",
+    "body": "This page or record doesn't exist, or you don't have access to it.",
+    "back": "Back to dashboard"
+  }
 }

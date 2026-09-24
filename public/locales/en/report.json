@@ -11,5 +11,15 @@
   "reporterPlaceholder": "So we can follow up",
   "submit": "Submit report",
   "thanksTitle": "Thank you!",
-  "thanksBody": "Your report has been received. The facilities team will take it from here."
+  "thanksBody": "Your report has been received. The facilities team will take it from here.",
+  "reference": "Reference",
+  "errors": {
+    "rate_limited": "Too many reports from here right now. Please try again in a few minutes.",
+    "report_too_long": "That report is too long. Please shorten the title or details.",
+    "report_invalid_asset": "This QR code doesn't match an asset of this organisation.",
+    "report_invalid_location": "This QR code doesn't match a location of this organisation.",
+    "captcha_failed": "The security check failed. Please try again.",
+    "captcha_required": "Please complete the security check first.",
+    "generic": "Something went wrong. Please try again."
+  }
 }

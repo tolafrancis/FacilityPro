@@ -12,10 +12,13 @@
 //   supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 //   (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.)
 //
-// Schedule it (e.g. every 2 minutes) via the Dashboard or pg_cron + pg_net,
-// the same way as process-outbox.
+// Schedule it (e.g. every 2 minutes) via pg_cron + pg_net, the same way as
+// process-outbox; it rejects callers without the service-role key (or
+// CRON_SECRET). Only organisations with settings.ai_sentiment = true are
+// scored: their inbound message text is sent to Anthropic.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { forbidden, isSchedulerRequest } from '../_shared/scheduler-auth.ts';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY') ?? '';
 // Cheap, fast model is ideal for short-text classification.
@@ -56,7 +59,9 @@ async function classify(text: string): Promise<{ sentiment: string; score: numbe
   return { sentiment, score };
 }
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  // Scheduler only (0061 pg_cron sends the service-role key).
+  if (!isSchedulerRequest(req)) return forbidden();
   if (!ANTHROPIC_API_KEY) {
     return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY not set' }), { status: 500 });
   }
@@ -66,11 +71,28 @@ Deno.serve(async () => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
+  // Only organisations that turned this on (Settings → Organisation profile)
+  // have message text sent to the AI provider (audit S2-M5).
+  const { data: orgs, error: orgError } = await supabase
+    .from('fp_organizations')
+    .select('id')
+    .eq('settings->>ai_sentiment', 'true');
+  if (orgError) {
+    return new Response(JSON.stringify({ error: orgError.message }), { status: 500 });
+  }
+  const optedIn = (orgs ?? []).map((o) => o.id as string);
+  if (optedIn.length === 0) {
+    return new Response(JSON.stringify({ processed: 0, scored: 0, failed: 0 }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const { data, error } = await supabase
     .from('fp_messages')
     .select('id, body')
     .eq('direction', 'in')
     .is('sentiment', null)
+    .in('org_id', optedIn)
     .order('created_at', { ascending: false })
     .limit(25);
 

@@ -2,7 +2,14 @@
   "title": "Lệnh công việc",
   "subtitle": "Công việc được phân công và tiến độ.",
   "empty": "Chưa có lệnh công việc. Tạo từ một yêu cầu.",
-  "columns": { "title": "Lệnh công việc", "asset": "Tài sản", "assignee": "Người phụ trách", "priority": "Ưu tiên", "status": "Trạng thái", "due": "Hạn" },
+  "columns": {
+    "title": "Lệnh công việc",
+    "asset": "Tài sản",
+    "assignee": "Người phụ trách",
+    "priority": "Ưu tiên",
+    "status": "Trạng thái",
+    "due": "Hạn"
+  },
   "detail": {
     "instructions": "Hướng dẫn",
     "instructionsPlaceholder": "Việc cần làm…",
@@ -46,5 +53,30 @@
     "subtitle": "Các lệnh công việc được phân công cho bạn.",
     "empty": "Hiện bạn chưa có công việc được phân công.",
     "open": "Mở"
+  },
+  "lifecycle": {
+    "started": "Bắt đầu",
+    "resolved": "Đã xử lý",
+    "verified": "Đã nghiệm thu",
+    "closed": "Đã đóng",
+    "reopen": "↺ Mở lại",
+    "reopenedCount_one": "Đã mở lại {{count}} lần",
+    "reopenedCount_other": "Đã mở lại {{count}} lần",
+    "holdReasonPrompt": "Vì sao công việc này tạm dừng? (ví dụ: chờ vật tư)",
+    "onHoldBecause": "Tạm dừng",
+    "assignToStart": "Hãy phân công kỹ thuật viên để bắt đầu lệnh công việc này.",
+    "closingHint": "Cần chọn mã hoàn thành trước khi đánh dấu đã xử lý.",
+    "errors": {
+      "wo_invalid_transition": "Không thể chuyển sang trạng thái này từ trạng thái hiện tại (một số bước cần quản lý).",
+      "wo_assignee_required": "Hãy phân công lệnh công việc trước khi bắt đầu.",
+      "wo_completion_code_required": "Hãy chọn mã hoàn thành trong mục Chi tiết đóng lệnh trước khi đánh dấu đã xử lý.",
+      "wo_checklist_incomplete": "Hãy hoàn tất các mục bắt buộc trong danh sách kiểm tra trước khi đánh dấu đã xử lý.",
+      "wo_field_not_allowed": "Chỉ quản lý mới có thể thay đổi các thông tin này."
+    }
+  },
+  "uploadQueued": "Bạn đang ngoại tuyến: ảnh sẽ được tải lên khi có kết nối.",
+  "uploadRejected": {
+    "too_large": "Tệp quá lớn (tối đa 25 MB).",
+    "unsupported_type": "Chỉ có thể đính kèm ảnh và video tại đây."
   }
 }

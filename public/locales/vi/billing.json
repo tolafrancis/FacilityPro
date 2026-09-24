@@ -12,9 +12,7 @@
   "choose": "Đăng ký qua PayPal",
   "current": "Gói hiện tại",
   "linkMissing": "Chưa đặt liên kết thanh toán",
-  "markActive": "Đánh dấu kích hoạt",
   "cancel": "Hủy gói",
-  "pendingNote": "Sau khi thanh toán qua PayPal, hãy đánh dấu kích hoạt gói này.",
   "editPlan": "Sửa gói",
   "limitsUnlimited": "Không giới hạn",
   "statusLabels": {
@@ -37,5 +35,34 @@
     "limitHint": "Để trống nếu không giới hạn.",
     "paymentUrl": "Liên kết thanh toán PayPal",
     "paymentHint": "Dán liên kết thanh toán hoặc đăng ký PayPal của bạn. Nút Đăng ký sẽ mở liên kết này."
-  }
+  },
+  "requestedNote": "Bạn đã yêu cầu gói {{plan}}. Gói sẽ được kích hoạt sau khi chúng tôi xác nhận thanh toán.",
+  "cancelRequestedNote": "Đã gửi yêu cầu hủy gói. Chúng tôi sẽ xác nhận sớm.",
+  "platform": {
+    "title": "Yêu cầu gói dịch vụ (nền tảng)",
+    "hint": "Chỉ kích hoạt gói sau khi đã xác nhận thanh toán trên PayPal.",
+    "empty": "Không có yêu cầu nào đang chờ.",
+    "activate": "Kích hoạt",
+    "confirmCancel": "Xác nhận hủy",
+    "cancelRequested": "đã yêu cầu hủy"
+  },
+  "jobs": {
+    "title": "Tác vụ nền (nền tảng)",
+    "hint": "Các tác vụ định kỳ: tạo lệnh bảo trì, leo thang SLA, nhắc nhở, quy trình tự động và gửi thông báo, cùng các kiểm tra lỗi gửi tin và quy trình. Quản trị nền tảng sẽ nhận email khi có mục bị trễ hoặc lỗi.",
+    "lastOk": "Lần thành công gần nhất",
+    "state": {
+      "ok": "Ổn định",
+      "late": "Bị trễ",
+      "failing": "Đang lỗi",
+      "never": "Chưa chạy",
+      "attention": "Cần xử lý"
+    },
+    "checks": {
+      "outbox_failed": "Gửi email/SMS/thông báo đẩy",
+      "outbox_backlog": "Hàng đợi tin nhắn",
+      "workflow_failures": "Quy trình tự động"
+    }
+  },
+  "trialEnds": "Dùng thử đến",
+  "trialEnded": "Thời gian dùng thử đã kết thúc: áp dụng giới hạn gói Miễn phí cho đến khi bạn nâng cấp."
 }

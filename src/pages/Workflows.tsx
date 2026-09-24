@@ -6,10 +6,11 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import { supabase } from '../lib/supabase';
+import { useUnsavedChangesWarning } from '../lib/useUnsavedChanges';
 import { useOrg } from '../contexts/OrgContext';
 import { useBudgets, useDevices, useFacilities, useFaultTypes, useLocations, useMetersAll, useOrgMembers, useRates, useSurveys } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { PRIORITIES } from '../lib/ui';
+import { PRIORITIES, formatDate } from '../lib/ui';
 
 // Events mirror FacilityBot's Workflow "Event" catalog (see docs/facilitybot-workflows-kb.md).
 type WorkflowTrigger =
@@ -410,7 +411,7 @@ async function fetchRuns(workflowId: string | undefined) {
 
 const ACTION_TARGET_LABEL: Record<WorkflowActionType, string> = {
   send_email: 'Recipient',
-  send_sms: 'Phone number',
+  send_sms: 'Recipient',
   send_push: 'Recipient',
   assign: 'Responder',
   create_request: 'Request type',
@@ -436,6 +437,11 @@ export default function Workflows() {
   const devices = useDevices();
   const metersAll = useMetersAll();
   const [form, setForm] = useState<WorkflowFormState>(EMPTY_FORM);
+  // What the form held when it was last loaded or saved: anything else is
+  // unsaved work worth a warning before it's thrown away.
+  const [baseline, setBaseline] = useState<WorkflowFormState>(EMPTY_FORM);
+  const dirty = JSON.stringify(form) !== JSON.stringify(baseline);
+  useUnsavedChangesWarning(dirty);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
@@ -523,6 +529,7 @@ export default function Workflows() {
         : await supabase.from('fp_workflows').insert({ org_id: currentOrg.id, ...payload, is_active: true, run_order: 100, version: 1 });
       if (error) throw error;
       setForm(EMPTY_FORM);
+      setBaseline(EMPTY_FORM);
       setEditingId(null);
       await queryClient.invalidateQueries({ queryKey: ['workflows', currentOrg.id] });
       setMessage(editingId ? 'Workflow updated.' : 'Workflow saved.');
@@ -534,6 +541,7 @@ export default function Workflows() {
   };
 
   const startEdit = (workflow: Workflow) => {
+    if (dirty && !window.confirm('Discard your unsaved changes and open this workflow?')) return;
     const cond = (workflow.conditions ?? {}) as { logic?: 'and' | 'or'; rules?: ConditionRow[] };
     const rules = (cond.rules ?? []) as ConditionRow[];
     const { tc, rest } = reverseTrigger(workflow.trigger_type, rules);
@@ -543,22 +551,26 @@ export default function Workflows() {
       value: (a.value as string) ?? '',
       subject: (a.subject as string) ?? '',
     }));
-    setForm({
+    const loaded: WorkflowFormState = {
       trigger_type: workflow.trigger_type,
       logic: cond.logic ?? 'and',
       cooldownMinutes: String(workflow.cooldown_minutes ?? 0),
       triggerConfig: tc,
       conditions: rest,
       actions: actions.length ? actions : [{ type: 'send_email', target: '', value: '', subject: '' }],
-    });
+    };
+    setForm(loaded);
+    setBaseline(loaded);
     setEditingId(workflow.id);
     setMessage(null);
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const cancelEdit = () => {
+    if (dirty && !window.confirm('Discard your unsaved changes to this workflow?')) return;
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setBaseline(EMPTY_FORM);
   };
 
   const deleteWorkflow = async (workflow: Workflow) => {
@@ -845,7 +857,17 @@ export default function Workflows() {
       );
     }
     if (type === 'send_sms') {
-      return <Input value={action.target} onChange={(e) => set(e.target.value)} placeholder="+1 555 000 0000" />;
+      // Texts go only to members; the server resolves the member's phone from
+      // their technician profile or notification settings. A legacy raw number
+      // stays selectable, and still works if it belongs to a member.
+      const legacyNumber = action.target && !memberList.some((m) => m.user_id === action.target);
+      return (
+        <Select value={action.target} onChange={(e) => set(e.target.value)}>
+          <option value="">Select recipient</option>
+          {legacyNumber && <option value={action.target}>{action.target}</option>}
+          {memberList.map((m) => <option key={m.user_id} value={m.user_id}>{m.email}</option>)}
+        </Select>
+      );
     }
     if (type === 'create_request') {
       return (
@@ -1175,7 +1197,7 @@ export default function Workflows() {
                   </div>
                   <div className="mt-3 flex items-center justify-between text-sm text-ink-muted">
                     <span>Runs: {workflow.run_count}</span>
-                    <span>Last: {workflow.last_run_at ? new Date(workflow.last_run_at).toLocaleString() : 'Never'}</span>
+                    <span>Last: {workflow.last_run_at ? formatDate(workflow.last_run_at, lng) : 'Never'}</span>
                   </div>
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-xs uppercase tracking-[0.2em] text-ink-muted">{workflow.actions.length} actions</span>
@@ -1205,7 +1227,7 @@ export default function Workflows() {
                     <div key={run.id} className="rounded-lg border border-line bg-surface px-3 py-3 text-sm">
                       <div className="flex items-center justify-between gap-3">
                         <span className="font-medium text-ink">{run.status}</span>
-                        <span className="text-ink-muted">{new Date(run.started_at).toLocaleString()}</span>
+                        <span className="text-ink-muted">{formatDate(run.started_at, lng)}</span>
                       </div>
                       <p className="mt-1 text-ink-muted">Trigger: {run.trigger_ref || 'n/a'}</p>
                       {run.error && <p className="mt-1 text-status-crit">{run.error}</p>}

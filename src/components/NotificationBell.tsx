@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,6 +16,23 @@ export default function NotificationBell() {
   const queryClient = useQueryClient();
   const notifications = useNotifications(user?.id);
   const [open, setOpen] = useState(false);
+
+  // New notifications arrive live (Supabase Realtime, RLS applies); the
+  // 60-second poll in useNotifications is the fallback.
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`notifications:${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'fp_notifications', filter: `user_id=eq.${user.id}` },
+        () => void queryClient.invalidateQueries({ queryKey: ['notifications', user.id] })
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
 
   const items = notifications.data ?? [];
   const unread = items.filter((n) => !n.read_at).length;
@@ -97,8 +114,8 @@ export default function NotificationBell() {
                         n.read_at ? '' : 'bg-brand-50/50'
                       }`}
                     >
-                      <span className="text-sm font-medium text-ink">{n.title}</span>
-                      {n.body && <span className="text-xs text-ink-muted">{n.body}</span>}
+                      <span className="text-sm font-medium text-ink">{n.title_i18n?.[lng] ?? n.title}</span>
+                      {n.body && <span className="text-xs text-ink-muted">{n.body_i18n?.[lng] ?? n.body}</span>}
                       <span className="text-[11px] text-ink-muted">{formatDate(n.created_at, lng)}</span>
                     </button>
                   </li>

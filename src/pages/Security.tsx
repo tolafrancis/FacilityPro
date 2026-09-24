@@ -118,7 +118,7 @@ export default function Security() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC as string),
       });
       const json = sub.toJSON();
-      await supabase.from('fp_push_subscriptions').upsert(
+      const { error: subError } = await supabase.from('fp_push_subscriptions').upsert(
         {
           user_id: user?.id,
           endpoint: sub.endpoint,
@@ -127,6 +127,9 @@ export default function Security() {
         },
         { onConflict: 'endpoint' }
       );
+      // Without the stored subscription the server can't deliver anything, so
+      // don't turn the preference on.
+      if (subError) throw new Error(subError.message);
       savePref.mutate({ push_enabled: true });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -138,6 +141,7 @@ export default function Security() {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       if (sub) {
+        // Best effort: turning the preference off below already stops delivery.
         await supabase.from('fp_push_subscriptions').delete().eq('endpoint', sub.endpoint);
         await sub.unsubscribe();
       }

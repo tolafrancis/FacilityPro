@@ -2,7 +2,14 @@
   "title": "Work orders",
   "subtitle": "Assigned work and its progress.",
   "empty": "No work orders yet. Create one from a request.",
-  "columns": { "title": "Work order", "asset": "Asset", "assignee": "Assignee", "priority": "Priority", "status": "Status", "due": "Due" },
+  "columns": {
+    "title": "Work order",
+    "asset": "Asset",
+    "assignee": "Assignee",
+    "priority": "Priority",
+    "status": "Status",
+    "due": "Due"
+  },
   "detail": {
     "instructions": "Instructions",
     "instructionsPlaceholder": "What needs doing…",
@@ -46,5 +53,30 @@
     "subtitle": "Work orders assigned to you.",
     "empty": "You have no assigned work right now.",
     "open": "Open"
+  },
+  "lifecycle": {
+    "started": "Started",
+    "resolved": "Resolved",
+    "verified": "Verified",
+    "closed": "Closed",
+    "reopen": "↺ Reopen",
+    "reopenedCount_one": "Reopened {{count}} time",
+    "reopenedCount_other": "Reopened {{count}} times",
+    "holdReasonPrompt": "Why is this work on hold? (e.g. waiting for parts)",
+    "onHoldBecause": "On hold",
+    "assignToStart": "Assign a technician to start this work order.",
+    "closingHint": "A completion code is required before the work can be resolved.",
+    "errors": {
+      "wo_invalid_transition": "That status change isn't allowed from here (some steps need a manager).",
+      "wo_assignee_required": "Assign the work order before starting it.",
+      "wo_completion_code_required": "Choose a completion code under Closing details before resolving.",
+      "wo_checklist_incomplete": "Complete the required checklist items before resolving.",
+      "wo_field_not_allowed": "Only a manager can change these details."
+    }
+  },
+  "uploadQueued": "You're offline: the photo will upload when you're back online.",
+  "uploadRejected": {
+    "too_large": "That file is too large (25 MB maximum).",
+    "unsupported_type": "Only photos and videos can be attached here."
   }
 }

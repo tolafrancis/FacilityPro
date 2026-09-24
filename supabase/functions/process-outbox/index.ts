@@ -10,6 +10,7 @@
 // Secrets (set once):
 //   supabase secrets set RESEND_API_KEY=re_xxx
 //   supabase secrets set OUTBOX_FROM="FacilitySpace <notifications@yourdomain.com>"
+//   supabase secrets set APP_URL=https://app.yourdomain.com   # base URL for links in emails (invites)
 //   # For SMS (optional):
 //   supabase secrets set TWILIO_ACCOUNT_SID=ACxxx
 //   supabase secrets set TWILIO_AUTH_TOKEN=xxx
@@ -21,30 +22,30 @@
 //   (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.)
 //   The VAPID_PUBLIC_KEY must also be exposed to the web app as VITE_VAPID_PUBLIC_KEY.
 //
-// Schedule it (so messages go out without manual calls). Either:
-//   - Supabase Dashboard -> Edge Functions -> Schedules (e.g. every 5 minutes), or
-//   - pg_cron + pg_net from the SQL editor:
-//       select cron.schedule('fp-outbox', '*/5 * * * *', $$
-//         select net.http_post(
-//           url := 'https://<project-ref>.functions.supabase.co/process-outbox',
-//           headers := '{"Authorization":"Bearer <anon-or-service-key>"}'::jsonb
-//         );
-//       $$);
+// Scheduling: migration 0061 schedules this every 5 minutes with pg_cron +
+// pg_net, using the project URL and service_role key stored in Supabase Vault
+// as `project_url` and `service_role_key` (see README). Nothing to set up here.
 //
 // Each row carries a `channel` ('email' | 'sms' | 'push'); add more by branching
 // in deliver().
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { forbidden, isSchedulerRequest } from '../_shared/scheduler-auth.ts';
 import webpush from 'https://esm.sh/web-push@3.6.7';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
-const OUTBOX_FROM = Deno.env.get('OUTBOX_FROM') ?? 'FacilitySpace <onboarding@resend.dev>';
+// No fallback sender: Resend's shared test address only delivers to the
+// account owner, so a missing OUTBOX_FROM silently lost every email.
+const OUTBOX_FROM = Deno.env.get('OUTBOX_FROM') ?? '';
 const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID') ?? '';
 const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN') ?? '';
 const TWILIO_FROM = Deno.env.get('TWILIO_FROM') ?? '';
 const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY') ?? '';
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY') ?? '';
 const VAPID_SUBJECT = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:ops@example.com';
+// Links in queued messages are written as {{app_url}}/... (migration 0065), so
+// the database never decides which site a platform email points to.
+const APP_URL = (Deno.env.get('APP_URL') ?? '').replace(/\/+$/, '');
 
 if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
@@ -52,6 +53,7 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 
 interface OutboxRow {
   id: string;
+  attempts?: number;
   channel: string;
   to_address: string;
   subject: string;
@@ -129,31 +131,48 @@ async function sendPush(
   }
 }
 
+function withLinks(text: string): string {
+  if (!text.includes('{{app_url}}')) return text;
+  if (!APP_URL) throw new Error('APP_URL not set');
+  return text.replaceAll('{{app_url}}', APP_URL);
+}
+
 async function deliver(row: OutboxRow, supabase: SupabaseClient): Promise<void> {
+  row = { ...row, subject: withLinks(row.subject), body: row.body === null ? null : withLinks(row.body) };
   if (row.channel === 'sms') {
     await sendSms(row.to_address, row.body ?? row.subject);
   } else if (row.channel === 'push') {
     await sendPush(supabase, row.to_address, row.subject, row.body ?? row.subject);
   } else {
     if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not set');
+    if (!OUTBOX_FROM) throw new Error('OUTBOX_FROM not set (e.g. "FacilitySpace <notifications@yourdomain.com>")');
     await sendEmail(row.to_address, row.subject, row.body ?? row.subject);
   }
 }
 
-Deno.serve(async () => {
+// Rows are claimed atomically (fp_claim_outbox), so overlapping runs — the
+// pg_cron schedule plus a manual call — never send the same message twice. A
+// failed delivery is retried on later runs, up to 5 attempts. Every run is
+// recorded (fp_record_job_run) so the job-health check notices if this stops.
+const MAX_ATTEMPTS = 5;
+
+Deno.serve(async (req) => {
+  // Scheduler only (0061 pg_cron sends the service-role key).
+  if (!isSchedulerRequest(req)) return forbidden();
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  const { data, error } = await supabase
-    .from('fp_notification_outbox')
-    .select('id, channel, to_address, subject, body')
-    .eq('status', 'pending')
-    .order('created_at')
-    .limit(50);
+  const { data, error } = await supabase.rpc('fp_claim_outbox', { p_limit: 50 });
 
   if (error) {
+    await supabase.rpc('fp_record_job_run', {
+      p_job: 'process_outbox',
+      p_ok: false,
+      p_processed: 0,
+      p_error: error.message,
+    });
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 
@@ -170,13 +189,24 @@ Deno.serve(async () => {
         .eq('id', row.id);
       sent++;
     } catch (e) {
+      const giveUp = (row.attempts ?? MAX_ATTEMPTS) >= MAX_ATTEMPTS;
       await supabase
         .from('fp_notification_outbox')
-        .update({ status: 'failed', error: e instanceof Error ? e.message : String(e) })
+        .update({
+          status: giveUp ? 'failed' : 'pending',
+          error: e instanceof Error ? e.message : String(e),
+        })
         .eq('id', row.id);
       failed++;
     }
   }
+
+  await supabase.rpc('fp_record_job_run', {
+    p_job: 'process_outbox',
+    p_ok: true,
+    p_processed: sent,
+    p_error: failed > 0 ? `${failed} message(s) failed this run and will be retried` : null,
+  });
 
   return new Response(JSON.stringify({ processed: rows.length, sent, failed }), {
     headers: { 'Content-Type': 'application/json' },

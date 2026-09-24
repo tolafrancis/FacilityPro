@@ -28,11 +28,15 @@
     "priority": "Mức ưu tiên",
     "firstDue": "Ngày đến hạn đầu tiên",
     "leadTime": "Tạo trước bao nhiêu ngày",
-    "leadTimeHint": "Hạn hoàn thành của lệnh công việc vẫn giữ nguyên — điều này chỉ ảnh hưởng đến thời điểm lệnh được tạo."
+    "leadTimeHint": "Hạn hoàn thành của lệnh công việc vẫn giữ nguyên — điều này chỉ ảnh hưởng đến thời điểm lệnh được tạo.",
+    "editTitle": "Sửa lịch bảo trì",
+    "nextDue": "Ngày đến hạn tiếp theo",
+    "timeZoneHint": "Đến hạn lúc {{time}} ({{tz}})"
   },
   "requiredParts": {
     "toggle": "Phụ tùng cần dùng",
     "title": "Bộ phụ tùng cần dùng",
     "empty": "Chưa có phụ tùng nào — đây chỉ là gợi ý, kỹ thuật viên vẫn xác nhận số lượng thực tế đã dùng."
-  }
+  },
+  "edit": "Sửa"
 }

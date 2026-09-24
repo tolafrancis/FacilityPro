@@ -41,6 +41,9 @@ import type {
   Part,
   PartCategory,
   Plan,
+  PlatformSubscription,
+  JobHealth,
+  SystemCheck,
   PmRequiredPart,
   PmSchedule,
   Priority,
@@ -250,6 +253,8 @@ export function useAsset(id: string | undefined) {
 export interface AssetPageFilters {
   assetTypeId?: string;
   locationId?: string;
+  /** 'inService' = active + out of service; 'retired' = retired + disposed. */
+  status?: 'inService' | 'retired';
 }
 
 /** Server-paginated asset list for Assets.tsx — dropdowns elsewhere keep using useAssets(). */
@@ -264,11 +269,169 @@ export function useAssetsPage(page: number, pageSize: number, filters: AssetPage
       let q = supabase.from('fp_assets').select('*', { count: 'exact' }).eq('org_id', orgId!);
       if (filters.assetTypeId) q = q.eq('asset_type_id', filters.assetTypeId);
       if (filters.locationId) q = q.eq('location_id', filters.locationId);
+      if (filters.status === 'inService') q = q.in('status', ['active', 'inactive']);
+      if (filters.status === 'retired') q = q.in('status', ['retired', 'disposed']);
       const { data, error, count } = await q
         .order('created_at', { ascending: false })
         .range(from, from + pageSize - 1);
       if (error) throw error;
       return { rows: (data ?? []) as Asset[], count: count ?? 0 };
+    },
+  });
+}
+
+/** One asset's requests and work orders, fetched by asset (not whole tables). */
+export function useAssetHistory(assetId: string | undefined) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['asset_history', assetId],
+    enabled: !!orgId && !!assetId,
+    queryFn: async () => {
+      const [req, wo] = await Promise.all([
+        supabase.from('fp_requests').select('*').eq('asset_id', assetId!).order('created_at', { ascending: false }).limit(200),
+        supabase.from('fp_work_orders').select('*').eq('asset_id', assetId!).order('created_at', { ascending: false }).limit(200),
+      ]);
+      if (req.error) throw req.error;
+      if (wo.error) throw wo.error;
+      return { requests: (req.data ?? []) as RequestRow[], workOrders: (wo.data ?? []) as WorkOrder[] };
+    },
+  });
+}
+
+export interface DashboardKpis {
+  open_requests: number;
+  overdue: number;
+  in_progress: number;
+  resolved_30d: number;
+}
+
+/** Dashboard counts, computed in the database (fp_dashboard_kpis, 0069). */
+export function useDashboardKpis() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['dashboard_kpis', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_dashboard_kpis', { p_org: orgId });
+      if (error) throw error;
+      return data as DashboardKpis;
+    },
+  });
+}
+
+export function useRecentRequests(limit: number) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['requests_recent', orgId, limit],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_requests')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return data as RequestRow[];
+    },
+  });
+}
+
+export interface ReportFilters {
+  from?: string;
+  to?: string;
+  locationId?: string;
+  technicianId?: string;
+  priority?: string;
+}
+
+export interface ReportKpis {
+  open_requests: number;
+  open_work: number;
+  overdue: number;
+  avg_resolution_hours: number | null;
+  pm_due: number;
+  pm_compliance: number | null;
+  planned_share: number | null;
+  low_stock: number;
+  expiring_contracts: number;
+  total_cost: number;
+  total_budget: number;
+  vendor_spend: { vendor_id: string; amount: number }[];
+  cost_by_month: { month: string; amount: number }[];
+  mtbf_days: number | null;
+}
+
+/** Reports page figures, computed in the database (fp_report_kpis, 0069). */
+export function useReportKpis(f: ReportFilters) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['report_kpis', orgId, f],
+    enabled: !!orgId,
+    placeholderData: keepPreviousData,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_report_kpis', {
+        p_org: orgId,
+        p_from: f.from || null,
+        p_to: f.to || null,
+        p_location: f.locationId || null,
+        p_technician: f.technicianId || null,
+        p_priority: f.priority || null,
+      });
+      if (error) throw error;
+      return data as ReportKpis;
+    },
+  });
+}
+
+/** Exact asset count (plan usage), without downloading the assets. */
+export function useAssetCount() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['asset_count', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('fp_assets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId!);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+}
+
+/** Titles for a handful of work orders, by id. */
+export function useWorkOrderTitles(ids: string[]) {
+  const key = [...new Set(ids)].sort();
+  return useQuery({
+    queryKey: ['wo_titles', key],
+    enabled: key.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('fp_work_orders').select('id, title').in('id', key);
+      if (error) throw error;
+      return new Map((data ?? []).map((w) => [w.id as string, w.title as string]));
+    },
+  });
+}
+
+export interface PlanUsage {
+  assets: { used: number; limit: number | null };
+  members: { used: number; limit: number | null };
+  sites: { used: number; limit: number | null };
+  trial_ends_at: string | null;
+}
+
+/** Usage against the limits actually enforced (fp_plan_usage, 0072). */
+export function usePlanUsage() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['plan_usage', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_plan_usage', { p_org: orgId });
+      if (error) throw error;
+      return data as PlanUsage;
     },
   });
 }
@@ -391,6 +554,23 @@ export function useWorkOrder(id: string | undefined) {
         .single();
       if (error) throw error;
       return data as WorkOrder;
+    },
+  });
+}
+
+/** The work order created from a request, if any (one per request, 0060). */
+export function useWorkOrderForRequest(requestId: string | undefined) {
+  return useQuery({
+    queryKey: ['work_order_for_request', requestId],
+    enabled: !!requestId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_work_orders')
+        .select('id, title, status')
+        .eq('request_id', requestId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as Pick<WorkOrder, 'id' | 'title' | 'status'> | null;
     },
   });
 }
@@ -1150,6 +1330,7 @@ export function useNotifications(userId: string | undefined) {
       const { data, error } = await supabase
         .from('fp_notifications')
         .select('*')
+        .eq('user_id', userId!)
         .order('created_at', { ascending: false })
         .limit(20);
       if (error) throw error;
@@ -1275,6 +1456,60 @@ export function usePlans() {
         .order('sort');
       if (error) throw error;
       return data as Plan[];
+    },
+  });
+}
+
+/** Platform operator (fp_platform_admins) — manages plans and activates subscriptions. */
+export function useIsPlatformAdmin() {
+  return useQuery({
+    queryKey: ['is_platform_admin'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_is_platform_admin');
+      if (error) throw error;
+      return data === true;
+    },
+  });
+}
+
+/** Every org's subscription, pending requests first. Platform admins only. */
+export function usePlatformSubscriptions(enabled: boolean) {
+  return useQuery({
+    queryKey: ['platform_subscriptions'],
+    enabled,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_platform_subscriptions');
+      if (error) throw error;
+      return (data ?? []) as PlatformSubscription[];
+    },
+  });
+}
+
+/** Background job health (pg_cron jobs + outbox). Platform admins only. */
+export function useJobHealth(enabled: boolean) {
+  return useQuery({
+    queryKey: ['job_health'],
+    enabled,
+    meta: { errorHandled: true }, // the panel shows it
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_job_health');
+      if (error) throw error;
+      return (data ?? []) as JobHealth[];
+    },
+  });
+}
+
+export function useSystemChecks(enabled: boolean) {
+  return useQuery({
+    queryKey: ['system_checks'],
+    enabled,
+    meta: { errorHandled: true }, // the panel shows it
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_system_health');
+      if (error) throw error;
+      return (data ?? []) as SystemCheck[];
     },
   });
 }

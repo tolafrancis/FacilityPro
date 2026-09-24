@@ -25,10 +25,26 @@
     "workflows": "Quy trình",
     "surveys": "Khảo sát",
     "desks": "Bàn làm việc",
-    "facilities": "Cơ sở vật chất"
+    "facilities": "Cơ sở vật chất",
+    "documents": "Tài liệu",
+    "permits": "Giấy phép làm việc",
+    "attendance": "Chấm công",
+    "smartAssistant": "Trợ lý thông minh",
+    "tenantExperience": "Trải nghiệm khách thuê",
+    "broadcasts": "Thông báo chung",
+    "financial": "Tài chính"
+  },
+  "navGroups": {
+    "maintenance": "Vận hành bảo trì",
+    "operations": "Vận hành & kiểm soát",
+    "finance": "Tài chính",
+    "ai": "Trí tuệ & cài đặt"
   },
   "actions": {
     "signOut": "Đăng xuất",
+    "retry": "Thử lại",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
     "save": "Lưu",
     "cancel": "Hủy",
     "create": "Tạo",
@@ -89,7 +105,13 @@
     "stillInUse": "Mục này đang được sử dụng ở nơi khác nên không thể thay đổi.",
     "invalidValue": "Giá trị này không hợp lệ.",
     "offline": "Bạn đang ngoại tuyến — vui lòng thử lại khi có kết nối.",
-    "generic": "Đã xảy ra lỗi. Vui lòng thử lại."
+    "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "planLimit": {
+      "assets": "Đã đạt giới hạn tài sản của gói. Hãy ngừng sử dụng tài sản không dùng hoặc nâng cấp trong mục Thanh toán.",
+      "members": "Đã đạt giới hạn thành viên của gói (tính cả lời mời đang chờ). Nâng cấp trong mục Thanh toán để mời thêm người.",
+      "sites": "Đã đạt giới hạn địa điểm của gói. Nâng cấp trong mục Thanh toán để thêm địa điểm."
+    },
+    "conflict": "Người khác vừa thay đổi mục này. Dữ liệu đã được tải lại; hãy kiểm tra và thử lại."
   },
   "requestStatus": {
     "new": "Mới",
@@ -102,10 +124,12 @@
     "rejected": "Từ chối"
   },
   "woStatus": {
+    "open": "Mở (chưa phân công)",
     "assigned": "Đã phân công",
     "in_progress": "Đang xử lý",
     "on_hold": "Tạm dừng",
     "resolved": "Đã xử lý",
+    "verified": "Đã nghiệm thu",
     "closed": "Đã đóng"
   },
   "form": {
@@ -133,7 +157,23 @@
   "offline": "Bạn đang ngoại tuyến. Thay đổi có thể không được lưu cho đến khi kết nối lại.",
   "sync": {
     "pending": "{{count}} chờ đồng bộ",
-    "syncing": "Đang đồng bộ…"
+    "syncing": "Đang đồng bộ…",
+    "offline": "Bạn đang ngoại tuyến. Thay đổi được lưu trên thiết bị và gửi khi có kết nối lại.",
+    "failed": "{{count}} chưa lưu được",
+    "failedTitle": "Các thay đổi không lưu được",
+    "failedHint": "Những thay đổi này được thực hiện khi ngoại tuyến và bị từ chối khi gửi (ví dụ: công việc đã thay đổi trong lúc đó hoặc bạn không còn quyền truy cập). Hãy thử lại hoặc bỏ qua.",
+    "retry": "Thử lại",
+    "discard": "Bỏ qua",
+    "op": {
+      "insert": "Thêm",
+      "update": "Thay đổi",
+      "upload": "Ảnh"
+    }
   },
-  "free": "Miễn phí"
+  "free": "Miễn phí",
+  "notFound": {
+    "title": "Không tìm thấy",
+    "body": "Trang hoặc bản ghi này không tồn tại, hoặc bạn không có quyền truy cập.",
+    "back": "Về trang tổng quan"
+  }
 }

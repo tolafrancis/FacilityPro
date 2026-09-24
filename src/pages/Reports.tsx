@@ -1,53 +1,42 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download } from 'lucide-react';
-import {
-  useAuditLog,
-  useBudgets,
-  useContracts,
-  useExpenditures,
-  useLocations,
-  useOrgMembers,
-  useParts,
-  usePmSchedules,
-  useProcurementOrders,
-  useRequests,
-  useVendors,
-  useWorkOrders,
-} from '../lib/queries';
+import { supabase } from '../lib/supabase';
+import { useMoney } from '../lib/useMoney';
+import { useOrg } from '../contexts/OrgContext';
+import { useAuditLog, useLocations, useOrgMembers, useReportKpis, useVendors } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { daysUntil, formatDate, PRIORITIES } from '../lib/ui';
+import { formatDate, PRIORITIES } from '../lib/ui';
 import type { Priority } from '../lib/database.types';
 import { downloadCsv } from '../lib/csv';
 import Button from '../components/ui/Button';
 import Select from '../components/ui/Select';
 
-function currency(value: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
-}
 
-function inRange(iso: string, from: string, to: string) {
-  const t = new Date(iso).getTime();
-  if (from && t < new Date(from).getTime()) return false;
-  if (to && t > new Date(to + 'T23:59:59').getTime()) return false;
-  return true;
+// Exports page through every matching row (PostgREST returns at most 1,000
+// per request), so a CSV is never silently cut short.
+async function fetchAll<T>(
+  build: () => { range: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: unknown }> }
+): Promise<T[]> {
+  const out: T[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await build().range(from, from + 999);
+    if (error) throw error;
+    out.push(...(data ?? []));
+    if (!data || data.length < 1000) return out;
+  }
 }
 
 export default function Reports() {
+  const currency = useMoney({ whole: true });
   const { t, i18n } = useTranslation('reports');
   const lng = i18n.resolvedLanguage ?? 'en';
+  const { currentOrg } = useOrg();
+  const orgId = currentOrg?.id;
 
-  const requests = useRequests().data ?? [];
-  const workOrders = useWorkOrders().data ?? [];
-  const schedules = usePmSchedules().data ?? [];
-  const parts = useParts().data ?? [];
-  const contracts = useContracts().data ?? [];
   const audit = useAuditLog().data ?? [];
   const locations = useLocations().data ?? [];
   const members = useOrgMembers().data ?? [];
-  const expenditures = useExpenditures().data ?? [];
-  const budgets = useBudgets().data ?? [];
-  const procurementOrders = useProcurementOrders().data ?? [];
   const vendors = useVendors().data ?? [];
 
   const [dateFrom, setDateFrom] = useState('');
@@ -55,204 +44,129 @@ export default function Reports() {
   const [locationId, setLocationId] = useState('');
   const [technicianId, setTechnicianId] = useState('');
   const [priority, setPriority] = useState<Priority | 'all'>('all');
+  const [exporting, setExporting] = useState<string | null>(null);
 
   const filtersActive = !!(dateFrom || dateTo || locationId || technicianId || priority !== 'all');
 
-  const filteredWorkOrders = useMemo(
+  // Every figure is computed in the database (fp_report_kpis), so it stays
+  // exact however much history the organisation has.
+  const report = useReportKpis({
+    from: dateFrom,
+    to: dateTo,
+    locationId,
+    technicianId,
+    priority: priority === 'all' ? undefined : priority,
+  });
+  const r = report.data;
+  const dash = (v: number | null | undefined, suffix = '') => (v === null || v === undefined ? '—' : `${v}${suffix}`);
+
+  const totalCost = r?.total_cost ?? 0;
+  const budgetUsedPct = !r || r.total_budget === 0 ? null : Math.round((r.total_cost / r.total_budget) * 100);
+  const plannedShare = r?.planned_share ?? null;
+  const mtbfDays = r?.mtbf_days ?? null;
+
+  const vendorSpend = useMemo(
+    () => (r?.vendor_spend ?? []).map((v) => ({ name: vendors.find((x) => x.id === v.vendor_id)?.name ?? v.vendor_id, amount: v.amount })),
+    [r, vendors]
+  );
+  const costByMonth = useMemo(
     () =>
-      workOrders.filter((w) => {
-        if (dateFrom || dateTo) {
-          if (!inRange(w.created_at, dateFrom, dateTo)) return false;
-        }
-        if (locationId && w.location_id !== locationId) return false;
-        if (technicianId && w.assigned_to !== technicianId) return false;
-        if (priority !== 'all' && w.priority !== priority) return false;
-        return true;
+      (r?.cost_by_month ?? []).map((m) => {
+        const [y, mo] = m.month.split('-').map(Number);
+        return {
+          key: m.month,
+          label: new Intl.DateTimeFormat(lng === 'vi' ? 'vi-VN' : 'en-US', { month: 'short' }).format(new Date(y, mo - 1, 1)),
+          amount: Number(m.amount),
+        };
       }),
-    [workOrders, dateFrom, dateTo, locationId, technicianId, priority]
+    [r, lng]
   );
-
-  const filteredRequests = useMemo(
-    () =>
-      requests.filter((r) => {
-        if (dateFrom || dateTo) {
-          if (!inRange(r.created_at, dateFrom, dateTo)) return false;
-        }
-        if (locationId && r.location_id !== locationId) return false;
-        if (priority !== 'all' && r.priority !== priority) return false;
-        return true;
-      }),
-    [requests, dateFrom, dateTo, locationId, priority]
-  );
-
-  const filteredExpenditures = useMemo(
-    () => expenditures.filter((e) => !(dateFrom || dateTo) || inRange(e.created_at, dateFrom, dateTo)),
-    [expenditures, dateFrom, dateTo]
-  );
-
-  const filteredProcurement = useMemo(
-    () => procurementOrders.filter((p) => !(dateFrom || dateTo) || inRange(p.created_at, dateFrom, dateTo)),
-    [procurementOrders, dateFrom, dateTo]
-  );
-
-  const now = Date.now();
-  const openRequests = filteredRequests.filter(
-    (r) => !['resolved', 'closed', 'rejected'].includes(r.status)
-  ).length;
-  const openWork = filteredWorkOrders.filter((w) => !['resolved', 'closed'].includes(w.status)).length;
-  const overdue = filteredWorkOrders.filter(
-    (w) => w.due_at && new Date(w.due_at).getTime() < now && !['resolved', 'closed'].includes(w.status)
-  ).length;
-
-  const closed = filteredWorkOrders.filter((w) => w.closed_at);
-  const avgResolution =
-    closed.length === 0
-      ? null
-      : Math.round(
-          closed.reduce(
-            (sum, w) =>
-              sum + (new Date(w.closed_at as string).getTime() - new Date(w.created_at).getTime()),
-            0
-          ) /
-            closed.length /
-            3600000
-        );
-
-  const pmDue = schedules.filter(
-    (s) => s.active && s.trigger_type === 'calendar' && s.next_due_at && new Date(s.next_due_at).getTime() <= now
-  ).length;
-
-  // PM compliance: of PM-generated work orders that have been closed, what
-  // share closed at or before their due date. Undefined (—) until at least
-  // one PM work order has been closed, rather than showing a misleading 0%.
-  const pmClosed = filteredWorkOrders.filter((w) => w.pm_schedule_id && w.closed_at);
-  const pmOnTime = pmClosed.filter(
-    (w) => w.due_at && new Date(w.closed_at as string).getTime() <= new Date(w.due_at).getTime()
-  );
-  const pmCompliance = pmClosed.length === 0 ? null : Math.round((pmOnTime.length / pmClosed.length) * 100);
-
-  // Planned vs. reactive: what share of work in scope came from a PM
-  // schedule rather than a one-off request/reactive job.
-  const plannedShare =
-    filteredWorkOrders.length === 0
-      ? null
-      : Math.round((filteredWorkOrders.filter((w) => w.pm_schedule_id).length / filteredWorkOrders.length) * 100);
-
-  const lowStock = parts.filter((p) => p.stock_balance <= p.reorder_level).length;
-  const expiringContracts = contracts.filter((c) => {
-    const d = daysUntil(c.expiry_date);
-    return d !== null && d >= 0 && d <= 30;
-  }).length;
-
-  // Cost: real work-order cost (labor + parts, live-rolled-up) plus manually
-  // recorded expenditures. Both are already-computed figures, not guesses.
-  const totalCost =
-    filteredWorkOrders.reduce((sum, w) => sum + w.cost, 0) + filteredExpenditures.reduce((sum, e) => sum + e.amount, 0);
-  const totalBudget = budgets.reduce((sum, b) => sum + b.amount, 0);
-  const budgetUsedPct = totalBudget === 0 ? null : Math.round((totalCost / totalBudget) * 100);
-
-  // Vendor spend: expenditures + procurement, grouped by vendor, top 5.
-  const vendorSpend = useMemo(() => {
-    const byVendor = new Map<string, number>();
-    for (const e of filteredExpenditures) {
-      if (!e.vendor_id) continue;
-      byVendor.set(e.vendor_id, (byVendor.get(e.vendor_id) ?? 0) + e.amount);
-    }
-    for (const p of filteredProcurement) {
-      if (!p.vendor_id) continue;
-      byVendor.set(p.vendor_id, (byVendor.get(p.vendor_id) ?? 0) + p.amount);
-    }
-    return Array.from(byVendor.entries())
-      .map(([vendorId, amount]) => ({ name: vendors.find((v) => v.id === vendorId)?.name ?? vendorId, amount }))
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 5);
-  }, [filteredExpenditures, filteredProcurement, vendors]);
-
-  // Cost by month, trailing 6 months, independent of the filter bar above so
-  // the trend line doesn't collapse to one bar when a narrow range is picked.
-  const costByMonth = useMemo(() => {
-    const months: { key: string; label: string; amount: number }[] = [];
-    const base = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(base.getFullYear(), base.getMonth() - i, 1);
-      months.push({
-        key: `${d.getFullYear()}-${d.getMonth()}`,
-        label: new Intl.DateTimeFormat(lng === 'vi' ? 'vi-VN' : 'en-US', { month: 'short' }).format(d),
-        amount: 0,
-      });
-    }
-    const bucket = (iso: string, amount: number) => {
-      const d = new Date(iso);
-      const key = `${d.getFullYear()}-${d.getMonth()}`;
-      const m = months.find((x) => x.key === key);
-      if (m) m.amount += amount;
-    };
-    for (const w of workOrders) if (w.closed_at) bucket(w.closed_at, w.cost);
-    for (const e of expenditures) bucket(e.created_at, e.amount);
-    return months;
-  }, [workOrders, expenditures, lng]);
   const maxMonthCost = Math.max(1, ...costByMonth.map((m) => m.amount));
   const maxVendorSpend = Math.max(1, ...vendorSpend.map((v) => v.amount));
 
-  // MTBF (approximate): mean days between consecutive closures of reactive
-  // (non-PM) work orders on the same asset, averaged across assets with at
-  // least two such closures.
-  const mtbfDays = useMemo(() => {
-    const byAsset = new Map<string, number[]>();
-    for (const w of workOrders) {
-      if (!w.asset_id || w.pm_schedule_id || !w.closed_at) continue;
-      const arr = byAsset.get(w.asset_id) ?? [];
-      arr.push(new Date(w.closed_at).getTime());
-      byAsset.set(w.asset_id, arr);
-    }
-    const gaps: number[] = [];
-    for (const times of byAsset.values()) {
-      if (times.length < 2) continue;
-      times.sort((a, b) => a - b);
-      for (let i = 1; i < times.length; i++) gaps.push((times[i] - times[i - 1]) / 86400000);
-    }
-    return gaps.length === 0 ? null : Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length);
-  }, [workOrders]);
-
   const kpis: { key: string; value: string | number }[] = [
-    { key: 'openRequests', value: openRequests },
-    { key: 'openWork', value: openWork },
-    { key: 'overdue', value: overdue },
-    { key: 'avgResolution', value: avgResolution ?? '—' },
-    { key: 'pmDue', value: pmDue },
-    { key: 'pmCompliance', value: pmCompliance !== null ? `${pmCompliance}%` : '—' },
-    { key: 'lowStock', value: lowStock },
-    { key: 'expiringContracts', value: expiringContracts },
+    { key: 'openRequests', value: dash(r?.open_requests) },
+    { key: 'openWork', value: dash(r?.open_work) },
+    { key: 'overdue', value: dash(r?.overdue) },
+    { key: 'avgResolution', value: dash(r?.avg_resolution_hours) },
+    { key: 'pmDue', value: dash(r?.pm_due) },
+    { key: 'pmCompliance', value: dash(r?.pm_compliance, '%') },
+    { key: 'lowStock', value: dash(r?.low_stock) },
+    { key: 'expiringContracts', value: dash(r?.expiring_contracts) },
   ];
 
-  const exportRequests = () =>
-    downloadCsv(
-      'requests.csv',
-      [
-        { key: 'id', label: 'id' },
-        { key: 'title', label: 'title' },
-        { key: 'status', label: 'status' },
-        { key: 'priority', label: 'priority' },
-        { key: 'source_lng', label: 'language' },
-        { key: 'created_at', label: 'created_at' },
-      ],
-      filteredRequests
-    );
+  // Same filters as the figures; date bounds are whole local days.
+  const dayStart = (d: string) => new Date(`${d}T00:00:00`).toISOString();
+  const dayEnd = (d: string) => new Date(`${d}T23:59:59.999`).toISOString();
 
-  const exportWorkOrders = () =>
-    downloadCsv(
-      'work-orders.csv',
-      [
-        { key: 'id', label: 'id' },
-        { key: 'title', label: 'title' },
-        { key: 'status', label: 'status' },
-        { key: 'priority', label: 'priority' },
-        { key: 'due_at', label: 'due_at' },
-        { key: 'closed_at', label: 'closed_at' },
-        { key: 'cost', label: 'cost' },
-      ],
-      filteredWorkOrders
-    );
+  const exportRequests = async () => {
+    setExporting('requests');
+    try {
+      const rows = await fetchAll(() => {
+        let q = supabase
+          .from('fp_requests')
+          .select('id, title, status, priority, source_lng, created_at')
+          .eq('org_id', orgId!)
+          .order('created_at', { ascending: false });
+        if (dateFrom) q = q.gte('created_at', dayStart(dateFrom));
+        if (dateTo) q = q.lte('created_at', dayEnd(dateTo));
+        if (locationId) q = q.eq('location_id', locationId);
+        if (priority !== 'all') q = q.eq('priority', priority);
+        return q;
+      });
+      downloadCsv(
+        'requests.csv',
+        [
+          { key: 'id', label: 'id' },
+          { key: 'title', label: 'title' },
+          { key: 'status', label: 'status' },
+          { key: 'priority', label: 'priority' },
+          { key: 'source_lng', label: 'language' },
+          { key: 'created_at', label: 'created_at' },
+        ],
+        rows as Record<string, unknown>[]
+      );
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const exportWorkOrders = async () => {
+    setExporting('work_orders');
+    try {
+      const rows = await fetchAll(() => {
+        let q = supabase
+          .from('fp_work_orders')
+          .select('id, title, status, priority, due_at, started_at, resolved_at, verified_at, closed_at, cost')
+          .eq('org_id', orgId!)
+          .order('created_at', { ascending: false });
+        if (dateFrom) q = q.gte('created_at', dayStart(dateFrom));
+        if (dateTo) q = q.lte('created_at', dayEnd(dateTo));
+        if (locationId) q = q.eq('location_id', locationId);
+        if (technicianId) q = q.eq('assigned_to', technicianId);
+        if (priority !== 'all') q = q.eq('priority', priority);
+        return q;
+      });
+      downloadCsv(
+        'work-orders.csv',
+        [
+          { key: 'id', label: 'id' },
+          { key: 'title', label: 'title' },
+          { key: 'status', label: 'status' },
+          { key: 'priority', label: 'priority' },
+          { key: 'due_at', label: 'due_at' },
+          { key: 'started_at', label: 'started_at' },
+          { key: 'resolved_at', label: 'resolved_at' },
+          { key: 'verified_at', label: 'verified_at' },
+          { key: 'closed_at', label: 'closed_at' },
+          { key: 'cost', label: 'cost' },
+        ],
+        rows as Record<string, unknown>[]
+      );
+    } finally {
+      setExporting(null);
+    }
+  };
 
   return (
     <div className="max-w-5xl">
@@ -381,10 +295,10 @@ export default function Reports() {
       <section className="mt-6 rounded-xl border border-line bg-white p-4">
         <h2 className="font-semibold text-ink">{t('exports')}</h2>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Button variant="secondary" onClick={exportRequests}>
+          <Button variant="secondary" onClick={() => void exportRequests()} loading={exporting === 'requests'}>
             <Download size={15} /> {t('exportRequests')}
           </Button>
-          <Button variant="secondary" onClick={exportWorkOrders}>
+          <Button variant="secondary" onClick={() => void exportWorkOrders()} loading={exporting === 'work_orders'}>
             <Download size={15} /> {t('exportWorkOrders')}
           </Button>
         </div>

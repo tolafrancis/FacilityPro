@@ -3,29 +3,31 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
-import { ArrowLeft, QrCode, Wrench, ClipboardList, Plus, Gauge } from 'lucide-react';
+import { ArrowLeft, QrCode, Wrench, ClipboardList, Plus, Gauge, Pencil, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { writeOrQueue } from '../lib/sync';
 import { useOrg } from '../contexts/OrgContext';
 import {
   useAsset,
+  useAssetHistory,
   useAssetTypes,
   useDocumentLinks,
   useDocuments,
   useLocations,
   useMeterReadings,
   useMeters,
-  useRequests,
-  useWorkOrders,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDate, formatDateOnly, REQUEST_STATUS_CLASS, WO_STATUS_CLASS } from '../lib/ui';
+import { REQUEST_STATUS_CLASS, WO_STATUS_CLASS, formatDate, formatDateOnly, friendlyError, safeHref } from '../lib/ui';
 import type { Meter } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
 import Select from '../components/ui/Select';
+import NotFound from '../components/NotFound';
+import { publicAppUrl, publicAppUrlConfigured } from '../lib/appUrl';
+import AssetDialog, { type AssetFormValues } from '../components/AssetDialog';
 
 type Tab = 'info' | 'history' | 'meters' | 'documents' | 'qr';
 
@@ -36,17 +38,77 @@ export default function AssetDetail() {
   const lng = i18n.resolvedLanguage ?? 'en';
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('info');
+  const [editing, setEditing] = useState(false);
+  const { isManager, currentOrg } = useOrg();
+  const queryClient = useQueryClient();
 
   const assetQuery = useAsset(id);
   const assetTypes = useAssetTypes();
   const locations = useLocations();
-  const requests = useRequests();
-  const workOrders = useWorkOrders();
+  const history = useAssetHistory(id);
+
+  const invalidateAssets = () => {
+    void queryClient.invalidateQueries({ queryKey: ['asset', id] });
+    void queryClient.invalidateQueries({ queryKey: ['assets', currentOrg?.id] });
+    void queryClient.invalidateQueries({ queryKey: ['assets_page'] });
+  };
+
+  const save = useMutation({
+    meta: { errorHandled: true }, // shown in the dialog
+    mutationFn: async (v: AssetFormValues) => {
+      const { data, error } = await supabase
+        .from('fp_assets')
+        .update({
+          name_i18n: { en: v.en, vi: v.vi || v.en },
+          asset_type_id: v.assetTypeId || null,
+          location_id: v.locationId || null,
+          serial: v.serial || null,
+          manufacturer: v.manufacturer || null,
+          model: v.model || null,
+          warranty_expiry: v.warranty || null,
+          status: v.status,
+        })
+        .eq('id', id!)
+        .select('id');
+      if (error) throw error;
+      if (!data?.length) throw { code: '42501', message: 'permission denied' };
+    },
+    onSuccess: () => {
+      invalidateAssets();
+      setEditing(false);
+    },
+  });
+
+  const remove = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.from('fp_assets').delete().eq('id', id!).select('id');
+      if (error) throw error;
+      if (!data?.length) throw { code: '42501', message: 'permission denied' };
+    },
+    onSuccess: () => {
+      invalidateAssets();
+      navigate('/assets', { replace: true });
+    },
+  });
+
+  const createType = async (name: string): Promise<string | null> => {
+    const nm = name.trim();
+    if (!nm) return null;
+    const { data, error } = await supabase
+      .from('fp_asset_types')
+      .insert({ org_id: currentOrg?.id, name_i18n: { en: nm, vi: nm } })
+      .select('id')
+      .single();
+    if (error) return null;
+    await queryClient.invalidateQueries({ queryKey: ['asset_types', currentOrg?.id] });
+    return data.id as string;
+  };
 
   const asset = assetQuery.data;
-  if (!asset) {
+  if (assetQuery.isLoading) {
     return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
   }
+  if (!asset) return <NotFound backTo="/assets" backLabel={t('title')} />;
 
   const typeName = asset.asset_type_id
     ? resolveI18n(
@@ -57,12 +119,14 @@ export default function AssetDetail() {
   const loc = locations.data?.find((x) => x.id === asset.location_id);
   const locName = loc ? resolveI18n(loc.name_i18n, lng) : '—';
 
-  const assetRequests = (requests.data ?? []).filter((r) => r.asset_id === asset.id);
-  const assetWorkOrders = (workOrders.data ?? []).filter((w) => w.asset_id === asset.id);
+  const assetRequests = history.data?.requests ?? [];
+  const assetWorkOrders = history.data?.workOrders ?? [];
 
-  const reportUrl = `${window.location.origin}/report?org=${asset.org_id}&asset=${asset.id}${
-    asset.location_id ? `&location=${asset.location_id}` : ''
-  }`;
+  // One code for everyone: staff land on the asset, others on the report
+  // form (see AssetScan). Uses the configured public address.
+  const qrUrl = asset.qr_code
+    ? `${publicAppUrl()}/a/${asset.qr_code}`
+    : `${publicAppUrl()}/report?org=${asset.org_id}&asset=${asset.id}${asset.location_id ? `&location=${asset.location_id}` : ''}`;
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'info', label: t('detail.info') },
@@ -84,7 +148,33 @@ export default function AssetDetail() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-ink">{resolveI18n(asset.name_i18n, lng)}</h1>
-          <p className="mt-1 text-sm text-ink-muted">{typeName}</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            {typeName}
+            {asset.status !== 'active' && (
+              <Pill className="ml-2 bg-surface text-ink-muted">{t(`status.${asset.status}`)}</Pill>
+            )}
+          </p>
+          {isManager && (
+            <div className="mt-2 flex gap-3 text-sm">
+              <button type="button" onClick={() => setEditing(true)} className="inline-flex items-center gap-1 font-medium text-brand hover:text-brand-600">
+                <Pencil size={14} /> {t('actions.edit')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm(t('actions.deleteConfirm'))) remove.mutate();
+                }}
+                className="inline-flex items-center gap-1 font-medium text-ink-muted hover:text-status-crit"
+              >
+                <Trash2 size={14} /> {t('actions.delete')}
+              </button>
+            </div>
+          )}
+          {remove.error && (
+            <p role="alert" className="mt-2 text-sm text-status-crit">
+              {friendlyError(remove.error as { code?: string; message?: string }, tc)}
+            </p>
+          )}
         </div>
         <Button
           onClick={() =>
@@ -114,6 +204,23 @@ export default function AssetDetail() {
           </button>
         ))}
       </div>
+
+      {editing && (
+        <AssetDialog
+          initial={asset}
+          locations={locations.data ?? []}
+          assetTypeOptions={(assetTypes.data ?? []).map((at) => ({ id: at.id, label: resolveI18n(at.name_i18n, lng) }))}
+          locationLabel={(l) => resolveI18n(l.name_i18n, lng)}
+          onCreateType={createType}
+          busy={save.isPending}
+          error={save.error ? friendlyError(save.error as { code?: string; message?: string }, tc) : null}
+          onCancel={() => {
+            save.reset();
+            setEditing(false);
+          }}
+          onSubmit={(v) => save.mutate(v)}
+        />
+      )}
 
       {tab === 'info' && (
         <dl className="mt-5 grid grid-cols-2 gap-4 text-sm">
@@ -165,9 +272,13 @@ export default function AssetDetail() {
       {tab === 'qr' && (
         <div className="mt-5 rounded-xl border border-line bg-white p-6 text-center">
           <div className="inline-block rounded-lg border border-line p-4">
-            <QRCodeSVG value={reportUrl} size={180} />
+            <QRCodeSVG value={qrUrl} size={180} />
           </div>
           <p className="mx-auto mt-3 max-w-sm text-sm text-ink-muted">{t('detail.qrHint')}</p>
+          <p className="mx-auto mt-1 max-w-sm break-all text-xs text-ink-muted">{qrUrl}</p>
+          {!publicAppUrlConfigured() && (
+            <p className="mx-auto mt-2 max-w-sm text-xs text-status-warn">{t('detail.qrUrlWarning')}</p>
+          )}
           <Button variant="secondary" className="mt-4" onClick={() => window.print()}>
             <QrCode size={16} /> {tc('actions.printQr')}
           </Button>
@@ -190,7 +301,7 @@ function MetersTab({ assetId }: { assetId: string }) {
   const { t, i18n } = useTranslation('assets');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
-  const { currentOrg } = useOrg();
+  const { currentOrg, isManager } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
   const metersQuery = useMeters(assetId);
@@ -218,13 +329,15 @@ function MetersTab({ assetId }: { assetId: string }) {
     <div className="mt-5">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-ink">{t('meters.tab')}</p>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600"
-        >
-          <Plus size={15} /> {t('meters.add')}
-        </button>
+        {isManager && (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600"
+          >
+            <Plus size={15} /> {t('meters.add')}
+          </button>
+        )}
       </div>
 
       {meters.length === 0 ? (
@@ -253,6 +366,9 @@ function MetersTab({ assetId }: { assetId: string }) {
 }
 
 function MeterRow({ meter, orgId, lng }: { meter: Meter; orgId: string; lng: string }) {
+  // Readings can create PM work orders, so only staff record them (0071).
+  const { role } = useOrg();
+  const canLog = role === 'org_admin' || role === 'manager' || role === 'technician';
   const { t } = useTranslation('assets');
   const queryClient = useQueryClient();
   const readingsQuery = useMeterReadings(meter.id);
@@ -290,6 +406,7 @@ function MeterRow({ meter, orgId, lng }: { meter: Meter; orgId: string; lng: str
             : t('meters.noReadings')}
         </span>
       </div>
+      {canLog && (
       <div className="mt-2 flex items-end gap-2">
         <Input
           type="number"
@@ -307,6 +424,7 @@ function MeterRow({ meter, orgId, lng }: { meter: Meter; orgId: string; lng: str
           {t('meters.logReading')}
         </button>
       </div>
+      )}
     </div>
   );
 }
@@ -365,7 +483,7 @@ function MeterDialog({
 
 function DocumentsTab({ assetId }: { assetId: string }) {
   const { t } = useTranslation('assets');
-  const { currentOrg } = useOrg();
+  const { currentOrg, isManager } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
   const linksQuery = useDocumentLinks('asset', assetId);
@@ -406,8 +524,8 @@ function DocumentsTab({ assetId }: { assetId: string }) {
           <div key={doc.id} className="rounded-lg border border-line bg-white px-3 py-2">
             <p className="text-sm font-medium text-ink">{doc.title}</p>
             <p className="text-xs text-ink-muted">{doc.category} · {doc.owner}</p>
-            {doc.link && (
-              <a href={doc.link} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs font-medium text-brand hover:text-brand-600">
+            {doc.link && /^https?:\/\//i.test(doc.link) && (
+              <a href={safeHref(doc.link)} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs font-medium text-brand hover:text-brand-600">
                 {t('documents.open')}
               </a>
             )}
@@ -415,7 +533,7 @@ function DocumentsTab({ assetId }: { assetId: string }) {
         ))
       )}
 
-      {attachable.length > 0 && (
+      {isManager && attachable.length > 0 && (
         <div className="flex items-end gap-2">
           <div className="flex-1">
             <label className="mb-1 block text-xs text-ink-muted">{t('documents.attach')}</label>

@@ -9,6 +9,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
+import Turnstile, { captchaEnabled } from '../components/Turnstile';
 
 const SEVERITIES: Priority[] = ['low', 'medium', 'high', 'critical'];
 
@@ -37,6 +38,9 @@ export default function PublicReport() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [reference, setReference] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   useEffect(() => {
     if (!org) {
@@ -63,26 +67,67 @@ export default function PublicReport() {
     };
   }, [org, asset, location]);
 
+  // Known server refusals, shown in the reporter's language.
+  const errorText = (code: string) =>
+    ['rate_limited', 'report_too_long', 'report_invalid_asset', 'report_invalid_location', 'captcha_failed'].includes(code)
+      ? t(`errors.${code}`)
+      : t('errors.generic');
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !org) return;
-    setBusy(true);
-    setError(null);
-    const { error: err } = await supabase.rpc('fp_public_report', {
-      p_org: org,
-      p_title: title.trim(),
-      p_body: description.trim() || null,
-      p_severity: severity,
-      p_lng: lng,
-      p_asset: asset,
-      p_location: location,
-      p_reporter: reporter.trim() || null,
-    });
-    setBusy(false);
-    if (err) {
-      setError(err.message);
+    if (captchaEnabled && !captchaToken) {
+      setError(t('errors.captcha_required'));
       return;
     }
+    setBusy(true);
+    setError(null);
+    const fields = {
+      org,
+      title: title.trim(),
+      body: description.trim() || null,
+      severity,
+      lng,
+      asset,
+      location,
+      reporter: reporter.trim() || null,
+    };
+    let id: string | null = null;
+    let code: string | null = null;
+    if (captchaEnabled) {
+      // Verified server-side by the public-report Edge Function.
+      const { data, error: err } = await supabase.functions.invoke('public-report', {
+        body: { ...fields, captchaToken },
+      });
+      if (err) {
+        const payload = await (err as { context?: Response }).context?.json?.().catch(() => null);
+        code = (payload as { error?: string } | null)?.error ?? 'generic';
+      } else {
+        id = (data as { id?: string } | null)?.id ?? null;
+      }
+      // Turnstile tokens are single-use.
+      setCaptchaToken(null);
+      setCaptchaKey((k) => k + 1);
+    } else {
+      const { data, error: err } = await supabase.rpc('fp_public_report', {
+        p_org: fields.org,
+        p_title: fields.title,
+        p_body: fields.body,
+        p_severity: fields.severity,
+        p_lng: fields.lng,
+        p_asset: fields.asset,
+        p_location: fields.location,
+        p_reporter: fields.reporter,
+      });
+      if (err) code = err.message.split(/[\s:]/)[0];
+      else id = data as string;
+    }
+    setBusy(false);
+    if (code) {
+      setError(errorText(code));
+      return;
+    }
+    setReference(id ? id.slice(0, 8).toUpperCase() : null);
     setDone(true);
   };
 
@@ -110,6 +155,11 @@ export default function PublicReport() {
             <CheckCircle2 className="mx-auto text-status-ok" aria-hidden />
             <h1 className="mt-3 text-lg font-semibold text-ink">{t('thanksTitle')}</h1>
             <p className="mt-1 text-sm text-ink-muted">{t('thanksBody')}</p>
+            {reference && (
+              <p className="mt-3 text-sm text-ink">
+                {t('reference')}: <span className="font-mono font-semibold">{reference}</span>
+              </p>
+            )}
           </div>
         ) : (
           <form onSubmit={submit} className="mt-6 rounded-xl border border-line bg-white p-5">
@@ -125,7 +175,7 @@ export default function PublicReport() {
             <div className="mt-4 space-y-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-ink">{t('what')}</label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('whatPlaceholder')} />
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('whatPlaceholder')} maxLength={200} />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-ink">{t('details')}</label>
@@ -133,6 +183,7 @@ export default function PublicReport() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
+                  maxLength={4000}
                   className="w-full rounded-lg border border-line px-3 py-2 text-sm"
                   placeholder={t('detailsPlaceholder')}
                 />
@@ -149,9 +200,10 @@ export default function PublicReport() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-ink">{t('reporter')}</label>
-                <Input value={reporter} onChange={(e) => setReporter(e.target.value)} placeholder={t('reporterPlaceholder')} />
+                <Input value={reporter} onChange={(e) => setReporter(e.target.value)} placeholder={t('reporterPlaceholder')} maxLength={200} />
               </div>
-              {error && <p className="text-sm text-status-crit">{error}</p>}
+              <Turnstile key={captchaKey} onToken={setCaptchaToken} />
+              {error && <p role="alert" className="text-sm text-status-crit">{error}</p>}
               <Button type="submit" loading={busy} disabled={!title.trim()} className="w-full justify-center">
                 {t('submit')}
               </Button>

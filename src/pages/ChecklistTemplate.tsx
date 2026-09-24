@@ -11,10 +11,12 @@ import type { ChecklistItemType } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
+import NotFound from '../components/NotFound';
 
 const ITEM_TYPES: ChecklistItemType[] = ['pass_fail', 'value', 'photo', 'text'];
 
 export default function ChecklistTemplate() {
+  const { isManager } = useOrg();
   const { id } = useParams<{ id: string }>();
   const { t, i18n } = useTranslation('checklists');
   const { t: tc } = useTranslation('common');
@@ -69,6 +71,9 @@ export default function ChecklistTemplate() {
     addItem.mutate();
   };
 
+  if (tplQuery.isLoading) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
+  if (!tplQuery.data) return <NotFound backTo="/checklists" />;
+
   return (
     <div className="max-w-2xl">
       <button
@@ -110,6 +115,7 @@ export default function ChecklistTemplate() {
         {items.length === 0 && <li className="text-sm text-ink-muted">{t('noItems')}</li>}
       </ul>
 
+      {isManager && (
       <form onSubmit={submit} className="mt-5 rounded-xl border border-line bg-white p-4">
         <p className="text-sm font-medium text-ink">{t('addItem')}</p>
         <div className="mt-3 space-y-3">
@@ -149,6 +155,7 @@ export default function ChecklistTemplate() {
           </Button>
         </div>
       </form>
+      )}
     </div>
   );
 }

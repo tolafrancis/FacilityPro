@@ -12,9 +12,7 @@
   "choose": "Subscribe via PayPal",
   "current": "Current plan",
   "linkMissing": "Payment link not set",
-  "markActive": "Mark active",
   "cancel": "Cancel plan",
-  "pendingNote": "After paying in PayPal, mark this plan active.",
   "editPlan": "Edit plan",
   "limitsUnlimited": "Unlimited",
   "statusLabels": {
@@ -37,5 +35,34 @@
     "limitHint": "Leave a limit blank for unlimited.",
     "paymentUrl": "PayPal payment link",
     "paymentHint": "Paste your PayPal payment or subscription link. The Subscribe button opens it."
-  }
+  },
+  "requestedNote": "You requested {{plan}}. It becomes active once we confirm your payment.",
+  "cancelRequestedNote": "Cancellation requested. We will confirm it shortly.",
+  "platform": {
+    "title": "Subscription requests (platform)",
+    "hint": "Activate a plan only after you have confirmed the payment in PayPal.",
+    "empty": "No pending requests.",
+    "activate": "Activate",
+    "confirmCancel": "Confirm cancellation",
+    "cancelRequested": "cancellation requested"
+  },
+  "jobs": {
+    "title": "Background jobs (platform)",
+    "hint": "Scheduled work: PM generation, SLA escalation, reminders, workflows and message delivery, plus delivery and workflow error checks. Platform admins are emailed when something is late or failing.",
+    "lastOk": "Last success",
+    "state": {
+      "ok": "Healthy",
+      "late": "Late",
+      "failing": "Failing",
+      "never": "Never run",
+      "attention": "Needs attention"
+    },
+    "checks": {
+      "outbox_failed": "Email/SMS/push delivery",
+      "outbox_backlog": "Message queue",
+      "workflow_failures": "Automation workflows"
+    }
+  },
+  "trialEnds": "Trial ends",
+  "trialEnded": "Your trial has ended: the Free plan's limits apply until you upgrade."
 }

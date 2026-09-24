@@ -25,9 +25,9 @@ import {
   useTechnicianProfile,
   useTechnicianProfiles,
 } from '../lib/queries';
-import { uploadMedia, signedUrl } from '../lib/media';
+import { prepareUpload, signedUrl, UploadRejected } from '../lib/media';
 import { writeOrQueue } from '../lib/sync';
-import { formatDate, PRIORITY_CLASS, WO_STATUS_CLASS, WO_STATUSES } from '../lib/ui';
+import { formatDate, formatMoney, friendlyError, nextWoStatuses, PRIORITY_CLASS, WO_DONE_STATUSES, WO_STATUS_CLASS } from '../lib/ui';
 import { resolveI18n } from '../i18n/resolver';
 import type {
   Media,
@@ -39,6 +39,7 @@ import { FAILURE_CODES, COMPLETION_CODES } from '../lib/database.types';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
 import ChecklistRunner from '../components/ChecklistRunner';
+import NotFound from '../components/NotFound';
 
 export default function WorkOrderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -51,7 +52,7 @@ export default function WorkOrderDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { currentOrg, role } = useOrg();
+  const { currentOrg, role, currency } = useOrg();
   const orgId = currentOrg?.id;
 
   const woQuery = useWorkOrder(id);
@@ -88,6 +89,7 @@ export default function WorkOrderDetail() {
 
   const wo = woQuery.data;
   const [uploadingPhase, setUploadingPhase] = useState<'before' | 'after' | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [partId, setPartId] = useState('');
   const [qty, setQty] = useState('1');
   const [minutes, setMinutes] = useState('');
@@ -154,6 +156,7 @@ export default function WorkOrderDetail() {
     mutationFn: async (
       changes: Partial<{
         status: WorkOrderStatus;
+        hold_reason: string | null;
         assigned_to: string | null;
         checklist_template_id: string | null;
         failure_code: FailureCode | null;
@@ -163,33 +166,95 @@ export default function WorkOrderDetail() {
         vendor_id: string | null;
       }>
     ) => {
-      const payload: Record<string, unknown> = { ...changes };
-      if (changes.status === 'closed' || changes.status === 'resolved') {
-        payload.closed_at = new Date().toISOString();
-      }
+      // Lifecycle timestamps (started/resolved/verified/closed) are stamped by
+      // the database; the client only sends the change itself.
+      // expectVersion: if someone else saved this work order since it was
+      // loaded, the change is refused instead of silently overwriting theirs.
       await writeOrQueue({
         op: 'update',
         table: 'fp_work_orders',
-        values: payload,
+        values: changes,
         matchColumn: 'id',
         matchValue: id!,
+        expectVersion: woQuery.data?.version,
+        label: woQuery.data?.title ?? undefined,
       });
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['work_order', id] });
       void queryClient.invalidateQueries({ queryKey: ['work_orders', orgId] });
+      void queryClient.invalidateQueries({ queryKey: ['work_orders_page'] });
+      void queryClient.invalidateQueries({ queryKey: ['my_work_orders'] });
     },
+    // A rejected change (e.g. a missing completion code) leaves the screen
+    // showing the old value; refetch so selects snap back.
+    onError: () => void queryClient.invalidateQueries({ queryKey: ['work_order', id] }),
   });
 
   const onUpload = async (phase: 'before' | 'after', file: File | null) => {
     if (!file || !orgId || !id) return;
     setUploadingPhase(phase);
-    await uploadMedia({ orgId, file, workOrderId: id, phase });
-    await queryClient.invalidateQueries({ queryKey: ['media', id] });
-    setUploadingPhase(null);
+    setUploadError(null);
+    try {
+      // Photos are downscaled first; storage refuses files over 25 MB or of
+      // unexpected types, and uploads from anyone but the assignee or a
+      // manager (0062). Offline, the photo waits in the queue.
+      const prepared = await prepareUpload(file);
+      const { queued } = await writeOrQueue({
+        op: 'upload',
+        table: 'fp_media',
+        values: { orgId, workOrderId: id, phase },
+        file: prepared,
+        fileName: prepared.name,
+        label: prepared.name,
+      });
+      if (queued) setUploadError(t('uploadQueued'));
+      await queryClient.invalidateQueries({ queryKey: ['media', id] });
+    } catch (e) {
+      setUploadError(
+        e instanceof UploadRejected
+          ? t(`uploadRejected.${e.reason}`)
+          : friendlyError(e as { code?: string; message?: string }, tc)
+      );
+    } finally {
+      setUploadingPhase(null);
+    }
   };
 
-  if (!wo) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
+  if (woQuery.isLoading) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
+  if (!wo) return <NotFound backTo="/work-orders" backLabel={t('title')} />;
+
+  const isManager = role === 'org_admin' || role === 'manager';
+  const isAssignee = !!user && wo.assigned_to === user.id;
+  // Managers run the job; the assignee records progress on it. The database
+  // enforces the same rule (fp_wo_lifecycle), this just hides dead controls.
+  const canWork = isManager || isAssignee;
+  const nextStatuses = canWork ? nextWoStatuses(wo.status, isManager) : [];
+  const workStarted = !['open', 'assigned'].includes(wo.status);
+
+  const changeStatus = (next: WorkOrderStatus) => {
+    if (next === 'on_hold') {
+      const reason = window.prompt(t('lifecycle.holdReasonPrompt'));
+      if (reason === null) return;
+      patch.mutate({ status: next, hold_reason: reason.trim() || null });
+      return;
+    }
+    patch.mutate({ status: next });
+  };
+
+  const lifecycleError = (() => {
+    if (!patch.error) return null;
+    const msg = (patch.error as Error).message;
+    const code = msg.split(/[\s:]/)[0];
+    const known = [
+      'wo_invalid_transition',
+      'wo_assignee_required',
+      'wo_completion_code_required',
+      'wo_checklist_incomplete',
+      'wo_field_not_allowed',
+    ];
+    return known.includes(code) ? t(`lifecycle.errors.${code}`) : friendlyError(patch.error as { code?: string; message?: string }, tc);
+  })();
 
   const media = mediaQuery.data ?? [];
   const before = media.filter((m) => m.phase === 'before');
@@ -221,16 +286,35 @@ export default function WorkOrderDetail() {
         </div>
         <Select
           value={wo.status}
-          onChange={(e) => patch.mutate({ status: e.target.value as WorkOrderStatus })}
+          onChange={(e) => changeStatus(e.target.value as WorkOrderStatus)}
+          disabled={nextStatuses.length === 0 || patch.isPending}
+          aria-label={t('detail.status')}
           className="w-auto"
         >
-          {WO_STATUSES.map((s) => (
+          <option value={wo.status}>{tc(`woStatus.${wo.status}`)}</option>
+          {nextStatuses.map((s) => (
             <option key={s} value={s}>
-              {tc(`woStatus.${s}`)}
+              {s === 'in_progress' && WO_DONE_STATUSES.includes(wo.status)
+                ? t('lifecycle.reopen')
+                : `→ ${tc(`woStatus.${s}`)}`}
             </option>
           ))}
         </Select>
       </div>
+
+      {lifecycleError && (
+        <p role="alert" className="mt-3 rounded-lg bg-status-crit/10 px-3 py-2 text-sm text-status-crit">
+          {lifecycleError}
+        </p>
+      )}
+      {wo.status === 'open' && isManager && (
+        <p className="mt-3 text-xs text-ink-muted">{t('lifecycle.assignToStart')}</p>
+      )}
+      {wo.status === 'on_hold' && wo.hold_reason && (
+        <p className="mt-3 rounded-lg bg-surface px-3 py-2 text-sm text-ink">
+          {t('lifecycle.onHoldBecause')}: {wo.hold_reason}
+        </p>
+      )}
 
       <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
         <div className="rounded-lg border border-line bg-white px-3 py-2">
@@ -245,6 +329,7 @@ export default function WorkOrderDetail() {
             <Select
               value={wo.assigned_to ?? ''}
               onChange={(e) => patch.mutate({ assigned_to: e.target.value || null })}
+              disabled={!isManager}
               className="mt-0.5 w-full"
             >
               <option value="">{tc('common.unassigned')}</option>
@@ -266,6 +351,7 @@ export default function WorkOrderDetail() {
             <Select
               value={wo.vendor_id ?? ''}
               onChange={(e) => patch.mutate({ vendor_id: e.target.value || null })}
+              disabled={!isManager}
               className="mt-0.5 w-full"
             >
               <option value="">{t('detail.noVendor')}</option>
@@ -304,10 +390,7 @@ export default function WorkOrderDetail() {
         <div className="rounded-lg border border-line bg-white px-3 py-2">
           <dt className="text-xs text-ink-muted">{t('detail.cost')}</dt>
           <dd className="mt-0.5 text-ink tabular-nums">
-            {new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-US', {
-              style: 'currency',
-              currency: 'USD',
-            }).format(wo.cost)}
+            {formatMoney(wo.cost, currency, lng)}
           </dd>
         </div>
         {canSeeFinancials && (
@@ -329,6 +412,29 @@ export default function WorkOrderDetail() {
           </div>
         )}
       </dl>
+
+      {(wo.started_at || wo.resolved_at || wo.reopened_count > 0) && (
+        <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 rounded-lg border border-line bg-white px-3 py-2 text-xs sm:grid-cols-4">
+          {(
+            [
+              ['started', wo.started_at],
+              ['resolved', wo.resolved_at],
+              ['verified', wo.verified_at],
+              ['closed', wo.closed_at],
+            ] as const
+          ).map(([key, at]) => (
+            <div key={key}>
+              <dt className="text-ink-muted">{t(`lifecycle.${key}`)}</dt>
+              <dd className="text-ink">{at ? formatDate(at, lng) : '—'}</dd>
+            </div>
+          ))}
+          {wo.reopened_count > 0 && (
+            <div className="col-span-2 sm:col-span-4">
+              <dd className="text-status-warn">{t('lifecycle.reopenedCount', { count: wo.reopened_count })}</dd>
+            </div>
+          )}
+        </dl>
+      )}
 
       {wo.vendor_id && canSeeFinancials && (() => {
         const activeContracts = (contractsQuery.data ?? []).filter((c) => c.vendor_id === wo.vendor_id);
@@ -355,14 +461,16 @@ export default function WorkOrderDetail() {
         </div>
       )}
 
-      {(wo.status === 'resolved' || wo.status === 'closed') && (
+      {workStarted && (
         <div className="mt-4 rounded-xl border border-line bg-white p-4">
           <p className="text-sm font-medium text-ink">{t('detail.closingDetails')}</p>
+          <p className="mt-0.5 text-xs text-ink-muted">{t('lifecycle.closingHint')}</p>
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-xs text-ink-muted">{t('detail.failureCode')}</label>
               <Select
                 value={wo.failure_code ?? ''}
+                disabled={!canWork}
                 onChange={(e) =>
                   patch.mutate({ failure_code: (e.target.value || null) as FailureCode | null })
                 }
@@ -379,6 +487,7 @@ export default function WorkOrderDetail() {
               <label className="mb-1 block text-xs text-ink-muted">{t('detail.completionCode')}</label>
               <Select
                 value={wo.completion_code ?? ''}
+                disabled={!canWork}
                 onChange={(e) =>
                   patch.mutate({ completion_code: (e.target.value || null) as CompletionCode | null })
                 }
@@ -397,6 +506,7 @@ export default function WorkOrderDetail() {
                 type="number"
                 min={0}
                 defaultValue={wo.downtime_minutes ?? ''}
+                disabled={!canWork}
                 onBlur={(e) =>
                   patch.mutate({
                     downtime_minutes: e.target.value === '' ? null : Math.max(0, parseInt(e.target.value, 10) || 0),
@@ -431,7 +541,8 @@ export default function WorkOrderDetail() {
                 <p className="mt-1 text-xs text-ink-muted">{ta('woNone')}</p>
               )}
             </div>
-            {!hasPending && (
+            {/* Only the assignee or a manager can ask for approval (0071). */}
+            {!hasPending && canWork && (
               <button
                 type="button"
                 onClick={() => requestApproval.mutate()}
@@ -558,10 +669,7 @@ export default function WorkOrderDetail() {
                   {who} · {entry.minutes} {tc('common.minutesShort')}
                 </span>
                 <span className="text-ink-muted tabular-nums">
-                  {new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                  }).format(entryCost)}
+                  {formatMoney(entryCost, currency, lng)}
                 </span>
               </li>
             );
@@ -581,17 +689,21 @@ export default function WorkOrderDetail() {
               className="w-full rounded-lg border border-line px-3 py-2 text-sm"
             />
           </div>
-          <div className="w-28">
-            <label className="mb-1 block text-xs text-ink-muted">{t('labor.rate')}</label>
-            <input
-              type="number"
-              min={0}
-              step="0.01"
-              value={rate}
-              onChange={(e) => setRate(e.target.value)}
-              className="w-full rounded-lg border border-line px-3 py-2 text-sm"
-            />
-          </div>
+          {/* Technicians are billed at their profile rate (set server-side,
+              0070); only admins/managers can enter a different rate. */}
+          {isManager && (
+            <div className="w-28">
+              <label className="mb-1 block text-xs text-ink-muted">{t('labor.rate')}</label>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm"
+              />
+            </div>
+          )}
           <button
             type="button"
             disabled={!minutes || logLabor.isPending}
@@ -612,6 +724,7 @@ export default function WorkOrderDetail() {
             addLabel={t('detail.addBefore')}
             uploading={uploadingPhase === 'before'}
             uploadingLabel={t('detail.uploading')}
+            canUpload={canWork}
             onPick={(f) => onUpload('before', f)}
           />
           <MediaColumn
@@ -620,9 +733,15 @@ export default function WorkOrderDetail() {
             addLabel={t('detail.addAfter')}
             uploading={uploadingPhase === 'after'}
             uploadingLabel={t('detail.uploading')}
+            canUpload={canWork}
             onPick={(f) => onUpload('after', f)}
           />
         </div>
+        {uploadError && (
+          <p role="alert" className="mt-2 text-sm text-status-crit">
+            {uploadError}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -634,6 +753,7 @@ function MediaColumn({
   addLabel,
   uploading,
   uploadingLabel,
+  canUpload,
   onPick,
 }: {
   label: string;
@@ -641,6 +761,8 @@ function MediaColumn({
   addLabel: string;
   uploading: boolean;
   uploadingLabel: string;
+  /** Only the assignee and managers may add evidence. */
+  canUpload: boolean;
   onPick: (file: File | null) => void;
 }) {
   return (
@@ -651,15 +773,21 @@ function MediaColumn({
           <MediaThumb key={m.id} item={m} />
         ))}
       </div>
-      <label className="mt-2 block cursor-pointer text-center text-xs font-medium text-brand hover:text-brand-600">
-        {uploading ? uploadingLabel : `+ ${addLabel}`}
-        <input
-          type="file"
-          accept="image/*,video/*"
-          className="hidden"
-          onChange={(e) => onPick(e.target.files?.[0] ?? null)}
-        />
-      </label>
+      {canUpload && (
+        <label className="mt-2 block cursor-pointer text-center text-xs font-medium text-brand hover:text-brand-600">
+          {uploading ? uploadingLabel : `+ ${addLabel}`}
+          <input
+            type="file"
+            accept="image/*,video/*"
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => {
+              onPick(e.target.files?.[0] ?? null);
+              e.target.value = '';
+            }}
+          />
+        </label>
+      )}
     </div>
   );
 }

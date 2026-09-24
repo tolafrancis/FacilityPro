@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '../lib/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Armchair, Trash2, Pencil, CalendarPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -20,6 +21,7 @@ interface DeskDraft {
 }
 
 export default function Desks() {
+  const { isManager } = useOrg();
   const { t: tc } = useTranslation('common');
   const { i18n } = useTranslation();
   const lng = i18n.resolvedLanguage ?? 'en';
@@ -83,9 +85,11 @@ export default function Desks() {
             Bookable desks grouped by zone. A new booking can trigger the &ldquo;Alert when Desk Booking Is Made&rdquo; workflow.
           </p>
         </div>
-        <Button onClick={() => setDialog({ mode: 'create' })}>
-          <Plus size={16} /> New desk
-        </Button>
+        {isManager && (
+          <Button onClick={() => setDialog({ mode: 'create' })}>
+            <Plus size={16} /> New desk
+          </Button>
+        )}
       </div>
 
       {deskRows.length === 0 ? (
@@ -102,6 +106,7 @@ export default function Desks() {
                 {resolveI18n(d.name_i18n, lng)}
                 <span className="text-xs font-normal text-ink-muted">Zone: {zoneName(d.zone_id)}</span>
               </span>
+              {isManager && (
               <span className="flex items-center gap-3">
                 <button type="button" onClick={() => setDialog({ mode: 'edit', desk: d })} className="text-ink-muted hover:text-brand" aria-label={tc('actions.edit')}>
                   <Pencil size={15} />
@@ -110,6 +115,7 @@ export default function Desks() {
                   <Trash2 size={15} />
                 </button>
               </span>
+              )}
             </li>
           ))}
         </ul>
@@ -132,7 +138,7 @@ export default function Desks() {
                   {deskName(b.desk_id)}
                   <span className="text-ink-muted"> · {b.booker_name || 'Someone'}{b.booked_for ? ` · ${b.booked_for}` : ''}</span>
                 </span>
-                <span className="text-xs text-ink-muted">{new Date(b.created_at).toLocaleString()}</span>
+                <span className="text-xs text-ink-muted">{formatDate(b.created_at, lng)}</span>
               </li>
             ))}
           </ul>

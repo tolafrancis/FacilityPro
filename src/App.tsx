@@ -5,6 +5,8 @@ import { useAuth } from './contexts/AuthContext';
 import { useOrg } from './contexts/OrgContext';
 import AppShell from './components/AppShell';
 import RequireRole from './components/RequireRole';
+import NotFound from './components/NotFound';
+import { rememberInvite } from './lib/redirect';
 
 // Every page is its own chunk, fetched on first visit rather than bundled
 // into the initial load — the whole app (Financial, Devices, Workflows and
@@ -14,6 +16,7 @@ const SignIn = lazy(() => import('./pages/SignIn'));
 const SignUp = lazy(() => import('./pages/SignUp'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
+const AssetScan = lazy(() => import('./pages/AssetScan'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Locations = lazy(() => import('./pages/Locations'));
 const Assets = lazy(() => import('./pages/Assets'));
@@ -58,9 +61,35 @@ function FullPageLoader() {
   );
 }
 
+function OrgLoadError({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="grid min-h-screen place-items-center px-4">
+      <div className="max-w-sm text-center">
+        <p className="text-sm text-ink">{t('errors.generic')}</p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-600"
+        >
+          {t('actions.retry')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// An invite opened while signed out: remember the token (it must survive
+// sign-up and email confirmation), then sign in or sign up.
+function InviteSignedOut({ next }: { next: string }) {
+  const location = useLocation();
+  rememberInvite(new URLSearchParams(location.search).get('token'));
+  return <Navigate to={`/signin?next=${next}`} replace />;
+}
+
 export default function App() {
   const { session, loading: authLoading } = useAuth();
-  const { memberships, loading: orgLoading } = useOrg();
+  const { memberships, loading: orgLoading, error: orgError, refresh: refreshOrgs } = useOrg();
   const location = useLocation();
 
   if (authLoading) return <FullPageLoader />;
@@ -72,9 +101,10 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/report" element={<PublicReport />} />
+          <Route path="/a/:code" element={<AssetScan />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/invite" element={<Navigate to={`/signin?next=${next}`} replace />} />
+          <Route path="/invite" element={<InviteSignedOut next={next} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
@@ -83,6 +113,10 @@ export default function App() {
 
   if (orgLoading) return <FullPageLoader />;
 
+  // Don't treat a failed load as "no organisation": that would send an existing
+  // member to onboarding, where they could create a duplicate org.
+  if (orgError) return <OrgLoadError onRetry={() => void refreshOrgs()} />;
+
   const hasOrg = memberships.length > 0;
 
   return (
@@ -90,6 +124,7 @@ export default function App() {
       <Routes>
         <Route path="/invite" element={<AcceptInvite />} />
         <Route path="/report" element={<PublicReport />} />
+        <Route path="/a/:code" element={<AssetScan />} />
         {!hasOrg ? (
           <>
             <Route path="/onboarding" element={<Onboarding />} />
@@ -106,37 +141,39 @@ export default function App() {
               <Route path="/requests/:id" element={<RequestDetail />} />
               <Route path="/work-orders" element={<WorkOrders />} />
               <Route path="/work-orders/:id" element={<WorkOrderDetail />} />
-              <Route path="/approvals" element={<Approvals />} />
-              <Route path="/inbox" element={<Inbox />} />
+              <Route element={<RequireRole allow={['org_admin', 'manager', 'technician']} />}>
+                <Route path="/inbox" element={<Inbox />} />
+              </Route>
               <Route path="/assets" element={<Assets />} />
               <Route path="/assets/:id" element={<AssetDetail />} />
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/checklists" element={<Checklists />} />
-              <Route path="/workflows" element={<Workflows />} />
-              <Route path="/surveys" element={<Surveys />} />
               <Route path="/desks" element={<Desks />} />
               <Route path="/facilities" element={<Facilities />} />
               <Route path="/checklists/:id" element={<ChecklistTemplate />} />
               <Route path="/parts" element={<Parts />} />
               <Route path="/vendors" element={<Vendors />} />
-              <Route element={<RequireRole allow={['org_admin', 'manager']} />}>
-                <Route path="/devices" element={<Devices />} />
-                <Route path="/devices/:id" element={<DeviceDetail />} />
-              </Route>
-              <Route path="/reports" element={<Reports />} />
               <Route path="/locations" element={<Locations />} />
               <Route path="/security" element={<Security />} />
-              <Route path="/billing" element={<Billing />} />
-              <Route path="/settings" element={<Settings />} />
               <Route path="/documents" element={<Documents />} />
               <Route path="/permits" element={<Permits />} />
               <Route path="/attendance" element={<Attendance />} />
               <Route path="/smart-assistant" element={<SmartAssistant />} />
               <Route path="/tenant-experience" element={<TenantExperience />} />
+              {/* Admin/manager pages: their data and writes are limited to these
+                  roles by RLS, so other roles would only see controls that fail. */}
               <Route element={<RequireRole allow={['org_admin', 'manager']} />}>
+                <Route path="/approvals" element={<Approvals />} />
+                <Route path="/workflows" element={<Workflows />} />
+                <Route path="/surveys" element={<Surveys />} />
+                <Route path="/devices" element={<Devices />} />
+                <Route path="/devices/:id" element={<DeviceDetail />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/billing" element={<Billing />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="/financial" element={<Financial />} />
               </Route>
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Route>
           </>
         )}

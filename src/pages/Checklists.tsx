@@ -11,6 +11,7 @@ import Button from '../components/ui/Button';
 import BilingualName from '../components/ui/BilingualName';
 
 export default function Checklists() {
+  const { isManager } = useOrg();
   const { t, i18n } = useTranslation('checklists');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
@@ -47,9 +48,11 @@ export default function Checklists() {
           <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
           <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
         </div>
-        <Button onClick={() => setOpen(true)}>
-          <Plus size={16} /> {t('addTemplate')}
-        </Button>
+        {isManager && (
+          <Button onClick={() => setOpen(true)}>
+            <Plus size={16} /> {t('addTemplate')}
+          </Button>
+        )}
       </div>
 
       {rows.length === 0 ? (

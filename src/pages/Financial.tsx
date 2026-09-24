@@ -5,6 +5,7 @@ import Input from '../components/ui/Input';
 import SearchSelect from '../components/ui/SearchSelect';
 import ProcurementManager from '../components/ProcurementManager';
 import { supabase } from '../lib/supabase';
+import { useMoney } from '../lib/useMoney';
 import { useOrg } from '../contexts/OrgContext';
 import { useAssets, useCostCenters, useExpenseCategories, useParts, useProcurementOrders, useVendorInvoices, useVendors, useWorkOrders } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
@@ -101,9 +102,6 @@ async function fetchBudgets(orgId: string | undefined) {
   return (data ?? []) as BudgetRecord[];
 }
 
-function currency(value: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-}
 
 // Small, fixed vocabularies — not business entities that need their own
 // manageable table, same treatment as a status/priority field elsewhere.
@@ -111,7 +109,8 @@ const RATE_UNITS = ['hour', 'day', 'week', 'month', 'job', 'visit'];
 const BUDGET_PERIODS = ['Monthly', 'Quarterly', 'Annual', 'One-time'];
 
 export default function Financial() {
-  const { currentOrg } = useOrg();
+  const currency = useMoney();
+  const { currentOrg, currency: orgCurrencyCode } = useOrg();
   const queryClient = useQueryClient();
   const [customerForm, setCustomerForm] = useState({ name: '', company: '', email: '', phone: '', notes: '' });
   const [paymentForm, setPaymentForm] = useState({
@@ -134,7 +133,7 @@ export default function Financial() {
     partId: '',
     cost_center_id: '',
   });
-  const [rateForm, setRateForm] = useState({ service: '', unit: 'hour', rate: '', currency: 'USD' });
+  const [rateForm, setRateForm] = useState({ service: '', unit: 'hour', rate: '', currency: orgCurrencyCode });
   const [budgetForm, setBudgetForm] = useState({ name: 'Operating budget', amount: '', period: 'Monthly', notes: '', cost_center_id: '' });
   const [costCenterForm, setCostCenterForm] = useState({ name: '', code: '' });
   const [expenseCategoryForm, setExpenseCategoryForm] = useState({ name: '' });
@@ -259,7 +258,7 @@ export default function Financial() {
     setMessage(null);
     try {
       await saveRecord('fp_finance_rates', { ...rateForm, rate: Number(rateForm.rate || 0) }, 'finance-rates');
-      setRateForm({ service: '', unit: 'hour', rate: '', currency: 'USD' });
+      setRateForm({ service: '', unit: 'hour', rate: '', currency: orgCurrencyCode });
       setMessage('Rate card saved.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to save rate card.');

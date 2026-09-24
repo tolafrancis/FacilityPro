@@ -1,13 +1,15 @@
 import { useState, type FormEvent } from 'react';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
+import { supabase } from '../lib/supabase';
+import { useOrg } from '../contexts/OrgContext';
 
 type AssistantResult = {
   summary: string;
   actions: string[];
+  source?: 'ai' | 'builtin' | 'rate_limited';
 };
 
-function buildFallback(prompt: string): AssistantResult {
+function buildFallback(prompt: string): Omit<AssistantResult, 'source'> {
   const lower = prompt.toLowerCase();
   if (lower.includes('fault') || lower.includes('repair')) {
     return {
@@ -27,45 +29,31 @@ function buildFallback(prompt: string): AssistantResult {
   };
 }
 
-async function generateRecommendation(prompt: string): Promise<AssistantResult> {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY as string | undefined;
-  if (apiKey) {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: (import.meta.env.VITE_OPENAI_MODEL as string | undefined) || 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are FacilitySpace Smart Assistant. Return a short summary and 3 bullet-point actions for a maintenance or facilities request.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-      }),
+// The AI call runs server-side in the smart-assistant Edge Function, which
+// holds the provider key (it must never be shipped in the web app bundle).
+// Without it (not deployed / not configured / rate limited) the page falls
+// back to built-in guidance, clearly labelled as such.
+async function generateRecommendation(prompt: string, orgId: string | undefined): Promise<AssistantResult> {
+  if (orgId) {
+    const { data, error } = await supabase.functions.invoke('smart-assistant', {
+      body: { prompt, org_id: orgId },
     });
-    if (response.ok) {
-      const data = await response.json();
-      const content = data?.choices?.[0]?.message?.content as string | undefined;
-      if (content) {
-        const lines = content.split('\n').filter(Boolean);
-        return {
-          summary: lines[0] || 'AI-generated summary',
-          actions: lines.slice(1, 4).map((line) => line.replace(/^[-*]\s*/, '')),
-        };
+    const ai = data as { summary?: string; actions?: string[] } | null;
+    if (!error && ai?.summary) {
+      return { summary: ai.summary, actions: ai.actions ?? [], source: 'ai' };
+    }
+    if (error) {
+      const payload = await (error as { context?: Response }).context?.json?.().catch(() => null);
+      if ((payload as { error?: string } | null)?.error === 'rate_limited') {
+        return { ...buildFallback(prompt), source: 'rate_limited' };
       }
     }
   }
-  return buildFallback(prompt);
+  return { ...buildFallback(prompt), source: 'builtin' };
 }
 
 export default function SmartAssistant() {
+  const { currentOrg } = useOrg();
   const [prompt, setPrompt] = useState('');
   const [result, setResult] = useState<AssistantResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -77,7 +65,7 @@ export default function SmartAssistant() {
     setBusy(true);
     setError(null);
     try {
-      const generated = await generateRecommendation(prompt);
+      const generated = await generateRecommendation(prompt, currentOrg?.id);
       setResult(generated);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to generate guidance right now.');
@@ -101,9 +89,8 @@ export default function SmartAssistant() {
           <div className="mt-4 space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-ink">Prompt</label>
-              <textarea value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={6} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" placeholder="Example: The HVAC unit in room 3 has been making a loud noise and the tenant reported it this morning." />
+              <textarea maxLength={2000} value={prompt} onChange={(event) => setPrompt(event.target.value)} rows={6} className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20" placeholder="Example: The HVAC unit in room 3 has been making a loud noise and the tenant reported it this morning." />
             </div>
-            <Input value={import.meta.env.VITE_OPENAI_API_KEY ? 'OpenAI integration enabled' : 'Using built-in guidance'} readOnly />
             <Button type="submit" loading={busy}>Generate recommendation</Button>
             {error && <p className="text-sm text-status-crit">{error}</p>}
           </div>
@@ -113,6 +100,13 @@ export default function SmartAssistant() {
           <h2 className="text-lg font-semibold text-ink">Suggested response</h2>
           {result ? (
             <div className="mt-4 space-y-4">
+              {result.source !== 'ai' && (
+                <p className="text-xs text-ink-muted">
+                  {result.source === 'rate_limited'
+                    ? 'AI limit reached for this hour — showing built-in guidance instead.'
+                    : 'Built-in guidance (the AI assistant is not configured).'}
+                </p>
+              )}
               <div className="rounded-xl bg-brand/10 p-4 text-sm text-brand">{result.summary}</div>
               <div>
                 <p className="text-sm font-semibold text-ink">Recommended actions</p>

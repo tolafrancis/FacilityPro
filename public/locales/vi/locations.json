@@ -22,6 +22,10 @@
   },
   "dialog": {
     "addSiteTitle": "Thêm khu vực",
-    "addChildTitle": "Thêm {{kind}}"
-  }
+    "addChildTitle": "Thêm {{kind}}",
+    "renameTitle": "Đổi tên {{kind}}"
+  },
+  "rename": "Đổi tên",
+  "delete": "Xóa",
+  "deleteConfirm": "Xóa \"{{name}}\"? Không thể hoàn tác."
 }

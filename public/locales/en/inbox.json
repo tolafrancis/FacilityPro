@@ -22,5 +22,19 @@
     "email": "Email"
   },
   "createTicket": "Create work order",
-  "ticketCreated": "Report created"
+  "ticketCreated": "Report created",
+  "delivery": {
+    "pending": "sending…",
+    "sent": "sent",
+    "delivered": "delivered",
+    "read": "read",
+    "failed": "Not delivered",
+    "notDelivered": "Reply saved, but not delivered: {{reason}}",
+    "errors": {
+      "channel_not_configured": "no WhatsApp number is connected to this organisation",
+      "rate_limited": "daily WhatsApp limit reached",
+      "send_failed": "WhatsApp rejected the message",
+      "not_allowed": "you can only send your own replies"
+    }
+  }
 }

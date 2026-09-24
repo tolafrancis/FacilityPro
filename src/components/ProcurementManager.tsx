@@ -2,6 +2,7 @@ import { useState, type Dispatch, type FormEvent, type SetStateAction } from 're
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CheckCircle2, ChevronDown, ChevronRight, FileWarning, PackageCheck, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useMoney } from '../lib/useMoney';
 import { useOrg } from '../contexts/OrgContext';
 import {
   useCostCenters,
@@ -26,9 +27,6 @@ import Input from './ui/Input';
 import Pill from './ui/Pill';
 import SearchSelect from './ui/SearchSelect';
 
-function currency(value: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-}
 
 const STATUSES: ProcurementStatus[] = ['rfq', 'po', 'received', 'approved'];
 
@@ -72,6 +70,7 @@ const EMPTY_FORM: OrderForm = { title: '', vendorId: '', costCenterId: '', notes
  * line posts into the inventory ledger so stock actually updates.
  */
 export default function ProcurementManager() {
+  const currency = useMoney();
   const { currentOrg } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();
@@ -207,6 +206,7 @@ function ProcurementDetail({
   costCenterName: string | null;
   onStatusChange: (status: ProcurementStatus) => void;
 }) {
+  const currency = useMoney();
   const { currentOrg } = useOrg();
   const orgId = currentOrg?.id;
   const queryClient = useQueryClient();

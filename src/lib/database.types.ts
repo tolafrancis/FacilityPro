@@ -16,6 +16,7 @@ export interface Organization {
   subscription_tier: string;
   allow_public_requests?: boolean;
   auto_create_work_orders?: boolean;
+  settings?: { timezone?: string; currency?: string } | null;
 }
 
 export interface Membership {
@@ -89,6 +90,8 @@ export interface FaultType {
   is_active?: boolean;
 }
 
+export type AssetStatus = 'active' | 'inactive' | 'retired' | 'disposed';
+
 export interface Asset {
   id: string;
   org_id: string;
@@ -100,7 +103,8 @@ export interface Asset {
   model: string | null;
   warranty_expiry: string | null;
   qr_code: string | null;
-  status: string;
+  status: AssetStatus;
+  retired_at: string | null;
   created_at: string;
 }
 
@@ -132,15 +136,19 @@ export interface RequestRow {
 }
 
 export type WorkOrderStatus =
+  | 'open'
   | 'assigned'
   | 'in_progress'
   | 'on_hold'
   | 'resolved'
+  | 'verified'
   | 'closed';
 
 export interface WorkOrder {
   id: string;
   org_id: string;
+  /** Bumped on every change (0072); used to detect edit conflicts. */
+  version: number;
   request_id: string | null;
   asset_id: string | null;
   assigned_to: string | null;
@@ -149,7 +157,14 @@ export interface WorkOrder {
   priority: Priority;
   status: WorkOrderStatus;
   due_at: string | null;
+  // Lifecycle timestamps are set by the database (0060), never by the client.
+  started_at: string | null;
+  resolved_at: string | null;
+  verified_at: string | null;
+  verified_by: string | null;
   closed_at: string | null;
+  hold_reason: string | null;
+  reopened_count: number;
   labour_minutes: number;
   cost: number;
   checklist_template_id: string | null;
@@ -194,6 +209,8 @@ export interface DocumentRecord {
   file_path: string | null;
   mime_type: string | null;
   file_size: number | null;
+  /** 'staff' = admins, managers, technicians; 'everyone' also occupants and vendors. */
+  visibility: 'staff' | 'everyone';
   created_at: string;
 }
 
@@ -587,6 +604,9 @@ export interface NotificationRow {
   kind: string;
   title: string;
   body: string | null;
+  /** Generated text in each language (0075); falls back to title/body. */
+  title_i18n?: Record<string, string> | null;
+  body_i18n?: Record<string, string> | null;
   link: string | null;
   read_at: string | null;
   created_at: string;
@@ -635,6 +655,9 @@ export interface Message {
   direction: 'in' | 'out';
   body: string;
   sender: string | null;
+  /** Outbound delivery on the external channel (set by channel-send / webhook receipts). */
+  delivery_status: 'pending' | 'sent' | 'delivered' | 'read' | 'failed' | null;
+  delivery_error: string | null;
   created_at: string;
 }
 
@@ -671,7 +694,41 @@ export interface Subscription {
   current_period_start: string | null;
   current_period_end: string | null;
   note: string | null;
+  requested_plan_code: string | null;
+  requested_at: string | null;
+  cancel_requested_at: string | null;
   updated_at: string;
+}
+
+/** Row of fp_job_health(): one background job's status (platform admins). */
+export interface JobHealth {
+  job: string;
+  description: string;
+  max_silence_minutes: number;
+  last_run_at: string | null;
+  last_ok_at: string | null;
+  last_ok: boolean | null;
+  last_error: string | null;
+  healthy: boolean;
+}
+
+/** Row of fp_system_health(): delivery and workflow checks (0066). */
+export interface SystemCheck {
+  check_name: 'outbox_failed' | 'outbox_backlog' | 'workflow_failures';
+  ok: boolean;
+  detail: string;
+}
+
+/** Row of fp_platform_subscriptions(): the platform operator's billing queue. */
+export interface PlatformSubscription {
+  org_id: string;
+  org_name: string;
+  plan_code: string | null;
+  status: SubscriptionStatus;
+  requested_plan_code: string | null;
+  requested_at: string | null;
+  cancel_requested_at: string | null;
+  current_period_end: string | null;
 }
 
 export interface Device {
@@ -684,6 +741,9 @@ export interface Device {
   meter_id: string | null;
   metric_map: Record<string, string>;
   last_seen_at: string | null;
+  /** Alert admins/managers when no data arrives for this long (0067). */
+  offline_after_minutes: number | null;
+  offline_alerted_at: string | null;
   active: boolean;
   created_at: string;
   updated_at: string;

@@ -17,7 +17,7 @@ Multilingual (English + Vietnamese) CMMS. Phase 1 makes the platform a usable ma
 **Core CMMS (Phase 1)**
 - **Settings** — define bilingual **fault types** and **asset types**, each with a default priority
 - **Assets** — registry with bilingual names, type, location, serial/manufacturer/model/warranty; per-asset **QR code** (Asset → QR tab); asset detail with a **history** tab (its requests + work orders)
-- **Fault reporting** — `New request` form with severity → priority mapping, optional photo, and **source language captured** (report in Vietnamese and it's stored as `vi`). The QR code encodes `/requests/new?asset=…&location=…` so scanning prefills the form
+- **Fault reporting** — `New request` form with severity → priority mapping, optional photo, and **source language captured** (report in Vietnamese and it's stored as `vi`). Each asset's QR code encodes `<VITE_PUBLIC_APP_URL>/a/<code>`: staff who scan it open the asset, anyone else gets the public report form (if enabled) or sign-in. Set `VITE_PUBLIC_APP_URL` before printing codes
 - **Requests** — list + status filter, detail view, **convert to work order**
 - **Work orders** — list + status filter; detail with **assignee** (real org members), **status lifecycle**, instructions, and **before/after photo evidence** (private storage, signed URLs)
 - **My Work** — a technician's assigned, open work orders
@@ -76,7 +76,35 @@ supabase db push
 
 **Option B — SQL editor**
 
-Run each file in `supabase/migrations/` **in order, 0001 → 0024**, in the dashboard SQL editor.
+Run each file in `supabase/migrations/` **in order, 0001 → 0075**, in the dashboard SQL editor.
+
+> **Platform admin (required after 0059).** Migration **0059** locks the plan catalogue and subscription activation to platform operators, and makes function EXECUTE an explicit allow-list (new functions in `public` are no longer callable from the API until granted). Make yourself a platform admin once, in the SQL editor:
+>
+> ```sql
+> insert into fp_platform_admins (user_id)
+>   select id from auth.users where email = 'you@yourcompany.com';
+> ```
+>
+> Platform admins see a **Subscription requests** queue on the Billing page and activate a customer's plan after confirming payment. If 0059 prints a `WARNING` about rows that reference another org, that data predates the fix; the warning includes the query to find those rows.
+>
+> **Scheduled jobs (0061).** Migration **0061** schedules the background jobs with `pg_cron`: PM generation (hourly), SLA escalation and time-based workflows (every 15 min), expiry reminders (daily, 07:00 Vietnam time), email/SMS/push delivery (every 5 min) and a health check. Enable **pg_cron** and **pg_net** (Dashboard → Database → Extensions) *before* running it; if pg_cron was missing, the migration prints a warning, and re-running it after enabling the extension creates the schedules. Message delivery calls the `process-outbox` Edge Function, so store the project URL and service key in Vault once:
+>
+> ```sql
+> select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
+> select vault.create_secret('<service_role key>', 'service_role_key');
+> ```
+>
+> Platform admins see every job's status under **Billing → Background jobs** and are emailed when a job is late or failing. Check it once after deploying: every job should turn **Healthy** within an hour. PM due dates use the organisation's time zone (**Settings → Time zone**, default `Asia/Ho_Chi_Minh`).
+>
+> **Team & invitations (0065).** An organisation always keeps at least one admin: demoting or removing the last one is refused (promote someone else first). Invitations are emailed to the invitee (see *Email delivery* below for `APP_URL`). In **Authentication → URL Configuration**, set **Site URL** to your app address and add `https://<your domain>/**` to **Redirect URLs**, so the confirmation email of someone signing up from an invitation brings them back to that invitation.
+>
+> **Operations (before launch).** [`docs/OPERATIONS.md`](docs/OPERATIONS.md) covers checking production matches the migrations (`scripts/check-drift.sh`), backups/PITR and a restore runbook (plus `scripts/backup-storage.mjs` for Storage files), email deliverability (Resend SMTP for Supabase Auth, SPF/DKIM/DMARC on Hostinger, the EN/VI templates in `supabase/templates/`), and monitoring (the `health` Edge Function for an uptime monitor; 0066 adds email/workflow failure alerts).
+>
+> **Scheduled Edge Functions.** `process-outbox`, `run-scheduled-workflows` and `score-sentiment` only accept the scheduler: pg_cron's call (it sends the service-role key from Vault) or an external scheduler sending `x-cron-secret` equal to the optional `CRON_SECRET` secret. `score-sentiment` only scores organisations that switched on **Settings → Organisation profile → Score inbox messages' sentiment with AI** (message text is sent to Anthropic).
+>
+> **Plan limits (0072).** The limits in each plan (`fp_plans.limits`: `assets`, `members`, `sites`; a missing key means unlimited) are enforced by the database. New organisations get a 14-day Pro trial, then the Free plan's limits apply until a platform admin activates a paid plan; existing organisations without a subscription were given a 30-day trial when 0072 ran. Retired assets and nothing else is freed automatically: over-limit organisations keep their data but can't add more.
+>
+> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits, inbox/channels, membership, operations health, IoT/retention/audit, asset lifecycle, KPIs, inventory, workflows/access, plans/integrity, asset QR, notification language), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
 
 > Migration **0008** creates the `fp_media` table **and a private storage bucket `fp-media`** with org-scoped access policies (objects are namespaced by org id; access via signed URLs). Migration **0009** adds `fp_org_members()` used to populate the assignee dropdown. Migrations **0010–0011** add checklists and preventive-maintenance schedules plus the `fp_generate_due_pm()` generator. Migration **0013** alters `fp_pm_schedules` (makes `next_due_at` nullable and adds meter-trigger columns) and **replaces** `fp_generate_due_pm()` to handle meter triggers. Migration **0015** adds a `BEFORE INSERT` trigger on `fp_work_orders` (SLA due-date + auto-assignment), and **0016** adds notification triggers. Migration **0017** adds the email outbox (`fp_notification_outbox`) plus a trigger that enqueues an email when an in-app notification lands for a user who opted in, and **0018** adds the approvals workflow. No manual storage setup is needed.
 
@@ -86,7 +114,10 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0024**, in the dash
 > supabase functions deploy process-outbox --no-verify-jwt
 > supabase secrets set RESEND_API_KEY=re_xxx
 > supabase secrets set OUTBOX_FROM="FacilitySpace <notifications@yourdomain.com>"
+> supabase secrets set APP_URL=https://app.yourdomain.com
 > ```
+>
+> `APP_URL` is the web app's address, used for links in emails. Invitations (migration **0065**) are emailed automatically when an admin invites someone; without `APP_URL` those emails fail and the admin has to copy the link from **Settings → Team** instead.
 >
 > Then schedule it (Dashboard → Edge Functions → Schedules, e.g. every 5 minutes) so the outbox drains. Each user opts in under **Security → Email notifications**. The provider call is isolated in one `sendEmail()` function, so SMTP/SES/Postmark — or SMS/push as new channels — drop in without touching the queue.
 >
@@ -96,7 +127,16 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0024**, in the dash
 
 > **Web push (optional).** Generate a VAPID keypair (`npx web-push generate-vapid-keys`). Set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `VAPID_SUBJECT` as Edge Function secrets, and expose the public key to the web app as `VITE_VAPID_PUBLIC_KEY` (in `.env`). Users then see **Security → Push notifications** and can enable it per device; push rides the same outbox/Edge Function as email and SMS.
 
-> **Inbox / channels (optional).** The inbox works immediately for manually logged conversations and outbound replies. To connect automated channels, deploy `channel-webhook` (inbound) and `channel-send` (outbound) and point your WhatsApp Cloud API / Zalo / LINE webhook at `channel-webhook`. Each function documents its secrets at the top; the WhatsApp Cloud API shape is implemented and the others slot in alongside it.
+> **Inbox / channels (optional).** The inbox is for staff (admin, manager, technician); occupants and vendors don't see it (migration **0064**). It works immediately for manually logged conversations and outbound replies. To connect WhatsApp Cloud API:
+>
+> 1. Deploy both functions: `supabase functions deploy channel-webhook --no-verify-jwt` and `supabase functions deploy channel-send`.
+> 2. Set secrets: `supabase secrets set WHATSAPP_TOKEN=… WHATSAPP_VERIFY_TOKEN=… WHATSAPP_APP_SECRET=…`. The app secret is **required**: every webhook delivery must carry a valid `X-Hub-Signature-256`, and without the secret the webhook rejects everything.
+> 3. Connect each organisation's number (as a platform admin, in the SQL editor): `insert into fp_channel_accounts (org_id, channel, external_id, display_name) values ('<org uuid>', 'whatsapp', '<phone_number_id>', '+84 …');`. Inbound messages are routed to, and replies sent from, the org that owns the number; an org admin sees it read-only under **Settings → Integrations**. (Single-tenant fallback: `WHATSAPP_PHONE_ID` + `WHATSAPP_ORG_ID` secrets.)
+> 4. Point the Meta webhook at `https://<project-ref>.functions.supabase.co/channel-webhook`.
+>
+> Outbound sends are limited to 500 per organisation per day, and each message shows its delivery status (sent / delivered / read / failed) in the inbox.
+
+> **Smart assistant (optional).** The AI call runs server-side; the key is never in the web bundle. `supabase functions deploy smart-assistant` and `supabase secrets set OPENAI_API_KEY=sk-…` (optionally `OPENAI_MODEL`, default `gpt-4o-mini`). Members get 30 requests per hour. Without the secret, the page uses its built-in guidance. Do **not** set any `VITE_OPENAI_*` variable: anything prefixed `VITE_` is public.
 
 > **Billing (PayPal links).** Migration 0022 seeds three editable plans. As an org admin, open **Billing**, click the pencil on a plan, and paste its **PayPal payment link** (a PayPal.me link, a payment link, or a subscription link) plus price and limits. The plan's **Subscribe** button then opens that link in PayPal; once a customer has paid, an admin clicks **Mark active** to set the plan and period. No webhook is needed for this paste-a-link flow. To automate activation later, add a PayPal Subscriptions webhook (or, for Vietnam, a VietQR `bank-webhook` reconciled by SePay/Casso) that updates `fp_subscriptions` — the data model already supports it.
 
@@ -109,7 +149,7 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0024**, in the dash
 >
 > Escalation and reminders post in-app notifications, which fan out to email/SMS/push for anyone opted in. (0023 also revokes the cron functions from `anon` so they can't be triggered publicly.)
 
-> **IoT devices (0024).** Open **Devices**, add a device, and copy its **key** plus the ready-made `curl` examples from the device page. There are two ways in: a device can POST directly to `…/rest/v1/rpc/fp_device_ingest` (anon apikey + its device key), or to the `iot-ingest` Edge Function, which accepts single, batch, or flat MQTT-style JSON. For **MQTT**, run a broker (EMQX, HiveMQ Cloud, AWS IoT Core, Mosquitto) and point its rule/webhook at `iot-ingest` — the device key travels in the `x-device-key` header or the body. The endpoint is vendor-neutral: anything that can send `{metric, value}` works (ESP32/ESP8266 with Tasmota or ESPHome, Shelly, Sonoff, Raspberry Pi, Modbus/PLC→MQTT gateways, LoRaWAN gateways like Dragino/Milesight via their network server). Map a device to a meter to feed meter-based PM from live data, and add **threshold rules** to auto-raise work orders / notifications (with a per-rule cooldown). Deploy the function with `supabase functions deploy iot-ingest --no-verify-jwt`.
+> **IoT devices (0024).** Open **Devices**, add a device, and copy its **key** plus the ready-made `curl` examples from the device page. There are two ways in: a device can POST directly to `…/rest/v1/rpc/fp_device_ingest` (anon apikey + its device key), or to the `iot-ingest` Edge Function, which accepts single, batch, or flat MQTT-style JSON. For **MQTT**, run a broker (EMQX, HiveMQ Cloud, AWS IoT Core, Mosquitto) and point its rule/webhook at `iot-ingest` — the device key travels in the `x-device-key` header or the body. The endpoint is vendor-neutral: anything that can send `{metric, value}` works (ESP32/ESP8266 with Tasmota or ESPHome, Shelly, Sonoff, Raspberry Pi, Modbus/PLC→MQTT gateways, LoRaWAN gateways like Dragino/Milesight via their network server). Map a device to a meter to feed meter-based PM from live data, and add **threshold rules** to auto-raise work orders / notifications (with a per-rule cooldown). Deploy the function with `supabase functions deploy iot-ingest --no-verify-jwt`. Since **0067**: a redelivered reading (same device, metric and timestamp) is stored and acted on once; a device page's **Offline alert** notifies admins and managers when it stops reporting; raw readings are kept 90 days and then rolled up into hourly min/max/avg (`fp_telemetry_hourly`), and audit entries 2 years. Change either per organisation with `update fp_organizations set settings = settings || '{"telemetry_retention_days": 180, "audit_retention_days": 1095}' where id = '<org>';` (minimum 7).
 
 > **MQTT pull / outbound (optional, 0043).** The above is *push* (the device/broker sends to us). To instead have the app **connect out to a broker and subscribe**, open a device → **Broker connection**, enter host/topic/credentials, and run the always-on bridge worker in [`mqtt-bridge/`](mqtt-bridge/) (Docker, systemd, or a managed worker — see its README). The worker keeps a live subscription per device and forwards each message into the same `fp_device_ingest` sink. Apply migration `0043_device_broker_connections.sql` first. Serverless functions can't hold a persistent socket, so this path needs the worker running.
 
@@ -122,7 +162,33 @@ Copy-Item .env.example .env.local
 ```
 VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_ANON_PUBLIC_KEY
+# Optional: Cloudflare Turnstile CAPTCHA on the public report form, sign-in and sign-up
+# VITE_TURNSTILE_SITE_KEY=0x4AAAAAAA...
+# The app's public address, used in printed asset QR codes
+VITE_PUBLIC_APP_URL=https://app.yourdomain.com
 ```
+
+**Abuse protection.** The public QR report form and device ingest are rate-limited in the database (migration **0063**) whether or not CAPTCHA is on:
+- Public reports:
+  - capped length
+  - 5 per 10 minutes per client
+  - 10 per hour per asset
+  - 60 per hour per organisation
+  - a repeat of the same problem within 30 minutes returns the existing request
+- Devices:
+  - at most 600 readings a minute
+  - 500 per request to `iot-ingest`
+  - future timestamps clamped
+  - duplicate readings ignored
+
+To add a CAPTCHA:
+1. Create a Turnstile widget in Cloudflare and set `VITE_TURNSTILE_SITE_KEY` in the web app.
+2. Deploy the function: `supabase functions deploy public-report`, then `supabase secrets set TURNSTILE_SECRET_KEY=…`.
+3. In Supabase → Authentication → Attack Protection, enable CAPTCHA with provider **Turnstile** and the same secret.
+4. Once the new web app is live, make the CAPTCHA mandatory for public reports:
+   `revoke execute on function fp_public_report(uuid, text, text, text, text, uuid, uuid, text, text) from anon;`
+
+Also review Authentication → Rate Limits; the defaults are low for sign-up emails, so configure custom SMTP before launch.
 
 ## 4. Install and run
 
@@ -165,7 +231,7 @@ Deploy `dist/` to Hostinger (cPanel/FTP) or Vercel. The SPA `.htaccess` and PWA 
 
 ```
 supabase/migrations/   0001–0011 foundation→PM, **0012 parts**, **0013 meters (+meter PM)**, **0014 vendors/contracts**, **0015 SLA+auto-assign**, **0016 notifications**, **0017 email channel**, **0018 approvals**, **0019 SMS channel**, **0020 web push**, **0021 inbox**, **0022 billing**, **0023 automation workflows**, **0024 IoT**
-supabase/functions/     process-outbox (email/SMS/push), channel-webhook (inbound), channel-send (outbound), iot-ingest (device telemetry)
+supabase/functions/     process-outbox (email/SMS/push), channel-webhook (inbound), channel-send (outbound), smart-assistant (AI), public-report, iot-ingest (device telemetry)
 public/sw.js            app-shell service worker (offline)
 src/lib/sync.ts         offline write queue + replay; src/contexts/SyncContext.tsx
 src/lib/               supabase, database.types, **ui** (status/colour maps), **media** (upload/signed URLs), **queries** (TanStack hooks)
