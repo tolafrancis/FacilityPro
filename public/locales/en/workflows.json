@@ -1,0 +1,331 @@
+{
+  "title": "Workflows",
+  "subtitle": "Create reusable automations for requests, work orders, telemetry, and reminders, then keep an audit trail of each run.",
+  "trigger": {
+    "service_request": "Service Request",
+    "fault_report": "Fault Report",
+    "workorder_created": "Work Order Created",
+    "asset_field": "Asset Field",
+    "chat_with_staff": "Chat With Staff",
+    "low_sentiment": "Low Sentiment",
+    "expenditure_budget_exceeded": "Budget Exceeded",
+    "parts_quantity": "Parts Quantity",
+    "desk_booking": "Desk Booking",
+    "facilities_booking": "Facilities Booking",
+    "sensor_integration": "Sensor Integration",
+    "meter_reading": "Meter Reading",
+    "sor_submitted": "SOR Submitted",
+    "expenditure_approval": "Expenditure Approval"
+  },
+  "triggerOption": {
+    "service_request": "Service Request",
+    "fault_report": "Fault Report",
+    "workorder_created": "Work Order Created",
+    "asset_field": "Asset Field (warranty / useful life)",
+    "chat_with_staff": "Chat With Staff",
+    "low_sentiment": "Low Sentiment (AI)",
+    "expenditure_budget_exceeded": "Expenditure Budget Exceeded",
+    "parts_quantity": "Parts Quantity",
+    "desk_booking": "Desk Booking",
+    "facilities_booking": "Facilities Booking",
+    "sensor_integration": "Sensor Integration",
+    "meter_reading": "Meter Reading",
+    "sor_submitted": "Service from Schedule of Rate (SOR) Submitted",
+    "expenditure_approval": "Expenditure Approval Needed"
+  },
+  "triggerHint": {
+    "service_request": "Fires when a request is created or completed.",
+    "fault_report": "Fires on fault reports.",
+    "workorder_created": "Fires when a work order is created — assign it or notify the team.",
+    "asset_field": "Scheduled check against an asset date field.",
+    "chat_with_staff": "Fires when a requestor opens a conversation.",
+    "low_sentiment": "Fires when AI marks an inbound message as low sentiment.",
+    "expenditure_budget_exceeded": "Fires when spend exceeds a budget.",
+    "parts_quantity": "Fires when a part stock drops.",
+    "desk_booking": "Fires when a desk is booked.",
+    "facilities_booking": "Fires when a facility is booked.",
+    "sensor_integration": "Fires on each sensor reading — use a cooldown for chatty sensors.",
+    "meter_reading": "Fires on each meter reading.",
+    "sor_submitted": "Fires when a quote / procurement is raised against the rate schedule.",
+    "expenditure_approval": "Fires when an approval is requested."
+  },
+  "action": {
+    "send_email": "Send Email",
+    "send_sms": "Send SMS",
+    "send_push": "Send Push",
+    "assign": "Assign To",
+    "create_request": "Create Request",
+    "alert_account": "Alert Account",
+    "send_survey": "Send Survey",
+    "create_expenditure": "Create Expenditure",
+    "send_approval_email": "Send Approval Email"
+  },
+  "actionOption": {
+    "send_email": "Send Email",
+    "send_sms": "Send SMS",
+    "send_push": "Send Push",
+    "assign": "Assign To",
+    "create_request": "Create Request",
+    "alert_account": "Alert Account",
+    "send_survey": "Send Survey to Requestor",
+    "create_expenditure": "Create Expenditure Request",
+    "send_approval_email": "Send Approval Email"
+  },
+  "actionTarget": {
+    "send_email": "Recipient",
+    "send_sms": "Recipient",
+    "send_push": "Recipient",
+    "assign": "Responder",
+    "create_request": "Request type",
+    "alert_account": "Account",
+    "send_survey": "Survey",
+    "create_expenditure": "Expenditure",
+    "send_approval_email": "Approver"
+  },
+  "field": {
+    "priority": "Priority",
+    "type": "Request / Fault Type",
+    "location_tag": "Location Tag",
+    "has_been_pending": "Has Been Pending (minutes)",
+    "is_complete": "Is Complete",
+    "days_since_purchase": "Days Since Purchase Date",
+    "days_before_expiry": "Days Before Warranty Expiry",
+    "quantity": "Parts Quantity",
+    "meter_value": "Meter Reading Value",
+    "meter": "Meter",
+    "sensor_score": "Sensor Score",
+    "device": "Device / Sensor",
+    "budget_amount": "Budget Amount",
+    "cost_centre": "Cost Centre / Budget",
+    "schedule_of_rate": "Schedule of Rate",
+    "zone": "Zone",
+    "facility": "Facility"
+  },
+  "operator": {
+    "equals": "equals",
+    "not": "not equals",
+    "contains": "contains",
+    "in": "in",
+    "exceeds": "exceeds (>)",
+    "gte": "greater than or equal (≥)",
+    "falls_below": "falls below (<)",
+    "pending_for": "has been pending for (minutes)",
+    "is_true": "is true"
+  },
+  "generated": {
+    "description": "Auto: when {{trigger}}, {{actions}}.",
+    "and": " and "
+  },
+  "defaults": {
+    "subject": "Request {{status}} reminder",
+    "body": "A {{type}} request is still pending."
+  },
+  "templates": {
+    "autoAssign": {
+      "title": "Auto-assign work orders",
+      "description": "Assign new work orders to a responder (optionally filtered by priority). Pick the responder after installing."
+    },
+    "usefulLife": {
+      "title": "Email based on asset useful life",
+      "description": "Email when an asset passes a set number of days since its purchase date.",
+      "message": "Asset useful life reached"
+    },
+    "warranty": {
+      "title": "Email when asset warranty expiry is near",
+      "description": "Email when an asset is within a set number of days of its warranty expiry.",
+      "message": "Warranty expiring soon"
+    },
+    "pendingReminder": {
+      "title": "Email reminder if request has been pending",
+      "description": "Email a reminder when a request has been pending for too long.",
+      "message": "Request still pending"
+    },
+    "chatWithStaff": {
+      "title": "Email when requestor asks to \"Chat with Staff\"",
+      "description": "Email staff when a requestor asks to chat with a person.",
+      "message": "Requestor wants to chat with staff"
+    },
+    "budgetExceeded": {
+      "title": "Email when expenditure budget is exceeded",
+      "description": "Email when spend exceeds the configured budget for a cost centre.",
+      "message": "Budget exceeded"
+    },
+    "lowSentiment": {
+      "title": "Email if requestor sentiment is low",
+      "description": "Email for service recovery when AI detects low requestor sentiment.",
+      "message": "Low sentiment detected"
+    },
+    "partsLow": {
+      "title": "Email when parts quantity falls below amount",
+      "description": "Email when a part drops below its reorder threshold.",
+      "message": "Part below reorder level"
+    },
+    "deskBooking": {
+      "title": "Alert when desk booking is made",
+      "description": "Alert an account when a desk is booked in a zone.",
+      "message": "Desk booked"
+    },
+    "sensorTicket": {
+      "title": "Create ticket when a sensor is triggered",
+      "description": "Create a request when a sensor reading crosses its trigger condition.",
+      "message": "Sensor threshold crossed"
+    },
+    "meterTicket": {
+      "title": "Create ticket when meter reading exceeds threshold",
+      "description": "Create a request when a meter reading exceeds a threshold.",
+      "message": "Meter reading above threshold"
+    },
+    "meterEmail": {
+      "title": "Email when meter reading exceeds threshold",
+      "description": "Email when a meter reading exceeds a threshold.",
+      "message": "Meter reading above threshold"
+    },
+    "survey": {
+      "title": "Survey after request completion",
+      "description": "Send a survey to the requestor when a request is completed."
+    },
+    "sorExpenditure": {
+      "title": "Expenditure request from SOR response",
+      "description": "Create an expenditure request when a Schedule of Rates response is submitted."
+    },
+    "approvalEmail": {
+      "title": "Expenditure approval email",
+      "description": "Send an approval email when an expenditure needs sign-off.",
+      "message": "Expenditure needs approval"
+    }
+  },
+  "messages": {
+    "saved": "Workflow saved.",
+    "updated": "Workflow updated.",
+    "deleted": "Workflow deleted.",
+    "installed": "Installed template: {{title}}"
+  },
+  "confirm": {
+    "discardOpen": "Discard your unsaved changes and open this workflow?",
+    "discard": "Discard your unsaved changes to this workflow?",
+    "delete": "Delete workflow \"{{name}}\"?"
+  },
+  "when": {
+    "created": "When created",
+    "completed": "When completed",
+    "pending": "When pending too long"
+  },
+  "placeholder": {
+    "minutes": "minutes",
+    "days": "days",
+    "exceedsValue": "exceeds value",
+    "score": "score ≥",
+    "fallsBelowQuantity": "falls below quantity",
+    "exceedsAmount": "exceeds amount",
+    "threshold": "threshold",
+    "value": "value"
+  },
+  "any": {
+    "type": "Any request / fault type",
+    "priority": "Any priority",
+    "meter": "Any meter",
+    "device": "Any device / sensor",
+    "budget": "Any cost centre / budget",
+    "zone": "Any zone",
+    "facility": "Any facility"
+  },
+  "noFaultTypes": "No fault types yet — add them in Settings → Catalogs.",
+  "assetCheck": {
+    "warranty": "Warranty expiry near (days before)",
+    "usefulLife": "Useful life (days since purchase)"
+  },
+  "noSettings": "This trigger needs no extra settings.",
+  "select": {
+    "priority": "Select priority",
+    "type": "Select request / fault type",
+    "location": "Select location",
+    "zone": "Select zone",
+    "facility": "Select facility",
+    "rate": "Select schedule of rate",
+    "device": "Select device / sensor",
+    "meter": "Select meter",
+    "budget": "Select cost centre / budget",
+    "responder": "Select responder",
+    "account": "Select account",
+    "recipient": "Select recipient",
+    "requestType": "Select request type",
+    "survey": "Select survey"
+  },
+  "bool": {
+    "true": "true",
+    "false": "false"
+  },
+  "placeholderHint": "Placeholders like {{priority}}, {{type}}, {{status}}, {{location_tag}} are filled from the event.",
+  "assign": {
+    "availability": "Availability",
+    "always": "Always",
+    "ifAvailable": "Only if responder is available"
+  },
+  "email": {
+    "subject": "Subject",
+    "subjectPlaceholder": "Email subject (supports {{placeholders}})",
+    "body": "Body",
+    "bodyPlaceholder": "Email body"
+  },
+  "messageField": {
+    "label": "Message",
+    "placeholder": "Message to include"
+  },
+  "requestField": {
+    "label": "Request description",
+    "placeholder": "What should the ticket say?"
+  },
+  "form": {
+    "editTitle": "Edit workflow",
+    "createTitle": "Create workflow",
+    "trigger": "Trigger",
+    "triggerSettings": "Trigger settings",
+    "cooldown": "Cooldown (minutes)",
+    "cooldownPlaceholder": "0 = fire every time",
+    "cooldownHint": "Minimum gap between runs — useful to throttle chatty sensors/meters.",
+    "filters": "Additional filters (optional)",
+    "match": "Match",
+    "matchAll": "ALL",
+    "matchAny": "ANY",
+    "removeFilter": "Remove filter",
+    "addFilter": "Add filter",
+    "actions": "Actions",
+    "removeAction": "Remove action",
+    "addAction": "Add action",
+    "savedAs": "Will be saved as:",
+    "update": "Update workflow",
+    "save": "Save workflow"
+  },
+  "gallery": {
+    "title": "Template gallery",
+    "install": "Install"
+  },
+  "library": {
+    "title": "Workflow library",
+    "empty": "No workflows yet. Start with a template or create one from scratch.",
+    "noDescription": "No description",
+    "active": "Active",
+    "disabled": "Disabled",
+    "runs": "Runs: {{count}}",
+    "lastRun": "Last: {{date}}",
+    "never": "Never",
+    "actions_one": "{{count}} action",
+    "actions_other": "{{count}} actions",
+    "edit": "Edit workflow",
+    "disable": "Disable",
+    "enable": "Enable",
+    "delete": "Delete workflow"
+  },
+  "runs": {
+    "title": "Run history",
+    "empty": "No runs recorded yet.",
+    "trigger": "Trigger: {{ref}}",
+    "none": "n/a",
+    "select": "Select a workflow to see recent runs."
+  },
+  "runStatus": {
+    "success": "Success",
+    "skipped": "Skipped",
+    "failed": "Failed"
+  }
+}

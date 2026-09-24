@@ -1,0 +1,330 @@
+{
+  "title": "Quy trình tự động",
+  "subtitle": "Tạo các quy trình tự động dùng lại được cho yêu cầu, lệnh công việc, dữ liệu cảm biến và nhắc việc, kèm nhật ký cho từng lần chạy.",
+  "trigger": {
+    "service_request": "Yêu cầu dịch vụ",
+    "fault_report": "Báo cáo sự cố",
+    "workorder_created": "Tạo lệnh công việc",
+    "asset_field": "Trường dữ liệu tài sản",
+    "chat_with_staff": "Trò chuyện với nhân viên",
+    "low_sentiment": "Cảm xúc tiêu cực",
+    "expenditure_budget_exceeded": "Vượt ngân sách",
+    "parts_quantity": "Số lượng vật tư",
+    "desk_booking": "Đặt chỗ ngồi",
+    "facilities_booking": "Đặt tiện ích",
+    "sensor_integration": "Tích hợp cảm biến",
+    "meter_reading": "Chỉ số đồng hồ",
+    "sor_submitted": "Gửi theo bảng đơn giá",
+    "expenditure_approval": "Phê duyệt chi tiêu"
+  },
+  "triggerOption": {
+    "service_request": "Yêu cầu dịch vụ",
+    "fault_report": "Báo cáo sự cố",
+    "workorder_created": "Tạo lệnh công việc",
+    "asset_field": "Trường dữ liệu tài sản (bảo hành / tuổi thọ sử dụng)",
+    "chat_with_staff": "Trò chuyện với nhân viên",
+    "low_sentiment": "Cảm xúc tiêu cực (AI)",
+    "expenditure_budget_exceeded": "Chi tiêu vượt ngân sách",
+    "parts_quantity": "Số lượng vật tư",
+    "desk_booking": "Đặt chỗ ngồi",
+    "facilities_booking": "Đặt tiện ích",
+    "sensor_integration": "Tích hợp cảm biến",
+    "meter_reading": "Chỉ số đồng hồ",
+    "sor_submitted": "Gửi dịch vụ theo bảng đơn giá (SOR)",
+    "expenditure_approval": "Cần phê duyệt chi tiêu"
+  },
+  "triggerHint": {
+    "service_request": "Chạy khi một yêu cầu được tạo hoặc hoàn thành.",
+    "fault_report": "Chạy khi có báo cáo sự cố.",
+    "workorder_created": "Chạy khi một lệnh công việc được tạo — phân công hoặc thông báo cho đội.",
+    "asset_field": "Kiểm tra định kỳ theo một trường ngày của tài sản.",
+    "chat_with_staff": "Chạy khi người yêu cầu mở một cuộc trò chuyện.",
+    "low_sentiment": "Chạy khi AI đánh giá tin nhắn đến mang cảm xúc tiêu cực.",
+    "expenditure_budget_exceeded": "Chạy khi chi tiêu vượt ngân sách.",
+    "parts_quantity": "Chạy khi tồn kho vật tư giảm.",
+    "desk_booking": "Chạy khi có người đặt chỗ ngồi.",
+    "facilities_booking": "Chạy khi có người đặt tiện ích.",
+    "sensor_integration": "Chạy với mỗi lần đọc cảm biến — hãy đặt thời gian chờ cho cảm biến gửi dữ liệu dày.",
+    "meter_reading": "Chạy với mỗi lần ghi chỉ số đồng hồ.",
+    "sor_submitted": "Chạy khi có báo giá / đơn mua sắm lập theo bảng đơn giá.",
+    "expenditure_approval": "Chạy khi có yêu cầu phê duyệt."
+  },
+  "action": {
+    "send_email": "Gửi email",
+    "send_sms": "Gửi SMS",
+    "send_push": "Gửi thông báo đẩy",
+    "assign": "Phân công cho",
+    "create_request": "Tạo yêu cầu",
+    "alert_account": "Cảnh báo tài khoản",
+    "send_survey": "Gửi khảo sát",
+    "create_expenditure": "Tạo khoản chi",
+    "send_approval_email": "Gửi email phê duyệt"
+  },
+  "actionOption": {
+    "send_email": "Gửi email",
+    "send_sms": "Gửi SMS",
+    "send_push": "Gửi thông báo đẩy",
+    "assign": "Phân công cho",
+    "create_request": "Tạo yêu cầu",
+    "alert_account": "Cảnh báo tài khoản",
+    "send_survey": "Gửi khảo sát cho người yêu cầu",
+    "create_expenditure": "Tạo đề nghị chi",
+    "send_approval_email": "Gửi email phê duyệt"
+  },
+  "actionTarget": {
+    "send_email": "Người nhận",
+    "send_sms": "Người nhận",
+    "send_push": "Người nhận",
+    "assign": "Người xử lý",
+    "create_request": "Loại yêu cầu",
+    "alert_account": "Tài khoản",
+    "send_survey": "Khảo sát",
+    "create_expenditure": "Khoản chi",
+    "send_approval_email": "Người phê duyệt"
+  },
+  "field": {
+    "priority": "Mức ưu tiên",
+    "type": "Loại yêu cầu / sự cố",
+    "location_tag": "Vị trí",
+    "has_been_pending": "Thời gian chờ xử lý (phút)",
+    "is_complete": "Đã hoàn thành",
+    "days_since_purchase": "Số ngày kể từ ngày mua",
+    "days_before_expiry": "Số ngày trước khi hết bảo hành",
+    "quantity": "Số lượng vật tư",
+    "meter_value": "Giá trị chỉ số đồng hồ",
+    "meter": "Đồng hồ",
+    "sensor_score": "Điểm cảm biến",
+    "device": "Thiết bị / cảm biến",
+    "budget_amount": "Số tiền ngân sách",
+    "cost_centre": "Trung tâm chi phí / ngân sách",
+    "schedule_of_rate": "Bảng đơn giá",
+    "zone": "Khu vực",
+    "facility": "Tiện ích"
+  },
+  "operator": {
+    "equals": "bằng",
+    "not": "khác",
+    "contains": "chứa",
+    "in": "thuộc",
+    "exceeds": "lớn hơn (>)",
+    "gte": "lớn hơn hoặc bằng (≥)",
+    "falls_below": "nhỏ hơn (<)",
+    "pending_for": "đã chờ xử lý (phút)",
+    "is_true": "đúng"
+  },
+  "generated": {
+    "description": "Tự động: khi {{trigger}}, {{actions}}.",
+    "and": " và "
+  },
+  "defaults": {
+    "subject": "Nhắc việc: yêu cầu {{status}}",
+    "body": "Một yêu cầu {{type}} vẫn đang chờ xử lý."
+  },
+  "templates": {
+    "autoAssign": {
+      "title": "Tự động phân công lệnh công việc",
+      "description": "Phân công lệnh công việc mới cho một người xử lý (có thể lọc theo mức ưu tiên). Chọn người xử lý sau khi cài đặt."
+    },
+    "usefulLife": {
+      "title": "Gửi email theo tuổi thọ sử dụng của tài sản",
+      "description": "Gửi email khi tài sản đã qua một số ngày nhất định kể từ ngày mua.",
+      "message": "Tài sản đã hết tuổi thọ sử dụng"
+    },
+    "warranty": {
+      "title": "Gửi email khi tài sản sắp hết bảo hành",
+      "description": "Gửi email khi tài sản còn một số ngày nhất định trước khi hết bảo hành.",
+      "message": "Sắp hết hạn bảo hành"
+    },
+    "pendingReminder": {
+      "title": "Gửi email nhắc khi yêu cầu chờ quá lâu",
+      "description": "Gửi email nhắc khi một yêu cầu đã chờ xử lý quá lâu.",
+      "message": "Yêu cầu vẫn đang chờ xử lý"
+    },
+    "chatWithStaff": {
+      "title": "Gửi email khi người yêu cầu muốn \"Trò chuyện với nhân viên\"",
+      "description": "Gửi email cho nhân viên khi người yêu cầu muốn trò chuyện với người thật.",
+      "message": "Người yêu cầu muốn trò chuyện với nhân viên"
+    },
+    "budgetExceeded": {
+      "title": "Gửi email khi chi tiêu vượt ngân sách",
+      "description": "Gửi email khi chi tiêu vượt ngân sách đã đặt cho một trung tâm chi phí.",
+      "message": "Đã vượt ngân sách"
+    },
+    "lowSentiment": {
+      "title": "Gửi email khi người yêu cầu không hài lòng",
+      "description": "Gửi email để kịp thời xử lý khi AI phát hiện người yêu cầu có cảm xúc tiêu cực.",
+      "message": "Phát hiện cảm xúc tiêu cực"
+    },
+    "partsLow": {
+      "title": "Gửi email khi số lượng vật tư xuống dưới mức",
+      "description": "Gửi email khi một vật tư xuống dưới mức cần đặt hàng lại.",
+      "message": "Vật tư dưới mức đặt hàng lại"
+    },
+    "deskBooking": {
+      "title": "Cảnh báo khi có người đặt chỗ ngồi",
+      "description": "Cảnh báo một tài khoản khi có chỗ ngồi được đặt trong một khu vực.",
+      "message": "Đã có người đặt chỗ ngồi"
+    },
+    "sensorTicket": {
+      "title": "Tạo phiếu khi cảm biến kích hoạt",
+      "description": "Tạo yêu cầu khi giá trị cảm biến vượt điều kiện kích hoạt.",
+      "message": "Cảm biến vượt ngưỡng"
+    },
+    "meterTicket": {
+      "title": "Tạo phiếu khi chỉ số đồng hồ vượt ngưỡng",
+      "description": "Tạo yêu cầu khi chỉ số đồng hồ vượt một ngưỡng.",
+      "message": "Chỉ số đồng hồ vượt ngưỡng"
+    },
+    "meterEmail": {
+      "title": "Gửi email khi chỉ số đồng hồ vượt ngưỡng",
+      "description": "Gửi email khi chỉ số đồng hồ vượt một ngưỡng.",
+      "message": "Chỉ số đồng hồ vượt ngưỡng"
+    },
+    "survey": {
+      "title": "Khảo sát sau khi hoàn thành yêu cầu",
+      "description": "Gửi khảo sát cho người yêu cầu khi yêu cầu được hoàn thành."
+    },
+    "sorExpenditure": {
+      "title": "Đề nghị chi từ phản hồi bảng đơn giá",
+      "description": "Tạo đề nghị chi khi có phản hồi theo bảng đơn giá được gửi."
+    },
+    "approvalEmail": {
+      "title": "Email phê duyệt chi tiêu",
+      "description": "Gửi email phê duyệt khi một khoản chi cần được ký duyệt.",
+      "message": "Khoản chi cần phê duyệt"
+    }
+  },
+  "messages": {
+    "saved": "Đã lưu quy trình.",
+    "updated": "Đã cập nhật quy trình.",
+    "deleted": "Đã xóa quy trình.",
+    "installed": "Đã cài mẫu: {{title}}"
+  },
+  "confirm": {
+    "discardOpen": "Bỏ các thay đổi chưa lưu và mở quy trình này?",
+    "discard": "Bỏ các thay đổi chưa lưu của quy trình này?",
+    "delete": "Xóa quy trình \"{{name}}\"?"
+  },
+  "when": {
+    "created": "Khi được tạo",
+    "completed": "Khi hoàn thành",
+    "pending": "Khi chờ xử lý quá lâu"
+  },
+  "placeholder": {
+    "minutes": "phút",
+    "days": "ngày",
+    "exceedsValue": "vượt giá trị",
+    "score": "điểm ≥",
+    "fallsBelowQuantity": "dưới số lượng",
+    "exceedsAmount": "vượt số tiền",
+    "threshold": "ngưỡng",
+    "value": "giá trị"
+  },
+  "any": {
+    "type": "Mọi loại yêu cầu / sự cố",
+    "priority": "Mọi mức ưu tiên",
+    "meter": "Mọi đồng hồ",
+    "device": "Mọi thiết bị / cảm biến",
+    "budget": "Mọi trung tâm chi phí / ngân sách",
+    "zone": "Mọi khu vực",
+    "facility": "Mọi tiện ích"
+  },
+  "noFaultTypes": "Chưa có loại sự cố nào — hãy thêm trong Cài đặt → Danh mục.",
+  "assetCheck": {
+    "warranty": "Sắp hết bảo hành (số ngày trước)",
+    "usefulLife": "Tuổi thọ sử dụng (số ngày từ khi mua)"
+  },
+  "noSettings": "Điều kiện kích hoạt này không cần thiết lập thêm.",
+  "select": {
+    "priority": "Chọn mức ưu tiên",
+    "type": "Chọn loại yêu cầu / sự cố",
+    "location": "Chọn vị trí",
+    "zone": "Chọn khu vực",
+    "facility": "Chọn tiện ích",
+    "rate": "Chọn bảng đơn giá",
+    "device": "Chọn thiết bị / cảm biến",
+    "meter": "Chọn đồng hồ",
+    "budget": "Chọn trung tâm chi phí / ngân sách",
+    "responder": "Chọn người xử lý",
+    "account": "Chọn tài khoản",
+    "recipient": "Chọn người nhận",
+    "requestType": "Chọn loại yêu cầu",
+    "survey": "Chọn khảo sát"
+  },
+  "bool": {
+    "true": "có",
+    "false": "không"
+  },
+  "placeholderHint": "Các biến như {{priority}}, {{type}}, {{status}}, {{location_tag}} sẽ được điền từ sự kiện.",
+  "assign": {
+    "availability": "Tình trạng sẵn sàng",
+    "always": "Luôn luôn",
+    "ifAvailable": "Chỉ khi người xử lý đang rảnh"
+  },
+  "email": {
+    "subject": "Tiêu đề",
+    "subjectPlaceholder": "Tiêu đề email (hỗ trợ {{placeholders}})",
+    "body": "Nội dung",
+    "bodyPlaceholder": "Nội dung email"
+  },
+  "messageField": {
+    "label": "Tin nhắn",
+    "placeholder": "Nội dung tin nhắn"
+  },
+  "requestField": {
+    "label": "Mô tả yêu cầu",
+    "placeholder": "Phiếu cần ghi nội dung gì?"
+  },
+  "form": {
+    "editTitle": "Sửa quy trình",
+    "createTitle": "Tạo quy trình",
+    "trigger": "Điều kiện kích hoạt",
+    "triggerSettings": "Thiết lập kích hoạt",
+    "cooldown": "Thời gian chờ (phút)",
+    "cooldownPlaceholder": "0 = chạy mọi lần",
+    "cooldownHint": "Khoảng cách tối thiểu giữa hai lần chạy — hữu ích để hạn chế cảm biến/đồng hồ gửi dữ liệu dày.",
+    "filters": "Bộ lọc bổ sung (không bắt buộc)",
+    "match": "Khớp",
+    "matchAll": "TẤT CẢ",
+    "matchAny": "BẤT KỲ",
+    "removeFilter": "Xóa bộ lọc",
+    "addFilter": "Thêm bộ lọc",
+    "actions": "Hành động",
+    "removeAction": "Xóa hành động",
+    "addAction": "Thêm hành động",
+    "savedAs": "Sẽ được lưu với tên:",
+    "update": "Cập nhật quy trình",
+    "save": "Lưu quy trình"
+  },
+  "gallery": {
+    "title": "Thư viện mẫu",
+    "install": "Cài đặt"
+  },
+  "library": {
+    "title": "Danh sách quy trình",
+    "empty": "Chưa có quy trình nào. Hãy bắt đầu từ một mẫu hoặc tự tạo mới.",
+    "noDescription": "Không có mô tả",
+    "active": "Đang bật",
+    "disabled": "Đã tắt",
+    "runs": "Số lần chạy: {{count}}",
+    "lastRun": "Lần cuối: {{date}}",
+    "never": "Chưa chạy",
+    "actions_other": "{{count}} hành động",
+    "edit": "Sửa quy trình",
+    "disable": "Tắt",
+    "enable": "Bật",
+    "delete": "Xóa quy trình"
+  },
+  "runs": {
+    "title": "Lịch sử chạy",
+    "empty": "Chưa có lần chạy nào.",
+    "trigger": "Kích hoạt bởi: {{ref}}",
+    "none": "không có",
+    "select": "Chọn một quy trình để xem các lần chạy gần đây."
+  },
+  "runStatus": {
+    "success": "Thành công",
+    "skipped": "Bỏ qua",
+    "failed": "Thất bại"
+  }
+}
