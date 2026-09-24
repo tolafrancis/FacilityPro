@@ -1,0 +1,146 @@
+{
+  "title": "Financial operations",
+  "subtitle": "Track customers, procurement, payments, expenditures, rate cards, and budget targets in one place.",
+  "kpi": {
+    "budgeted": "Budgeted",
+    "spend": "Committed spend",
+    "openPos": "Open purchase orders"
+  },
+  "fields": {
+    "notes": "Notes",
+    "amount": "Amount",
+    "description": "Description",
+    "vendor": "Vendor",
+    "searchVendors": "Search vendors…",
+    "noVendor": "No vendor",
+    "partOptional": "Part (optional)",
+    "searchParts": "Search parts…",
+    "costCenter": "Cost center",
+    "noCostCenter": "No cost center",
+    "noInvoiceNumber": "No invoice #"
+  },
+  "messages": {
+    "customerSaved": "Customer record saved.",
+    "paymentSaved": "Payment entry saved.",
+    "expenditureSaved": "Expenditure recorded.",
+    "rateSaved": "Rate card saved.",
+    "budgetSaved": "Budget target saved.",
+    "costCenterSaved": "Cost center saved.",
+    "categorySaved": "Expense category saved."
+  },
+  "customers": {
+    "title": "Customers",
+    "name": "Customer or client name",
+    "company": "Company",
+    "email": "Email",
+    "phone": "Phone",
+    "save": "Save customer",
+    "recent": "Recent customers",
+    "empty": "No customer records yet.",
+    "client": "Client"
+  },
+  "payments": {
+    "title": "Payments",
+    "description": "Invoice or payment description",
+    "purchaseOrder": "Purchase order",
+    "noPurchaseOrder": "No purchase order",
+    "invoice": "Invoice (three-way match)",
+    "noInvoice": "No specific invoice",
+    "noInvoicesOnPo": "No invoices recorded on this PO yet — add one from the Procurement panel above.",
+    "method": "Method",
+    "defaultMethod": "Manual transfer",
+    "reference": "Reference",
+    "save": "Save payment"
+  },
+  "paymentStatus": {
+    "pending": "Pending",
+    "completed": "Completed"
+  },
+  "expenditures": {
+    "title": "Expenditures",
+    "notAPart": "Not a part / service",
+    "selectCategory": "Select a category…",
+    "workOrder": "Work order (optional)",
+    "noWorkOrder": "No work order",
+    "asset": "Asset (optional)",
+    "noAsset": "No asset",
+    "save": "Record spend"
+  },
+  "rates": {
+    "title": "Schedule of rates",
+    "service": "Service or labour item",
+    "rate": "Rate",
+    "currency": "Currency",
+    "save": "Save rate"
+  },
+  "rateUnit": {
+    "hour": "hour",
+    "day": "day",
+    "week": "week",
+    "month": "month",
+    "job": "job",
+    "visit": "visit"
+  },
+  "budget": {
+    "title": "Budget",
+    "name": "Budget name",
+    "defaultName": "Operating budget",
+    "save": "Save budget"
+  },
+  "budgetPeriod": {
+    "Monthly": "Monthly",
+    "Quarterly": "Quarterly",
+    "Annual": "Annual",
+    "One-time": "One-time"
+  },
+  "costCenters": {
+    "title": "Cost centers",
+    "name": "Name (e.g. Facilities — HVAC)",
+    "code": "Code (optional)",
+    "save": "Save cost center"
+  },
+  "categories": {
+    "title": "Expense categories",
+    "name": "Name (e.g. Contracted services)",
+    "save": "Save category"
+  },
+  "procurement": {
+    "title": "Procurement",
+    "newPo": "New PO",
+    "empty": "No purchase orders yet.",
+    "costCenter": "Cost center: {{name}}",
+    "line": "Line",
+    "qty": "Qty",
+    "unitCost": "Unit cost",
+    "received": "Received",
+    "noLines": "No lines yet.",
+    "servicePart": "Service / no part",
+    "orDescription": "Or type a description",
+    "addLine": "Add line",
+    "receive": "Receive shipment",
+    "quantityReceived": "Quantity received",
+    "confirmReceipt": "Confirm receipt",
+    "invoices": "Vendor invoices (three-way match)",
+    "noInvoices": "No invoices recorded against this PO yet.",
+    "invoiceNumber": "Invoice #",
+    "invoiceDate": "Invoice date",
+    "recordInvoice": "Record invoice",
+    "newTitle": "New purchase order",
+    "titlePlaceholder": "Title (what is this PO for?)"
+  },
+  "poStatus": {
+    "rfq": "RFQ",
+    "po": "PO",
+    "received": "Received",
+    "approved": "Approved"
+  },
+  "match": {
+    "matched": "Matched",
+    "both": "Amount & receipt mismatch",
+    "amount": "Amount mismatch",
+    "receipt": "Awaiting full receipt",
+    "bothHint": "Amount differs from the PO total and not everything has been received",
+    "amountHint": "Invoice amount differs from the PO total ({{total}})",
+    "receiptHint": "Not everything on this PO has been received yet"
+  }
+}

@@ -1,5 +1,6 @@
 import { useState, type Dispatch, type FormEvent, type SetStateAction } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, ChevronDown, ChevronRight, FileWarning, PackageCheck, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useMoney } from '../lib/useMoney';
@@ -14,6 +15,7 @@ import {
   useVendors,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
+import { formatDateOnly, friendlyError } from '../lib/ui';
 import type {
   CostCenter,
   ProcurementLine,
@@ -70,6 +72,8 @@ const EMPTY_FORM: OrderForm = { title: '', vendorId: '', costCenterId: '', notes
  * line posts into the inventory ledger so stock actually updates.
  */
 export default function ProcurementManager() {
+  const { t } = useTranslation('financial');
+  const { t: tc } = useTranslation('common');
   const currency = useMoney();
   const { currentOrg } = useOrg();
   const orgId = currentOrg?.id;
@@ -104,7 +108,7 @@ export default function ProcurementManager() {
       setForm(EMPTY_FORM);
       setOpen(false);
     },
-    onError: (e: unknown) => setError(e instanceof Error ? e.message : String(e)),
+    onError: (e: unknown) => setError(friendlyError(e as { code?: string; message?: string }, tc)),
   });
 
   const setStatus = useMutation({
@@ -127,18 +131,18 @@ export default function ProcurementManager() {
   return (
     <div className="rounded-2xl border border-line bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-ink">Procurement</h2>
+        <h2 className="text-lg font-semibold text-ink">{t('procurement.title')}</h2>
         <button
           type="button"
           onClick={() => setOpen(true)}
           className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600"
         >
-          <Plus size={15} /> New PO
+          <Plus size={15} /> {t('procurement.newPo')}
         </button>
       </div>
 
       {orders.length === 0 ? (
-        <p className="mt-4 text-sm text-ink-muted">No purchase orders yet.</p>
+        <p className="mt-4 text-sm text-ink-muted">{t('procurement.empty')}</p>
       ) : (
         <ul className="mt-4 divide-y divide-line">
           {orders.map((po) => (
@@ -158,8 +162,8 @@ export default function ProcurementManager() {
                   <span className="truncate font-medium text-ink">{po.title}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-2 text-xs">
-                  <span className="text-ink-muted">{vendorName(po.vendor_id) ?? po.vendor ?? 'No vendor'}</span>
-                  <Pill className="bg-surface uppercase tracking-wide text-ink-muted">{po.status}</Pill>
+                  <span className="text-ink-muted">{vendorName(po.vendor_id) ?? po.vendor ?? t('fields.noVendor')}</span>
+                  <Pill className="bg-surface uppercase tracking-wide text-ink-muted">{t(`poStatus.${po.status}`)}</Pill>
                   <span className="font-medium text-ink tabular-nums">{currency(po.amount)}</span>
                 </span>
               </button>
@@ -206,6 +210,9 @@ function ProcurementDetail({
   costCenterName: string | null;
   onStatusChange: (status: ProcurementStatus) => void;
 }) {
+  const { t, i18n } = useTranslation('financial');
+  const { t: tc } = useTranslation('common');
+  const lng = i18n.resolvedLanguage ?? 'en';
   const currency = useMoney();
   const { currentOrg } = useOrg();
   const orgId = currentOrg?.id;
@@ -248,7 +255,7 @@ function ProcurementDetail({
     mutationFn: async () => {
       if (!orgId) return;
       const part = partsQuery.data?.find((p) => p.id === lineForm.partId);
-      const description = lineForm.description || (part ? resolveI18n(part.name_i18n, 'en') : '');
+      const description = lineForm.description || (part ? resolveI18n(part.name_i18n, lng) : '');
       if (!description) return;
       const { error } = await supabase.from('fp_procurement_lines').insert({
         org_id: orgId,
@@ -303,7 +310,7 @@ function ProcurementDetail({
   return (
     <div className="mt-3 rounded-lg border border-line bg-surface p-3">
       <div className="flex items-center justify-between text-xs text-ink-muted">
-        <span>{costCenterName ? `Cost center: ${costCenterName}` : 'No cost center'}</span>
+        <span>{costCenterName ? t('procurement.costCenter', { name: costCenterName }) : t('fields.noCostCenter')}</span>
         <select
           value={po.status}
           onChange={(e) => onStatusChange(e.target.value as ProcurementStatus)}
@@ -311,7 +318,7 @@ function ProcurementDetail({
         >
           {STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s.toUpperCase()}
+              {t(`poStatus.${s}`)}
             </option>
           ))}
         </select>
@@ -321,10 +328,10 @@ function ProcurementDetail({
         <table className="w-full min-w-[420px] text-sm">
           <thead className="text-left text-xs text-ink-muted">
             <tr>
-              <th className="py-1">Line</th>
-              <th className="py-1 text-right">Qty</th>
-              <th className="py-1 text-right">Unit cost</th>
-              <th className="py-1 text-right">Received</th>
+              <th className="py-1">{t('procurement.line')}</th>
+              <th className="py-1 text-right">{t('procurement.qty')}</th>
+              <th className="py-1 text-right">{t('procurement.unitCost')}</th>
+              <th className="py-1 text-right">{t('procurement.received')}</th>
             </tr>
           </thead>
           <tbody>
@@ -341,7 +348,7 @@ function ProcurementDetail({
             {lines.length === 0 && (
               <tr>
                 <td colSpan={4} className="py-2 text-ink-muted">
-                  No lines yet.
+                  {t('procurement.noLines')}
                 </td>
               </tr>
             )}
@@ -351,25 +358,25 @@ function ProcurementDetail({
 
       <div className="mt-3 flex flex-wrap items-end gap-2">
         <div className="w-44">
-          <label className="mb-1 block text-xs text-ink-muted">Part (optional)</label>
+          <label className="mb-1 block text-xs text-ink-muted">{t('fields.partOptional')}</label>
           <SearchSelect
             value={lineForm.partId}
             onChange={(id) => setLineForm({ ...lineForm, partId: id })}
-            options={(partsQuery.data ?? []).map((p) => ({ id: p.id, label: resolveI18n(p.name_i18n, 'en') }))}
-            placeholder="Search parts…"
-            emptyLabel="Service / no part"
+            options={(partsQuery.data ?? []).map((p) => ({ id: p.id, label: resolveI18n(p.name_i18n, lng) }))}
+            placeholder={t('fields.searchParts')}
+            emptyLabel={t('procurement.servicePart')}
           />
         </div>
         <div className="min-w-[140px] flex-1">
-          <label className="mb-1 block text-xs text-ink-muted">Description</label>
+          <label className="mb-1 block text-xs text-ink-muted">{t('fields.description')}</label>
           <Input
             value={lineForm.description}
             onChange={(e) => setLineForm({ ...lineForm, description: e.target.value })}
-            placeholder="Or type a description"
+            placeholder={t('procurement.orDescription')}
           />
         </div>
         <div className="w-20">
-          <label className="mb-1 block text-xs text-ink-muted">Qty</label>
+          <label className="mb-1 block text-xs text-ink-muted">{t('procurement.qty')}</label>
           <Input
             type="number"
             value={lineForm.quantity}
@@ -377,7 +384,7 @@ function ProcurementDetail({
           />
         </div>
         <div className="w-24">
-          <label className="mb-1 block text-xs text-ink-muted">Unit cost</label>
+          <label className="mb-1 block text-xs text-ink-muted">{t('procurement.unitCost')}</label>
           <Input
             type="number"
             value={lineForm.unitCost}
@@ -385,7 +392,7 @@ function ProcurementDetail({
           />
         </div>
         <Button type="button" onClick={() => addLine.mutate()} loading={addLine.isPending}>
-          Add line
+          {t('procurement.addLine')}
         </Button>
       </div>
 
@@ -397,11 +404,11 @@ function ProcurementDetail({
               onClick={() => setReceiving(true)}
               className="inline-flex items-center gap-1 text-sm font-medium text-brand hover:text-brand-600"
             >
-              <PackageCheck size={15} /> Receive shipment
+              <PackageCheck size={15} /> {t('procurement.receive')}
             </button>
           ) : (
             <div>
-              <p className="text-xs font-medium text-ink-muted">Quantity received</p>
+              <p className="text-xs font-medium text-ink-muted">{t('procurement.quantityReceived')}</p>
               <div className="mt-2 space-y-2">
                 {lines
                   .filter((l) => l.part_id)
@@ -428,10 +435,10 @@ function ProcurementDetail({
                     setReceiveQty({});
                   }}
                 >
-                  Cancel
+                  {tc('actions.cancel')}
                 </Button>
                 <Button type="button" onClick={() => submitReceipt.mutate()} loading={submitReceipt.isPending}>
-                  Confirm receipt
+                  {t('procurement.confirmReceipt')}
                 </Button>
               </div>
             </div>
@@ -440,7 +447,7 @@ function ProcurementDetail({
       )}
 
       <div className="mt-3 border-t border-line pt-3">
-        <p className="text-xs font-medium text-ink-muted">Vendor invoices (three-way match)</p>
+        <p className="text-xs font-medium text-ink-muted">{t('procurement.invoices')}</p>
         <div className="mt-2 space-y-2">
           {(invoicesQuery.data ?? []).map((inv) => {
             const { amountMatches, fullyReceived } = matchInvoice(
@@ -453,46 +460,46 @@ function ProcurementDetail({
             return (
               <div key={inv.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 text-sm">
                 <span className="text-ink">
-                  {inv.invoice_number || 'No invoice #'} · {currency(inv.amount)}
-                  {inv.invoice_date && <span className="text-ink-muted"> · {inv.invoice_date}</span>}
+                  {inv.invoice_number || t('fields.noInvoiceNumber')} · {currency(inv.amount)}
+                  {inv.invoice_date && <span className="text-ink-muted"> · {formatDateOnly(inv.invoice_date, lng)}</span>}
                 </span>
                 {matched ? (
                   <span className="inline-flex items-center gap-1 text-xs font-medium text-status-ok">
-                    <CheckCircle2 size={14} /> Matched
+                    <CheckCircle2 size={14} /> {t('match.matched')}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 text-xs font-medium text-status-warn" title={
                     !amountMatches && !fullyReceived
-                      ? 'Amount differs from the PO total and not everything has been received'
+                      ? t('match.bothHint')
                       : !amountMatches
-                        ? `Invoice amount differs from the PO total (${currency(po.amount)})`
-                        : 'Not everything on this PO has been received yet'
+                        ? t('match.amountHint', { total: currency(po.amount) })
+                        : t('match.receiptHint')
                   }>
                     <FileWarning size={14} />
                     {!amountMatches && !fullyReceived
-                      ? 'Amount & receipt mismatch'
+                      ? t('match.both')
                       : !amountMatches
-                        ? 'Amount mismatch'
-                        : 'Awaiting full receipt'}
+                        ? t('match.amount')
+                        : t('match.receipt')}
                   </span>
                 )}
               </div>
             );
           })}
           {(invoicesQuery.data ?? []).length === 0 && (
-            <p className="text-sm text-ink-muted">No invoices recorded against this PO yet.</p>
+            <p className="text-sm text-ink-muted">{t('procurement.noInvoices')}</p>
           )}
         </div>
         <div className="mt-3 flex flex-wrap items-end gap-2">
           <div className="w-32">
-            <label className="mb-1 block text-xs text-ink-muted">Invoice #</label>
+            <label className="mb-1 block text-xs text-ink-muted">{t('procurement.invoiceNumber')}</label>
             <Input
               value={invoiceForm.invoiceNumber}
               onChange={(e) => setInvoiceForm({ ...invoiceForm, invoiceNumber: e.target.value })}
             />
           </div>
           <div className="w-28">
-            <label className="mb-1 block text-xs text-ink-muted">Amount</label>
+            <label className="mb-1 block text-xs text-ink-muted">{t('fields.amount')}</label>
             <Input
               type="number"
               value={invoiceForm.amount}
@@ -500,7 +507,7 @@ function ProcurementDetail({
             />
           </div>
           <div className="w-36">
-            <label className="mb-1 block text-xs text-ink-muted">Invoice date</label>
+            <label className="mb-1 block text-xs text-ink-muted">{t('procurement.invoiceDate')}</label>
             <Input
               type="date"
               value={invoiceForm.invoiceDate}
@@ -508,7 +515,7 @@ function ProcurementDetail({
             />
           </div>
           <Button type="button" onClick={() => addInvoice.mutate()} loading={addInvoice.isPending}>
-            Record invoice
+            {t('procurement.recordInvoice')}
           </Button>
         </div>
       </div>
@@ -535,6 +542,8 @@ function NewOrderDialog({
   onCancel: () => void;
   onSubmit: () => void;
 }) {
+  const { t } = useTranslation('financial');
+  const { t: tc } = useTranslation('common');
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!form.title) return;
@@ -544,31 +553,31 @@ function NewOrderDialog({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/30 p-4">
       <form onSubmit={submit} className="w-full max-w-md rounded-xl border border-line bg-white p-6 shadow-lg">
-        <h2 className="text-lg font-semibold text-ink">New purchase order</h2>
+        <h2 className="text-lg font-semibold text-ink">{t('procurement.newTitle')}</h2>
         <div className="mt-4 space-y-3">
           <Input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            placeholder="Title (what is this PO for?)"
+            placeholder={t('procurement.titlePlaceholder')}
           />
           <div>
-            <label className="mb-1 block text-xs text-ink-muted">Vendor</label>
+            <label className="mb-1 block text-xs text-ink-muted">{t('fields.vendor')}</label>
             <SearchSelect
               value={form.vendorId}
               onChange={(id) => setForm({ ...form, vendorId: id })}
               options={vendors.map((v) => ({ id: v.id, label: v.name }))}
-              placeholder="Search vendors…"
-              emptyLabel="No vendor"
+              placeholder={t('fields.searchVendors')}
+              emptyLabel={t('fields.noVendor')}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ink-muted">Cost center</label>
+            <label className="mb-1 block text-xs text-ink-muted">{t('fields.costCenter')}</label>
             <select
               value={form.costCenterId}
               onChange={(e) => setForm({ ...form, costCenterId: e.target.value })}
               className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
             >
-              <option value="">No cost center</option>
+              <option value="">{t('fields.noCostCenter')}</option>
               {costCenters.map((cc) => (
                 <option key={cc.id} value={cc.id}>
                   {cc.code ? `${cc.code} — ${cc.name}` : cc.name}
@@ -581,16 +590,16 @@ function NewOrderDialog({
             onChange={(e) => setForm({ ...form, notes: e.target.value })}
             rows={2}
             className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
-            placeholder="Notes"
+            placeholder={t('fields.notes')}
           />
           {error && <p className="text-sm text-status-crit">{error}</p>}
         </div>
         <div className="mt-6 flex justify-end gap-2">
           <Button type="button" variant="secondary" onClick={onCancel}>
-            Cancel
+            {tc('actions.cancel')}
           </Button>
           <Button type="submit" loading={busy}>
-            Create
+            {tc('actions.create')}
           </Button>
         </div>
       </form>

@@ -1,0 +1,146 @@
+{
+  "title": "Quản lý tài chính",
+  "subtitle": "Theo dõi khách hàng, mua sắm, thanh toán, chi tiêu, bảng đơn giá và ngân sách ở cùng một nơi.",
+  "kpi": {
+    "budgeted": "Ngân sách",
+    "spend": "Chi tiêu đã ghi nhận",
+    "openPos": "Đơn đặt hàng đang mở"
+  },
+  "fields": {
+    "notes": "Ghi chú",
+    "amount": "Số tiền",
+    "description": "Mô tả",
+    "vendor": "Nhà cung cấp",
+    "searchVendors": "Tìm nhà cung cấp…",
+    "noVendor": "Không có nhà cung cấp",
+    "partOptional": "Vật tư (không bắt buộc)",
+    "searchParts": "Tìm vật tư…",
+    "costCenter": "Trung tâm chi phí",
+    "noCostCenter": "Không có trung tâm chi phí",
+    "noInvoiceNumber": "Chưa có số hóa đơn"
+  },
+  "messages": {
+    "customerSaved": "Đã lưu thông tin khách hàng.",
+    "paymentSaved": "Đã lưu khoản thanh toán.",
+    "expenditureSaved": "Đã ghi nhận khoản chi.",
+    "rateSaved": "Đã lưu đơn giá.",
+    "budgetSaved": "Đã lưu ngân sách.",
+    "costCenterSaved": "Đã lưu trung tâm chi phí.",
+    "categorySaved": "Đã lưu loại chi phí."
+  },
+  "customers": {
+    "title": "Khách hàng",
+    "name": "Tên khách hàng",
+    "company": "Công ty",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "save": "Lưu khách hàng",
+    "recent": "Khách hàng gần đây",
+    "empty": "Chưa có khách hàng nào.",
+    "client": "Khách hàng"
+  },
+  "payments": {
+    "title": "Thanh toán",
+    "description": "Mô tả hóa đơn hoặc khoản thanh toán",
+    "purchaseOrder": "Đơn đặt hàng",
+    "noPurchaseOrder": "Không có đơn đặt hàng",
+    "invoice": "Hóa đơn (đối chiếu ba bên)",
+    "noInvoice": "Không chọn hóa đơn cụ thể",
+    "noInvoicesOnPo": "Đơn đặt hàng này chưa có hóa đơn — hãy thêm ở mục Mua sắm phía trên.",
+    "method": "Phương thức",
+    "defaultMethod": "Chuyển khoản",
+    "reference": "Mã tham chiếu",
+    "save": "Lưu thanh toán"
+  },
+  "paymentStatus": {
+    "pending": "Chờ xử lý",
+    "completed": "Đã hoàn tất"
+  },
+  "expenditures": {
+    "title": "Chi tiêu",
+    "notAPart": "Không phải vật tư / dịch vụ",
+    "selectCategory": "Chọn loại chi phí…",
+    "workOrder": "Lệnh công việc (không bắt buộc)",
+    "noWorkOrder": "Không có lệnh công việc",
+    "asset": "Tài sản (không bắt buộc)",
+    "noAsset": "Không có tài sản",
+    "save": "Ghi nhận chi tiêu"
+  },
+  "rates": {
+    "title": "Bảng đơn giá",
+    "service": "Dịch vụ hoặc hạng mục nhân công",
+    "rate": "Đơn giá",
+    "currency": "Tiền tệ",
+    "save": "Lưu đơn giá"
+  },
+  "rateUnit": {
+    "hour": "giờ",
+    "day": "ngày",
+    "week": "tuần",
+    "month": "tháng",
+    "job": "công việc",
+    "visit": "lượt"
+  },
+  "budget": {
+    "title": "Ngân sách",
+    "name": "Tên ngân sách",
+    "defaultName": "Ngân sách vận hành",
+    "save": "Lưu ngân sách"
+  },
+  "budgetPeriod": {
+    "Monthly": "Hằng tháng",
+    "Quarterly": "Hằng quý",
+    "Annual": "Hằng năm",
+    "One-time": "Một lần"
+  },
+  "costCenters": {
+    "title": "Trung tâm chi phí",
+    "name": "Tên (VD: Cơ sở vật chất — Điều hòa)",
+    "code": "Mã (không bắt buộc)",
+    "save": "Lưu trung tâm chi phí"
+  },
+  "categories": {
+    "title": "Loại chi phí",
+    "name": "Tên (VD: Dịch vụ thuê ngoài)",
+    "save": "Lưu loại chi phí"
+  },
+  "procurement": {
+    "title": "Mua sắm",
+    "newPo": "Tạo đơn đặt hàng",
+    "empty": "Chưa có đơn đặt hàng nào.",
+    "costCenter": "Trung tâm chi phí: {{name}}",
+    "line": "Hạng mục",
+    "qty": "SL",
+    "unitCost": "Đơn giá",
+    "received": "Đã nhận",
+    "noLines": "Chưa có hạng mục nào.",
+    "servicePart": "Dịch vụ / không phải vật tư",
+    "orDescription": "Hoặc nhập mô tả",
+    "addLine": "Thêm hạng mục",
+    "receive": "Nhận hàng",
+    "quantityReceived": "Số lượng đã nhận",
+    "confirmReceipt": "Xác nhận nhận hàng",
+    "invoices": "Hóa đơn nhà cung cấp (đối chiếu ba bên)",
+    "noInvoices": "Đơn đặt hàng này chưa có hóa đơn nào.",
+    "invoiceNumber": "Số hóa đơn",
+    "invoiceDate": "Ngày hóa đơn",
+    "recordInvoice": "Ghi nhận hóa đơn",
+    "newTitle": "Đơn đặt hàng mới",
+    "titlePlaceholder": "Tiêu đề (đơn này dùng để làm gì?)"
+  },
+  "poStatus": {
+    "rfq": "Yêu cầu báo giá",
+    "po": "Đã đặt hàng",
+    "received": "Đã nhận hàng",
+    "approved": "Đã duyệt"
+  },
+  "match": {
+    "matched": "Khớp",
+    "both": "Lệch số tiền & chưa nhận đủ",
+    "amount": "Lệch số tiền",
+    "receipt": "Chờ nhận đủ hàng",
+    "bothHint": "Số tiền khác với tổng đơn đặt hàng và chưa nhận đủ hàng",
+    "amountHint": "Số tiền hóa đơn khác với tổng đơn đặt hàng ({{total}})",
+    "receiptHint": "Chưa nhận đủ hàng trong đơn đặt hàng này"
+  }
+}
