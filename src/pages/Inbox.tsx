@@ -58,7 +58,8 @@ export default function Inbox() {
         if (sendError) {
           const payload = await (sendError as { context?: Response }).context?.json?.().catch(() => null);
           const code = (payload as { error?: string } | null)?.error;
-          notifyError(t('delivery.notDelivered', { reason: code ? t(`delivery.errors.${code}`, code) : sendError.message }));
+          const channel = t(`channels.${current.channel}`);
+          notifyError(t('delivery.notDelivered', { reason: code ? t(`delivery.errors.${code}`, { defaultValue: code, channel }) : sendError.message }));
         }
       }
     },

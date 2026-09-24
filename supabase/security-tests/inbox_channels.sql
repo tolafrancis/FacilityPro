@@ -101,4 +101,29 @@ select t.check('a retried webhook delivery is stored once',
     $q$insert into fp_messages (org_id, conversation_id, direction, body, external_id) values (%L, 'c0000000-0000-0000-0000-000000000001', 'in', 'hello', 'wamid.1')$q$, :'org')) like 'err:%duplicate%'
   and (select count(*) from fp_messages where external_id = 'wamid.1') = 1);
 
+-- ===========================================================================
+-- Zalo OA (0076): connected like a number; its tokens are service-role only
+-- ===========================================================================
+select t.check('platform admin connects a Zalo OA to an org',
+  t.run('authenticated', :'ops', format(
+    $q$insert into fp_channel_accounts (org_id, channel, external_id, display_name) values (%L, 'zalo', '4318823530455000000', 'Toà nhà A')$q$, :'org')) = 'ok:1');
+select t.check('an org admin cannot register a Zalo OA',
+  t.run('authenticated', :'adminB', format(
+    $q$insert into fp_channel_accounts (org_id, channel, external_id) values (%L, 'zalo', '999')$q$, :'orgB')) like 'err:%');
+select id as "zaloAcct" from fp_channel_accounts where channel = 'zalo' \gset
+select t.check('the service role stores the OA''s tokens',
+  t.run('service_role', null, format(
+    $q$insert into fp_channel_tokens (channel_account_id, access_token, refresh_token, expires_at) values (%L, 'at', 'rt', now() + interval '1 day')$q$, :'zaloAcct')) = 'ok:1');
+select t.check('nobody signed in can read Zalo tokens, not even the org''s admin or a platform admin',
+  t.run('authenticated', :'admin', $q$select * from fp_channel_tokens$q$) like 'err:%'
+  and t.run('authenticated', :'ops', $q$select * from fp_channel_tokens$q$) like 'err:%'
+  and t.run('anon', null, $q$select * from fp_channel_tokens$q$) like 'err:%');
+select t.check('nobody signed in can overwrite a Zalo token',
+  t.run('authenticated', :'ops', $q$update fp_channel_tokens set refresh_token = 'mine'$q$) like 'err:%'
+  and (select refresh_token from fp_channel_tokens) = 'rt');
+select t.run('authenticated', :'ops', format(
+  $q$delete from fp_channel_accounts where id = %L$q$, :'zaloAcct')) as r \gset
+select t.check('disconnecting the OA removes its tokens',
+  :'r' = 'ok:1' and not exists (select 1 from fp_channel_tokens));
+
 \ir _report.sql

@@ -869,8 +869,8 @@ function IntegrationsSection() {
 
   const emailOn = !!pref.data?.email_enabled;
 
-  // Numbers are connected by the platform operator (0064): a tenant choosing
-  // its own number id could otherwise receive another tenant's messages.
+  // Numbers / OAs are connected by the platform operator (0064, 0076): a
+  // tenant choosing its own id could otherwise receive another tenant's messages.
   const channels = useQuery({
     queryKey: ['channel_accounts'],
     queryFn: async () => {
@@ -893,20 +893,26 @@ function IntegrationsSection() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-line bg-white p-4">
-        <h2 className="font-semibold text-ink">WhatsApp</h2>
-        {(channels.data ?? []).filter((c) => c.channel === 'whatsapp' && c.active).length > 0 ? (
-          <ul className="mt-1 text-sm text-ink">
-            {(channels.data ?? []).filter((c) => c.channel === 'whatsapp' && c.active).map((c) => (
-              <li key={c.id}>Connected: {c.display_name ?? c.external_id}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-1 text-sm text-ink-muted">
-            No WhatsApp number is connected. Contact FacilitySpace support to connect your business number; replies to WhatsApp conversations can't be delivered until then.
-          </p>
-        )}
-      </section>
+      {([
+        ['whatsapp', 'WhatsApp', 'No WhatsApp number is connected. Contact FacilitySpace support to connect your business number; replies to WhatsApp conversations can\'t be delivered until then.'],
+        ['zalo', 'Zalo', 'No Zalo Official Account is connected. Contact FacilitySpace support to connect your OA; replies to Zalo conversations can\'t be delivered until then.'],
+      ] as const).map(([channel, label, empty]) => {
+        const connected = (channels.data ?? []).filter((c) => c.channel === channel && c.active);
+        return (
+          <section key={channel} className="rounded-xl border border-line bg-white p-4">
+            <h2 className="font-semibold text-ink">{label}</h2>
+            {connected.length > 0 ? (
+              <ul className="mt-1 text-sm text-ink">
+                {connected.map((c) => (
+                  <li key={c.id}>Connected: {c.display_name ?? c.external_id}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-1 text-sm text-ink-muted">{empty}</p>
+            )}
+          </section>
+        );
+      })}
 
       <section className="rounded-xl border border-line bg-white p-4">
         <h2 className="font-semibold text-ink">Email, SMS &amp; push delivery</h2>

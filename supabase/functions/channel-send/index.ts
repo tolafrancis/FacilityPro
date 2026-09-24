@@ -9,6 +9,8 @@
 //   supabase secrets set WHATSAPP_TOKEN=EAAG...         # WhatsApp Cloud API token (platform business account)
 //   # Optional, single-tenant fallback for deployments without fp_channel_accounts rows:
 //   supabase secrets set WHATSAPP_PHONE_ID=1234567890 WHATSAPP_ORG_ID=<org uuid>
+//   # Zalo OA (0076): ZALO_APP_ID + ZALO_APP_SECRET, and the OA's refresh token
+//   # in fp_channel_tokens (see _shared/zalo.ts and the README).
 //
 // Security (migration 0064):
 //   * The message is read with the caller's own JWT, so RLS decides whether
@@ -16,12 +18,13 @@
 //     message's author can send it, once.
 //   * It is sent from the number connected to that organisation
 //     (fp_channel_accounts); an organisation without a number can't send.
-//   * At most 500 outbound WhatsApp messages per organisation per day.
+//   * At most 500 outbound WhatsApp + Zalo messages per organisation per day.
 //
-// 'manual' and 'web' conversations need no external delivery. Extend the
-// switch for Zalo/Line.
+// 'manual', 'web' and 'email' conversations need no external delivery.
+// LINE isn't connected yet.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { sendZalo } from '../_shared/zalo.ts';
 
 const WHATSAPP_TOKEN = Deno.env.get('WHATSAPP_TOKEN') ?? '';
 const FALLBACK_PHONE_ID = Deno.env.get('WHATSAPP_PHONE_ID') ?? '';
@@ -86,22 +89,24 @@ Deno.serve(async (req) => {
     .select('channel, contact_handle')
     .eq('id', msg.conversation_id)
     .maybeSingle();
-  if (!conv?.contact_handle || conv.channel !== 'whatsapp') {
+  const channel = conv?.channel;
+  if (!conv?.contact_handle || (channel !== 'whatsapp' && channel !== 'zalo')) {
     return json({ status: 'not_external' }); // manual/web/email: nothing to deliver
   }
 
   const { data: account } = await service
     .from('fp_channel_accounts')
-    .select('external_id')
+    .select('id, external_id')
     .eq('org_id', msg.org_id)
-    .eq('channel', 'whatsapp')
+    .eq('channel', channel)
     .eq('active', true)
+    .order('created_at')
     .limit(1)
     .maybeSingle();
-  const phoneId =
+  const senderId =
     (account?.external_id as string | undefined) ??
-    (FALLBACK_PHONE_ID && msg.org_id === FALLBACK_ORG_ID ? FALLBACK_PHONE_ID : null);
-  if (!phoneId) return json({ error: 'channel_not_configured' }, 400);
+    (channel === 'whatsapp' && FALLBACK_PHONE_ID && msg.org_id === FALLBACK_ORG_ID ? FALLBACK_PHONE_ID : null);
+  if (!senderId) return json({ error: 'channel_not_configured', channel }, 400);
 
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const { count } = await service
@@ -117,12 +122,15 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const externalId = await sendWhatsApp(phoneId, conv.contact_handle, msg.body);
+    const externalId =
+      channel === 'zalo'
+        ? await sendZalo(service, account!.id as string, conv.contact_handle, msg.body)
+        : await sendWhatsApp(senderId, conv.contact_handle, msg.body);
     await service.from('fp_messages').update({ delivery_status: 'sent', external_id: externalId, delivery_error: null }).eq('id', msg.id);
     return json({ status: 'sent' });
   } catch (e) {
     const error = e instanceof Error ? e.message : String(e);
     await service.from('fp_messages').update({ delivery_status: 'failed', delivery_error: error.slice(0, 500) }).eq('id', msg.id);
-    return json({ error: 'send_failed', detail: error }, 502);
+    return json({ error: 'send_failed', channel, detail: error }, 502);
   }
 });

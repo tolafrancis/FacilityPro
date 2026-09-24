@@ -134,7 +134,23 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0075**, in the dash
 > 3. Connect each organisation's number (as a platform admin, in the SQL editor): `insert into fp_channel_accounts (org_id, channel, external_id, display_name) values ('<org uuid>', 'whatsapp', '<phone_number_id>', '+84 …');`. Inbound messages are routed to, and replies sent from, the org that owns the number; an org admin sees it read-only under **Settings → Integrations**. (Single-tenant fallback: `WHATSAPP_PHONE_ID` + `WHATSAPP_ORG_ID` secrets.)
 > 4. Point the Meta webhook at `https://<project-ref>.functions.supabase.co/channel-webhook`.
 >
-> Outbound sends are limited to 500 per organisation per day, and each message shows its delivery status (sent / delivered / read / failed) in the inbox.
+> **Zalo Official Account (0076).** Zalo runs through the same two functions. One Zalo app (developers.zalo.me) serves every organisation; each org's OA authorises it.
+>
+> 1. Apply migration `0076_zalo_channel.sql` and redeploy `channel-webhook` and `channel-send` (same flags as above).
+> 2. Set secrets: `supabase secrets set ZALO_APP_ID=… ZALO_APP_SECRET=… ZALO_OA_SECRET_KEY=…` (the last one is the **OA Secret Key** on the app's Webhook page; every delivery's `X-ZEvent-Signature` is checked against it, and without it Zalo deliveries are rejected).
+> 3. Webhook URL: Zalo only accepts a URL on a domain verified in the Zalo app, and `supabase.co` can't be verified. Put the function behind your own domain (a Supabase custom domain, or a small proxy such as a Cloudflare Worker on `hooks.yourdomain.com` that forwards the request body and the `X-ZEvent-Signature` header unchanged to `https://<project-ref>.functions.supabase.co/channel-webhook`) and verify that domain. Subscribe to the `user_send_*`, `user_received_message` and `user_seen_message` events.
+> 4. Connect each organisation's OA (as a platform admin, in the SQL editor), using the OA id and a refresh token from the OA's authorisation (Zalo's OAuth v4 flow, or the API Explorer):
+>    ```sql
+>    with a as (
+>      insert into fp_channel_accounts (org_id, channel, external_id, display_name)
+>      values ('<org uuid>', 'zalo', '<oa_id>', '<OA name>') returning id)
+>    insert into fp_channel_tokens (channel_account_id, refresh_token) select id, '<refresh_token>' from a;
+>    ```
+>    Access tokens are renewed automatically, and the rotated refresh token is saved back. Tokens are readable by the Edge Functions only. A refresh token expires after about 3 months unused, so an OA that sends nothing for that long has to be re-authorised (update its `fp_channel_tokens.refresh_token`); a failed renewal is recorded in `fp_channel_tokens.last_error`.
+>
+> Zalo only allows replies (customer-service messages) to followers who have messaged the OA recently; outside that window Zalo rejects the send and the message shows as not delivered. Zalo conversations start when a follower writes to the OA. The contact name is filled from their Zalo profile.
+>
+> Outbound sends (WhatsApp and Zalo together) are limited to 500 per organisation per day, and each message shows its delivery status (sent / delivered / read / failed) in the inbox.
 
 > **Smart assistant (optional).** The AI call runs server-side; the key is never in the web bundle. `supabase functions deploy smart-assistant` and `supabase secrets set OPENAI_API_KEY=sk-…` (optionally `OPENAI_MODEL`, default `gpt-4o-mini`). Members get 30 requests per hour. Without the secret, the page uses its built-in guidance. Do **not** set any `VITE_OPENAI_*` variable: anything prefixed `VITE_` is public.
 

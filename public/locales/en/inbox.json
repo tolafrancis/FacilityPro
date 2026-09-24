@@ -31,9 +31,9 @@
     "failed": "Not delivered",
     "notDelivered": "Reply saved, but not delivered: {{reason}}",
     "errors": {
-      "channel_not_configured": "no WhatsApp number is connected to this organisation",
-      "rate_limited": "daily WhatsApp limit reached",
-      "send_failed": "WhatsApp rejected the message",
+      "channel_not_configured": "no {{channel}} account is connected to this organisation",
+      "rate_limited": "daily messaging limit reached",
+      "send_failed": "{{channel}} rejected the message",
       "not_allowed": "you can only send your own replies"
     }
   }

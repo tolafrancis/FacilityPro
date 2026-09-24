@@ -31,9 +31,9 @@
     "failed": "Chưa gửi được",
     "notDelivered": "Đã lưu tin trả lời nhưng chưa gửi được: {{reason}}",
     "errors": {
-      "channel_not_configured": "tổ chức chưa kết nối số WhatsApp",
-      "rate_limited": "đã đạt giới hạn WhatsApp trong ngày",
-      "send_failed": "WhatsApp từ chối tin nhắn",
+      "channel_not_configured": "tổ chức chưa kết nối tài khoản {{channel}}",
+      "rate_limited": "đã đạt giới hạn tin nhắn trong ngày",
+      "send_failed": "{{channel}} từ chối tin nhắn",
       "not_allowed": "bạn chỉ có thể gửi tin trả lời của chính mình"
     }
   }
