@@ -13,18 +13,9 @@
 //   supabase functions deploy run-scheduled-workflows --no-verify-jwt
 //   (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.)
 //
-// Schedule it (e.g. every 15 minutes). Either:
-//   - Supabase Dashboard -> Edge Functions -> Schedules, or
-//   - pg_cron + pg_net from the SQL editor:
-//       select cron.schedule('fp-scheduled-workflows', '*/15 * * * *', $$
-//         select net.http_post(
-//           url := 'https://<project-ref>.functions.supabase.co/run-scheduled-workflows',
-//           headers := '{"Authorization":"Bearer <service-key>"}'::jsonb
-//         );
-//       $$);
-//   - or skip the function entirely and cron the SQL directly:
-//       select cron.schedule('fp-scheduled-workflows', '*/15 * * * *',
-//         $$ select fp_run_scheduled_workflows(); $$);
+// Optional: migration 0061 already runs the same job every 15 minutes with
+// pg_cron (select fp_run_job('scheduled_workflows')). Deploy this only if you
+// want to trigger it from outside the database as well.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -34,7 +25,8 @@ Deno.serve(async () => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  const { data, error } = await supabase.rpc('fp_run_scheduled_workflows');
+  // fp_run_job records the run, so the job-health check sees it.
+  const { data, error } = await supabase.rpc('fp_run_job', { p_job: 'scheduled_workflows' });
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });

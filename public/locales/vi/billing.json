@@ -45,5 +45,16 @@
     "activate": "Kích hoạt",
     "confirmCancel": "Xác nhận hủy",
     "cancelRequested": "đã yêu cầu hủy"
+  },
+  "jobs": {
+    "title": "Tác vụ nền (nền tảng)",
+    "hint": "Các tác vụ định kỳ: tạo lệnh bảo trì, leo thang SLA, nhắc nhở, quy trình tự động và gửi thông báo. Quản trị nền tảng sẽ nhận email khi một tác vụ bị trễ hoặc lỗi.",
+    "lastOk": "Lần thành công gần nhất",
+    "state": {
+      "ok": "Ổn định",
+      "late": "Bị trễ",
+      "failing": "Đang lỗi",
+      "never": "Chưa chạy"
+    }
   }
 }

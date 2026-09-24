@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
 import {
@@ -15,7 +15,8 @@ import {
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { formatDate, PRIORITIES, PRIORITY_CLASS } from '../lib/ui';
-import type { Priority, PmTriggerType } from '../lib/database.types';
+import type { Priority, PmSchedule, PmTriggerType } from '../lib/database.types';
+import { dateInZone, orgTimeZone, timeInZone, zonedTimeToIso } from '../lib/time';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
@@ -36,6 +37,10 @@ export default function Maintenance() {
   const members = useOrgMembers();
 
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<PmSchedule | null>(null);
+  // Due dates are shown and entered in the organisation's time zone, not the
+  // browser's (a manager travelling abroad must not shift every schedule).
+  const tz = orgTimeZone(currentOrg);
   const [monthOffset, setMonthOffset] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -91,13 +96,13 @@ export default function Maintenance() {
     const map: Record<number, number> = {};
     for (const s of schedules) {
       if (!s.active || s.trigger_type !== 'calendar' || !s.next_due_at) continue;
-      const d = new Date(s.next_due_at);
-      if (d.getFullYear() === year && d.getMonth() === month) {
-        map[d.getDate()] = (map[d.getDate()] ?? 0) + 1;
+      const [y, m, d] = dateInZone(s.next_due_at, tz).split('-').map(Number);
+      if (y === year && m - 1 === month) {
+        map[d] = (map[d] ?? 0) + 1;
       }
     }
     return map;
-  }, [schedules, year, month]);
+  }, [schedules, year, month, tz]);
 
   return (
     <div className="max-w-4xl">
@@ -212,6 +217,13 @@ export default function Maintenance() {
                     <div className="mt-2 flex items-center gap-3">
                       <button
                         type="button"
+                        onClick={() => setEditing(s)}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:text-brand-600"
+                      >
+                        <Pencil size={12} /> {t('edit')}
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => toggleActive.mutate({ id: s.id, active: !s.active })}
                         className="text-xs font-medium text-brand hover:text-brand-600"
                       >
@@ -238,10 +250,15 @@ export default function Maintenance() {
         </section>
       </div>
 
-      {open && (
+      {(open || editing) && (
         <ScheduleDialog
-          busy={false}
-          onCancel={() => setOpen(false)}
+          key={editing?.id ?? 'new'}
+          schedule={editing}
+          timeZone={tz}
+          onCancel={() => {
+            setOpen(false);
+            setEditing(null);
+          }}
           orgId={orgId!}
           assetOptions={assets.map((a) => ({ id: a.id, name: resolveI18n(a.name_i18n, lng) }))}
           templateOptions={(templatesQuery.data ?? []).map((tpl) => ({
@@ -249,9 +266,10 @@ export default function Maintenance() {
             name: resolveI18n(tpl.name_i18n, lng),
           }))}
           memberOptions={(members.data ?? []).map((m) => ({ id: m.user_id, name: m.email }))}
-          onCreated={() => {
+          onSaved={() => {
             void queryClient.invalidateQueries({ queryKey: ['pm_schedules', orgId] });
             setOpen(false);
+            setEditing(null);
           }}
         />
       )}
@@ -261,46 +279,53 @@ export default function Maintenance() {
 
 function ScheduleDialog({
   orgId,
+  schedule,
+  timeZone,
   assetOptions,
   templateOptions,
   memberOptions,
   onCancel,
-  onCreated,
+  onSaved,
 }: {
-  busy: boolean;
   orgId: string;
+  /** Existing schedule to edit; omit to create a new one. */
+  schedule: PmSchedule | null;
+  timeZone: string;
   assetOptions: { id: string; name: string }[];
   templateOptions: { id: string; name: string }[];
   memberOptions: { id: string; name: string }[];
   onCancel: () => void;
-  onCreated: () => void;
+  onSaved: () => void;
 }) {
   const { t, i18n } = useTranslation('maintenance');
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
-  const [en, setEn] = useState('');
-  const [vi, setVi] = useState('');
-  const [assetId, setAssetId] = useState('');
-  const [triggerType, setTriggerType] = useState<PmTriggerType>('calendar');
-  const [interval, setInterval] = useState('30');
-  const [meterId, setMeterId] = useState('');
-  const [threshold, setThreshold] = useState('100');
-  const [templateId, setTemplateId] = useState('');
-  const [assignee, setAssignee] = useState('');
-  const [priority, setPriority] = useState<Priority>('medium');
-  const today = new Date().toISOString().slice(0, 10);
-  const [firstDue, setFirstDue] = useState(today);
-  const [leadTime, setLeadTime] = useState('0');
+  const s = schedule;
+  const [en, setEn] = useState(s?.name_i18n.en ?? '');
+  const [vi, setVi] = useState(s?.name_i18n.vi ?? '');
+  const [assetId, setAssetId] = useState(s?.asset_id ?? '');
+  const [triggerType, setTriggerType] = useState<PmTriggerType>(s?.trigger_type ?? 'calendar');
+  const [interval, setInterval] = useState(String(s?.interval_days ?? 30));
+  const [meterId, setMeterId] = useState(s?.meter_id ?? '');
+  const [threshold, setThreshold] = useState(String(s?.meter_threshold ?? 100));
+  const [templateId, setTemplateId] = useState(s?.checklist_template_id ?? '');
+  const [assignee, setAssignee] = useState(s?.assigned_to ?? '');
+  const [priority, setPriority] = useState<Priority>(s?.priority ?? 'medium');
+  // "Today" and the due date are the organisation's calendar day; the time of
+  // day is kept when editing and is 09:00 for new schedules.
+  const today = dateInZone(Date.now(), timeZone);
+  const [firstDue, setFirstDue] = useState(s?.next_due_at ? dateInZone(s.next_due_at, timeZone) : today);
+  const dueTime = s?.next_due_at ? timeInZone(s.next_due_at, timeZone) : '09:00';
+  const [leadTime, setLeadTime] = useState(String(s?.lead_time_days ?? 0));
   const [error, setError] = useState<string | null>(null);
 
   const metersQuery = useMeters(assetId || undefined);
   const meters = metersQuery.data ?? [];
 
-  const create = useMutation({
+  const save = useMutation({
     mutationFn: async () => {
       const isCalendar = triggerType === 'calendar';
-      const { error: err } = await supabase.from('fp_pm_schedules').insert({
-        org_id: orgId,
+      const values = {
         asset_id: assetId || null,
         name_i18n: { en, vi: vi || en },
         interval_days: Math.max(1, parseInt(interval, 10) || 30),
@@ -308,14 +333,17 @@ function ScheduleDialog({
         assigned_to: assignee || null,
         priority,
         trigger_type: triggerType,
-        next_due_at: isCalendar ? new Date(firstDue + 'T09:00:00').toISOString() : null,
+        next_due_at: isCalendar ? zonedTimeToIso(firstDue, dueTime, timeZone) : null,
         meter_id: isCalendar ? null : meterId || null,
         meter_threshold: isCalendar ? null : Math.max(1, parseFloat(threshold) || 1),
         lead_time_days: Math.max(0, parseInt(leadTime, 10) || 0),
-      });
+      };
+      const { error: err } = s
+        ? await supabase.from('fp_pm_schedules').update(values).eq('id', s.id)
+        : await supabase.from('fp_pm_schedules').insert({ org_id: orgId, ...values });
       if (err) throw err;
     },
-    onSuccess: onCreated,
+    onSuccess: onSaved,
     onError: (e: unknown) => setError(e instanceof Error ? e.message : String(e)),
   });
 
@@ -327,7 +355,7 @@ function ScheduleDialog({
       setError(t('dialog.meterRequired'));
       return;
     }
-    create.mutate();
+    save.mutate();
   };
 
   return (
@@ -336,7 +364,7 @@ function ScheduleDialog({
         onSubmit={submit}
         className="w-full max-w-md rounded-xl border border-line bg-white p-6 shadow-lg"
       >
-        <h2 className="text-lg font-semibold text-ink">{t('dialog.title')}</h2>
+        <h2 className="text-lg font-semibold text-ink">{s ? t('dialog.editTitle') : t('dialog.title')}</h2>
         <div className="mt-4 space-y-4">
           <BilingualName en={en} vi={vi} onEn={setEn} onVi={setVi} />
           <div>
@@ -378,9 +406,12 @@ function ScheduleDialog({
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-ink">
-                  {t('dialog.firstDue')}
+                  {s ? t('dialog.nextDue') : t('dialog.firstDue')}
                 </label>
                 <Input type="date" value={firstDue} onChange={(e) => setFirstDue(e.target.value)} />
+                <p className="mt-1 text-xs text-ink-muted">
+                  {t('dialog.timeZoneHint', { time: dueTime, tz: timeZone })}
+                </p>
               </div>
               <div className="col-span-2">
                 <label className="mb-1 block text-sm font-medium text-ink">
@@ -467,8 +498,8 @@ function ScheduleDialog({
           <Button type="button" variant="secondary" onClick={onCancel}>
             {tc('actions.cancel')}
           </Button>
-          <Button type="submit" loading={create.isPending}>
-            {tc('actions.create')}
+          <Button type="submit" loading={save.isPending}>
+            {s ? tc('actions.save') : tc('actions.create')}
           </Button>
         </div>
       </form>

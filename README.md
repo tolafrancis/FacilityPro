@@ -76,7 +76,7 @@ supabase db push
 
 **Option B — SQL editor**
 
-Run each file in `supabase/migrations/` **in order, 0001 → 0059**, in the dashboard SQL editor.
+Run each file in `supabase/migrations/` **in order, 0001 → 0061**, in the dashboard SQL editor.
 
 > **Platform admin (required after 0059).** Migration **0059** locks the plan catalogue and subscription activation to platform operators, and makes function EXECUTE an explicit allow-list (new functions in `public` are no longer callable from the API until granted). Make yourself a platform admin once, in the SQL editor:
 >
@@ -87,7 +87,16 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0059**, in the dash
 >
 > Platform admins see a **Subscription requests** queue on the Billing page and activate a customer's plan after confirming payment. If 0059 prints a `WARNING` about rows that reference another org, that data predates the fix; the warning includes the query to find those rows.
 >
-> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs `security_blockers.sql`, which checks cross-tenant and privilege-escalation cases plus normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
+> **Scheduled jobs (0061).** Migration **0061** schedules the background jobs with `pg_cron`: PM generation (hourly), SLA escalation and time-based workflows (every 15 min), expiry reminders (daily, 07:00 Vietnam time), email/SMS/push delivery (every 5 min) and a health check. Enable **pg_cron** and **pg_net** (Dashboard → Database → Extensions) *before* running it; if pg_cron was missing, the migration prints a warning, and re-running it after enabling the extension creates the schedules. Message delivery calls the `process-outbox` Edge Function, so store the project URL and service key in Vault once:
+>
+> ```sql
+> select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
+> select vault.create_secret('<service_role key>', 'service_role_key');
+> ```
+>
+> Platform admins see every job's status under **Billing → Background jobs** and are emailed when a job is late or failing. Check it once after deploying: every job should turn **Healthy** within an hour. PM due dates use the organisation's time zone (**Settings → Time zone**, default `Asia/Ho_Chi_Minh`).
+>
+> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
 
 > Migration **0008** creates the `fp_media` table **and a private storage bucket `fp-media`** with org-scoped access policies (objects are namespaced by org id; access via signed URLs). Migration **0009** adds `fp_org_members()` used to populate the assignee dropdown. Migrations **0010–0011** add checklists and preventive-maintenance schedules plus the `fp_generate_due_pm()` generator. Migration **0013** alters `fp_pm_schedules` (makes `next_due_at` nullable and adds meter-trigger columns) and **replaces** `fp_generate_due_pm()` to handle meter triggers. Migration **0015** adds a `BEFORE INSERT` trigger on `fp_work_orders` (SLA due-date + auto-assignment), and **0016** adds notification triggers. Migration **0017** adds the email outbox (`fp_notification_outbox`) plus a trigger that enqueues an email when an in-app notification lands for a user who opted in, and **0018** adds the approvals workflow. No manual storage setup is needed.
 

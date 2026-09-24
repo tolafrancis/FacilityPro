@@ -16,6 +16,7 @@ export interface Organization {
   subscription_tier: string;
   allow_public_requests?: boolean;
   auto_create_work_orders?: boolean;
+  settings?: { timezone?: string; currency?: string } | null;
 }
 
 export interface Membership {
@@ -684,6 +685,18 @@ export interface Subscription {
   requested_at: string | null;
   cancel_requested_at: string | null;
   updated_at: string;
+}
+
+/** Row of fp_job_health(): one background job's status (platform admins). */
+export interface JobHealth {
+  job: string;
+  description: string;
+  max_silence_minutes: number;
+  last_run_at: string | null;
+  last_ok_at: string | null;
+  last_ok: boolean | null;
+  last_error: string | null;
+  healthy: boolean;
 }
 
 /** Row of fp_platform_subscriptions(): the platform operator's billing queue. */

@@ -21,15 +21,9 @@
 //   (SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected automatically.)
 //   The VAPID_PUBLIC_KEY must also be exposed to the web app as VITE_VAPID_PUBLIC_KEY.
 //
-// Schedule it (so messages go out without manual calls). Either:
-//   - Supabase Dashboard -> Edge Functions -> Schedules (e.g. every 5 minutes), or
-//   - pg_cron + pg_net from the SQL editor:
-//       select cron.schedule('fp-outbox', '*/5 * * * *', $$
-//         select net.http_post(
-//           url := 'https://<project-ref>.functions.supabase.co/process-outbox',
-//           headers := '{"Authorization":"Bearer <anon-or-service-key>"}'::jsonb
-//         );
-//       $$);
+// Scheduling: migration 0061 schedules this every 5 minutes with pg_cron +
+// pg_net, using the project URL and service_role key stored in Supabase Vault
+// as `project_url` and `service_role_key` (see README). Nothing to set up here.
 //
 // Each row carries a `channel` ('email' | 'sms' | 'push'); add more by branching
 // in deliver().
@@ -52,6 +46,7 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 
 interface OutboxRow {
   id: string;
+  attempts?: number;
   channel: string;
   to_address: string;
   subject: string;
@@ -140,20 +135,27 @@ async function deliver(row: OutboxRow, supabase: SupabaseClient): Promise<void> 
   }
 }
 
+// Rows are claimed atomically (fp_claim_outbox), so overlapping runs — the
+// pg_cron schedule plus a manual call — never send the same message twice. A
+// failed delivery is retried on later runs, up to 5 attempts. Every run is
+// recorded (fp_record_job_run) so the job-health check notices if this stops.
+const MAX_ATTEMPTS = 5;
+
 Deno.serve(async () => {
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  const { data, error } = await supabase
-    .from('fp_notification_outbox')
-    .select('id, channel, to_address, subject, body')
-    .eq('status', 'pending')
-    .order('created_at')
-    .limit(50);
+  const { data, error } = await supabase.rpc('fp_claim_outbox', { p_limit: 50 });
 
   if (error) {
+    await supabase.rpc('fp_record_job_run', {
+      p_job: 'process_outbox',
+      p_ok: false,
+      p_processed: 0,
+      p_error: error.message,
+    });
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 
@@ -170,13 +172,24 @@ Deno.serve(async () => {
         .eq('id', row.id);
       sent++;
     } catch (e) {
+      const giveUp = (row.attempts ?? MAX_ATTEMPTS) >= MAX_ATTEMPTS;
       await supabase
         .from('fp_notification_outbox')
-        .update({ status: 'failed', error: e instanceof Error ? e.message : String(e) })
+        .update({
+          status: giveUp ? 'failed' : 'pending',
+          error: e instanceof Error ? e.message : String(e),
+        })
         .eq('id', row.id);
       failed++;
     }
   }
+
+  await supabase.rpc('fp_record_job_run', {
+    p_job: 'process_outbox',
+    p_ok: true,
+    p_processed: sent,
+    p_error: failed > 0 ? `${failed} message(s) failed this run and will be retried` : null,
+  });
 
   return new Response(JSON.stringify({ processed: rows.length, sent, failed }), {
     headers: { 'Content-Type': 'application/json' },

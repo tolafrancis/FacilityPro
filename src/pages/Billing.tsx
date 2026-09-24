@@ -7,13 +7,14 @@ import { useOrg } from '../contexts/OrgContext';
 import {
   useAssets,
   useIsPlatformAdmin,
+  useJobHealth,
   useOrgMembers,
   usePlans,
   usePlatformSubscriptions,
   useSubscription,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDateOnly } from '../lib/ui';
+import { formatDate, formatDateOnly } from '../lib/ui';
 import type { Plan, PlatformSubscription } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -213,6 +214,7 @@ export default function Billing() {
       </div>
 
       {isPlatformAdmin && <PlatformQueue plans={plans} onChanged={invalidate} />}
+      {isPlatformAdmin && <JobHealthPanel />}
 
       {editing && (
         <PlanDialog
@@ -320,6 +322,53 @@ function PlatformQueue({ plans, onChanged }: { plans: Plan[]; onChanged: () => v
           })}
         </ul>
       )}
+    </section>
+  );
+}
+
+/** Platform operator: are the scheduled jobs (PM, SLA, reminders, outbox) running? */
+function JobHealthPanel() {
+  const { t, i18n } = useTranslation('billing');
+  const lng = i18n.resolvedLanguage ?? 'en';
+  const health = useJobHealth(true);
+  const jobs = health.data ?? [];
+
+  return (
+    <section className="mt-8 rounded-xl border border-line bg-white p-4">
+      <h2 className="font-semibold text-ink">{t('jobs.title')}</h2>
+      <p className="mt-1 text-xs text-ink-muted">{t('jobs.hint')}</p>
+      {health.error && (
+        <p className="mt-2 text-xs text-status-crit">{(health.error as Error).message}</p>
+      )}
+      <ul className="mt-3 divide-y divide-line">
+        {jobs.map((j) => {
+          const state = j.healthy ? 'ok' : j.last_ok === false ? 'failing' : j.last_run_at ? 'late' : 'never';
+          return (
+            <li key={j.job} className="flex flex-wrap items-start justify-between gap-2 py-2 text-sm">
+              <div className="min-w-0">
+                <p className="font-medium text-ink">{j.description}</p>
+                <p className="text-xs text-ink-muted">
+                  {t('jobs.lastOk')}: {j.last_ok_at ? formatDate(j.last_ok_at, lng) : '—'}
+                </p>
+                {!j.healthy && j.last_error && (
+                  <p className="mt-0.5 break-words text-xs text-status-crit">{j.last_error}</p>
+                )}
+              </div>
+              <Pill
+                className={
+                  state === 'ok'
+                    ? 'bg-status-ok/10 text-status-ok'
+                    : state === 'failing'
+                      ? 'bg-status-crit/10 text-status-crit'
+                      : 'bg-status-warn/15 text-status-warn'
+                }
+              >
+                {t(`jobs.state.${state}`)}
+              </Pill>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

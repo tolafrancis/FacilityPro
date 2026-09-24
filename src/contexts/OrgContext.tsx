@@ -50,7 +50,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     const { data, error: err } = await supabase
       .from('fp_users_orgs')
       .select(
-        'org_id, role, fp_organizations(id, name, default_lng, active_languages, subscription_tier, allow_public_requests, auto_create_work_orders)'
+        'org_id, role, fp_organizations(id, name, default_lng, active_languages, subscription_tier, allow_public_requests, auto_create_work_orders, settings)'
       )
       .eq('user_id', userId);
     if (err) {

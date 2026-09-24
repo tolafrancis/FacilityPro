@@ -45,5 +45,16 @@
     "activate": "Activate",
     "confirmCancel": "Confirm cancellation",
     "cancelRequested": "cancellation requested"
+  },
+  "jobs": {
+    "title": "Background jobs (platform)",
+    "hint": "Scheduled work: PM generation, SLA escalation, reminders, workflows and message delivery. Platform admins are emailed when a job is late or failing.",
+    "lastOk": "Last success",
+    "state": {
+      "ok": "Healthy",
+      "late": "Late",
+      "failing": "Failing",
+      "never": "Never run"
+    }
   }
 }

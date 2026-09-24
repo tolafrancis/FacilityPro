@@ -42,6 +42,7 @@ import type {
   PartCategory,
   Plan,
   PlatformSubscription,
+  JobHealth,
   PmRequiredPart,
   PmSchedule,
   Priority,
@@ -1318,6 +1319,20 @@ export function usePlatformSubscriptions(enabled: boolean) {
       const { data, error } = await supabase.rpc('fp_platform_subscriptions');
       if (error) throw error;
       return (data ?? []) as PlatformSubscription[];
+    },
+  });
+}
+
+/** Background job health (pg_cron jobs + outbox). Platform admins only. */
+export function useJobHealth(enabled: boolean) {
+  return useQuery({
+    queryKey: ['job_health'],
+    enabled,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_job_health');
+      if (error) throw error;
+      return (data ?? []) as JobHealth[];
     },
   });
 }
