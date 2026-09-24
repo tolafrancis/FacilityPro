@@ -16,7 +16,8 @@ import {
   useWorkOrders,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import type { DocumentEntityType } from '../lib/database.types';
+import type { DocumentEntityType, DocumentRecord } from '../lib/database.types';
+import { signedUrl } from '../lib/media';
 
 const ENTITY_TYPES: { value: DocumentEntityType; label: string }[] = [
   { value: 'asset', label: 'Asset' },
@@ -28,9 +29,12 @@ const ENTITY_TYPES: { value: DocumentEntityType; label: string }[] = [
 ];
 
 export default function Documents() {
-  const { currentOrg } = useOrg();
+  const { currentOrg, role } = useOrg();
+  // Adding documents is a manager task (RLS enforces it too); everyone else
+  // just gets the list of documents they're allowed to see.
+  const canManage = role === 'org_admin' || role === 'manager';
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({ title: '', category: '', owner: '', summary: '', link: '' });
+  const [form, setForm] = useState({ title: '', category: '', owner: '', summary: '', link: '', visibility: 'staff' as DocumentRecord['visibility'] });
   const [file, setFile] = useState<File | null>(null);
   const [linkEntityType, setLinkEntityType] = useState<DocumentEntityType | ''>('');
   const [linkEntityId, setLinkEntityId] = useState('');
@@ -79,6 +83,14 @@ export default function Documents() {
     void queryClient.invalidateQueries({ queryKey: ['documents', currentOrg.id] });
   }, [currentOrg?.id, queryClient]);
 
+  // Files are private: open them through a short-lived signed URL, which the
+  // storage policy only issues to people allowed to see the document.
+  const openAttachment = async (path: string) => {
+    const url = await signedUrl(path);
+    if (url) window.open(url, '_blank', 'noopener');
+    else setMessage('You do not have access to this file, or it no longer exists.');
+  };
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!currentOrg?.id || !form.title) return;
@@ -94,7 +106,10 @@ export default function Documents() {
         fileName = file.name;
         mimeType = file.type;
         fileSize = file.size;
-        const path = `${currentOrg.id}/${crypto.randomUUID()}-${file.name}`;
+        // Storage keys must be plain ASCII (Vietnamese file names otherwise fail);
+        // the original name is kept in file_name for display.
+        const safeName = file.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = `${currentOrg.id}/documents/${crypto.randomUUID()}-${safeName}`;
         const { error: uploadError } = await supabase.storage.from('fp-media').upload(path, file, { cacheControl: '3600', upsert: false });
         if (uploadError) throw uploadError;
         filePath = path;
@@ -113,10 +128,15 @@ export default function Documents() {
           file_path: filePath,
           mime_type: mimeType,
           file_size: fileSize,
+          visibility: form.visibility,
         })
         .select('id')
         .single();
-      if (error) throw error;
+      if (error) {
+        // Don't leave an orphaned file behind a document that wasn't saved.
+        if (filePath) await supabase.storage.from('fp-media').remove([filePath]);
+        throw error;
+      }
 
       if (linkEntityType && linkEntityId) {
         const { error: linkError } = await supabase.from('fp_document_links').insert({
@@ -128,7 +148,7 @@ export default function Documents() {
         if (linkError) throw linkError;
       }
 
-      setForm({ title: '', category: '', owner: '', summary: '', link: '' });
+      setForm({ title: '', category: '', owner: '', summary: '', link: '', visibility: 'staff' });
       setFile(null);
       setLinkEntityType('');
       setLinkEntityId('');
@@ -151,7 +171,8 @@ export default function Documents() {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+      <div className={canManage ? 'grid gap-6 lg:grid-cols-[0.95fr_1.05fr]' : 'max-w-3xl'}>
+        {canManage && (
         <form onSubmit={submit} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-ink">Add a document</h2>
           <div className="mt-4 space-y-4">
@@ -209,10 +230,22 @@ export default function Documents() {
                 )}
               </div>
             </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-ink">Who can see it</label>
+              <select
+                value={form.visibility}
+                onChange={(event) => setForm({ ...form, visibility: event.target.value as DocumentRecord['visibility'] })}
+                className="w-full rounded-lg border border-line bg-white px-3 py-2 text-sm text-ink focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+              >
+                <option value="staff">Staff only (admins, managers, technicians)</option>
+                <option value="everyone">Everyone, including occupants and vendors</option>
+              </select>
+            </div>
             <Button type="submit" loading={busy}>Save document</Button>
             {message && <p className="text-sm text-brand">{message}</p>}
           </div>
         </form>
+        )}
 
         <div className="space-y-4">
           {documents.length === 0 && (
@@ -233,13 +266,24 @@ export default function Documents() {
                 </div>
                 {doc.summary && <p className="mt-3 text-sm text-ink-muted">{doc.summary}</p>}
                 <div className="mt-3 flex flex-wrap gap-3 text-sm">
-                  {doc.link && (
+                  {doc.link && /^https?:\/\//i.test(doc.link) && (
                     <a href={doc.link} target="_blank" rel="noreferrer" className="font-medium text-brand">
                       Open reference
                     </a>
                   )}
-                  {doc.file_name && (
-                    <span className="text-ink-muted">Attachment: {doc.file_name}</span>
+                  {doc.file_path && (
+                    <button
+                      type="button"
+                      onClick={() => void openAttachment(doc.file_path!)}
+                      className="font-medium text-brand hover:text-brand-600"
+                    >
+                      Download {doc.file_name ?? 'attachment'}
+                    </button>
+                  )}
+                  {canManage && (
+                    <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs text-ink-muted">
+                      {doc.visibility === 'everyone' ? 'Visible to everyone' : 'Staff only'}
+                    </span>
                   )}
                 </div>
                 {docLinks.length > 0 && (

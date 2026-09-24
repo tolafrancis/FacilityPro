@@ -88,6 +88,7 @@ export default function WorkOrderDetail() {
 
   const wo = woQuery.data;
   const [uploadingPhase, setUploadingPhase] = useState<'before' | 'after' | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [partId, setPartId] = useState('');
   const [qty, setQty] = useState('1');
   const [minutes, setMinutes] = useState('');
@@ -188,9 +189,18 @@ export default function WorkOrderDetail() {
   const onUpload = async (phase: 'before' | 'after', file: File | null) => {
     if (!file || !orgId || !id) return;
     setUploadingPhase(phase);
-    await uploadMedia({ orgId, file, workOrderId: id, phase });
-    await queryClient.invalidateQueries({ queryKey: ['media', id] });
-    setUploadingPhase(null);
+    setUploadError(null);
+    try {
+      // Storage refuses files over 25 MB or of unexpected types, and uploads
+      // from anyone but the assignee or a manager (0062).
+      const { error } = await uploadMedia({ orgId, file, workOrderId: id, phase });
+      if (error) setUploadError(error);
+      await queryClient.invalidateQueries({ queryKey: ['media', id] });
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : tc('errors.generic'));
+    } finally {
+      setUploadingPhase(null);
+    }
   };
 
   if (!wo) return <p className="text-sm text-ink-muted">{tc('loading')}</p>;
@@ -696,6 +706,7 @@ export default function WorkOrderDetail() {
             addLabel={t('detail.addBefore')}
             uploading={uploadingPhase === 'before'}
             uploadingLabel={t('detail.uploading')}
+            canUpload={canWork}
             onPick={(f) => onUpload('before', f)}
           />
           <MediaColumn
@@ -704,9 +715,15 @@ export default function WorkOrderDetail() {
             addLabel={t('detail.addAfter')}
             uploading={uploadingPhase === 'after'}
             uploadingLabel={t('detail.uploading')}
+            canUpload={canWork}
             onPick={(f) => onUpload('after', f)}
           />
         </div>
+        {uploadError && (
+          <p role="alert" className="mt-2 text-sm text-status-crit">
+            {uploadError}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -718,6 +735,7 @@ function MediaColumn({
   addLabel,
   uploading,
   uploadingLabel,
+  canUpload,
   onPick,
 }: {
   label: string;
@@ -725,6 +743,8 @@ function MediaColumn({
   addLabel: string;
   uploading: boolean;
   uploadingLabel: string;
+  /** Only the assignee and managers may add evidence. */
+  canUpload: boolean;
   onPick: (file: File | null) => void;
 }) {
   return (
@@ -735,15 +755,21 @@ function MediaColumn({
           <MediaThumb key={m.id} item={m} />
         ))}
       </div>
-      <label className="mt-2 block cursor-pointer text-center text-xs font-medium text-brand hover:text-brand-600">
-        {uploading ? uploadingLabel : `+ ${addLabel}`}
-        <input
-          type="file"
-          accept="image/*,video/*"
-          className="hidden"
-          onChange={(e) => onPick(e.target.files?.[0] ?? null)}
-        />
-      </label>
+      {canUpload && (
+        <label className="mt-2 block cursor-pointer text-center text-xs font-medium text-brand hover:text-brand-600">
+          {uploading ? uploadingLabel : `+ ${addLabel}`}
+          <input
+            type="file"
+            accept="image/*,video/*"
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => {
+              onPick(e.target.files?.[0] ?? null);
+              e.target.value = '';
+            }}
+          />
+        </label>
+      )}
     </div>
   );
 }

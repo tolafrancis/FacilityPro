@@ -204,6 +204,8 @@ export interface DocumentRecord {
   file_path: string | null;
   mime_type: string | null;
   file_size: number | null;
+  /** 'staff' = admins, managers, technicians; 'everyone' also occupants and vendors. */
+  visibility: 'staff' | 'everyone';
   created_at: string;
 }
 
