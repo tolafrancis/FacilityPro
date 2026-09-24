@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useMoney } from '../lib/useMoney';
 import { useOrg } from '../contexts/OrgContext';
 import { useAuditLog, useLocations, useOrgMembers, useReportKpis, useVendors } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
@@ -11,9 +12,6 @@ import { downloadCsv } from '../lib/csv';
 import Button from '../components/ui/Button';
 import Select from '../components/ui/Select';
 
-function currency(value: number) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
-}
 
 // Exports page through every matching row (PostgREST returns at most 1,000
 // per request), so a CSV is never silently cut short.
@@ -30,6 +28,7 @@ async function fetchAll<T>(
 }
 
 export default function Reports() {
+  const currency = useMoney({ whole: true });
   const { t, i18n } = useTranslation('reports');
   const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg } = useOrg();

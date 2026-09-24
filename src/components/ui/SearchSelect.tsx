@@ -1,3 +1,4 @@
+import { foldText } from '../../lib/ui';
 import { useState } from 'react';
 import { Plus, ChevronDown } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export default function SearchSelect({
 
   const selectedLabel = options.find((o) => o.id === value)?.label ?? '';
   const filtered = query
-    ? options.filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
+    ? options.filter((o) => foldText(o.label).includes(foldText(query)))
     : options;
 
   const inputClass =

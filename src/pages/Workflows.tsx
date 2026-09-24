@@ -9,7 +9,7 @@ import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
 import { useBudgets, useDevices, useFacilities, useFaultTypes, useLocations, useMetersAll, useOrgMembers, useRates, useSurveys } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { PRIORITIES } from '../lib/ui';
+import { PRIORITIES, formatDate } from '../lib/ui';
 
 // Events mirror FacilityBot's Workflow "Event" catalog (see docs/facilitybot-workflows-kb.md).
 type WorkflowTrigger =
@@ -1185,7 +1185,7 @@ export default function Workflows() {
                   </div>
                   <div className="mt-3 flex items-center justify-between text-sm text-ink-muted">
                     <span>Runs: {workflow.run_count}</span>
-                    <span>Last: {workflow.last_run_at ? new Date(workflow.last_run_at).toLocaleString() : 'Never'}</span>
+                    <span>Last: {workflow.last_run_at ? formatDate(workflow.last_run_at, lng) : 'Never'}</span>
                   </div>
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-xs uppercase tracking-[0.2em] text-ink-muted">{workflow.actions.length} actions</span>
@@ -1215,7 +1215,7 @@ export default function Workflows() {
                     <div key={run.id} className="rounded-lg border border-line bg-surface px-3 py-3 text-sm">
                       <div className="flex items-center justify-between gap-3">
                         <span className="font-medium text-ink">{run.status}</span>
-                        <span className="text-ink-muted">{new Date(run.started_at).toLocaleString()}</span>
+                        <span className="text-ink-muted">{formatDate(run.started_at, lng)}</span>
                       </div>
                       <p className="mt-1 text-ink-muted">Trigger: {run.trigger_ref || 'n/a'}</p>
                       {run.error && <p className="mt-1 text-status-crit">{run.error}</p>}

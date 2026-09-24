@@ -76,7 +76,7 @@ supabase db push
 
 **Option B — SQL editor**
 
-Run each file in `supabase/migrations/` **in order, 0001 → 0072**, in the dashboard SQL editor.
+Run each file in `supabase/migrations/` **in order, 0001 → 0073**, in the dashboard SQL editor.
 
 > **Platform admin (required after 0059).** Migration **0059** locks the plan catalogue and subscription activation to platform operators, and makes function EXECUTE an explicit allow-list (new functions in `public` are no longer callable from the API until granted). Make yourself a platform admin once, in the SQL editor:
 >

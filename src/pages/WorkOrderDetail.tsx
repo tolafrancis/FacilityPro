@@ -27,7 +27,7 @@ import {
 } from '../lib/queries';
 import { prepareUpload, signedUrl, UploadRejected } from '../lib/media';
 import { writeOrQueue } from '../lib/sync';
-import { formatDate, friendlyError, nextWoStatuses, PRIORITY_CLASS, WO_DONE_STATUSES, WO_STATUS_CLASS } from '../lib/ui';
+import { formatDate, formatMoney, friendlyError, nextWoStatuses, PRIORITY_CLASS, WO_DONE_STATUSES, WO_STATUS_CLASS } from '../lib/ui';
 import { resolveI18n } from '../i18n/resolver';
 import type {
   Media,
@@ -52,7 +52,7 @@ export default function WorkOrderDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { currentOrg, role } = useOrg();
+  const { currentOrg, role, currency } = useOrg();
   const orgId = currentOrg?.id;
 
   const woQuery = useWorkOrder(id);
@@ -390,10 +390,7 @@ export default function WorkOrderDetail() {
         <div className="rounded-lg border border-line bg-white px-3 py-2">
           <dt className="text-xs text-ink-muted">{t('detail.cost')}</dt>
           <dd className="mt-0.5 text-ink tabular-nums">
-            {new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-US', {
-              style: 'currency',
-              currency: 'USD',
-            }).format(wo.cost)}
+            {formatMoney(wo.cost, currency, lng)}
           </dd>
         </div>
         {canSeeFinancials && (
@@ -672,10 +669,7 @@ export default function WorkOrderDetail() {
                   {who} · {entry.minutes} {tc('common.minutesShort')}
                 </span>
                 <span className="text-ink-muted tabular-nums">
-                  {new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                  }).format(entryCost)}
+                  {formatMoney(entryCost, currency, lng)}
                 </span>
               </li>
             );

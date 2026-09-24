@@ -18,7 +18,7 @@ import {
   useMeters,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDate, formatDateOnly, friendlyError, REQUEST_STATUS_CLASS, WO_STATUS_CLASS } from '../lib/ui';
+import { REQUEST_STATUS_CLASS, WO_STATUS_CLASS, formatDate, formatDateOnly, friendlyError, safeHref } from '../lib/ui';
 import type { Meter } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -518,7 +518,7 @@ function DocumentsTab({ assetId }: { assetId: string }) {
             <p className="text-sm font-medium text-ink">{doc.title}</p>
             <p className="text-xs text-ink-muted">{doc.category} · {doc.owner}</p>
             {doc.link && /^https?:\/\//i.test(doc.link) && (
-              <a href={doc.link} target="_blank" rel="noreferrer" className="mt-1 inline-block text-xs font-medium text-brand hover:text-brand-600">
+              <a href={safeHref(doc.link)} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs font-medium text-brand hover:text-brand-600">
                 {t('documents.open')}
               </a>
             )}

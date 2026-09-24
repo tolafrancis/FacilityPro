@@ -1330,6 +1330,7 @@ export function useNotifications(userId: string | undefined) {
       const { data, error } = await supabase
         .from('fp_notifications')
         .select('*')
+        .eq('user_id', userId!)
         .order('created_at', { ascending: false })
         .limit(20);
       if (error) throw error;

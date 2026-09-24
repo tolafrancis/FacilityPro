@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { supabase } from '../lib/supabase';
+import { formatDateOnly } from '../lib/ui';
 import { useOrg } from '../contexts/OrgContext';
 
 interface BroadcastItem {
@@ -21,6 +23,8 @@ async function fetchBroadcasts(orgId: string | undefined) {
 }
 
 export default function TenantExperience() {
+  const { i18n } = useTranslation();
+  const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg } = useOrg();
   const queryClient = useQueryClient();
   const [form, setForm] = useState({ title: '', audience: 'All tenants', message: '' });
@@ -112,7 +116,7 @@ export default function TenantExperience() {
                   <h3 className="font-semibold text-ink">{item.title}</h3>
                   <p className="text-sm text-ink-muted">{item.audience}</p>
                 </div>
-                <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{new Date(item.created_at).toLocaleDateString()}</span>
+                <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{formatDateOnly(item.created_at, lng)}</span>
               </div>
               <p className="mt-3 text-sm text-ink-muted">{item.message}</p>
             </div>

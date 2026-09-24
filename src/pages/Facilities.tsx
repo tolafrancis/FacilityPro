@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDate } from '../lib/ui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Building2, Trash2, Pencil, CalendarPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -141,7 +142,7 @@ export default function Facilities() {
                   {facilityName(b.facility_id)}
                   <span className="text-ink-muted"> · {b.booker_name || 'Someone'}{b.booked_for ? ` · ${b.booked_for}` : ''}</span>
                 </span>
-                <span className="text-xs text-ink-muted">{new Date(b.created_at).toLocaleString()}</span>
+                <span className="text-xs text-ink-muted">{formatDate(b.created_at, lng)}</span>
               </li>
             ))}
           </ul>

@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
+import { orgCurrency } from '../lib/ui';
 import type { Membership, Organization, Role } from '../lib/database.types';
 
 interface OrgContextValue {
@@ -16,6 +17,8 @@ interface OrgContextValue {
   role: Role | null;
   /** org_admin or manager: may create/edit the org's configuration and records. */
   isManager: boolean;
+  /** ISO 4217 code for amounts in this organisation (see orgCurrency). */
+  currency: string;
   loading: boolean;
   /** Set when memberships could not be loaded (e.g. network error). */
   error: string | null;
@@ -88,6 +91,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
         currentOrg: current?.fp_organizations ?? null,
         role: current?.role ?? null,
         isManager: current?.role === 'org_admin' || current?.role === 'manager',
+        currency: orgCurrency(current?.fp_organizations),
         loading,
         error,
         refresh,

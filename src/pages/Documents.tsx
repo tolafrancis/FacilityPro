@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import SearchSelect from '../components/ui/SearchSelect';
 import { supabase } from '../lib/supabase';
+import { formatDateOnly, safeHref } from '../lib/ui';
 import { useOrg } from '../contexts/OrgContext';
 import {
   useAssets,
@@ -29,6 +31,8 @@ const ENTITY_TYPES: { value: DocumentEntityType; label: string }[] = [
 ];
 
 export default function Documents() {
+  const { i18n } = useTranslation();
+  const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg, role } = useOrg();
   // Adding documents is a manager task (RLS enforces it too); everyone else
   // just gets the list of documents they're allowed to see.
@@ -262,12 +266,12 @@ export default function Documents() {
                     <h3 className="font-semibold text-ink">{doc.title}</h3>
                     <p className="text-sm text-ink-muted">{doc.category} · {doc.owner}</p>
                   </div>
-                  <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{new Date(doc.created_at).toLocaleDateString()}</span>
+                  <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{formatDateOnly(doc.created_at, lng)}</span>
                 </div>
                 {doc.summary && <p className="mt-3 text-sm text-ink-muted">{doc.summary}</p>}
                 <div className="mt-3 flex flex-wrap gap-3 text-sm">
                   {doc.link && /^https?:\/\//i.test(doc.link) && (
-                    <a href={doc.link} target="_blank" rel="noreferrer" className="font-medium text-brand">
+                    <a href={safeHref(doc.link)} target="_blank" rel="noopener noreferrer" className="font-medium text-brand">
                       Open reference
                     </a>
                   )}

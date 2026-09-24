@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Printer } from 'lucide-react';
 import { useAsset, useFaultTypes, useLocations, useOrgMembers, useParts, useWorkOrder, useWoLabor, useWoParts } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDate } from '../lib/ui';
+import { formatDate, formatMoney } from '../lib/ui';
+import { useOrg } from '../contexts/OrgContext';
 import NotFound from '../components/NotFound';
 
 export default function JobSheet() {
@@ -17,6 +18,7 @@ export default function JobSheet() {
   const wo = woQuery.data;
   const asset = useAsset(wo?.asset_id ?? undefined).data;
   const members = useOrgMembers();
+  const { currency } = useOrg();
   const parts = useParts();
   const woParts = useWoParts(id);
   const woLabor = useWoLabor(id);
@@ -80,10 +82,7 @@ export default function JobSheet() {
           {faultType && <Row label={t('fields.faultType')} value={resolveI18n(faultType.name_i18n, lng)} />}
           <Row
             label={t('fields.cost')}
-            value={new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-US', {
-              style: 'currency',
-              currency: 'USD',
-            }).format(wo.cost)}
+            value={formatMoney(wo.cost, currency, lng)}
           />
         </tbody>
       </table>

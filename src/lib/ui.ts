@@ -72,6 +72,56 @@ export const REQUEST_STATUSES: RequestStatus[] = [
   'rejected',
 ];
 
+/**
+ * Money in the organisation's currency (Settings → Currency). Organisations
+ * that haven't set one get VND when their default language is Vietnamese,
+ * otherwise USD. VND has no minor unit, so it's shown without decimals.
+ */
+export function orgCurrency(org: { settings?: { currency?: string } | null; default_lng?: string } | null | undefined): string {
+  const c = org?.settings?.currency?.trim().toUpperCase();
+  if (c && /^[A-Z]{3}$/.test(c)) return c;
+  return org?.default_lng === 'vi' ? 'VND' : 'USD';
+}
+
+export function formatMoney(value: number | null | undefined, currency: string, lng: string, opts: { whole?: boolean } = {}): string {
+  const v = Number(value ?? 0);
+  const noMinor = currency === 'VND' || opts.whole;
+  try {
+    return new Intl.NumberFormat(lng === 'vi' ? 'vi-VN' : 'en-GB', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: noMinor ? 0 : undefined,
+      maximumFractionDigits: noMinor ? 0 : 2,
+    }).format(v);
+  } catch {
+    return `${v.toLocaleString(lng === 'vi' ? 'vi-VN' : 'en-GB')} ${currency}`;
+  }
+}
+
+/**
+ * Search key that ignores case and Vietnamese accents: "dieu hoa" matches
+ * "Điều hòa" (audit S5-L1).
+ */
+export function foldText(s: string): string {
+  return s
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase();
+}
+
+/** Only http(s) links are rendered as links (no javascript: or data: URLs). */
+export function safeHref(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const u = new URL(url.trim());
+    return u.protocol === 'https:' || u.protocol === 'http:' ? u.href : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function formatDate(value: string | null, lng: string): string {
   if (!value) return '—';
   return new Intl.DateTimeFormat(lng === 'vi' ? 'vi-VN' : 'en-GB', {
