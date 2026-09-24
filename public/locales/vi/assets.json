@@ -3,7 +3,13 @@
   "subtitle": "Danh mục thiết bị của bạn. Mỗi tài sản có một mã QR để truy cập nhanh tại hiện trường.",
   "add": "Thêm tài sản",
   "empty": "Chưa có tài sản. Thêm thiết bị đầu tiên của bạn.",
-  "columns": { "name": "Tài sản", "type": "Loại", "location": "Vị trí", "serial": "Số sê-ri", "status": "Trạng thái" },
+  "columns": {
+    "name": "Tài sản",
+    "type": "Loại",
+    "location": "Vị trí",
+    "serial": "Số sê-ri",
+    "status": "Trạng thái"
+  },
   "form": {
     "type": "Loại tài sản",
     "location": "Vị trí",
@@ -12,7 +18,13 @@
     "model": "Kiểu máy",
     "warranty": "Hạn bảo hành",
     "create": "Tạo tài sản",
-    "title": "Thêm tài sản"
+    "title": "Thêm tài sản",
+    "editTitle": "Sửa tài sản",
+    "save": "Lưu thay đổi",
+    "status": "Trạng thái",
+    "searchOrAdd": "Tìm hoặc nhập để thêm…",
+    "createType": "Khác — tạo loại mới",
+    "locationHint": "Thêm phòng và khu vực trong mục Vị trí."
   },
   "detail": {
     "info": "Chi tiết",
@@ -42,5 +54,22 @@
     "attach": "Đính kèm tài liệu có sẵn",
     "choose": "Chọn tài liệu…",
     "attachAction": "Đính kèm"
+  },
+  "status": {
+    "active": "Đang hoạt động",
+    "inactive": "Ngừng sử dụng tạm thời",
+    "retired": "Đã ngừng sử dụng",
+    "disposed": "Đã thanh lý"
+  },
+  "filter": {
+    "inService": "Đang sử dụng",
+    "retired": "Đã ngừng / thanh lý",
+    "all": "Tất cả"
+  },
+  "actions": {
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "deleteConfirm": "Xóa tài sản này? Không thể hoàn tác.",
+    "retireHint": "Ngừng sử dụng sẽ dừng bảo trì định kỳ cho tài sản này và giữ lại lịch sử."
   }
 }

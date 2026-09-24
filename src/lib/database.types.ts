@@ -90,6 +90,8 @@ export interface FaultType {
   is_active?: boolean;
 }
 
+export type AssetStatus = 'active' | 'inactive' | 'retired' | 'disposed';
+
 export interface Asset {
   id: string;
   org_id: string;
@@ -101,7 +103,8 @@ export interface Asset {
   model: string | null;
   warranty_expiry: string | null;
   qr_code: string | null;
-  status: string;
+  status: AssetStatus;
+  retired_at: string | null;
   created_at: string;
 }
 

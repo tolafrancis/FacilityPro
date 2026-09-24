@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,13 +7,12 @@ import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
 import { useAssetsPage, useAssetTypes, useLocations } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import type { LocationRow } from '../lib/database.types';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
-import SearchSelect from '../components/ui/SearchSelect';
-import BilingualName from '../components/ui/BilingualName';
+import Pill from '../components/ui/Pill';
 import Pagination from '../components/ui/Pagination';
+import AssetDialog, { type AssetFormValues } from '../components/AssetDialog';
+import { friendlyError } from '../lib/ui';
 
 const PAGE_SIZE = 25;
 
@@ -30,11 +29,13 @@ export default function Assets() {
   const [open, setOpen] = useState(false);
   const [filterTypeId, setFilterTypeId] = useState('');
   const [filterLocationId, setFilterLocationId] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'inService' | 'retired' | ''>('inService');
   const [page, setPage] = useState(1);
 
   const assets = useAssetsPage(page, PAGE_SIZE, {
     assetTypeId: filterTypeId || undefined,
     locationId: filterLocationId || undefined,
+    status: filterStatus || undefined,
   });
   const rows = assets.data?.rows ?? [];
   const total = assets.data?.count ?? 0;
@@ -49,16 +50,7 @@ export default function Assets() {
   };
 
   const create = useMutation({
-    mutationFn: async (v: {
-      en: string;
-      vi: string;
-      assetTypeId: string;
-      locationId: string;
-      serial: string;
-      manufacturer: string;
-      model: string;
-      warranty: string;
-    }) => {
+    mutationFn: async (v: AssetFormValues) => {
       const { error } = await supabase.from('fp_assets').insert({
         org_id: orgId,
         name_i18n: { en: v.en, vi: v.vi || v.en },
@@ -71,6 +63,7 @@ export default function Assets() {
       });
       if (error) throw error;
     },
+    meta: { errorHandled: true }, // shown in the dialog
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['assets', orgId] });
       void queryClient.invalidateQueries({ queryKey: ['assets_page'] });
@@ -91,19 +84,6 @@ export default function Assets() {
     await queryClient.invalidateQueries({ queryKey: ['asset_types', orgId] });
     return data.id as string;
   };
-  const createLocation = async (name: string): Promise<string | null> => {
-    const nm = name.trim();
-    if (!nm) return null;
-    const { data, error } = await supabase
-      .from('fp_locations')
-      .insert({ org_id: orgId, name_i18n: { en: nm, vi: nm }, kind: 'room' })
-      .select('id')
-      .single();
-    if (error) return null;
-    await queryClient.invalidateQueries({ queryKey: ['locations', orgId] });
-    return data.id as string;
-  };
-
   return (
     <div className="max-w-5xl">
       <div className="flex items-start justify-between">
@@ -149,6 +129,20 @@ export default function Assets() {
             ))}
           </Select>
         </div>
+        <div className="min-w-[160px]">
+          <label className="mb-1 block text-xs text-ink-muted">{t('columns.status')}</label>
+          <Select
+            value={filterStatus}
+            onChange={(e) => {
+              setFilterStatus(e.target.value as 'inService' | 'retired' | '');
+              setPage(1);
+            }}
+          >
+            <option value="inService">{t('filter.inService')}</option>
+            <option value="retired">{t('filter.retired')}</option>
+            <option value="">{t('filter.all')}</option>
+          </Select>
+        </div>
       </div>
 
       {rows.length === 0 ? (
@@ -174,6 +168,9 @@ export default function Assets() {
                     <Link to={`/assets/${a.id}`} className="font-medium text-brand hover:text-brand-600">
                       {resolveI18n(a.name_i18n, lng)}
                     </Link>
+                    {a.status !== 'active' && (
+                      <Pill className="ml-2 bg-surface text-ink-muted">{t(`status.${a.status}`)}</Pill>
+                    )}
                   </td>
                   <td className="px-4 py-2 text-ink-muted">{typeName(a.asset_type_id)}</td>
                   <td className="px-4 py-2 text-ink-muted">{locName(a.location_id)}</td>
@@ -204,142 +201,12 @@ export default function Assets() {
           }))}
           locationLabel={(l) => resolveI18n(l.name_i18n, lng)}
           onCreateType={createType}
-          onCreateLocation={createLocation}
           busy={create.isPending}
+          error={create.error ? friendlyError(create.error as { code?: string; message?: string }, tc) : null}
           onCancel={() => setOpen(false)}
           onSubmit={(v) => create.mutate(v)}
-          labels={{
-            title: t('form.title'),
-            type: t('form.type'),
-            location: t('form.location'),
-            serial: t('form.serial'),
-            manufacturer: t('form.manufacturer'),
-            model: t('form.model'),
-            warranty: t('form.warranty'),
-            create: t('form.create'),
-            cancel: tc('actions.cancel'),
-            none: tc('common.none'),
-          }}
         />
       )}
-    </div>
-  );
-}
-
-interface AssetDialogProps {
-  locations: LocationRow[];
-  assetTypeOptions: { id: string; label: string }[];
-  locationLabel: (l: LocationRow) => string;
-  onCreateType: (name: string) => Promise<string | null>;
-  onCreateLocation: (name: string) => Promise<string | null>;
-  busy: boolean;
-  onCancel: () => void;
-  onSubmit: (v: {
-    en: string;
-    vi: string;
-    assetTypeId: string;
-    locationId: string;
-    serial: string;
-    manufacturer: string;
-    model: string;
-    warranty: string;
-  }) => void;
-  labels: Record<string, string>;
-}
-
-function AssetDialog({
-  locations,
-  assetTypeOptions,
-  locationLabel,
-  onCreateType,
-  onCreateLocation,
-  busy,
-  onCancel,
-  onSubmit,
-  labels,
-}: AssetDialogProps) {
-  const [en, setEn] = useState('');
-  const [vi, setVi] = useState('');
-  const [assetTypeId, setAssetTypeId] = useState('');
-  const [locationId, setLocationId] = useState('');
-  const [serial, setSerial] = useState('');
-  const [manufacturer, setManufacturer] = useState('');
-  const [model, setModel] = useState('');
-  const [warranty, setWarranty] = useState('');
-
-  const placeableLocations = useMemo(
-    () => locations.filter((l) => l.kind === 'room' || l.kind === 'zone' || l.kind === 'floor'),
-    [locations]
-  );
-  const locOptions = placeableLocations.map((l) => ({ id: l.id, label: locationLabel(l) }));
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!en) return;
-    onSubmit({ en, vi, assetTypeId, locationId, serial, manufacturer, model, warranty });
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center overflow-auto bg-black/30 p-4">
-      <form
-        onSubmit={submit}
-        className="my-8 w-full max-w-md rounded-xl border border-line bg-white p-6 shadow-lg"
-      >
-        <h2 className="text-lg font-semibold text-ink">{labels.title}</h2>
-        <div className="mt-4 space-y-4">
-          <BilingualName en={en} vi={vi} onEn={setEn} onVi={setVi} />
-          <div>
-            <label className="mb-1 block text-sm font-medium text-ink">{labels.type}</label>
-            <SearchSelect
-              value={assetTypeId}
-              onChange={setAssetTypeId}
-              options={assetTypeOptions}
-              placeholder="Search or type to add…"
-              emptyLabel={labels.none}
-              createLabel="Other — create new type"
-              onCreate={async (q) => { const id = await onCreateType(q); if (id) setAssetTypeId(id); }}
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-ink">{labels.location}</label>
-            <SearchSelect
-              value={locationId}
-              onChange={setLocationId}
-              options={locOptions}
-              placeholder="Search or type to add…"
-              emptyLabel={labels.none}
-              createLabel="Add new location"
-              onCreate={async (q) => { const id = await onCreateLocation(q); if (id) setLocationId(id); }}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-ink">{labels.serial}</label>
-              <Input value={serial} onChange={(e) => setSerial(e.target.value)} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-ink">{labels.warranty}</label>
-              <Input type="date" value={warranty} onChange={(e) => setWarranty(e.target.value)} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-ink">{labels.manufacturer}</label>
-              <Input value={manufacturer} onChange={(e) => setManufacturer(e.target.value)} />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-ink">{labels.model}</label>
-              <Input value={model} onChange={(e) => setModel(e.target.value)} />
-            </div>
-          </div>
-        </div>
-        <div className="mt-6 flex justify-end gap-2">
-          <Button type="button" variant="secondary" onClick={onCancel}>
-            {labels.cancel}
-          </Button>
-          <Button type="submit" loading={busy}>
-            {labels.create}
-          </Button>
-        </div>
-      </form>
     </div>
   );
 }

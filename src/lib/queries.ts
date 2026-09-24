@@ -253,6 +253,8 @@ export function useAsset(id: string | undefined) {
 export interface AssetPageFilters {
   assetTypeId?: string;
   locationId?: string;
+  /** 'inService' = active + out of service; 'retired' = retired + disposed. */
+  status?: 'inService' | 'retired';
 }
 
 /** Server-paginated asset list for Assets.tsx — dropdowns elsewhere keep using useAssets(). */
@@ -267,11 +269,31 @@ export function useAssetsPage(page: number, pageSize: number, filters: AssetPage
       let q = supabase.from('fp_assets').select('*', { count: 'exact' }).eq('org_id', orgId!);
       if (filters.assetTypeId) q = q.eq('asset_type_id', filters.assetTypeId);
       if (filters.locationId) q = q.eq('location_id', filters.locationId);
+      if (filters.status === 'inService') q = q.in('status', ['active', 'inactive']);
+      if (filters.status === 'retired') q = q.in('status', ['retired', 'disposed']);
       const { data, error, count } = await q
         .order('created_at', { ascending: false })
         .range(from, from + pageSize - 1);
       if (error) throw error;
       return { rows: (data ?? []) as Asset[], count: count ?? 0 };
+    },
+  });
+}
+
+/** One asset's requests and work orders, fetched by asset (not whole tables). */
+export function useAssetHistory(assetId: string | undefined) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['asset_history', assetId],
+    enabled: !!orgId && !!assetId,
+    queryFn: async () => {
+      const [req, wo] = await Promise.all([
+        supabase.from('fp_requests').select('*').eq('asset_id', assetId!).order('created_at', { ascending: false }).limit(200),
+        supabase.from('fp_work_orders').select('*').eq('asset_id', assetId!).order('created_at', { ascending: false }).limit(200),
+      ]);
+      if (req.error) throw req.error;
+      if (wo.error) throw wo.error;
+      return { requests: (req.data ?? []) as RequestRow[], workOrders: (wo.data ?? []) as WorkOrder[] };
     },
   });
 }

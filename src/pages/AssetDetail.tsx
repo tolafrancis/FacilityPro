@@ -3,23 +3,22 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
-import { ArrowLeft, QrCode, Wrench, ClipboardList, Plus, Gauge } from 'lucide-react';
+import { ArrowLeft, QrCode, Wrench, ClipboardList, Plus, Gauge, Pencil, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { writeOrQueue } from '../lib/sync';
 import { useOrg } from '../contexts/OrgContext';
 import {
   useAsset,
+  useAssetHistory,
   useAssetTypes,
   useDocumentLinks,
   useDocuments,
   useLocations,
   useMeterReadings,
   useMeters,
-  useRequests,
-  useWorkOrders,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDate, formatDateOnly, REQUEST_STATUS_CLASS, WO_STATUS_CLASS } from '../lib/ui';
+import { formatDate, formatDateOnly, friendlyError, REQUEST_STATUS_CLASS, WO_STATUS_CLASS } from '../lib/ui';
 import type { Meter } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -27,6 +26,7 @@ import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
 import Select from '../components/ui/Select';
 import NotFound from '../components/NotFound';
+import AssetDialog, { type AssetFormValues } from '../components/AssetDialog';
 
 type Tab = 'info' | 'history' | 'meters' | 'documents' | 'qr';
 
@@ -37,12 +37,71 @@ export default function AssetDetail() {
   const lng = i18n.resolvedLanguage ?? 'en';
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('info');
+  const [editing, setEditing] = useState(false);
+  const { isManager, currentOrg } = useOrg();
+  const queryClient = useQueryClient();
 
   const assetQuery = useAsset(id);
   const assetTypes = useAssetTypes();
   const locations = useLocations();
-  const requests = useRequests();
-  const workOrders = useWorkOrders();
+  const history = useAssetHistory(id);
+
+  const invalidateAssets = () => {
+    void queryClient.invalidateQueries({ queryKey: ['asset', id] });
+    void queryClient.invalidateQueries({ queryKey: ['assets', currentOrg?.id] });
+    void queryClient.invalidateQueries({ queryKey: ['assets_page'] });
+  };
+
+  const save = useMutation({
+    meta: { errorHandled: true }, // shown in the dialog
+    mutationFn: async (v: AssetFormValues) => {
+      const { data, error } = await supabase
+        .from('fp_assets')
+        .update({
+          name_i18n: { en: v.en, vi: v.vi || v.en },
+          asset_type_id: v.assetTypeId || null,
+          location_id: v.locationId || null,
+          serial: v.serial || null,
+          manufacturer: v.manufacturer || null,
+          model: v.model || null,
+          warranty_expiry: v.warranty || null,
+          status: v.status,
+        })
+        .eq('id', id!)
+        .select('id');
+      if (error) throw error;
+      if (!data?.length) throw { code: '42501', message: 'permission denied' };
+    },
+    onSuccess: () => {
+      invalidateAssets();
+      setEditing(false);
+    },
+  });
+
+  const remove = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.from('fp_assets').delete().eq('id', id!).select('id');
+      if (error) throw error;
+      if (!data?.length) throw { code: '42501', message: 'permission denied' };
+    },
+    onSuccess: () => {
+      invalidateAssets();
+      navigate('/assets', { replace: true });
+    },
+  });
+
+  const createType = async (name: string): Promise<string | null> => {
+    const nm = name.trim();
+    if (!nm) return null;
+    const { data, error } = await supabase
+      .from('fp_asset_types')
+      .insert({ org_id: currentOrg?.id, name_i18n: { en: nm, vi: nm } })
+      .select('id')
+      .single();
+    if (error) return null;
+    await queryClient.invalidateQueries({ queryKey: ['asset_types', currentOrg?.id] });
+    return data.id as string;
+  };
 
   const asset = assetQuery.data;
   if (assetQuery.isLoading) {
@@ -59,8 +118,8 @@ export default function AssetDetail() {
   const loc = locations.data?.find((x) => x.id === asset.location_id);
   const locName = loc ? resolveI18n(loc.name_i18n, lng) : '—';
 
-  const assetRequests = (requests.data ?? []).filter((r) => r.asset_id === asset.id);
-  const assetWorkOrders = (workOrders.data ?? []).filter((w) => w.asset_id === asset.id);
+  const assetRequests = history.data?.requests ?? [];
+  const assetWorkOrders = history.data?.workOrders ?? [];
 
   const reportUrl = `${window.location.origin}/report?org=${asset.org_id}&asset=${asset.id}${
     asset.location_id ? `&location=${asset.location_id}` : ''
@@ -86,7 +145,33 @@ export default function AssetDetail() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-ink">{resolveI18n(asset.name_i18n, lng)}</h1>
-          <p className="mt-1 text-sm text-ink-muted">{typeName}</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            {typeName}
+            {asset.status !== 'active' && (
+              <Pill className="ml-2 bg-surface text-ink-muted">{t(`status.${asset.status}`)}</Pill>
+            )}
+          </p>
+          {isManager && (
+            <div className="mt-2 flex gap-3 text-sm">
+              <button type="button" onClick={() => setEditing(true)} className="inline-flex items-center gap-1 font-medium text-brand hover:text-brand-600">
+                <Pencil size={14} /> {t('actions.edit')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm(t('actions.deleteConfirm'))) remove.mutate();
+                }}
+                className="inline-flex items-center gap-1 font-medium text-ink-muted hover:text-status-crit"
+              >
+                <Trash2 size={14} /> {t('actions.delete')}
+              </button>
+            </div>
+          )}
+          {remove.error && (
+            <p role="alert" className="mt-2 text-sm text-status-crit">
+              {friendlyError(remove.error as { code?: string; message?: string }, tc)}
+            </p>
+          )}
         </div>
         <Button
           onClick={() =>
@@ -116,6 +201,23 @@ export default function AssetDetail() {
           </button>
         ))}
       </div>
+
+      {editing && (
+        <AssetDialog
+          initial={asset}
+          locations={locations.data ?? []}
+          assetTypeOptions={(assetTypes.data ?? []).map((at) => ({ id: at.id, label: resolveI18n(at.name_i18n, lng) }))}
+          locationLabel={(l) => resolveI18n(l.name_i18n, lng)}
+          onCreateType={createType}
+          busy={save.isPending}
+          error={save.error ? friendlyError(save.error as { code?: string; message?: string }, tc) : null}
+          onCancel={() => {
+            save.reset();
+            setEditing(false);
+          }}
+          onSubmit={(v) => save.mutate(v)}
+        />
+      )}
 
       {tab === 'info' && (
         <dl className="mt-5 grid grid-cols-2 gap-4 text-sm">

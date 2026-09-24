@@ -22,6 +22,10 @@
   },
   "dialog": {
     "addSiteTitle": "Add a site",
-    "addChildTitle": "Add {{kind}}"
-  }
+    "addChildTitle": "Add {{kind}}",
+    "renameTitle": "Rename {{kind}}"
+  },
+  "rename": "Rename",
+  "delete": "Delete",
+  "deleteConfirm": "Delete \"{{name}}\"? This can't be undone."
 }
