@@ -94,6 +94,8 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0075**, in the dash
 > select vault.create_secret('<service_role key>', 'service_role_key');
 > ```
 >
+> The key must be the one Edge Functions see as `SUPABASE_SERVICE_ROLE_KEY`, or the functions answer the scheduler with 403 `forbidden`. On older projects that's the legacy **service_role** key (`eyJ…`). On projects created with the new API keys it's the **secret** key (Project Settings → API Keys → Secret keys, `sb_secret_…`); the legacy service_role key is rejected there. To check, run `select status_code, content from net._http_response order by created desc limit 1;` a few minutes later: it should be 200.
+>
 > Platform admins see every job's status under **Billing → Background jobs** and are emailed when a job is late or failing. Check it once after deploying: every job should turn **Healthy** within an hour. PM due dates use the organisation's time zone (**Settings → Time zone**, default `Asia/Ho_Chi_Minh`).
 >
 > **Team & invitations (0065).** An organisation always keeps at least one admin: demoting or removing the last one is refused (promote someone else first). Invitations are emailed to the invitee (see *Email delivery* below for `APP_URL`). In **Authentication → URL Configuration**, set **Site URL** to your app address and add `https://<your domain>/**` to **Redirect URLs**, so the confirmation email of someone signing up from an invitation brings them back to that invitation.
