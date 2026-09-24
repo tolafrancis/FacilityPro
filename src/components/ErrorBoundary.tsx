@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { reportError } from '../lib/monitoring';
 
 interface Props {
   children: ReactNode;
@@ -40,8 +41,7 @@ export default class ErrorBoundary extends Component<Props, State> {
       window.location.reload();
       return;
     }
-    // eslint-disable-next-line no-console
-    console.error('Unhandled render error:', error, info.componentStack);
+    reportError(error, { componentStack: info.componentStack });
   }
 
   render() {

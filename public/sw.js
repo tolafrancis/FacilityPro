@@ -2,12 +2,11 @@
 // Data requests (Supabase, other origins) are never cached here; offline writes
 // are handled in-app by the IndexedDB queue.
 
-// Bump this version string on every deploy that changes app shell files
-// (index.html, manifest, favicon) — it's the only thing that forces
-// `install`/`activate` to actually run again and purge the old cache.
-// Without a bump, a returning visitor's browser has no way to notice the
-// shell changed, since sw.js's own bytes are otherwise identical.
-const CACHE = 'facilityspace-shell-v3';
+// The build replaces __BUILD_ID__ with a hash of the built index.html (see
+// swBuildId in vite.config.ts), so every deploy that changes the app ships a
+// different sw.js; that is what makes browsers install it and drop the old
+// cache. No manual version bump needed.
+const CACHE = 'facilityspace-shell-__BUILD_ID__';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {

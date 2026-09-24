@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import { supabase } from '../lib/supabase';
+import { useUnsavedChangesWarning } from '../lib/useUnsavedChanges';
 import { useOrg } from '../contexts/OrgContext';
 import { useBudgets, useDevices, useFacilities, useFaultTypes, useLocations, useMetersAll, useOrgMembers, useRates, useSurveys } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
@@ -436,6 +437,11 @@ export default function Workflows() {
   const devices = useDevices();
   const metersAll = useMetersAll();
   const [form, setForm] = useState<WorkflowFormState>(EMPTY_FORM);
+  // What the form held when it was last loaded or saved: anything else is
+  // unsaved work worth a warning before it's thrown away.
+  const [baseline, setBaseline] = useState<WorkflowFormState>(EMPTY_FORM);
+  const dirty = JSON.stringify(form) !== JSON.stringify(baseline);
+  useUnsavedChangesWarning(dirty);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null);
@@ -523,6 +529,7 @@ export default function Workflows() {
         : await supabase.from('fp_workflows').insert({ org_id: currentOrg.id, ...payload, is_active: true, run_order: 100, version: 1 });
       if (error) throw error;
       setForm(EMPTY_FORM);
+      setBaseline(EMPTY_FORM);
       setEditingId(null);
       await queryClient.invalidateQueries({ queryKey: ['workflows', currentOrg.id] });
       setMessage(editingId ? 'Workflow updated.' : 'Workflow saved.');
@@ -534,6 +541,7 @@ export default function Workflows() {
   };
 
   const startEdit = (workflow: Workflow) => {
+    if (dirty && !window.confirm('Discard your unsaved changes and open this workflow?')) return;
     const cond = (workflow.conditions ?? {}) as { logic?: 'and' | 'or'; rules?: ConditionRow[] };
     const rules = (cond.rules ?? []) as ConditionRow[];
     const { tc, rest } = reverseTrigger(workflow.trigger_type, rules);
@@ -543,22 +551,26 @@ export default function Workflows() {
       value: (a.value as string) ?? '',
       subject: (a.subject as string) ?? '',
     }));
-    setForm({
+    const loaded: WorkflowFormState = {
       trigger_type: workflow.trigger_type,
       logic: cond.logic ?? 'and',
       cooldownMinutes: String(workflow.cooldown_minutes ?? 0),
       triggerConfig: tc,
       conditions: rest,
       actions: actions.length ? actions : [{ type: 'send_email', target: '', value: '', subject: '' }],
-    });
+    };
+    setForm(loaded);
+    setBaseline(loaded);
     setEditingId(workflow.id);
     setMessage(null);
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const cancelEdit = () => {
+    if (dirty && !window.confirm('Discard your unsaved changes to this workflow?')) return;
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setBaseline(EMPTY_FORM);
   };
 
   const deleteWorkflow = async (workflow: Workflow) => {

@@ -11,6 +11,18 @@ import { SyncProvider } from './contexts/SyncContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Toaster, { notifyError } from './components/Toaster';
 import { friendlyError } from './lib/ui';
+import { initMonitoring, reportError } from './lib/monitoring';
+
+void initMonitoring();
+window.addEventListener('unhandledrejection', (e) => reportError(e.reason, { kind: 'unhandledrejection' }));
+
+// Expected refusals (validation, permission, business rules, offline) are
+// shown to the user; only unexpected failures go to error tracking.
+function isUnexpected(error: unknown): boolean {
+  const e = error as ApiError;
+  if (!navigator.onLine) return false;
+  return !e?.code || /^(08|53|54|57|58|XX)/.test(e.code) || (typeof e.status === 'number' && e.status >= 500);
+}
 
 type ApiError = { code?: string; message?: string; status?: number };
 
@@ -41,6 +53,7 @@ const queryClient = new QueryClient({
   // records (PGRST116) are left to the page, which shows "not found".
   queryCache: new QueryCache({
     onError: (error, query) => {
+      if (isUnexpected(error)) reportError(error, { queryKey: JSON.stringify(query.queryKey).slice(0, 200) });
       if (query.meta?.errorHandled || (error as ApiError)?.code === 'PGRST116') return;
       notifyError(friendlyError(error as ApiError, i18n.getFixedT(null, 'common')));
     },
@@ -49,6 +62,7 @@ const queryClient = new QueryClient({
   // (no onError, no meta.errorHandled) get an app-wide toast.
   mutationCache: new MutationCache({
     onError: (error, _variables, _context, mutation) => {
+      if (isUnexpected(error)) reportError(error, { mutation: String(mutation.options.mutationKey ?? '') });
       if (mutation.options.onError || mutation.meta?.errorHandled) return;
       notifyError(friendlyError(error as ApiError, i18n.getFixedT(null, 'common')));
     },

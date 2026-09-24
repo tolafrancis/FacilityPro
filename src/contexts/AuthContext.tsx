@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import i18n from '../i18n';
+import { setMonitoringUser } from '../lib/monitoring';
 
 interface AuthContextValue {
   session: Session | null;
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
+      void setMonitoringUser(next?.user.id ?? null);
     });
     return () => sub.subscription.unsubscribe();
   }, []);

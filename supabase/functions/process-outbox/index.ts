@@ -34,7 +34,9 @@ import { forbidden, isSchedulerRequest } from '../_shared/scheduler-auth.ts';
 import webpush from 'https://esm.sh/web-push@3.6.7';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
-const OUTBOX_FROM = Deno.env.get('OUTBOX_FROM') ?? 'FacilitySpace <onboarding@resend.dev>';
+// No fallback sender: Resend's shared test address only delivers to the
+// account owner, so a missing OUTBOX_FROM silently lost every email.
+const OUTBOX_FROM = Deno.env.get('OUTBOX_FROM') ?? '';
 const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID') ?? '';
 const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN') ?? '';
 const TWILIO_FROM = Deno.env.get('TWILIO_FROM') ?? '';
@@ -143,6 +145,7 @@ async function deliver(row: OutboxRow, supabase: SupabaseClient): Promise<void> 
     await sendPush(supabase, row.to_address, row.subject, row.body ?? row.subject);
   } else {
     if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not set');
+    if (!OUTBOX_FROM) throw new Error('OUTBOX_FROM not set (e.g. "FacilitySpace <notifications@yourdomain.com>")');
     await sendEmail(row.to_address, row.subject, row.body ?? row.subject);
   }
 }

@@ -136,4 +136,45 @@ not for production.
   for `https://<ref>.functions.supabase.co/health?token=<HEALTH_TOKEN>`
   every 5 minutes, alerting on any non-200 response, by SMS or app push.
   Add a second monitor for the web app's own URL.
-- **Frontend errors**: see *Error tracking* in the README (Sentry).
+- **Frontend errors (Sentry)**: create a Sentry project (free tier is
+  fine), set `VITE_SENTRY_DSN` (and `VITE_SENTRY_ENVIRONMENT=production`) in
+  the build environment and rebuild. Unexpected errors (crashes, failed
+  requests that aren't a normal refusal) are reported with the user's id
+  only, no email and no session replay. Without the variable nothing is
+  loaded. For readable stack traces, upload source maps from CI with
+  `@sentry/cli sourcemaps upload` after `vite build --sourcemap hidden`.
+- **Edge Function errors**: Supabase dashboard → Edge Functions → Logs
+  (functions log failures with `console.error`). Set a log drain (Settings →
+  Log drains) to keep them longer or alert on them.
+
+---
+
+## 5. Staging and releases
+
+Never test migrations on production first.
+
+1. Create a second Supabase project, **staging**, on the same plan
+   features (pg_cron, pg_net, Storage). Apply every migration with
+   `supabase db push` (link the CLI to staging first).
+2. Build the web app against staging (`VITE_SUPABASE_URL` /
+   `VITE_SUPABASE_ANON_KEY` of staging) and host it on a separate
+   subdomain (e.g. `staging.yourdomain.com`), with its own
+   `VITE_PUBLIC_APP_URL`.
+3. For each release: CI must be green (build, translations, migrations on a
+   fresh database, security suites) → apply to staging → click through the
+   manual test plan in the audit report with test users in each role →
+   apply the same migrations to production → deploy the web build →
+   `scripts/check-drift.sh` against production.
+4. Keep staging data fake: no real customer data or phone numbers.
+
+---
+
+## 6. Things that are public by design
+
+- **Public report link** (`/report?org=…` and asset QR codes): when an
+  organisation switches on public reporting, anyone with the link sees the
+  organisation's name and the asset/location name it points to, and can
+  submit a (rate-limited) report. Nothing else is exposed. Switching public
+  reporting off makes the link show "not available".
+- **Asset QR codes** (`/a/<code>`): resolve to ids only for people who
+  aren't members; the codes are random and can't be guessed.
