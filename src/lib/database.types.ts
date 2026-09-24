@@ -704,6 +704,13 @@ export interface JobHealth {
   healthy: boolean;
 }
 
+/** Row of fp_system_health(): delivery and workflow checks (0066). */
+export interface SystemCheck {
+  check_name: 'outbox_failed' | 'outbox_backlog' | 'workflow_failures';
+  ok: boolean;
+  detail: string;
+}
+
 /** Row of fp_platform_subscriptions(): the platform operator's billing queue. */
 export interface PlatformSubscription {
   org_id: string;

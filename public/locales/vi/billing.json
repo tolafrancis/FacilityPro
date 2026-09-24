@@ -48,13 +48,19 @@
   },
   "jobs": {
     "title": "Tác vụ nền (nền tảng)",
-    "hint": "Các tác vụ định kỳ: tạo lệnh bảo trì, leo thang SLA, nhắc nhở, quy trình tự động và gửi thông báo. Quản trị nền tảng sẽ nhận email khi một tác vụ bị trễ hoặc lỗi.",
+    "hint": "Các tác vụ định kỳ: tạo lệnh bảo trì, leo thang SLA, nhắc nhở, quy trình tự động và gửi thông báo, cùng các kiểm tra lỗi gửi tin và quy trình. Quản trị nền tảng sẽ nhận email khi có mục bị trễ hoặc lỗi.",
     "lastOk": "Lần thành công gần nhất",
     "state": {
       "ok": "Ổn định",
       "late": "Bị trễ",
       "failing": "Đang lỗi",
-      "never": "Chưa chạy"
+      "never": "Chưa chạy",
+      "attention": "Cần xử lý"
+    },
+    "checks": {
+      "outbox_failed": "Gửi email/SMS/thông báo đẩy",
+      "outbox_backlog": "Hàng đợi tin nhắn",
+      "workflow_failures": "Quy trình tự động"
     }
   }
 }

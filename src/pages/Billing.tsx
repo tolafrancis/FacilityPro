@@ -8,6 +8,7 @@ import {
   useAssets,
   useIsPlatformAdmin,
   useJobHealth,
+  useSystemChecks,
   useOrgMembers,
   usePlans,
   usePlatformSubscriptions,
@@ -335,6 +336,7 @@ function JobHealthPanel() {
   const lng = i18n.resolvedLanguage ?? 'en';
   const health = useJobHealth(true);
   const jobs = health.data ?? [];
+  const checks = useSystemChecks(true).data ?? [];
 
   return (
     <section className="mt-8 rounded-xl border border-line bg-white p-4">
@@ -371,6 +373,17 @@ function JobHealthPanel() {
             </li>
           );
         })}
+        {checks.map((c) => (
+          <li key={c.check_name} className="flex flex-wrap items-start justify-between gap-2 py-2 text-sm">
+            <div className="min-w-0">
+              <p className="font-medium text-ink">{t(`jobs.checks.${c.check_name}`)}</p>
+              <p className={`text-xs ${c.ok ? 'text-ink-muted' : 'text-status-crit'}`}>{c.detail}</p>
+            </div>
+            <Pill className={c.ok ? 'bg-status-ok/10 text-status-ok' : 'bg-status-crit/10 text-status-crit'}>
+              {t(c.ok ? 'jobs.state.ok' : 'jobs.state.attention')}
+            </Pill>
+          </li>
+        ))}
       </ul>
     </section>
   );

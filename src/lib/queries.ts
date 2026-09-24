@@ -43,6 +43,7 @@ import type {
   Plan,
   PlatformSubscription,
   JobHealth,
+  SystemCheck,
   PmRequiredPart,
   PmSchedule,
   Priority,
@@ -1334,6 +1335,20 @@ export function useJobHealth(enabled: boolean) {
       const { data, error } = await supabase.rpc('fp_job_health');
       if (error) throw error;
       return (data ?? []) as JobHealth[];
+    },
+  });
+}
+
+export function useSystemChecks(enabled: boolean) {
+  return useQuery({
+    queryKey: ['system_checks'],
+    enabled,
+    meta: { errorHandled: true }, // the panel shows it
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_system_health');
+      if (error) throw error;
+      return (data ?? []) as SystemCheck[];
     },
   });
 }

@@ -43,9 +43,23 @@ for suite in "${suites[@]}"; do
   done
 
   echo "=== $suite (migrations${upto:+ up to $upto})"
-  (cd "$here" && psql -v ON_ERROR_STOP=$strict -q -d "$db" -f "$suite" 2>&1) \
-    | grep -vE '^(psql:.*(ERROR|LINE|\^)|\s*\^|LINE [0-9]+:)' || true
+  log="$(mktemp)"
+  set +e
+  (cd "$here" && psql -v ON_ERROR_STOP=$strict -q -d "$db" -f "$suite" >"$log" 2>&1)
+  status=$?
+  set -e
+  # Expected errors (a probe that must fail) are noise in a partial run.
+  grep -vE '^(psql:.*(ERROR|LINE|\^)|\s*\^|LINE [0-9]+:)' "$log" || true
   failed="$(psql -q -d "$db" -Atc "select count(*) from t.results where not ok" 2>/dev/null || echo 1)"
+  # In strict mode a suite that stops early must not count as passing. (The
+  # report's own final assertion also exits non-zero; that is already
+  # counted in $failed.)
+  if [[ "$strict" == 1 && "$status" != 0 && "$failed" == 0 ]]; then
+    echo "SUITE ABORTED before finishing:"
+    grep -E 'ERROR|LINE' "$log" | head -5
+    failed=1
+  fi
+  rm -f "$log"
   psql -q -d postgres -c "drop database if exists $db" >/dev/null
   total_failed=$((total_failed + failed))
 done

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import i18n from '../i18n';
 
 interface AuthContextValue {
   session: Session | null;
@@ -48,7 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { captchaToken, emailRedirectTo: redirectTo },
+      // lang picks the language of Supabase Auth emails (templates in
+      // supabase/templates read .Data.lang).
+      options: { captchaToken, emailRedirectTo: redirectTo, data: { lang: i18n.resolvedLanguage ?? 'en' } },
     });
     return { error: error?.message ?? null, needsConfirm: !!data.user && !data.session };
   };

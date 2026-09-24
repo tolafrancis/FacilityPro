@@ -48,13 +48,19 @@
   },
   "jobs": {
     "title": "Background jobs (platform)",
-    "hint": "Scheduled work: PM generation, SLA escalation, reminders, workflows and message delivery. Platform admins are emailed when a job is late or failing.",
+    "hint": "Scheduled work: PM generation, SLA escalation, reminders, workflows and message delivery, plus delivery and workflow error checks. Platform admins are emailed when something is late or failing.",
     "lastOk": "Last success",
     "state": {
       "ok": "Healthy",
       "late": "Late",
       "failing": "Failing",
-      "never": "Never run"
+      "never": "Never run",
+      "attention": "Needs attention"
+    },
+    "checks": {
+      "outbox_failed": "Email/SMS/push delivery",
+      "outbox_backlog": "Message queue",
+      "workflow_failures": "Automation workflows"
     }
   }
 }
