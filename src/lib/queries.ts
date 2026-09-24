@@ -41,6 +41,7 @@ import type {
   Part,
   PartCategory,
   Plan,
+  PlatformSubscription,
   PmRequiredPart,
   PmSchedule,
   Priority,
@@ -1275,6 +1276,31 @@ export function usePlans() {
         .order('sort');
       if (error) throw error;
       return data as Plan[];
+    },
+  });
+}
+
+/** Platform operator (fp_platform_admins) — manages plans and activates subscriptions. */
+export function useIsPlatformAdmin() {
+  return useQuery({
+    queryKey: ['is_platform_admin'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_is_platform_admin');
+      if (error) throw error;
+      return data === true;
+    },
+  });
+}
+
+/** Every org's subscription, pending requests first. Platform admins only. */
+export function usePlatformSubscriptions(enabled: boolean) {
+  return useQuery({
+    queryKey: ['platform_subscriptions'],
+    enabled,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_platform_subscriptions');
+      if (error) throw error;
+      return (data ?? []) as PlatformSubscription[];
     },
   });
 }

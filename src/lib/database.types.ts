@@ -671,7 +671,22 @@ export interface Subscription {
   current_period_start: string | null;
   current_period_end: string | null;
   note: string | null;
+  requested_plan_code: string | null;
+  requested_at: string | null;
+  cancel_requested_at: string | null;
   updated_at: string;
+}
+
+/** Row of fp_platform_subscriptions(): the platform operator's billing queue. */
+export interface PlatformSubscription {
+  org_id: string;
+  org_name: string;
+  plan_code: string | null;
+  status: SubscriptionStatus;
+  requested_plan_code: string | null;
+  requested_at: string | null;
+  cancel_requested_at: string | null;
+  current_period_end: string | null;
 }
 
 export interface Device {

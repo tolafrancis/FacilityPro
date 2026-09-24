@@ -4,22 +4,22 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, ExternalLink, Pencil } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
-import { useAssets, useOrgMembers, usePlans, useSubscription } from '../lib/queries';
+import {
+  useAssets,
+  useIsPlatformAdmin,
+  useOrgMembers,
+  usePlans,
+  usePlatformSubscriptions,
+  useSubscription,
+} from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { formatDateOnly } from '../lib/ui';
-import type { Plan } from '../lib/database.types';
+import type { Plan, PlatformSubscription } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
-
-function periodEnd(interval: 'month' | 'year'): string {
-  const d = new Date();
-  if (interval === 'year') d.setFullYear(d.getFullYear() + 1);
-  else d.setMonth(d.getMonth() + 1);
-  return d.toISOString();
-}
 
 export default function Billing() {
   const { t, i18n } = useTranslation('billing');
@@ -34,44 +34,34 @@ export default function Billing() {
   const subQuery = useSubscription();
   const assets = useAssets();
   const members = useOrgMembers();
+  // Only the platform operator edits the shared plan catalogue and activates
+  // subscriptions (after verifying payment); customers can only request.
+  const isPlatformAdmin = useIsPlatformAdmin().data === true;
   const [editing, setEditing] = useState<Plan | null>(null);
 
   const plans = plansQuery.data ?? [];
   const sub = subQuery.data;
   const currentPlan =
     plans.find((p) => p.code === sub?.plan_code) ?? plans.find((p) => p.code === 'free') ?? null;
+  const requestedPlan = plans.find((p) => p.code === sub?.requested_plan_code) ?? null;
 
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ['subscription', orgId] });
     void queryClient.invalidateQueries({ queryKey: ['plans'] });
+    void queryClient.invalidateQueries({ queryKey: ['platform_subscriptions'] });
   };
 
-  const setPlan = useMutation({
-    mutationFn: async (v: { code: string; status: 'pending' | 'active' | 'canceled'; interval?: 'month' | 'year' }) => {
-      const payload: Record<string, unknown> = {
-        org_id: orgId,
-        plan_code: v.code,
-        status: v.status,
-        provider: 'paypal',
-      };
-      if (v.status === 'active') {
-        payload.current_period_start = new Date().toISOString();
-        payload.current_period_end = periodEnd(v.interval ?? 'month');
-      }
-      const { error } = await supabase
-        .from('fp_subscriptions')
-        .upsert(payload, { onConflict: 'org_id' });
+  const requestPlan = useMutation({
+    mutationFn: async (code: string) => {
+      const { error } = await supabase.rpc('fp_request_plan', { p_org: orgId!, p_plan: code });
       if (error) throw error;
     },
     onSuccess: invalidate,
   });
 
-  const cancel = useMutation({
+  const requestCancel = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from('fp_subscriptions')
-        .update({ status: 'canceled' })
-        .eq('org_id', orgId!);
+      const { error } = await supabase.rpc('fp_request_cancellation', { p_org: orgId! });
       if (error) throw error;
     },
     onSuccess: invalidate,
@@ -79,7 +69,7 @@ export default function Billing() {
 
   const subscribe = (plan: Plan) => {
     if (plan.payment_url) window.open(plan.payment_url, '_blank', 'noopener');
-    setPlan.mutate({ code: plan.code, status: 'pending' });
+    requestPlan.mutate(plan.code);
   };
 
   const limit = (n?: number) => (n == null ? t('limitsUnlimited') : String(n));
@@ -133,28 +123,25 @@ export default function Billing() {
           {usageRow(t('members'), members.data?.length ?? 0, currentPlan?.limits.members)}
         </div>
 
-        {isAdmin && sub?.status === 'pending' && (
-          <div className="mt-4 flex items-center gap-2 rounded-lg bg-brand-50 p-3">
-            <p className="flex-1 text-xs text-brand-600">{t('pendingNote')}</p>
-            <Button
-              onClick={() => {
-                const p = plans.find((x) => x.code === sub.plan_code);
-                setPlan.mutate({
-                  code: sub.plan_code as string,
-                  status: 'active',
-                  interval: p?.interval ?? 'month',
-                });
-              }}
-            >
-              {t('markActive')}
-            </Button>
-          </div>
+        {requestedPlan && (
+          <p className="mt-4 rounded-lg bg-brand-50 p-3 text-xs text-brand-600">
+            {t('requestedNote', { plan: resolveI18n(requestedPlan.name_i18n, lng) })}
+          </p>
         )}
-        {isAdmin && sub && sub.status !== 'canceled' && (
+        {sub?.cancel_requested_at && (
+          <p className="mt-4 rounded-lg bg-surface p-3 text-xs text-ink-muted">{t('cancelRequestedNote')}</p>
+        )}
+        {(requestPlan.error || requestCancel.error) && (
+          <p className="mt-3 text-xs text-status-crit">
+            {((requestPlan.error ?? requestCancel.error) as Error).message}
+          </p>
+        )}
+        {isAdmin && sub && sub.status !== 'canceled' && !sub.cancel_requested_at && (
           <button
             type="button"
-            onClick={() => cancel.mutate()}
-            className="mt-3 text-xs font-medium text-ink-muted hover:text-status-crit"
+            onClick={() => requestCancel.mutate()}
+            disabled={requestCancel.isPending}
+            className="mt-3 text-xs font-medium text-ink-muted hover:text-status-crit disabled:opacity-50"
           >
             {t('cancel')}
           </button>
@@ -169,7 +156,7 @@ export default function Billing() {
             <div key={plan.code} className="flex flex-col rounded-xl border border-line bg-white p-4">
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-ink">{resolveI18n(plan.name_i18n, lng)}</p>
-                {isAdmin && (
+                {isPlatformAdmin && (
                   <button
                     type="button"
                     onClick={() => setEditing(plan)}
@@ -207,7 +194,7 @@ export default function Billing() {
                 ) : isAdmin ? (
                   <Button
                     onClick={() => subscribe(plan)}
-                    disabled={!plan.payment_url}
+                    disabled={!plan.payment_url || requestPlan.isPending}
                     className="w-full justify-center"
                   >
                     {plan.payment_url ? (
@@ -225,6 +212,8 @@ export default function Billing() {
         })}
       </div>
 
+      {isPlatformAdmin && <PlatformQueue plans={plans} onChanged={invalidate} />}
+
       {editing && (
         <PlanDialog
           plan={editing}
@@ -238,6 +227,100 @@ export default function Billing() {
         />
       )}
     </div>
+  );
+}
+
+/** Platform operator's queue: activate a customer's plan once payment is verified. */
+function PlatformQueue({ plans, onChanged }: { plans: Plan[]; onChanged: () => void }) {
+  const { t, i18n } = useTranslation('billing');
+  const lng = i18n.resolvedLanguage ?? 'en';
+  const subs = usePlatformSubscriptions(true);
+
+  const setSubscription = useMutation({
+    mutationFn: async (v: { org: string; plan: string; status: 'active' | 'canceled'; interval: 'month' | 'year' }) => {
+      const { error } = await supabase.rpc('fp_platform_set_subscription', {
+        p_org: v.org,
+        p_plan: v.plan,
+        p_status: v.status,
+        p_interval: v.interval,
+      });
+      if (error) throw error;
+    },
+    onSuccess: onChanged,
+  });
+
+  const planName = (code: string | null) => {
+    const p = plans.find((x) => x.code === code);
+    return p ? resolveI18n(p.name_i18n, lng) : (code ?? '—');
+  };
+
+  const rows = (subs.data ?? []).filter(
+    (s: PlatformSubscription) => s.requested_plan_code || s.cancel_requested_at
+  );
+
+  return (
+    <section className="mt-8 rounded-xl border border-line bg-white p-4">
+      <h2 className="font-semibold text-ink">{t('platform.title')}</h2>
+      <p className="mt-1 text-xs text-ink-muted">{t('platform.hint')}</p>
+      {setSubscription.error && (
+        <p className="mt-2 text-xs text-status-crit">{(setSubscription.error as Error).message}</p>
+      )}
+      {rows.length === 0 ? (
+        <p className="mt-3 text-sm text-ink-muted">{t('platform.empty')}</p>
+      ) : (
+        <ul className="mt-3 divide-y divide-line">
+          {rows.map((s) => {
+            const requested = plans.find((p) => p.code === s.requested_plan_code);
+            return (
+              <li key={s.org_id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-ink">{s.org_name}</p>
+                  <p className="text-xs text-ink-muted">
+                    {planName(s.plan_code)} · {t(`statusLabels.${s.status}`)}
+                    {s.requested_plan_code && ` → ${planName(s.requested_plan_code)}`}
+                    {s.requested_at && ` · ${formatDateOnly(s.requested_at, lng)}`}
+                    {s.cancel_requested_at && ` · ${t('platform.cancelRequested')}`}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  {requested && (
+                    <Button
+                      onClick={() =>
+                        setSubscription.mutate({
+                          org: s.org_id,
+                          plan: requested.code,
+                          status: 'active',
+                          interval: requested.interval,
+                        })
+                      }
+                      loading={setSubscription.isPending}
+                    >
+                      {t('platform.activate')}
+                    </Button>
+                  )}
+                  {s.cancel_requested_at && (
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        setSubscription.mutate({
+                          org: s.org_id,
+                          plan: s.plan_code ?? 'free',
+                          status: 'canceled',
+                          interval: 'month',
+                        })
+                      }
+                      loading={setSubscription.isPending}
+                    >
+                      {t('platform.confirmCancel')}
+                    </Button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
 

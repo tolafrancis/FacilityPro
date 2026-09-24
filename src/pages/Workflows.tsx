@@ -410,7 +410,7 @@ async function fetchRuns(workflowId: string | undefined) {
 
 const ACTION_TARGET_LABEL: Record<WorkflowActionType, string> = {
   send_email: 'Recipient',
-  send_sms: 'Phone number',
+  send_sms: 'Recipient',
   send_push: 'Recipient',
   assign: 'Responder',
   create_request: 'Request type',
@@ -845,7 +845,17 @@ export default function Workflows() {
       );
     }
     if (type === 'send_sms') {
-      return <Input value={action.target} onChange={(e) => set(e.target.value)} placeholder="+1 555 000 0000" />;
+      // Texts go only to members; the server resolves the member's phone from
+      // their technician profile or notification settings. A legacy raw number
+      // stays selectable, and still works if it belongs to a member.
+      const legacyNumber = action.target && !memberList.some((m) => m.user_id === action.target);
+      return (
+        <Select value={action.target} onChange={(e) => set(e.target.value)}>
+          <option value="">Select recipient</option>
+          {legacyNumber && <option value={action.target}>{action.target}</option>}
+          {memberList.map((m) => <option key={m.user_id} value={m.user_id}>{m.email}</option>)}
+        </Select>
+      );
     }
     if (type === 'create_request') {
       return (
