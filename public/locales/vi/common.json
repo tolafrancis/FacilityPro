@@ -29,6 +29,8 @@
   },
   "actions": {
     "signOut": "Đăng xuất",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
     "save": "Lưu",
     "cancel": "Hủy",
     "create": "Tạo",

@@ -42,6 +42,8 @@
   },
   "actions": {
     "signOut": "Sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
     "save": "Save",
     "cancel": "Cancel",
     "create": "Create",
