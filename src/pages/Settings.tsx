@@ -847,6 +847,17 @@ function IntegrationsSection() {
 
   const emailOn = !!pref.data?.email_enabled;
 
+  // Numbers are connected by the platform operator (0064): a tenant choosing
+  // its own number id could otherwise receive another tenant's messages.
+  const channels = useQuery({
+    queryKey: ['channel_accounts'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('fp_channel_accounts').select('id, channel, display_name, external_id, active');
+      if (error) throw error;
+      return (data ?? []) as { id: string; channel: string; display_name: string | null; external_id: string; active: boolean }[];
+    },
+  });
+
   return (
     <div className="space-y-6">
       <section className="rounded-xl border border-line bg-white p-4">
@@ -858,6 +869,21 @@ function IntegrationsSection() {
             <Link to="/devices" className="mt-2 inline-flex text-sm font-medium text-brand hover:text-brand-600">Manage devices →</Link>
           </div>
         </div>
+      </section>
+
+      <section className="rounded-xl border border-line bg-white p-4">
+        <h2 className="font-semibold text-ink">WhatsApp</h2>
+        {(channels.data ?? []).filter((c) => c.channel === 'whatsapp' && c.active).length > 0 ? (
+          <ul className="mt-1 text-sm text-ink">
+            {(channels.data ?? []).filter((c) => c.channel === 'whatsapp' && c.active).map((c) => (
+              <li key={c.id}>Connected: {c.display_name ?? c.external_id}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-1 text-sm text-ink-muted">
+            No WhatsApp number is connected. Contact FacilitySpace support to connect your business number; replies to WhatsApp conversations can't be delivered until then.
+          </p>
+        )}
       </section>
 
       <section className="rounded-xl border border-line bg-white p-4">

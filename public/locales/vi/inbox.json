@@ -22,5 +22,19 @@
     "email": "Email"
   },
   "createTicket": "Tạo lệnh công việc",
-  "ticketCreated": "Đã tạo báo cáo"
+  "ticketCreated": "Đã tạo báo cáo",
+  "delivery": {
+    "pending": "đang gửi…",
+    "sent": "đã gửi",
+    "delivered": "đã nhận",
+    "read": "đã xem",
+    "failed": "Chưa gửi được",
+    "notDelivered": "Đã lưu tin trả lời nhưng chưa gửi được: {{reason}}",
+    "errors": {
+      "channel_not_configured": "tổ chức chưa kết nối số WhatsApp",
+      "rate_limited": "đã đạt giới hạn WhatsApp trong ngày",
+      "send_failed": "WhatsApp từ chối tin nhắn",
+      "not_allowed": "bạn chỉ có thể gửi tin trả lời của chính mình"
+    }
+  }
 }

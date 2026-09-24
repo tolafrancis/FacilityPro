@@ -76,7 +76,7 @@ supabase db push
 
 **Option B — SQL editor**
 
-Run each file in `supabase/migrations/` **in order, 0001 → 0063**, in the dashboard SQL editor.
+Run each file in `supabase/migrations/` **in order, 0001 → 0064**, in the dashboard SQL editor.
 
 > **Platform admin (required after 0059).** Migration **0059** locks the plan catalogue and subscription activation to platform operators, and makes function EXECUTE an explicit allow-list (new functions in `public` are no longer callable from the API until granted). Make yourself a platform admin once, in the SQL editor:
 >
@@ -96,7 +96,7 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0063**, in the dash
 >
 > Platform admins see every job's status under **Billing → Background jobs** and are emailed when a job is late or failing. Check it once after deploying: every job should turn **Healthy** within an hour. PM due dates use the organisation's time zone (**Settings → Time zone**, default `Asia/Ho_Chi_Minh`).
 >
-> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
+> **Security tests.** `supabase/security-tests/run.sh` builds a throwaway database (any local Postgres 15+), applies every migration, and runs every suite in that folder (security, work-order lifecycle, PM scheduling and jobs, file storage access, public endpoint limits, inbox/channels), each checking both the protections and normal use. Run it after any migration change: `PGHOST=… PGUSER=postgres supabase/security-tests/run.sh`.
 
 > Migration **0008** creates the `fp_media` table **and a private storage bucket `fp-media`** with org-scoped access policies (objects are namespaced by org id; access via signed URLs). Migration **0009** adds `fp_org_members()` used to populate the assignee dropdown. Migrations **0010–0011** add checklists and preventive-maintenance schedules plus the `fp_generate_due_pm()` generator. Migration **0013** alters `fp_pm_schedules` (makes `next_due_at` nullable and adds meter-trigger columns) and **replaces** `fp_generate_due_pm()` to handle meter triggers. Migration **0015** adds a `BEFORE INSERT` trigger on `fp_work_orders` (SLA due-date + auto-assignment), and **0016** adds notification triggers. Migration **0017** adds the email outbox (`fp_notification_outbox`) plus a trigger that enqueues an email when an in-app notification lands for a user who opted in, and **0018** adds the approvals workflow. No manual storage setup is needed.
 
@@ -116,7 +116,16 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0063**, in the dash
 
 > **Web push (optional).** Generate a VAPID keypair (`npx web-push generate-vapid-keys`). Set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `VAPID_SUBJECT` as Edge Function secrets, and expose the public key to the web app as `VITE_VAPID_PUBLIC_KEY` (in `.env`). Users then see **Security → Push notifications** and can enable it per device; push rides the same outbox/Edge Function as email and SMS.
 
-> **Inbox / channels (optional).** The inbox works immediately for manually logged conversations and outbound replies. To connect automated channels, deploy `channel-webhook` (inbound) and `channel-send` (outbound) and point your WhatsApp Cloud API / Zalo / LINE webhook at `channel-webhook`. Each function documents its secrets at the top; the WhatsApp Cloud API shape is implemented and the others slot in alongside it.
+> **Inbox / channels (optional).** The inbox is for staff (admin, manager, technician); occupants and vendors don't see it (migration **0064**). It works immediately for manually logged conversations and outbound replies. To connect WhatsApp Cloud API:
+>
+> 1. Deploy both functions: `supabase functions deploy channel-webhook --no-verify-jwt` and `supabase functions deploy channel-send`.
+> 2. Set secrets: `supabase secrets set WHATSAPP_TOKEN=… WHATSAPP_VERIFY_TOKEN=… WHATSAPP_APP_SECRET=…`. The app secret is **required**: every webhook delivery must carry a valid `X-Hub-Signature-256`, and without the secret the webhook rejects everything.
+> 3. Connect each organisation's number (as a platform admin, in the SQL editor): `insert into fp_channel_accounts (org_id, channel, external_id, display_name) values ('<org uuid>', 'whatsapp', '<phone_number_id>', '+84 …');`. Inbound messages are routed to, and replies sent from, the org that owns the number; an org admin sees it read-only under **Settings → Integrations**. (Single-tenant fallback: `WHATSAPP_PHONE_ID` + `WHATSAPP_ORG_ID` secrets.)
+> 4. Point the Meta webhook at `https://<project-ref>.functions.supabase.co/channel-webhook`.
+>
+> Outbound sends are limited to 500 per organisation per day, and each message shows its delivery status (sent / delivered / read / failed) in the inbox.
+
+> **Smart assistant (optional).** The AI call runs server-side; the key is never in the web bundle. `supabase functions deploy smart-assistant` and `supabase secrets set OPENAI_API_KEY=sk-…` (optionally `OPENAI_MODEL`, default `gpt-4o-mini`). Members get 30 requests per hour. Without the secret, the page uses its built-in guidance. Do **not** set any `VITE_OPENAI_*` variable: anything prefixed `VITE_` is public.
 
 > **Billing (PayPal links).** Migration 0022 seeds three editable plans. As an org admin, open **Billing**, click the pencil on a plan, and paste its **PayPal payment link** (a PayPal.me link, a payment link, or a subscription link) plus price and limits. The plan's **Subscribe** button then opens that link in PayPal; once a customer has paid, an admin clicks **Mark active** to set the plan and period. No webhook is needed for this paste-a-link flow. To automate activation later, add a PayPal Subscriptions webhook (or, for Vietnam, a VietQR `bank-webhook` reconciled by SePay/Casso) that updates `fp_subscriptions` — the data model already supports it.
 
@@ -209,7 +218,7 @@ Deploy `dist/` to Hostinger (cPanel/FTP) or Vercel. The SPA `.htaccess` and PWA 
 
 ```
 supabase/migrations/   0001–0011 foundation→PM, **0012 parts**, **0013 meters (+meter PM)**, **0014 vendors/contracts**, **0015 SLA+auto-assign**, **0016 notifications**, **0017 email channel**, **0018 approvals**, **0019 SMS channel**, **0020 web push**, **0021 inbox**, **0022 billing**, **0023 automation workflows**, **0024 IoT**
-supabase/functions/     process-outbox (email/SMS/push), channel-webhook (inbound), channel-send (outbound), iot-ingest (device telemetry)
+supabase/functions/     process-outbox (email/SMS/push), channel-webhook (inbound), channel-send (outbound), smart-assistant (AI), public-report, iot-ingest (device telemetry)
 public/sw.js            app-shell service worker (offline)
 src/lib/sync.ts         offline write queue + replay; src/contexts/SyncContext.tsx
 src/lib/               supabase, database.types, **ui** (status/colour maps), **media** (upload/signed URLs), **queries** (TanStack hooks)

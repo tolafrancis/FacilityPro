@@ -129,7 +129,9 @@ export default function App() {
               <Route path="/requests/:id" element={<RequestDetail />} />
               <Route path="/work-orders" element={<WorkOrders />} />
               <Route path="/work-orders/:id" element={<WorkOrderDetail />} />
-              <Route path="/inbox" element={<Inbox />} />
+              <Route element={<RequireRole allow={['org_admin', 'manager', 'technician']} />}>
+                <Route path="/inbox" element={<Inbox />} />
+              </Route>
               <Route path="/assets" element={<Assets />} />
               <Route path="/assets/:id" element={<AssetDetail />} />
               <Route path="/maintenance" element={<Maintenance />} />

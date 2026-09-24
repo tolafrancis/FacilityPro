@@ -71,7 +71,11 @@ const ADMIN_MANAGER_ONLY_KEYS = new Set([
   'settings',
 ]);
 
+// Customer conversations (names, phone numbers) are staff-only (0064).
+const STAFF_ONLY_KEYS = new Set(['inbox']);
+
 function isNavItemVisible(key: string, role: Role | null): boolean {
+  if (STAFF_ONLY_KEYS.has(key)) return role === 'org_admin' || role === 'manager' || role === 'technician';
   if (!ADMIN_MANAGER_ONLY_KEYS.has(key)) return true;
   return role === 'org_admin' || role === 'manager';
 }

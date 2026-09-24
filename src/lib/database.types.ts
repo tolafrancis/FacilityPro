@@ -647,6 +647,9 @@ export interface Message {
   direction: 'in' | 'out';
   body: string;
   sender: string | null;
+  /** Outbound delivery on the external channel (set by channel-send / webhook receipts). */
+  delivery_status: 'pending' | 'sent' | 'delivered' | 'read' | 'failed' | null;
+  delivery_error: string | null;
   created_at: string;
 }
 
