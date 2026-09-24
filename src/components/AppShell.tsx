@@ -58,11 +58,10 @@ interface NavGroup {
 }
 
 // Nav items whose underlying data is admin/manager-only at the RLS layer
-// (fp_finance_* tables, fp_devices) — hiding them for other roles avoids a
+// (fp_finance_* tables) — hiding them for other roles avoids a
 // dead-end click into a page that will just come back empty.
 const ADMIN_MANAGER_ONLY_KEYS = new Set([
   'financial',
-  'devices',
   'approvals',
   'workflows',
   'surveys',
@@ -72,7 +71,9 @@ const ADMIN_MANAGER_ONLY_KEYS = new Set([
 ]);
 
 // Customer conversations (names, phone numbers) are staff-only (0064).
-const STAFF_ONLY_KEYS = new Set(['inbox']);
+// Devices: technicians see live data, alerts and history (0077); keys and
+// configuration stay admin/manager-only inside the page.
+const STAFF_ONLY_KEYS = new Set(['inbox', 'devices']);
 
 function isNavItemVisible(key: string, role: Role | null): boolean {
   if (STAFF_ONLY_KEYS.has(key)) return role === 'org_admin' || role === 'manager' || role === 'technician';
@@ -278,7 +279,7 @@ export default function AppShell() {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <OfflineBanner />
         <header className="flex items-center justify-between gap-3 border-b border-line bg-white px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">

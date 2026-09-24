@@ -747,6 +747,16 @@ export interface Device {
   active: boolean;
   created_at: string;
   updated_at: string;
+  /** IoT platform (0077). */
+  location_id: string | null;
+  site_id: string | null;
+  device_type_id: string | null;
+  model_id: string | null;
+  protocol: string | null;
+  external_id: string | null;
+  gateway_id: string | null;
+  connection_config: Record<string, unknown>;
+  firmware_version: string | null;
 }
 
 export interface Telemetry {
@@ -761,8 +771,8 @@ export interface Telemetry {
   created_at: string;
 }
 
-export type DeviceRuleOp = 'gt' | 'gte' | 'lt' | 'lte' | 'eq';
-export type DeviceRuleAction = 'notify' | 'work_order' | 'both';
+export type DeviceRuleOp = 'gt' | 'gte' | 'lt' | 'lte' | 'eq' | 'neq' | 'pct_above_baseline' | 'pct_below_baseline';
+export type DeviceRuleAction = 'alert' | 'notify' | 'work_order' | 'both';
 
 export interface DeviceRule {
   id: string;
@@ -778,6 +788,15 @@ export interface DeviceRule {
   last_fired_at: string | null;
   active: boolean;
   created_at: string;
+  /** 0077 */
+  name: string | null;
+  alert_severity: 'info' | 'warning' | 'critical' | 'emergency';
+  conditions: { device_id?: string; metric: string; op: string; threshold: number }[];
+  notify_roles: string[];
+  active_hours: { days?: number[]; from?: string; to?: string } | null;
+  suppress_until: string | null;
+  escalate_after_minutes: number | null;
+  auto_resolve: boolean;
 }
 
 export type DeviceConnProtocol = 'mqtt' | 'mqtts' | 'ws' | 'wss';

@@ -1549,10 +1549,11 @@ export function useDevices() {
   });
 }
 
-export function useDevice(deviceId: string | undefined) {
+/** The full device row, including its key: org admins and managers only (RLS). */
+export function useDevice(deviceId: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ['device', deviceId],
-    enabled: !!deviceId,
+    enabled: !!deviceId && enabled,
     refetchInterval: 30000,
     queryFn: async () => {
       const { data, error } = await supabase

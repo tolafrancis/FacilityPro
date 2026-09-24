@@ -1,19 +1,32 @@
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Cpu, Circle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { Plus, Cpu, Circle, BatteryLow, Search } from 'lucide-react';
 import { useOrg } from '../contexts/OrgContext';
-import { useAssets, useDevices, useMeters } from '../lib/queries';
-import { resolveI18n } from '../i18n/resolver';
-import { formatDate } from '../lib/ui';
+import { usePersistentState } from '../lib/persistedState';
+import { ago, CATEGORIES, PROTOCOLS, SEVERITY_CLASS, STATUS_DOT, useDeviceAlerts, useDeviceDirectory, type DirectoryDevice } from '../lib/iot';
+import { useLocationLabels } from '../components/iot/locationLabels';
+import AddDeviceWizard from '../components/iot/AddDeviceWizard';
+import DeviceAlerts from '../components/iot/DeviceAlerts';
+import Gateways from '../components/iot/Gateways';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
 
-const KINDS = ['sensor', 'gateway', 'plc', 'meter', 'controller', 'other'];
+type Tile = 'all' | 'online' | 'offline' | 'warning' | 'critical' | 'battery';
+type Tab = 'devices' | 'alerts' | 'gateways';
+
+const isOffline = (d: DirectoryDevice) => d.status === 'offline' || d.status === 'never';
+const isCritical = (d: DirectoryDevice) => d.alert_severity === 'critical' || d.alert_severity === 'emergency';
+const TILE_TEST: Record<Tile, (d: DirectoryDevice) => boolean> = {
+  all: () => true,
+  online: (d) => d.status === 'online',
+  offline: isOffline,
+  warning: (d) => d.alert_severity === 'warning',
+  critical: isCritical,
+  battery: (d) => d.battery_low,
+};
 
 export default function Devices() {
   const { t, i18n } = useTranslation('devices');
@@ -22,25 +35,48 @@ export default function Devices() {
   const { currentOrg, role } = useOrg();
   const orgId = currentOrg?.id;
   const isAdmin = role === 'org_admin';
+  const isStaff = role === 'org_admin' || role === 'manager' || role === 'technician';
 
-  const devices = useDevices();
-  const assets = useAssets();
+  const devices = useDeviceDirectory();
+  const openAlerts = useDeviceAlerts();
+  const labels = useLocationLabels();
   const [showAdd, setShowAdd] = useState(false);
+  const [tab, setTab] = usePersistentState<Tab>('devices.tab', 'devices');
+  const [tile, setTile] = useState<Tile>('all');
+  const [q, setQ] = useState('');
+  const [building, setBuilding] = useState('');
+  const [category, setCategory] = useState('');
+  const [manufacturer, setManufacturer] = useState('');
+  const [protocol, setProtocol] = useState('');
 
-  const assetName = (id: string | null) => {
-    if (!id) return '—';
-    const a = assets.data?.find((x) => x.id === id);
-    return a ? resolveI18n(a.name_i18n, lng) : '—';
-  };
+  const all = devices.data ?? [];
+  const counts = useMemo(
+    () => Object.fromEntries((Object.keys(TILE_TEST) as Tile[]).map((k) => [k, all.filter(TILE_TEST[k]).length])) as Record<Tile, number>,
+    [all]
+  );
+  const manufacturers = [...new Set(all.map((d) => d.manufacturer).filter(Boolean))] as string[];
+  const filtered = all.filter((d) =>
+    TILE_TEST[tile](d)
+    && (!q || `${d.name} ${d.external_id ?? ''} ${d.model ?? ''}`.toLowerCase().includes(q.toLowerCase()))
+    && (!building || labels.building(d.location_id) === building)
+    && (!category || d.category === category)
+    && (!manufacturer || d.manufacturer === manufacturer)
+    && (!protocol || d.protocol === protocol)
+  );
+  const nameOf = (id: string) => all.find((d) => d.id === id)?.name ?? '';
 
-  const online = (lastSeen: string | null) => {
-    if (!lastSeen) return false;
-    return Date.now() - new Date(lastSeen).getTime() < 10 * 60 * 1000; // 10 min
-  };
+  const tiles: { key: Tile; tone: string }[] = [
+    { key: 'all', tone: 'text-ink' },
+    { key: 'online', tone: 'text-status-ok' },
+    { key: 'offline', tone: 'text-status-crit' },
+    { key: 'warning', tone: 'text-amber-600' },
+    { key: 'critical', tone: 'text-status-crit' },
+    { key: 'battery', tone: 'text-amber-600' },
+  ];
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-start justify-between">
+    <div className="max-w-5xl">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
           <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
@@ -52,45 +88,114 @@ export default function Devices() {
         )}
       </div>
 
-      <div className="mt-6 rounded-xl border border-line bg-white">
-        {(devices.data ?? []).length === 0 ? (
-          <div className="p-8 text-center">
-            <Cpu className="mx-auto text-ink-muted" aria-hidden />
-            <p className="mt-2 text-sm text-ink-muted">{t('empty')}</p>
-          </div>
-        ) : (
-          <ul>
-            {(devices.data ?? []).map((d) => (
-              <li key={d.id}>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/devices/${d.id}`)}
-                  className="flex w-full items-center justify-between border-b border-line px-4 py-3 text-left last:border-0 hover:bg-surface"
-                >
-                  <div className="flex items-center gap-3">
-                    <Circle
-                      size={10}
-                      className={online(d.last_seen_at) ? 'fill-status-ok text-status-ok' : 'fill-line text-line'}
-                      aria-hidden
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-ink">{d.name}</p>
-                      <p className="text-xs text-ink-muted">
-                        {assetName(d.asset_id)}
-                        {d.last_seen_at ? ` · ${t('lastSeen')} ${formatDate(d.last_seen_at, lng)}` : ` · ${t('neverSeen')}`}
-                      </p>
-                    </div>
-                  </div>
-                  {d.kind && <Pill className="bg-surface text-ink-muted">{d.kind}</Pill>}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+      <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-6">
+        {tiles.map(({ key, tone }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => { setTile(key); setTab('devices'); }}
+            aria-pressed={tile === key}
+            className={`rounded-xl border bg-white p-3 text-left transition ${tile === key ? 'border-brand ring-2 ring-brand/20' : 'border-line hover:bg-surface'}`}
+          >
+            <p className="text-xs text-ink-muted">{t(`iot.tiles.${key}`)}</p>
+            <p className={`mt-0.5 text-2xl font-semibold ${tone}`}>{counts[key] ?? 0}</p>
+          </button>
+        ))}
       </div>
 
+      <div className="mt-5 flex gap-1 border-b border-line" role="tablist">
+        {(['devices', 'alerts', ...(role === 'org_admin' || role === 'manager' ? ['gateways'] : [])] as Tab[]).map((k) => (
+          <button
+            key={k}
+            type="button"
+            role="tab"
+            aria-selected={tab === k}
+            onClick={() => setTab(k)}
+            className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium ${tab === k ? 'border-brand text-ink' : 'border-transparent text-ink-muted hover:text-ink'}`}
+          >
+            {t(`iot.tabs.${k}`)}
+            {k === 'alerts' && (openAlerts.data?.length ?? 0) > 0 && (
+              <span className="ml-1.5 rounded-full bg-status-crit px-1.5 text-[11px] text-white">{openAlerts.data?.length}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'devices' && (
+        <>
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <div className="relative col-span-2 sm:col-span-1">
+              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" aria-hidden />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('iot.search')} className="pl-9" aria-label={t('iot.search')} />
+            </div>
+            <Select value={building} onChange={(e) => setBuilding(e.target.value)} aria-label={t('iot.building')}>
+              <option value="">{t('iot.allBuildings')}</option>
+              {labels.buildings.map((b) => <option key={b.id} value={b.id}>{b.label}</option>)}
+            </Select>
+            <Select value={category} onChange={(e) => setCategory(e.target.value)} aria-label={t('iot.category')}>
+              <option value="">{t('iot.allCategories')}</option>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{t(`iot.categories.${c}`)}</option>)}
+            </Select>
+            <Select value={manufacturer} onChange={(e) => setManufacturer(e.target.value)} aria-label={t('iot.manufacturer')}>
+              <option value="">{t('iot.allManufacturers')}</option>
+              {manufacturers.map((m) => <option key={m} value={m}>{m}</option>)}
+            </Select>
+            <Select value={protocol} onChange={(e) => setProtocol(e.target.value)} aria-label={t('iot.protocolLabel')}>
+              <option value="">{t('iot.allProtocols')}</option>
+              {PROTOCOLS.map((p) => <option key={p} value={p}>{t(`iot.protocol.${p}`)}</option>)}
+            </Select>
+          </div>
+
+          <div className="mt-3 rounded-xl border border-line bg-white">
+            {filtered.length === 0 ? (
+              <div className="p-8 text-center">
+                <Cpu className="mx-auto text-ink-muted" aria-hidden />
+                <p className="mt-2 text-sm text-ink-muted">{all.length === 0 ? t('empty') : t('iot.noMatch')}</p>
+              </div>
+            ) : (
+              <ul>
+                {filtered.map((d) => (
+                  <li key={d.id}>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/devices/${d.id}`)}
+                      className="flex w-full items-center justify-between gap-3 border-b border-line px-4 py-3 text-left last:border-0 hover:bg-surface"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <Circle size={10} className={`shrink-0 ${STATUS_DOT[d.status]}`} aria-label={t(`iot.status.${d.status}`)} />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-ink">{d.name}</p>
+                          <p className="truncate text-xs text-ink-muted">
+                            {labels.label(d.location_id)}
+                            {d.manufacturer ? ` · ${d.manufacturer}${d.model ? ` ${d.model}` : ''}` : ''}
+                            {d.last_seen_at ? ` · ${ago(d.last_seen_at, lng)}` : ` · ${t('neverSeen')}`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        {d.battery_low && <BatteryLow size={16} className="text-amber-600" aria-label={t('iot.tiles.battery')} />}
+                        {d.alert_severity && <Pill className={SEVERITY_CLASS[d.alert_severity]}>{t(`iot.severity.${d.alert_severity}`)}</Pill>}
+                        {d.protocol && <Pill className="hidden bg-surface text-ink-muted sm:inline-flex">{t(`iot.protocol.${d.protocol}`)}</Pill>}
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
+
+      {tab === 'alerts' && (
+        <div className="mt-4 rounded-xl border border-line bg-white px-4">
+          <DeviceAlerts canAct={isStaff} deviceName={nameOf} />
+        </div>
+      )}
+
+      {tab === 'gateways' && orgId && <div className="mt-4"><Gateways orgId={orgId} isAdmin={isAdmin} /></div>}
+
       {showAdd && orgId && (
-        <AddDeviceDialog
+        <AddDeviceWizard
           orgId={orgId}
           onClose={() => setShowAdd(false)}
           onCreated={(id) => {
@@ -99,124 +204,6 @@ export default function Devices() {
           }}
         />
       )}
-    </div>
-  );
-}
-
-function AddDeviceDialog({
-  orgId,
-  onClose,
-  onCreated,
-}: {
-  orgId: string;
-  onClose: () => void;
-  onCreated: (id: string) => void;
-}) {
-  const { t, i18n } = useTranslation('devices');
-  const { t: tc } = useTranslation('common');
-  const lng = i18n.resolvedLanguage ?? 'en';
-  const queryClient = useQueryClient();
-  const assets = useAssets();
-  const [name, setName] = useState('');
-  const [kind, setKind] = useState('sensor');
-  const [assetId, setAssetId] = useState('');
-  const [meterId, setMeterId] = useState('');
-  const meters = useMeters(assetId || undefined);
-
-  // Only selectable assets: active ones, sorted by localized name.
-  const assetOptions = (assets.data ?? [])
-    .filter((a) => a.status === 'active')
-    .sort((x, y) => resolveI18n(x.name_i18n, lng).localeCompare(resolveI18n(y.name_i18n, lng)));
-
-  // Meters have no status to filter on; sort by localized name.
-  const meterOptions = (meters.data ?? [])
-    .slice()
-    .sort((x, y) => resolveI18n(x.name_i18n, lng).localeCompare(resolveI18n(y.name_i18n, lng)));
-
-  const create = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase
-        .from('fp_devices')
-        .insert({
-          org_id: orgId,
-          name: name.trim(),
-          kind,
-          asset_id: assetId || null,
-          meter_id: meterId || null,
-        })
-        .select('id')
-        .single();
-      if (error) throw error;
-      return data.id as string;
-    },
-    onSuccess: (id) => {
-      void queryClient.invalidateQueries({ queryKey: ['devices', orgId] });
-      onCreated(id);
-    },
-  });
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    create.mutate();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/30 p-4">
-      <form onSubmit={submit} className="w-full max-w-md rounded-xl border border-line bg-white p-6 shadow-lg">
-        <h2 className="text-lg font-semibold text-ink">{t('addTitle')}</h2>
-        <div className="mt-4 space-y-3">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-ink">{t('name')}</label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('namePlaceholder')} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-ink">{t('kind')}</label>
-              <Select value={kind} onChange={(e) => setKind(e.target.value)}>
-                {KINDS.map((k) => (
-                  <option key={k} value={k}>
-                    {t(`kinds.${k}`)}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-ink">{t('asset')}</label>
-              <Select value={assetId} onChange={(e) => { setAssetId(e.target.value); setMeterId(''); }}>
-                <option value="">{t('noAsset')}</option>
-                {assetOptions.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {resolveI18n(a.name_i18n, lng)}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          </div>
-          {assetId && meterOptions.length > 0 && (
-            <div>
-              <label className="mb-1 block text-sm font-medium text-ink">{t('meter')}</label>
-              <Select value={meterId} onChange={(e) => setMeterId(e.target.value)}>
-                <option value="">{t('noMeter')}</option>
-                {meterOptions.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {resolveI18n(m.name_i18n, lng)}
-                  </option>
-                ))}
-              </Select>
-              <p className="mt-1 text-xs text-ink-muted">{t('meterHint')}</p>
-            </div>
-          )}
-        </div>
-        <div className="mt-6 flex justify-end gap-2">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            {tc('actions.cancel')}
-          </Button>
-          <Button type="submit" loading={create.isPending} disabled={!name.trim()}>
-            {tc('actions.create')}
-          </Button>
-        </div>
-      </form>
     </div>
   );
 }

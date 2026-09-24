@@ -162,12 +162,16 @@ export default function App() {
               <Route path="/tenant-experience" element={<TenantExperience />} />
               {/* Admin/manager pages: their data and writes are limited to these
                   roles by RLS, so other roles would only see controls that fail. */}
+              {/* Devices: technicians see live data, alerts and history (0077);
+                  configuration and keys stay admin/manager-only in the page. */}
+              <Route element={<RequireRole allow={['org_admin', 'manager', 'technician']} />}>
+                <Route path="/devices" element={<Devices />} />
+                <Route path="/devices/:id" element={<DeviceDetail />} />
+              </Route>
               <Route element={<RequireRole allow={['org_admin', 'manager']} />}>
                 <Route path="/approvals" element={<Approvals />} />
                 <Route path="/workflows" element={<Workflows />} />
                 <Route path="/surveys" element={<Surveys />} />
-                <Route path="/devices" element={<Devices />} />
-                <Route path="/devices/:id" element={<DeviceDetail />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/billing" element={<Billing />} />
                 <Route path="/settings" element={<Settings />} />
