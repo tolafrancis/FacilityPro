@@ -604,6 +604,9 @@ export interface NotificationRow {
   kind: string;
   title: string;
   body: string | null;
+  /** Generated text in each language (0075); falls back to title/body. */
+  title_i18n?: Record<string, string> | null;
+  body_i18n?: Record<string, string> | null;
   link: string | null;
   read_at: string | null;
   created_at: string;

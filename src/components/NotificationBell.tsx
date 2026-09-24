@@ -114,8 +114,8 @@ export default function NotificationBell() {
                         n.read_at ? '' : 'bg-brand-50/50'
                       }`}
                     >
-                      <span className="text-sm font-medium text-ink">{n.title}</span>
-                      {n.body && <span className="text-xs text-ink-muted">{n.body}</span>}
+                      <span className="text-sm font-medium text-ink">{n.title_i18n?.[lng] ?? n.title}</span>
+                      {n.body && <span className="text-xs text-ink-muted">{n.body_i18n?.[lng] ?? n.body}</span>}
                       <span className="text-[11px] text-ink-muted">{formatDate(n.created_at, lng)}</span>
                     </button>
                   </li>
