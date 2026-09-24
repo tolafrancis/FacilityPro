@@ -73,5 +73,10 @@
       "wo_checklist_incomplete": "Hãy hoàn tất các mục bắt buộc trong danh sách kiểm tra trước khi đánh dấu đã xử lý.",
       "wo_field_not_allowed": "Chỉ quản lý mới có thể thay đổi các thông tin này."
     }
+  },
+  "uploadQueued": "Bạn đang ngoại tuyến: ảnh sẽ được tải lên khi có kết nối.",
+  "uploadRejected": {
+    "too_large": "Tệp quá lớn (tối đa 25 MB).",
+    "unsupported_type": "Chỉ có thể đính kèm ảnh và video tại đây."
   }
 }

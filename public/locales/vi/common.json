@@ -110,7 +110,8 @@
       "assets": "Đã đạt giới hạn tài sản của gói. Hãy ngừng sử dụng tài sản không dùng hoặc nâng cấp trong mục Thanh toán.",
       "members": "Đã đạt giới hạn thành viên của gói (tính cả lời mời đang chờ). Nâng cấp trong mục Thanh toán để mời thêm người.",
       "sites": "Đã đạt giới hạn địa điểm của gói. Nâng cấp trong mục Thanh toán để thêm địa điểm."
-    }
+    },
+    "conflict": "Người khác vừa thay đổi mục này. Dữ liệu đã được tải lại; hãy kiểm tra và thử lại."
   },
   "requestStatus": {
     "new": "Mới",
@@ -156,7 +157,18 @@
   "offline": "Bạn đang ngoại tuyến. Thay đổi có thể không được lưu cho đến khi kết nối lại.",
   "sync": {
     "pending": "{{count}} chờ đồng bộ",
-    "syncing": "Đang đồng bộ…"
+    "syncing": "Đang đồng bộ…",
+    "offline": "Bạn đang ngoại tuyến. Thay đổi được lưu trên thiết bị và gửi khi có kết nối lại.",
+    "failed": "{{count}} chưa lưu được",
+    "failedTitle": "Các thay đổi không lưu được",
+    "failedHint": "Những thay đổi này được thực hiện khi ngoại tuyến và bị từ chối khi gửi (ví dụ: công việc đã thay đổi trong lúc đó hoặc bạn không còn quyền truy cập). Hãy thử lại hoặc bỏ qua.",
+    "retry": "Thử lại",
+    "discard": "Bỏ qua",
+    "op": {
+      "insert": "Thêm",
+      "update": "Thay đổi",
+      "upload": "Ảnh"
+    }
   },
   "free": "Miễn phí",
   "notFound": {

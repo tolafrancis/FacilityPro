@@ -25,7 +25,7 @@ import {
   useTechnicianProfile,
   useTechnicianProfiles,
 } from '../lib/queries';
-import { uploadMedia, signedUrl } from '../lib/media';
+import { prepareUpload, signedUrl, UploadRejected } from '../lib/media';
 import { writeOrQueue } from '../lib/sync';
 import { formatDate, friendlyError, nextWoStatuses, PRIORITY_CLASS, WO_DONE_STATUSES, WO_STATUS_CLASS } from '../lib/ui';
 import { resolveI18n } from '../i18n/resolver';
@@ -168,12 +168,16 @@ export default function WorkOrderDetail() {
     ) => {
       // Lifecycle timestamps (started/resolved/verified/closed) are stamped by
       // the database; the client only sends the change itself.
+      // expectVersion: if someone else saved this work order since it was
+      // loaded, the change is refused instead of silently overwriting theirs.
       await writeOrQueue({
         op: 'update',
         table: 'fp_work_orders',
         values: changes,
         matchColumn: 'id',
         matchValue: id!,
+        expectVersion: woQuery.data?.version,
+        label: woQuery.data?.title ?? undefined,
       });
     },
     onSuccess: () => {
@@ -192,13 +196,26 @@ export default function WorkOrderDetail() {
     setUploadingPhase(phase);
     setUploadError(null);
     try {
-      // Storage refuses files over 25 MB or of unexpected types, and uploads
-      // from anyone but the assignee or a manager (0062).
-      const { error } = await uploadMedia({ orgId, file, workOrderId: id, phase });
-      if (error) setUploadError(error);
+      // Photos are downscaled first; storage refuses files over 25 MB or of
+      // unexpected types, and uploads from anyone but the assignee or a
+      // manager (0062). Offline, the photo waits in the queue.
+      const prepared = await prepareUpload(file);
+      const { queued } = await writeOrQueue({
+        op: 'upload',
+        table: 'fp_media',
+        values: { orgId, workOrderId: id, phase },
+        file: prepared,
+        fileName: prepared.name,
+        label: prepared.name,
+      });
+      if (queued) setUploadError(t('uploadQueued'));
       await queryClient.invalidateQueries({ queryKey: ['media', id] });
     } catch (e) {
-      setUploadError(e instanceof Error ? e.message : tc('errors.generic'));
+      setUploadError(
+        e instanceof UploadRejected
+          ? t(`uploadRejected.${e.reason}`)
+          : friendlyError(e as { code?: string; message?: string }, tc)
+      );
     } finally {
       setUploadingPhase(null);
     }

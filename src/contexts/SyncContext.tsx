@@ -7,45 +7,77 @@ import {
   type ReactNode,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { countWrites } from '../lib/offlineDb';
-import { flushQueue, QUEUE_CHANGED } from '../lib/sync';
+import { userWrites, type QueuedWrite } from '../lib/offlineDb';
+import { discardWrite, flushQueue, QUEUE_CHANGED, retryWrite, setQueueUser } from '../lib/sync';
+import { useAuth } from './AuthContext';
 
 interface SyncContextValue {
   online: boolean;
+  /** This user's changes waiting to be sent. */
   pending: number;
+  /** This user's queued changes the server refused (kept until discarded). */
+  failed: QueuedWrite[];
   syncing: boolean;
   sync: () => Promise<void>;
+  discard: (id: number) => Promise<void>;
+  retry: (item: QueuedWrite) => Promise<void>;
 }
 
 const SyncContext = createContext<SyncContextValue | undefined>(undefined);
 
 export function SyncProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
+  setQueueUser(userId);
   const [online, setOnline] = useState(navigator.onLine);
   const [pending, setPending] = useState(0);
+  const [failed, setFailed] = useState<QueuedWrite[]>([]);
   const [syncing, setSyncing] = useState(false);
 
-  const refreshPending = useCallback(async () => {
-    setPending(await countWrites());
-  }, []);
+  const refresh = useCallback(async () => {
+    const mine = await userWrites(userId).catch(() => ({ pending: [], failed: [] }));
+    setPending(mine.pending.length);
+    setFailed(mine.failed);
+  }, [userId]);
 
   const sync = useCallback(async () => {
     if (!navigator.onLine) return;
     setSyncing(true);
-    const done = await flushQueue();
-    setSyncing(false);
-    await refreshPending();
-    if (done > 0) void queryClient.invalidateQueries();
-  }, [queryClient, refreshPending]);
+    try {
+      const done = await flushQueue();
+      if (done > 0) void queryClient.invalidateQueries();
+    } finally {
+      setSyncing(false);
+      await refresh();
+    }
+  }, [queryClient, refresh]);
+
+  const discard = useCallback(async (id: number) => {
+    await discardWrite(id);
+  }, []);
+
+  const retry = useCallback(
+    async (item: QueuedWrite) => {
+      await retryWrite(item);
+      await sync();
+    },
+    [sync]
+  );
 
   useEffect(() => {
-    void refreshPending();
+    // On sign-in (or switching user) show and send that user's queue only.
+    void refresh();
+    if (userId && navigator.onLine) void sync();
+  }, [userId, refresh, sync]);
+
+  useEffect(() => {
     const onOnline = () => {
       setOnline(true);
       void sync();
     };
     const onOffline = () => setOnline(false);
-    const onQueue = () => void refreshPending();
+    const onQueue = () => void refresh();
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
     window.addEventListener(QUEUE_CHANGED, onQueue);
@@ -54,10 +86,10 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('offline', onOffline);
       window.removeEventListener(QUEUE_CHANGED, onQueue);
     };
-  }, [refreshPending, sync]);
+  }, [refresh, sync]);
 
   return (
-    <SyncContext.Provider value={{ online, pending, syncing, sync }}>
+    <SyncContext.Provider value={{ online, pending, failed, syncing, sync, discard, retry }}>
       {children}
     </SyncContext.Provider>
   );

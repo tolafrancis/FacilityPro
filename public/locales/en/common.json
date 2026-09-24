@@ -110,7 +110,8 @@
       "assets": "Your plan's asset limit is reached. Retire unused assets or upgrade under Billing.",
       "members": "Your plan's member limit is reached (pending invitations count). Upgrade under Billing to invite more people.",
       "sites": "Your plan's site limit is reached. Upgrade under Billing to add more sites."
-    }
+    },
+    "conflict": "Someone else changed this in the meantime. It has been reloaded; check it and try again."
   },
   "requestStatus": {
     "new": "New",
@@ -156,7 +157,18 @@
   "offline": "You're offline. Changes may not save until you reconnect.",
   "sync": {
     "pending": "{{count}} to sync",
-    "syncing": "Syncing…"
+    "syncing": "Syncing…",
+    "offline": "You're offline. Changes are saved on this device and sent when you reconnect.",
+    "failed": "{{count}} not saved",
+    "failedTitle": "Changes that couldn't be saved",
+    "failedHint": "These were made offline and refused when sent (for example, the job changed meanwhile or you no longer have access). Retry, or discard them.",
+    "retry": "Retry",
+    "discard": "Discard",
+    "op": {
+      "insert": "Add",
+      "update": "Change",
+      "upload": "Photo"
+    }
   },
   "free": "Free",
   "notFound": {

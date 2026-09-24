@@ -73,5 +73,10 @@
       "wo_checklist_incomplete": "Complete the required checklist items before resolving.",
       "wo_field_not_allowed": "Only a manager can change these details."
     }
+  },
+  "uploadQueued": "You're offline: the photo will upload when you're back online.",
+  "uploadRejected": {
+    "too_large": "That file is too large (25 MB maximum).",
+    "unsupported_type": "Only photos and videos can be attached here."
   }
 }

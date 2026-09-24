@@ -31,6 +31,11 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: (failureCount, error) => !isPermanent(error) && failureCount < 2,
     },
+    // React Query pauses mutations while the browser is offline by default,
+    // which kept field writes from ever reaching the offline queue
+    // (writeOrQueue). Run them always: queued writes are stored on the
+    // device, other saves fail at once with "you're offline".
+    mutations: { networkMode: 'always' },
   },
   // A list that failed to load must not look like an empty list. Missing
   // records (PGRST116) are left to the page, which shows "not found".
@@ -57,16 +62,17 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <ErrorBoundary>
       <Suspense fallback={<div className="grid min-h-screen place-items-center text-ink-muted">Loading…</div>}>
         <QueryClientProvider client={queryClient}>
-          <SyncProvider>
-            <BrowserRouter>
-              <AuthProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              {/* Inside AuthProvider: the offline queue belongs to the signed-in user. */}
+              <SyncProvider>
                 <OrgProvider>
                   <App />
                   <Toaster />
                 </OrgProvider>
-              </AuthProvider>
-            </BrowserRouter>
-          </SyncProvider>
+              </SyncProvider>
+            </AuthProvider>
+          </BrowserRouter>
         </QueryClientProvider>
       </Suspense>
     </ErrorBoundary>

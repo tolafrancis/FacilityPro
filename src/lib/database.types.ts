@@ -147,6 +147,8 @@ export type WorkOrderStatus =
 export interface WorkOrder {
   id: string;
   org_id: string;
+  /** Bumped on every change (0072); used to detect edit conflicts. */
+  version: number;
   request_id: string | null;
   asset_id: string | null;
   assigned_to: string | null;
