@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useOrg } from '../contexts/OrgContext';
-import { useRequests, useWorkOrders } from '../lib/queries';
+import { useDashboardKpis, useRecentRequests } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDate, PRIORITY_CLASS, REQUEST_STATUS_CLASS, WO_DONE_STATUSES } from '../lib/ui';
+import { formatDate, PRIORITY_CLASS, REQUEST_STATUS_CLASS } from '../lib/ui';
 import { useFaultTypes } from '../lib/queries';
 import Pill from '../components/ui/Pill';
 
@@ -11,36 +11,25 @@ export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const lng = i18n.resolvedLanguage ?? 'en';
   const { currentOrg } = useOrg();
-  const requests = useRequests();
-  const workOrders = useWorkOrders();
+  // Counts come from the database (exact at any size); only the six most
+  // recent requests are fetched.
+  const kpis = useDashboardKpis().data;
+  const recentQuery = useRecentRequests(6);
   const faultTypes = useFaultTypes();
-
-  const reqs = requests.data ?? [];
-  const wos = workOrders.data ?? [];
-  const now = Date.now();
-  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
-
-  const openCount = reqs.filter((r) => !['resolved', 'closed', 'rejected'].includes(r.status)).length;
-  const overdueCount = wos.filter(
-    (w) => w.due_at && new Date(w.due_at).getTime() < now && !WO_DONE_STATUSES.includes(w.status)
-  ).length;
-  const inProgressCount = wos.filter((w) => w.status === 'in_progress').length;
-  const resolvedCount = wos.filter(
-    (w) => w.resolved_at && new Date(w.resolved_at).getTime() > thirtyDaysAgo
-  ).length;
 
   const faultName = (id: string | null) => {
     const ft = faultTypes.data?.find((x) => x.id === id);
     return ft ? resolveI18n(ft.name_i18n, lng) : '—';
   };
 
-  const recent = reqs.slice(0, 6);
+  const recent = recentQuery.data ?? [];
+  const show = (n: number | undefined) => (n === undefined ? '—' : n);
 
   const cards = [
-    { key: 'open', value: openCount },
-    { key: 'overdue', value: overdueCount },
-    { key: 'inProgress', value: inProgressCount },
-    { key: 'resolved', value: resolvedCount },
+    { key: 'open', value: show(kpis?.open_requests) },
+    { key: 'overdue', value: show(kpis?.overdue) },
+    { key: 'inProgress', value: show(kpis?.in_progress) },
+    { key: 'resolved', value: show(kpis?.resolved_30d) },
   ];
 
   return (

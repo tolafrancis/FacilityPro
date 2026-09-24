@@ -6,7 +6,7 @@ import { CheckCircle2, XCircle, ClipboardCheck } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrg } from '../contexts/OrgContext';
-import { useApprovals, useOrgMembers, useWorkOrders } from '../lib/queries';
+import { useApprovals, useOrgMembers, useWorkOrderTitles } from '../lib/queries';
 import { formatDate } from '../lib/ui';
 
 export default function Approvals() {
@@ -18,12 +18,12 @@ export default function Approvals() {
   const queryClient = useQueryClient();
 
   const pending = useApprovals('pending');
-  const workOrders = useWorkOrders();
+  const woTitles = useWorkOrderTitles((pending.data ?? []).map((a) => a.work_order_id).filter((x): x is string => !!x));
   const members = useOrgMembers();
   const [note, setNote] = useState<Record<string, string>>({});
 
   const woTitle = (id: string) =>
-    workOrders.data?.find((w) => w.id === id)?.title ?? id.slice(0, 8);
+    woTitles.data?.get(id) ?? id.slice(0, 8);
   const requester = (uid: string | null) =>
     uid ? members.data?.find((m) => m.user_id === uid)?.email ?? uid : '—';
 

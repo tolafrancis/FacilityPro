@@ -5,7 +5,7 @@ import { Check, ExternalLink, Pencil } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
 import {
-  useAssets,
+  useAssetCount,
   useIsPlatformAdmin,
   useJobHealth,
   useSystemChecks,
@@ -34,7 +34,7 @@ export default function Billing() {
 
   const plansQuery = usePlans();
   const subQuery = useSubscription();
-  const assets = useAssets();
+  const assetCount = useAssetCount();
   const members = useOrgMembers();
   // Only the platform operator edits the shared plan catalogue and activates
   // subscriptions (after verifying payment); customers can only request.
@@ -123,7 +123,7 @@ export default function Billing() {
 
         <div className="mt-4 space-y-1 border-t border-line pt-3">
           <p className="text-xs font-medium uppercase tracking-wide text-ink-muted">{t('usage')}</p>
-          {usageRow(t('assets'), assets.data?.length ?? 0, currentPlan?.limits.assets)}
+          {usageRow(t('assets'), assetCount.data ?? 0, currentPlan?.limits.assets)}
           {usageRow(t('members'), members.data?.length ?? 0, currentPlan?.limits.members)}
         </div>
 

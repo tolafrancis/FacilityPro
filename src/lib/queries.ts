@@ -298,6 +298,123 @@ export function useAssetHistory(assetId: string | undefined) {
   });
 }
 
+export interface DashboardKpis {
+  open_requests: number;
+  overdue: number;
+  in_progress: number;
+  resolved_30d: number;
+}
+
+/** Dashboard counts, computed in the database (fp_dashboard_kpis, 0069). */
+export function useDashboardKpis() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['dashboard_kpis', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_dashboard_kpis', { p_org: orgId });
+      if (error) throw error;
+      return data as DashboardKpis;
+    },
+  });
+}
+
+export function useRecentRequests(limit: number) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['requests_recent', orgId, limit],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_requests')
+        .select('*')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return data as RequestRow[];
+    },
+  });
+}
+
+export interface ReportFilters {
+  from?: string;
+  to?: string;
+  locationId?: string;
+  technicianId?: string;
+  priority?: string;
+}
+
+export interface ReportKpis {
+  open_requests: number;
+  open_work: number;
+  overdue: number;
+  avg_resolution_hours: number | null;
+  pm_due: number;
+  pm_compliance: number | null;
+  planned_share: number | null;
+  low_stock: number;
+  expiring_contracts: number;
+  total_cost: number;
+  total_budget: number;
+  vendor_spend: { vendor_id: string; amount: number }[];
+  cost_by_month: { month: string; amount: number }[];
+  mtbf_days: number | null;
+}
+
+/** Reports page figures, computed in the database (fp_report_kpis, 0069). */
+export function useReportKpis(f: ReportFilters) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['report_kpis', orgId, f],
+    enabled: !!orgId,
+    placeholderData: keepPreviousData,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('fp_report_kpis', {
+        p_org: orgId,
+        p_from: f.from || null,
+        p_to: f.to || null,
+        p_location: f.locationId || null,
+        p_technician: f.technicianId || null,
+        p_priority: f.priority || null,
+      });
+      if (error) throw error;
+      return data as ReportKpis;
+    },
+  });
+}
+
+/** Exact asset count (plan usage), without downloading the assets. */
+export function useAssetCount() {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['asset_count', orgId],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('fp_assets')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', orgId!);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+}
+
+/** Titles for a handful of work orders, by id. */
+export function useWorkOrderTitles(ids: string[]) {
+  const key = [...new Set(ids)].sort();
+  return useQuery({
+    queryKey: ['wo_titles', key],
+    enabled: key.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('fp_work_orders').select('id, title').in('id', key);
+      if (error) throw error;
+      return new Map((data ?? []).map((w) => [w.id as string, w.title as string]));
+    },
+  });
+}
+
 export function useRequests() {
   const orgId = useOrgId();
   return useQuery({
