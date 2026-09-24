@@ -677,17 +677,21 @@ export default function WorkOrderDetail() {
               className="w-full rounded-lg border border-line px-3 py-2 text-sm"
             />
           </div>
-          <div className="w-28">
-            <label className="mb-1 block text-xs text-ink-muted">{t('labor.rate')}</label>
-            <input
-              type="number"
-              min={0}
-              step="0.01"
-              value={rate}
-              onChange={(e) => setRate(e.target.value)}
-              className="w-full rounded-lg border border-line px-3 py-2 text-sm"
-            />
-          </div>
+          {/* Technicians are billed at their profile rate (set server-side,
+              0070); only admins/managers can enter a different rate. */}
+          {isManager && (
+            <div className="w-28">
+              <label className="mb-1 block text-xs text-ink-muted">{t('labor.rate')}</label>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                value={rate}
+                onChange={(e) => setRate(e.target.value)}
+                className="w-full rounded-lg border border-line px-3 py-2 text-sm"
+              />
+            </div>
+          )}
           <button
             type="button"
             disabled={!minutes || logLabor.isPending}
