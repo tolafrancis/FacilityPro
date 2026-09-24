@@ -132,10 +132,12 @@ export interface RequestRow {
 }
 
 export type WorkOrderStatus =
+  | 'open'
   | 'assigned'
   | 'in_progress'
   | 'on_hold'
   | 'resolved'
+  | 'verified'
   | 'closed';
 
 export interface WorkOrder {
@@ -149,7 +151,14 @@ export interface WorkOrder {
   priority: Priority;
   status: WorkOrderStatus;
   due_at: string | null;
+  // Lifecycle timestamps are set by the database (0060), never by the client.
+  started_at: string | null;
+  resolved_at: string | null;
+  verified_at: string | null;
+  verified_by: string | null;
   closed_at: string | null;
+  hold_reason: string | null;
+  reopened_count: number;
   labour_minutes: number;
   cost: number;
   checklist_template_id: string | null;

@@ -396,6 +396,23 @@ export function useWorkOrder(id: string | undefined) {
   });
 }
 
+/** The work order created from a request, if any (one per request, 0060). */
+export function useWorkOrderForRequest(requestId: string | undefined) {
+  return useQuery({
+    queryKey: ['work_order_for_request', requestId],
+    enabled: !!requestId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_work_orders')
+        .select('id, title, status')
+        .eq('request_id', requestId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as Pick<WorkOrder, 'id' | 'title' | 'status'> | null;
+    },
+  });
+}
+
 export function useMyWorkOrders(userId: string | undefined) {
   const orgId = useOrgId();
   return useQuery({

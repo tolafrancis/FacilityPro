@@ -5,37 +5,7 @@
 --
 -- Run with supabase/security-tests/run.sh (fresh DB + shim + all migrations + this).
 
-set client_min_messages = warning;
-
--- ---------------------------------------------------------------------------
--- Harness: run SQL as an API role / user, the way PostgREST would.
--- ---------------------------------------------------------------------------
-create schema t;
-create table t.results (id serial, name text, ok boolean, detail text);
-
--- Returns 'ok:<rowcount>' or 'err:<message>'.
-create function t.run(p_role text, p_uid uuid, p_sql text) returns text
-language plpgsql as $$
-declare n bigint;
-begin
-  perform set_config('request.jwt.claim.sub', coalesce(p_uid::text, ''), true);
-  -- Only API roles carry a JWT; a direct DB session (pg_cron) has none.
-  perform set_config('request.jwt.claim.role',
-    case when p_role in ('anon', 'authenticated', 'service_role') then p_role else '' end, true);
-  execute format('set local role %I', p_role);
-  begin
-    execute p_sql;
-    get diagnostics n = row_count;
-    reset role;
-    return 'ok:' || n;
-  exception when others then
-    reset role;
-    return 'err:' || sqlerrm;
-  end;
-end $$;
-
-create function t.check(p_name text, p_ok boolean, p_detail text default null) returns void
-language sql as $$ insert into t.results (name, ok, detail) values (p_name, coalesce(p_ok, false), p_detail) $$;
+\ir _harness.sql
 
 -- ---------------------------------------------------------------------------
 -- Fixture: two orgs. A = adminA, techA (technician), occA (occupant).
@@ -329,14 +299,4 @@ select t.check('B6: per-org daily email quota stops a flood',
   (select count(*) from fp_notification_outbox where org_id = :'orgB' and channel = 'email' and status = 'pending') <= 500
   and exists (select 1 from fp_notification_outbox where org_id = :'orgB' and error = 'daily_quota_exceeded'));
 
--- ---------------------------------------------------------------------------
--- Report
--- ---------------------------------------------------------------------------
-\pset footer off
-select case when ok then 'PASS' else 'FAIL' end as result, name from t.results order by id;
-select count(*) filter (where ok) as passed, count(*) filter (where not ok) as failed from t.results;
-do $$ begin
-  if exists (select 1 from t.results where not ok) then
-    raise exception 'security suite: % check(s) failed', (select count(*) from t.results where not ok);
-  end if;
-end $$;
+\ir _report.sql

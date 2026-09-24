@@ -16,7 +16,7 @@ import {
   useWorkOrders,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { daysUntil, formatDate, PRIORITIES } from '../lib/ui';
+import { daysUntil, formatDate, PRIORITIES, WO_DONE_STATUSES } from '../lib/ui';
 import type { Priority } from '../lib/database.types';
 import { downloadCsv } from '../lib/csv';
 import Button from '../components/ui/Button';
@@ -99,19 +99,21 @@ export default function Reports() {
   const openRequests = filteredRequests.filter(
     (r) => !['resolved', 'closed', 'rejected'].includes(r.status)
   ).length;
-  const openWork = filteredWorkOrders.filter((w) => !['resolved', 'closed'].includes(w.status)).length;
+  const openWork = filteredWorkOrders.filter((w) => !WO_DONE_STATUSES.includes(w.status)).length;
   const overdue = filteredWorkOrders.filter(
-    (w) => w.due_at && new Date(w.due_at).getTime() < now && !['resolved', 'closed'].includes(w.status)
+    (w) => w.due_at && new Date(w.due_at).getTime() < now && !WO_DONE_STATUSES.includes(w.status)
   ).length;
 
-  const closed = filteredWorkOrders.filter((w) => w.closed_at);
+  // Resolution time = created → resolved (the work finished), not the later
+  // administrative close.
+  const closed = filteredWorkOrders.filter((w) => w.resolved_at);
   const avgResolution =
     closed.length === 0
       ? null
       : Math.round(
           closed.reduce(
             (sum, w) =>
-              sum + (new Date(w.closed_at as string).getTime() - new Date(w.created_at).getTime()),
+              sum + (new Date(w.resolved_at as string).getTime() - new Date(w.created_at).getTime()),
             0
           ) /
             closed.length /
@@ -125,9 +127,9 @@ export default function Reports() {
   // PM compliance: of PM-generated work orders that have been closed, what
   // share closed at or before their due date. Undefined (—) until at least
   // one PM work order has been closed, rather than showing a misleading 0%.
-  const pmClosed = filteredWorkOrders.filter((w) => w.pm_schedule_id && w.closed_at);
+  const pmClosed = filteredWorkOrders.filter((w) => w.pm_schedule_id && w.resolved_at);
   const pmOnTime = pmClosed.filter(
-    (w) => w.due_at && new Date(w.closed_at as string).getTime() <= new Date(w.due_at).getTime()
+    (w) => w.due_at && new Date(w.resolved_at as string).getTime() <= new Date(w.due_at).getTime()
   );
   const pmCompliance = pmClosed.length === 0 ? null : Math.round((pmOnTime.length / pmClosed.length) * 100);
 
@@ -187,7 +189,7 @@ export default function Reports() {
       const m = months.find((x) => x.key === key);
       if (m) m.amount += amount;
     };
-    for (const w of workOrders) if (w.closed_at) bucket(w.closed_at, w.cost);
+    for (const w of workOrders) if (w.resolved_at) bucket(w.resolved_at, w.cost);
     for (const e of expenditures) bucket(e.created_at, e.amount);
     return months;
   }, [workOrders, expenditures, lng]);
@@ -200,9 +202,9 @@ export default function Reports() {
   const mtbfDays = useMemo(() => {
     const byAsset = new Map<string, number[]>();
     for (const w of workOrders) {
-      if (!w.asset_id || w.pm_schedule_id || !w.closed_at) continue;
+      if (!w.asset_id || w.pm_schedule_id || !w.resolved_at) continue;
       const arr = byAsset.get(w.asset_id) ?? [];
-      arr.push(new Date(w.closed_at).getTime());
+      arr.push(new Date(w.resolved_at).getTime());
       byAsset.set(w.asset_id, arr);
     }
     const gaps: number[] = [];
@@ -248,6 +250,9 @@ export default function Reports() {
         { key: 'status', label: 'status' },
         { key: 'priority', label: 'priority' },
         { key: 'due_at', label: 'due_at' },
+        { key: 'started_at', label: 'started_at' },
+        { key: 'resolved_at', label: 'resolved_at' },
+        { key: 'verified_at', label: 'verified_at' },
         { key: 'closed_at', label: 'closed_at' },
         { key: 'cost', label: 'cost' },
       ],

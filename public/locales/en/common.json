@@ -118,10 +118,12 @@
     "rejected": "Rejected"
   },
   "woStatus": {
+    "open": "Open (unassigned)",
     "assigned": "Assigned",
     "in_progress": "In progress",
     "on_hold": "On hold",
     "resolved": "Resolved",
+    "verified": "Verified",
     "closed": "Closed"
   },
   "form": {

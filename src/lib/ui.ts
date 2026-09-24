@@ -19,22 +19,47 @@ export const REQUEST_STATUS_CLASS: Record<RequestStatus, string> = {
 };
 
 export const WO_STATUS_CLASS: Record<WorkOrderStatus, string> = {
+  open: 'bg-status-info/10 text-status-info',
   assigned: 'bg-status-warn/15 text-status-warn',
   in_progress: 'bg-status-warn/15 text-status-warn',
   on_hold: 'bg-surface text-ink-muted',
   resolved: 'bg-status-ok/10 text-status-ok',
+  verified: 'bg-status-ok/10 text-status-ok',
   closed: 'bg-status-ok/10 text-status-ok',
 };
 
 export const PRIORITIES: Priority[] = ['low', 'medium', 'high', 'critical'];
 
 export const WO_STATUSES: WorkOrderStatus[] = [
+  'open',
   'assigned',
   'in_progress',
   'on_hold',
   'resolved',
+  'verified',
   'closed',
 ];
+
+/** Statuses where the work itself is finished (awaiting sign-off or done). */
+export const WO_DONE_STATUSES: WorkOrderStatus[] = ['resolved', 'verified', 'closed'];
+
+/**
+ * Status changes a user may pick from `from`. Mirrors the database rule in
+ * fp_wo_lifecycle() (0060), which is what actually enforces it; open/assigned
+ * follow assignment and are never picked directly.
+ */
+export function nextWoStatuses(from: WorkOrderStatus, isManager: boolean): WorkOrderStatus[] {
+  const next: Record<WorkOrderStatus, WorkOrderStatus[]> = {
+    open: [],
+    assigned: ['in_progress', 'on_hold'],
+    in_progress: ['on_hold', 'resolved'],
+    on_hold: ['in_progress'],
+    resolved: isManager ? ['verified', 'closed', 'in_progress'] : ['in_progress'],
+    verified: isManager ? ['closed', 'in_progress'] : [],
+    closed: isManager ? ['in_progress'] : [],
+  };
+  return next[from];
+}
 
 export const REQUEST_STATUSES: RequestStatus[] = [
   'new',

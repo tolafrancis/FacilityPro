@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useOrg } from '../contexts/OrgContext';
 import { useRequests, useWorkOrders } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDate, PRIORITY_CLASS, REQUEST_STATUS_CLASS } from '../lib/ui';
+import { formatDate, PRIORITY_CLASS, REQUEST_STATUS_CLASS, WO_DONE_STATUSES } from '../lib/ui';
 import { useFaultTypes } from '../lib/queries';
 import Pill from '../components/ui/Pill';
 
@@ -22,11 +22,11 @@ export default function Dashboard() {
 
   const openCount = reqs.filter((r) => !['resolved', 'closed', 'rejected'].includes(r.status)).length;
   const overdueCount = wos.filter(
-    (w) => w.due_at && new Date(w.due_at).getTime() < now && w.status !== 'closed' && w.status !== 'resolved'
+    (w) => w.due_at && new Date(w.due_at).getTime() < now && !WO_DONE_STATUSES.includes(w.status)
   ).length;
   const inProgressCount = wos.filter((w) => w.status === 'in_progress').length;
   const resolvedCount = wos.filter(
-    (w) => w.closed_at && new Date(w.closed_at).getTime() > thirtyDaysAgo
+    (w) => w.resolved_at && new Date(w.resolved_at).getTime() > thirtyDaysAgo
   ).length;
 
   const faultName = (id: string | null) => {

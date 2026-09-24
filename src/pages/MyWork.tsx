@@ -20,7 +20,9 @@ export default function MyWork() {
     return a ? resolveI18n(a.name_i18n, lng) : null;
   };
 
-  const open = (workOrders.data ?? []).filter((w) => w.status !== 'closed');
+  // Resolved work stays visible (it can come back for rework) until a manager
+  // verifies or closes it.
+  const open = (workOrders.data ?? []).filter((w) => w.status !== 'verified' && w.status !== 'closed');
 
   return (
     <div className="max-w-2xl">
