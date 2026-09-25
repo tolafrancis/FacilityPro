@@ -5,6 +5,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "facilitypro",
   "compatibility_date": "2025-09-01",
+  // Only /webhooks/* runs this script (the Zalo forwarder); everything else
+  // is served straight from dist/.
+  "main": "worker/index.js",
   // Attached on every deploy; Cloudflare creates the DNS records and
   // certificates (the domain must be in this Cloudflare account).
   "routes": [
@@ -13,6 +16,8 @@
   ],
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/webhooks/*"],
     // Client-side routes (/devices/…, /work-orders/…) load index.html.
     "not_found_handling": "single-page-application"
   }

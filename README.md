@@ -140,7 +140,7 @@ Run each file in `supabase/migrations/` **in order, 0001 → 0075**, in the dash
 >
 > 1. Apply migration `0076_zalo_channel.sql` and redeploy `channel-webhook` and `channel-send` (same flags as above).
 > 2. Set secrets: `supabase secrets set ZALO_APP_ID=… ZALO_APP_SECRET=… ZALO_OA_SECRET_KEY=…` (the last one is the **OA Secret Key** on the app's Webhook page; every delivery's `X-ZEvent-Signature` is checked against it, and without it Zalo deliveries are rejected).
-> 3. Webhook URL: Zalo only accepts a URL on a domain verified in the Zalo app, and `supabase.co` can't be verified. Put the function behind your own domain (a Supabase custom domain, or a small proxy such as a Cloudflare Worker on `hooks.yourdomain.com` that forwards the request body and the `X-ZEvent-Signature` header unchanged to `https://<project-ref>.functions.supabase.co/channel-webhook`) and verify that domain. Subscribe to the `user_send_*`, `user_received_message` and `user_seen_message` events.
+> 3. Webhook URL: Zalo only accepts a URL on a domain verified in the Zalo app, and `supabase.co` can't be verified. The site's Cloudflare Worker forwards `https://<your-domain>/webhooks/zalo` to `channel-webhook` with the body and `X-ZEvent-Signature` unchanged (`worker/index.js`; set `ZALO_WEBHOOK_TARGET` as a Worker variable if your project ref differs). Verify the domain in the Zalo app (DNS TXT record) and use that URL. Subscribe to the `user_send_*`, `user_received_message` and `user_seen_message` events.
 > 4. Connect each organisation's OA (as a platform admin, in the SQL editor), using the OA id and a refresh token from the OA's authorisation (Zalo's OAuth v4 flow, or the API Explorer):
 >    ```sql
 >    with a as (
