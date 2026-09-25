@@ -488,12 +488,22 @@ export interface RequestPageFilters {
 }
 
 /**
- * A search term safe inside a PostgREST or=(…ilike…) filter: characters that
- * carry meaning there (, ( ) * % \ " :) become spaces.
+ * PostgREST filter for a request search: every word must appear in the title
+ * or the description (any order, any case). Characters that carry meaning in
+ * the filter syntax (, ( ) * % \ " :) are treated as spaces; values are quoted. Returns the body
+ * of an or=(…) filter, or null for an empty search.
  */
-export function searchPattern(term: string | undefined): string | null {
-  const clean = (term ?? '').replace(/[,()*%\\":]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100);
-  return clean ? `*${clean}*` : null;
+export function requestSearchFilter(term: string | undefined): string | null {
+  const words = (term ?? '')
+    .slice(0, 100)
+    .replace(/[,()*%\\":]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 6);
+  if (!words.length) return null;
+  // Quoted values, so a word with a dot (v1.2) stays one value.
+  const perWord = words.map((w) => `or(title.ilike."*${w}*",body_original.ilike."*${w}*")`);
+  return `and(${perWord.join(',')})`;
 }
 
 /** Server-paginated request list for Requests.tsx. */
@@ -508,8 +518,8 @@ export function useRequestsPage(page: number, pageSize: number, filters: Request
       let q = supabase.from('fp_requests').select('*', { count: 'exact' }).eq('org_id', orgId!);
       if (filters.status && filters.status !== 'all') q = q.eq('status', filters.status);
       if (filters.locationId) q = q.eq('location_id', filters.locationId);
-      const pattern = searchPattern(filters.search);
-      if (pattern) q = q.or(`title.ilike.${pattern},body_original.ilike.${pattern}`);
+      const search = requestSearchFilter(filters.search);
+      if (search) q = q.or(search);
       const { data, error, count } = await q
         .order('created_at', { ascending: false })
         .range(from, from + pageSize - 1);
