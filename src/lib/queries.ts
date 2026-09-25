@@ -483,6 +483,17 @@ export function useRequest(id: string | undefined) {
 export interface RequestPageFilters {
   status?: RequestStatus | 'all';
   locationId?: string;
+  /** Words to find in the title or description. */
+  search?: string;
+}
+
+/**
+ * A search term safe inside a PostgREST or=(…ilike…) filter: characters that
+ * carry meaning there (, ( ) * % \ " :) become spaces.
+ */
+export function searchPattern(term: string | undefined): string | null {
+  const clean = (term ?? '').replace(/[,()*%\\":]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100);
+  return clean ? `*${clean}*` : null;
 }
 
 /** Server-paginated request list for Requests.tsx. */
@@ -497,6 +508,8 @@ export function useRequestsPage(page: number, pageSize: number, filters: Request
       let q = supabase.from('fp_requests').select('*', { count: 'exact' }).eq('org_id', orgId!);
       if (filters.status && filters.status !== 'all') q = q.eq('status', filters.status);
       if (filters.locationId) q = q.eq('location_id', filters.locationId);
+      const pattern = searchPattern(filters.search);
+      if (pattern) q = q.or(`title.ilike.${pattern},body_original.ilike.${pattern}`);
       const { data, error, count } = await q
         .order('created_at', { ascending: false })
         .range(from, from + pageSize - 1);

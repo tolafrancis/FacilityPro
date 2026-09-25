@@ -1,6 +1,7 @@
-import { Link } from 'react-router-dom';
+import { useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Boxes, CheckCircle2, ClipboardList, Hourglass, MapPin, Package, Plus, UserPlus, Users, Circle } from 'lucide-react';
+import { AlertTriangle, Boxes, Search, CheckCircle2, ClipboardList, Hourglass, MapPin, Package, Plus, UserPlus, Users, Circle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrg } from '../contexts/OrgContext';
 import { useDashboardKpis, useRecentRequests, useFaultTypes } from '../lib/queries';
@@ -37,6 +38,13 @@ export default function Dashboard() {
   const fullName = (user?.user_metadata?.full_name as string | undefined)?.trim();
   const greetingName = fullName ? fullName.split(/\s+/)[0] : user?.email?.split('@')[0] ?? '';
   const logo = orgLogoUrl(currentOrg?.logo_path);
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const onSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const q = search.trim();
+    navigate(q ? `/requests?q=${encodeURIComponent(q)}` : '/requests');
+  };
 
   const cards = [
     { key: 'tasks', value: kpis?.tasks, icon: ClipboardList, to: '/work-orders' },
@@ -75,12 +83,27 @@ export default function Dashboard() {
             <p className="mt-0.5 truncate text-base text-ink-muted">{t('dashboard.welcomeTo', { org: currentOrg?.name ?? '' })}</p>
           </div>
         </div>
-        <Link
-          to="/requests/new"
-          className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-brand px-6 text-base font-semibold text-white shadow-sm hover:bg-brand-600"
-        >
-          <Plus size={20} aria-hidden /> {t('dashboard.create')}
-        </Link>
+        <div className="flex w-full items-center gap-3 sm:w-auto">
+          <form onSubmit={onSearch} role="search" className="relative min-w-0 flex-1 sm:w-64 sm:flex-none">
+            <label htmlFor="dashboard-search" className="sr-only">{t('dashboard.search')}</label>
+            <Search size={18} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" aria-hidden />
+            <input
+              id="dashboard-search"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('dashboard.search')}
+              maxLength={100}
+              className="h-11 w-full rounded-xl border border-line bg-white pl-10 pr-3 text-sm text-ink shadow-sm placeholder:text-ink-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+            />
+          </form>
+          <Link
+            to="/requests/new"
+            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-brand px-5 text-base font-semibold text-white shadow-sm hover:bg-brand-600"
+          >
+            <Plus size={20} aria-hidden /> {t('dashboard.create')}
+          </Link>
+        </div>
       </div>
 
       {(kpis?.overdue ?? 0) > 0 && (

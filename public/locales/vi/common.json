@@ -109,7 +109,8 @@
     "resolvedLegend": "Đã xử lý",
     "chartLabel": "Biểu đồ cột: số sự cố được báo và đã xử lý mỗi ngày, 7 ngày qua",
     "noActivity": "Chưa có hoạt động nào.",
-    "justNow": "Vừa xong"
+    "justNow": "Vừa xong",
+    "search": "Tìm yêu cầu"
   },
   "priority": {
     "low": "Thấp",

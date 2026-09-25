@@ -3,8 +3,23 @@
   "subtitle": "Reported faults and service requests.",
   "new": "New request",
   "empty": "No requests yet.",
-  "columns": { "title": "Request", "type": "Fault type", "location": "Location", "priority": "Priority", "status": "Status", "created": "Created" },
-  "filter": { "status": "Status", "all": "All statuses" },
+  "columns": {
+    "title": "Request",
+    "type": "Fault type",
+    "location": "Location",
+    "priority": "Priority",
+    "status": "Status",
+    "created": "Created"
+  },
+  "filter": {
+    "status": "Status",
+    "all": "All statuses",
+    "search": "Search requests",
+    "searchPlaceholder": "Search by title or description",
+    "noMatches": "No requests match “{{q}}”.",
+    "clearSearch": "Clear search",
+    "allLocations": "All locations"
+  },
   "form": {
     "title": "Report a fault",
     "summary": "Summary",

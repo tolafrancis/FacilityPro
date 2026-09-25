@@ -3,8 +3,23 @@
   "subtitle": "Các sự cố và yêu cầu dịch vụ đã báo cáo.",
   "new": "Yêu cầu mới",
   "empty": "Chưa có yêu cầu.",
-  "columns": { "title": "Yêu cầu", "type": "Loại sự cố", "location": "Vị trí", "priority": "Ưu tiên", "status": "Trạng thái", "created": "Tạo lúc" },
-  "filter": { "status": "Trạng thái", "all": "Tất cả trạng thái" },
+  "columns": {
+    "title": "Yêu cầu",
+    "type": "Loại sự cố",
+    "location": "Vị trí",
+    "priority": "Ưu tiên",
+    "status": "Trạng thái",
+    "created": "Tạo lúc"
+  },
+  "filter": {
+    "status": "Trạng thái",
+    "all": "Tất cả trạng thái",
+    "search": "Tìm yêu cầu",
+    "searchPlaceholder": "Tìm theo tiêu đề hoặc mô tả",
+    "noMatches": "Không có yêu cầu nào khớp với “{{q}}”.",
+    "clearSearch": "Xóa tìm kiếm",
+    "allLocations": "Tất cả vị trí"
+  },
   "form": {
     "title": "Báo cáo sự cố",
     "summary": "Tóm tắt",

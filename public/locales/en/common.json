@@ -111,7 +111,8 @@
     "resolvedLegend": "Resolved",
     "chartLabel": "Bar chart: faults reported and resolved per day, last 7 days",
     "noActivity": "No activity yet.",
-    "justNow": "Just now"
+    "justNow": "Just now",
+    "search": "Search requests"
   },
   "priority": {
     "low": "Low",
