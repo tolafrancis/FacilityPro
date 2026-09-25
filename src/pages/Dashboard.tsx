@@ -1,7 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Boxes, Search, CheckCircle2, ClipboardList, Hourglass, MapPin, Package, Plus, UserPlus, Users, Circle } from 'lucide-react';
+import { AlertTriangle, Boxes, Building2, CalendarClock, ChevronDown, ListChecks, Search, CheckCircle2, ClipboardList, Hourglass, MapPin, Package, Plus, Sparkles, UserPlus, Users, Circle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrg } from '../contexts/OrgContext';
 import { useDashboardKpis, useRecentRequests, useFaultTypes } from '../lib/queries';
@@ -9,6 +11,11 @@ import { resolveI18n } from '../i18n/resolver';
 import { REQUEST_STATUS_CLASS } from '../lib/ui';
 import { orgLogoUrl } from '../lib/orgLogo';
 import Pill from '../components/ui/Pill';
+import Modal from '../components/ui/Modal';
+import QuickCreate, { type QuickKind } from '../components/QuickCreate';
+import JoinLinks from '../components/JoinLinks';
+
+type SetupStep = QuickKind | 'team';
 
 // Category donut: brand shades, then neutrals.
 const SLICE_COLORS = ['#C9461F', '#E8552D', '#F2A48C', '#6B7280', '#D1D5DB'];
@@ -23,6 +30,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const { currentOrg, role } = useOrg();
   const isAdmin = role === 'org_admin';
+  const isManager = role === 'org_admin' || role === 'manager';
   const isStaff = role === 'org_admin' || role === 'manager' || role === 'technician';
   // Counts come from the database (exact at any size, limited by RLS); only
   // the most recent requests are fetched.
@@ -53,14 +61,50 @@ export default function Dashboard() {
     { key: 'completed', value: kpis?.completed_7d, icon: CheckCircle2, to: '/work-orders' },
   ];
 
+  // A shared join link counts as inviting the team, like an email invite.
+  const joinLinks = useQuery({
+    queryKey: ['join_links_count', currentOrg?.id],
+    enabled: isAdmin && !!currentOrg?.id,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('fp_join_links')
+        .select('id', { count: 'exact', head: true })
+        .eq('org_id', currentOrg!.id)
+        .is('revoked_at', null);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
   const setup = kpis?.setup;
-  const todo = [
-    { key: 'team', done: (setup?.members ?? 0) > 1 || (setup?.invites ?? 0) > 0, to: '/settings?tab=team', icon: Users },
-    { key: 'asset', done: (setup?.assets ?? 0) > 0, to: '/assets', icon: Boxes },
-    { key: 'parts', done: (setup?.parts ?? 0) > 0, to: '/parts', icon: Package },
-    { key: 'location', done: (setup?.locations ?? 0) > 0, to: '/locations', icon: MapPin },
+  // Setup to-do list: each step opens a quick form right here; "Set up now"
+  // walks through the unfinished ones in order.
+  const todo: { key: string; step: SetupStep; done: boolean; icon: typeof Users }[] = [
+    { key: 'team', step: 'team', done: (setup?.members ?? 0) > 1 || (setup?.invites ?? 0) > 0 || (joinLinks.data ?? 0) > 0, icon: Users },
+    { key: 'location', step: 'location', done: (setup?.locations ?? 0) > 0, icon: MapPin },
+    { key: 'asset', step: 'asset', done: (setup?.assets ?? 0) > 0, icon: Boxes },
+    { key: 'parts', step: 'part', done: (setup?.parts ?? 0) > 0, icon: Package },
   ];
   const todoLeft = todo.filter((x) => !x.done).length;
+  const [step, setStep] = useState<SetupStep | null>(null);
+  const [guided, setGuided] = useState<SetupStep[]>([]);
+  const startGuided = () => {
+    const queue = todo.filter((x) => !x.done).map((x) => x.step);
+    setGuided(queue.slice(1));
+    setStep(queue[0] ?? null);
+  };
+  const closeStep = () => {
+    if (guided.length) {
+      setStep(guided[0]);
+      setGuided(guided.slice(1));
+    } else {
+      setStep(null);
+    }
+  };
+  const stopGuided = () => {
+    setGuided([]);
+    setStep(null);
+  };
 
   const categories = kpis?.categories ?? [];
   const catTotal = categories.reduce((a, c) => a + c.count, 0);
@@ -97,12 +141,16 @@ export default function Dashboard() {
               className="h-11 w-full rounded-xl border border-line bg-white pl-10 pr-3 text-sm text-ink shadow-sm placeholder:text-ink-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
             />
           </form>
-          <Link
-            to="/requests/new"
-            className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-brand px-5 text-base font-semibold text-white shadow-sm hover:bg-brand-600"
-          >
-            <Plus size={20} aria-hidden /> {t('dashboard.create')}
-          </Link>
+          {isManager ? (
+            <CreateMenu isAdmin={isAdmin} onQuick={setStep} />
+          ) : (
+            <Link
+              to="/requests/new"
+              className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl bg-brand px-5 text-base font-semibold text-white shadow-sm hover:bg-brand-600"
+            >
+              <Plus size={20} aria-hidden /> {t('dashboard.create')}
+            </Link>
+          )}
         </div>
       </div>
 
@@ -219,9 +267,9 @@ export default function Dashboard() {
               )}
             </div>
             <ul className="mt-3 space-y-1">
-              {todo.map(({ key, done, to, icon: Icon }) => (
+              {todo.map(({ key, step: s, done, icon: Icon }) => (
                 <li key={key}>
-                  <Link to={to} className="flex min-h-[44px] items-center gap-3 rounded-xl px-2 text-sm hover:bg-surface">
+                  <button type="button" onClick={() => setStep(s)} className="flex min-h-[44px] w-full items-center gap-3 rounded-xl px-2 text-left text-sm hover:bg-surface">
                     {done ? (
                       <CheckCircle2 size={20} className="shrink-0 text-status-ok" aria-label={t('dashboard.done')} />
                     ) : (
@@ -229,21 +277,30 @@ export default function Dashboard() {
                     )}
                     <Icon size={18} className="shrink-0 text-ink-muted" aria-hidden />
                     <span className={`flex-1 ${done ? 'text-ink-muted line-through' : 'font-medium text-ink'}`}>{t(`dashboard.todoItems.${key}`)}</span>
-                    {!done && (
-                      <span className="grid h-7 w-7 place-items-center rounded-full bg-brand-50 text-brand">
-                        <Plus size={16} aria-hidden />
-                      </span>
-                    )}
-                  </Link>
+                    <span className="grid h-7 w-7 place-items-center rounded-full bg-brand-50 text-brand">
+                      <Plus size={16} aria-hidden />
+                    </span>
+                  </button>
                 </li>
               ))}
             </ul>
-            <Link
-              to="/settings?tab=team"
-              className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-brand text-sm font-semibold text-white hover:bg-brand-600"
-            >
-              <UserPlus size={18} aria-hidden /> {t('dashboard.invite')}
-            </Link>
+            {todoLeft > 0 ? (
+              <button
+                type="button"
+                onClick={startGuided}
+                className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-brand text-sm font-semibold text-white hover:bg-brand-600"
+              >
+                <Sparkles size={18} aria-hidden /> {t('dashboard.setupNow')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setStep('team')}
+                className="mt-4 inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-brand text-sm font-semibold text-brand hover:bg-brand-50"
+              >
+                <UserPlus size={18} aria-hidden /> {t('dashboard.invite')}
+              </button>
+            )}
           </section>
         ) : (
           <section className={card}>
@@ -261,6 +318,103 @@ export default function Dashboard() {
           </section>
         )}
       </div>
+      {step && step !== 'team' && <QuickCreate key={step} kind={step} onClose={closeStep} />}
+      {step === 'team' && (
+        <Modal title={t('dashboard.teamTitle')} onClose={closeStep} closeLabel={t('actions.close')} wide>
+          {isAdmin ? <JoinLinks defaultRole="technician" compact /> : null}
+          <Link to="/settings?tab=team" className="mt-4 block text-center text-sm font-medium text-brand hover:text-brand-600">
+            {t('dashboard.inviteByEmail')}
+          </Link>
+        </Modal>
+      )}
+      {step && guided.length > 0 && (
+        <button
+          type="button"
+          onClick={stopGuided}
+          className="fixed inset-x-0 top-[max(0.75rem,env(safe-area-inset-top))] z-[60] mx-auto w-max rounded-full bg-ink px-4 py-2 text-xs font-medium text-white shadow-lg"
+        >
+          {t('dashboard.stopSetup', { count: guided.length })}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Admins and managers: create anything from one menu. */
+function CreateMenu({ isAdmin, onQuick }: { isAdmin: boolean; onQuick: (k: SetupStep) => void }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('touchstart', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('touchstart', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const item = 'flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium text-ink hover:bg-surface';
+  const quick = (k: SetupStep) => () => {
+    setOpen(false);
+    onQuick(k);
+  };
+  const links: { to: string; key: string; icon: typeof Plus }[] = [
+    { to: '/requests/new', key: 'request', icon: ClipboardList },
+    { to: '/maintenance', key: 'maintenance', icon: CalendarClock },
+    { to: '/checklists', key: 'checklist', icon: ListChecks },
+  ];
+  const quicks: { k: SetupStep; key: string; icon: typeof Plus }[] = [
+    { k: 'asset', key: 'asset', icon: Boxes },
+    { k: 'part', key: 'part', icon: Package },
+    { k: 'location', key: 'location', icon: MapPin },
+    { k: 'vendor', key: 'vendor', icon: Building2 },
+    ...(isAdmin ? [{ k: 'team' as SetupStep, key: 'people', icon: UserPlus }] : []),
+  ];
+
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        className="inline-flex h-11 items-center gap-2 rounded-xl bg-brand px-5 text-base font-semibold text-white shadow-sm hover:bg-brand-600"
+      >
+        <Plus size={20} aria-hidden /> {t('dashboard.create')}
+        <ChevronDown size={18} aria-hidden className={`transition ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 z-40 mt-2 w-64 rounded-xl border border-line bg-white p-1.5 shadow-xl">
+          {links.slice(0, 1).map(({ to, key, icon: Icon }) => (
+            <Link key={key} role="menuitem" to={to} className={item} onClick={() => setOpen(false)}>
+              <Icon size={18} className="text-brand" aria-hidden /> {t(`dashboard.createMenu.${key}`)}
+            </Link>
+          ))}
+          <div className="my-1 border-t border-line" />
+          {quicks.map(({ k, key, icon: Icon }) => (
+            <button key={key} type="button" role="menuitem" onClick={quick(k)} className={item}>
+              <Icon size={18} className="text-brand" aria-hidden /> {t(`dashboard.createMenu.${key}`)}
+            </button>
+          ))}
+          <div className="my-1 border-t border-line" />
+          {links.slice(1).map(({ to, key, icon: Icon }) => (
+            <Link key={key} role="menuitem" to={to} className={item} onClick={() => setOpen(false)}>
+              <Icon size={18} className="text-brand" aria-hidden /> {t(`dashboard.createMenu.${key}`)}
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

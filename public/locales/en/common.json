@@ -117,7 +117,22 @@
     "chartLabel": "Bar chart: faults reported and resolved per day, last 7 days",
     "noActivity": "No activity yet.",
     "justNow": "Just now",
-    "search": "Search requests"
+    "search": "Search requests",
+    "setupNow": "Set up now — about 2 minutes",
+    "teamTitle": "Invite your team",
+    "inviteByEmail": "Or invite by email in Settings → Team",
+    "stopSetup_one": "Stop setup ({{count}} step left)",
+    "stopSetup_other": "Stop setup ({{count}} steps left)",
+    "createMenu": {
+      "request": "Report a fault",
+      "asset": "Asset",
+      "part": "Part / spare",
+      "location": "Location",
+      "vendor": "Vendor",
+      "people": "Invite people",
+      "maintenance": "Maintenance plan",
+      "checklist": "Checklist"
+    }
   },
   "priority": {
     "low": "Low",
@@ -247,7 +262,7 @@
     "intro": "Create a link for a role and share it anywhere — WhatsApp, Zalo, SMS, email, or a printed QR code. Whoever opens it signs up and joins with that role. Revoke a link at any time.",
     "role": "Joins as",
     "label": "Name (optional)",
-    "labelPlaceholder": "e.g. Tower A tenants",
+    "labelPlaceholder": "e.g. Tower A tenants, night shift",
     "expires": "Expires",
     "never": "Never",
     "days_one": "In {{count}} day",
@@ -267,5 +282,42 @@
     "shareMessage": "Join {{org}} on FacilityPro as {{role}}:",
     "qrTitle": "Join {{org}} on FacilityPro",
     "qrSubtitle": "Scan to join as {{role}}"
+  },
+  "quick": {
+    "title": {
+      "location": "Add a location",
+      "asset": "Add an asset",
+      "part": "Add a part",
+      "vendor": "Add a vendor"
+    },
+    "name": "Name",
+    "nameRequired": "Enter a name.",
+    "save": "Save",
+    "saved": "“{{name}}” was added.",
+    "addAnother": "Add another",
+    "done": "Done",
+    "moreOnPage": "You can add more details later on its page.",
+    "placeholder": {
+      "location": "e.g. Tower A, Floor 3, Lobby",
+      "asset": "e.g. Chiller 1, Lift A",
+      "part": "e.g. Air filter 20×20",
+      "vendor": "e.g. CoolAir Services"
+    },
+    "locationKind": "Type",
+    "parent": "Inside",
+    "none": "— None —",
+    "location": "Location",
+    "assetType": "Asset type",
+    "sku": "SKU",
+    "stock": "In stock",
+    "reorder": "Reorder at",
+    "phone": "Phone",
+    "email": "Email",
+    "kinds": {
+      "building": "Building",
+      "floor": "Floor",
+      "room": "Room",
+      "zone": "Zone"
+    }
   }
 }

@@ -115,7 +115,22 @@
     "chartLabel": "Biểu đồ cột: số sự cố được báo và đã xử lý mỗi ngày, 7 ngày qua",
     "noActivity": "Chưa có hoạt động nào.",
     "justNow": "Vừa xong",
-    "search": "Tìm yêu cầu"
+    "search": "Tìm yêu cầu",
+    "setupNow": "Thiết lập ngay — khoảng 2 phút",
+    "teamTitle": "Mời đội ngũ",
+    "inviteByEmail": "Hoặc mời qua email tại Cài đặt → Đội ngũ",
+    "stopSetup_one": "Dừng thiết lập (còn {{count}} bước)",
+    "stopSetup_other": "Dừng thiết lập (còn {{count}} bước)",
+    "createMenu": {
+      "request": "Báo sự cố",
+      "asset": "Tài sản",
+      "part": "Phụ tùng",
+      "location": "Vị trí",
+      "vendor": "Nhà cung cấp",
+      "people": "Mời thành viên",
+      "maintenance": "Kế hoạch bảo trì",
+      "checklist": "Danh sách kiểm tra"
+    }
   },
   "priority": {
     "low": "Thấp",
@@ -245,7 +260,7 @@
     "intro": "Tạo liên kết cho một vai trò và chia sẻ ở bất cứ đâu — WhatsApp, Zalo, SMS, email hoặc mã QR in sẵn. Ai mở liên kết sẽ đăng ký và tham gia với vai trò đó. Có thể thu hồi liên kết bất cứ lúc nào.",
     "role": "Tham gia với vai trò",
     "label": "Tên (không bắt buộc)",
-    "labelPlaceholder": "VD: Cư dân tòa A",
+    "labelPlaceholder": "VD: Cư dân tòa A, ca đêm",
     "expires": "Hết hạn",
     "never": "Không bao giờ",
     "days_one": "Sau {{count}} ngày",
@@ -265,5 +280,42 @@
     "shareMessage": "Tham gia {{org}} trên FacilityPro với vai trò {{role}}:",
     "qrTitle": "Tham gia {{org}} trên FacilityPro",
     "qrSubtitle": "Quét để tham gia với vai trò {{role}}"
+  },
+  "quick": {
+    "title": {
+      "location": "Thêm vị trí",
+      "asset": "Thêm tài sản",
+      "part": "Thêm phụ tùng",
+      "vendor": "Thêm nhà cung cấp"
+    },
+    "name": "Tên",
+    "nameRequired": "Nhập tên.",
+    "save": "Lưu",
+    "saved": "Đã thêm “{{name}}”.",
+    "addAnother": "Thêm nữa",
+    "done": "Xong",
+    "moreOnPage": "Bạn có thể thêm chi tiết sau trên trang riêng.",
+    "placeholder": {
+      "location": "VD: Tòa A, Tầng 3, Sảnh",
+      "asset": "VD: Chiller 1, Thang máy A",
+      "part": "VD: Lọc gió 20×20",
+      "vendor": "VD: Dịch vụ CoolAir"
+    },
+    "locationKind": "Loại",
+    "parent": "Thuộc",
+    "none": "— Không —",
+    "location": "Vị trí",
+    "assetType": "Loại tài sản",
+    "sku": "Mã SKU",
+    "stock": "Tồn kho",
+    "reorder": "Đặt lại khi còn",
+    "phone": "Điện thoại",
+    "email": "Email",
+    "kinds": {
+      "building": "Tòa nhà",
+      "floor": "Tầng",
+      "room": "Phòng",
+      "zone": "Khu vực"
+    }
   }
 }
