@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
-import AuthLayout from '../components/AuthLayout';
+import AuthLayout, { AuthError, AuthNotice } from '../components/AuthLayout';
 import { forgetInvite } from '../lib/redirect';
 
 export default function AcceptInvite() {
@@ -47,15 +47,15 @@ export default function AcceptInvite() {
 
   return (
     <AuthLayout title={t('invite.title')}>
-      {status === 'working' && <p className="text-sm text-ink">{t('invite.accepting')}</p>}
-      {status === 'ok' && <p className="text-sm text-status-ok">{t('invite.success')}</p>}
+      {status === 'working' && <AuthNotice>{t('invite.accepting')}</AuthNotice>}
+      {status === 'ok' && <AuthNotice>{t('invite.success')}</AuthNotice>}
       {status === 'error' && (
         <>
-          <p className="text-sm text-status-crit">{message}</p>
+          <AuthError>{message}</AuthError>
           <button
             type="button"
             onClick={() => navigate('/', { replace: true })}
-            className="mt-4 text-sm font-medium text-brand hover:text-brand-600"
+            className="mt-4 min-h-[44px] w-full text-center text-sm font-semibold underline underline-offset-2"
           >
             {t('invite.goHome')}
           </button>

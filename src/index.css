@@ -11,3 +11,30 @@ body,
 body {
   @apply bg-surface text-ink font-sans antialiased;
 }
+
+/* ---------------------------------------------------------------------------
+   Phones
+   ------------------------------------------------------------------------- */
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* No double-tap-to-zoom delay on controls. */
+a,
+button,
+input,
+select,
+textarea,
+label {
+  touch-action: manipulation;
+}
+
+@media (max-width: 639px) {
+  /* Under 16px, iOS zooms the page in when a field is focused. */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

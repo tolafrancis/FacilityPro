@@ -32,7 +32,9 @@
     "smartAssistant": "Trợ lý thông minh",
     "tenantExperience": "Trải nghiệm khách thuê",
     "broadcasts": "Thông báo chung",
-    "financial": "Tài chính"
+    "financial": "Tài chính",
+    "mobileTabs": "Chính",
+    "menu": "Menu"
   },
   "navGroups": {
     "maintenance": "Vận hành bảo trì",
@@ -72,7 +74,36 @@
     "inProgress": "Đang xử lý",
     "resolved": "Đã xử lý (30 ngày)",
     "recentRequests": "Yêu cầu gần đây",
-    "hint": "Báo cáo một sự cố để xem nó chuyển thành lệnh công việc tại đây."
+    "hint": "Báo cáo một sự cố để xem nó chuyển thành lệnh công việc tại đây.",
+    "hello": "Xin chào {{name}}",
+    "welcomeTo": "Chào mừng đến với {{org}}",
+    "create": "Tạo mới",
+    "overdueBanner_other": "{{count}} công việc đã quá hạn",
+    "cards": {
+      "tasks": "Số công việc",
+      "pendingTasks": "Công việc đang chờ",
+      "assets": "Số tài sản",
+      "completed": "Công việc hoàn thành gần đây"
+    },
+    "weekly": "Trong tuần",
+    "faultsReported": "Tổng sự cố được báo",
+    "faultsResolved": "Tổng đã xử lý",
+    "category": "Danh mục",
+    "noCategories": "Chưa có sự cố nào được báo.",
+    "last30": "30 ngày qua",
+    "uncategorised": "Chưa phân loại",
+    "todo": "Việc cần làm",
+    "todoLeft_other": "còn {{count}}",
+    "done": "Xong",
+    "todoItems": {
+      "team": "Đội ngũ",
+      "asset": "Tài sản",
+      "parts": "Kho phụ tùng",
+      "location": "Vị trí"
+    },
+    "invite": "Mời",
+    "quickActions": "Thao tác nhanh",
+    "recentActivity": "Hoạt động gần đây"
   },
   "priority": {
     "low": "Thấp",

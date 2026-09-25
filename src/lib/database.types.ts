@@ -17,6 +17,9 @@ export interface Organization {
   allow_public_requests?: boolean;
   auto_create_work_orders?: boolean;
   settings?: { timezone?: string; currency?: string } | null;
+  /** 0079 */
+  industry?: string | null;
+  logo_path?: string | null;
 }
 
 export interface Membership {

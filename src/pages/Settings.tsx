@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Copy, Cpu, Pencil, Power } from 'lucide-react';
@@ -39,7 +39,12 @@ const TABS: { key: TabKey; label: string }[] = [
 export default function Settings() {
   const { t } = useTranslation('settings');
   const { role } = useOrg();
-  const [tab, setTab] = useState<TabKey>('general');
+  // ?tab=team deep-links (the dashboard's Invite button).
+  const [params] = useSearchParams();
+  const requested = params.get('tab') as TabKey | null;
+  const [tab, setTab] = useState<TabKey>(
+    requested && TABS.some((x) => x.key === requested) && (requested !== 'team' || role === 'org_admin') ? requested : 'general'
+  );
   const visibleTabs = TABS.filter((tabItem) => tabItem.key !== 'team' || role === 'org_admin');
 
   const selectTab = (key: TabKey) => {

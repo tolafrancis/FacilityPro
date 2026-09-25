@@ -303,6 +303,15 @@ export interface DashboardKpis {
   overdue: number;
   in_progress: number;
   resolved_30d: number;
+  /** 0079 */
+  tasks?: number;
+  pending_tasks?: number;
+  completed_7d?: number;
+  assets?: number;
+  faults_7d?: number;
+  resolved_7d?: number;
+  categories?: { fault_type_id: string | null; count: number }[];
+  setup?: { members: number; invites: number; assets: number; parts: number; locations: number };
 }
 
 /** Dashboard counts, computed in the database (fp_dashboard_kpis, 0069). */

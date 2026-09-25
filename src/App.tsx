@@ -15,6 +15,8 @@ import { rememberInvite } from './lib/redirect';
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SignUp = lazy(() => import('./pages/SignUp'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
 const AssetScan = lazy(() => import('./pages/AssetScan'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -104,6 +106,8 @@ export default function App() {
           <Route path="/a/:code" element={<AssetScan />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/invite" element={<InviteSignedOut next={next} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -125,6 +129,8 @@ export default function App() {
         <Route path="/invite" element={<AcceptInvite />} />
         <Route path="/report" element={<PublicReport />} />
         <Route path="/a/:code" element={<AssetScan />} />
+        {/* The reset email's link signs the user in; they set the password here. */}
+        <Route path="/reset-password" element={<ResetPassword />} />
         {!hasOrg ? (
           <>
             <Route path="/onboarding" element={<Onboarding />} />

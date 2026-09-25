@@ -5,12 +5,12 @@
 {{ $lang := or .Data.lang "en" }}{{ if eq $lang "vi" }}
   <h2 style="margin:0 0 12px;font-size:20px;color:#111827">Liên kết đăng nhập</h2>
   <p style="margin:0 0 20px;line-height:1.5">Dùng liên kết này để đăng nhập FacilityPro. Liên kết chỉ dùng một lần và sẽ sớm hết hạn.</p>
-  <p style="margin:0 0 20px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#2563eb;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Đăng nhập</a></p>
+  <p style="margin:0 0 20px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C9461F;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Đăng nhập</a></p>
   <p style="margin:0 0 8px;font-size:13px;color:#6b7280">Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
 {{ else }}
   <h2 style="margin:0 0 12px;font-size:20px;color:#111827">Your sign-in link</h2>
   <p style="margin:0 0 20px;line-height:1.5">Use this link to sign in to FacilityPro. It works once and expires soon.</p>
-  <p style="margin:0 0 20px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#2563eb;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Sign in</a></p>
+  <p style="margin:0 0 20px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#C9461F;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Sign in</a></p>
   <p style="margin:0 0 8px;font-size:13px;color:#6b7280">If you didn't ask for this, you can ignore this email.</p>
 {{ end }}
   <p style="margin:24px 0 0;font-size:12px;color:#9ca3af">FacilityPro</p>

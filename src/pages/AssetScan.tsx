@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import AuthLayout from '../components/AuthLayout';
+import AuthLayout, { AuthError, AuthNotice } from '../components/AuthLayout';
 
 interface Resolved {
   asset_id: string;
@@ -51,9 +51,7 @@ export default function AssetScan() {
 
   return (
     <AuthLayout title={t('scan.title')}>
-      <p className={`text-sm ${problem ? 'text-status-crit' : 'text-ink-muted'}`}>
-        {problem ? t(`scan.${problem}`) : t('scan.opening')}
-      </p>
+      {problem ? <AuthError>{t(`scan.${problem}`)}</AuthError> : <AuthNotice>{t('scan.opening')}</AuthNotice>}
     </AuthLayout>
   );
 }

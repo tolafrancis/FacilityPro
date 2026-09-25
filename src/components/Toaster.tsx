@@ -36,7 +36,7 @@ export default function Toaster() {
   return (
     <div
       aria-live="assertive"
-      className="pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex flex-col items-center gap-2 px-4"
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-[60] flex flex-col items-center gap-2 px-4 lg:bottom-4"
     >
       {toasts.map((t) => (
         <div

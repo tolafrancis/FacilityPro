@@ -32,7 +32,9 @@
     "smartAssistant": "Smart assistant",
     "tenantExperience": "Tenant experience",
     "broadcasts": "Broadcasts",
-    "financial": "Financial"
+    "financial": "Financial",
+    "mobileTabs": "Main",
+    "menu": "Menu"
   },
   "navGroups": {
     "maintenance": "Maintenance Operations",
@@ -72,7 +74,38 @@
     "inProgress": "In progress",
     "resolved": "Resolved (30d)",
     "recentRequests": "Recent requests",
-    "hint": "Report a fault to see it flow through to a work order here."
+    "hint": "Report a fault to see it flow through to a work order here.",
+    "hello": "Hello {{name}}",
+    "welcomeTo": "Welcome to {{org}}",
+    "create": "Create",
+    "overdueBanner_one": "{{count}} work order is overdue",
+    "overdueBanner_other": "{{count}} work orders are overdue",
+    "cards": {
+      "tasks": "No. of Tasks",
+      "pendingTasks": "Pending Tasks",
+      "assets": "No. of Assets",
+      "completed": "Recently Completed Tasks"
+    },
+    "weekly": "Weekly",
+    "faultsReported": "Total Faults Reported",
+    "faultsResolved": "Total Resolved",
+    "category": "Category",
+    "noCategories": "No faults reported yet.",
+    "last30": "Last 30 days",
+    "uncategorised": "Uncategorised",
+    "todo": "To Do List",
+    "todoLeft_one": "{{count}} left",
+    "todoLeft_other": "{{count}} left",
+    "done": "Done",
+    "todoItems": {
+      "team": "Team",
+      "asset": "Asset",
+      "parts": "Parts Inventory",
+      "location": "Location"
+    },
+    "invite": "Invite",
+    "quickActions": "Quick actions",
+    "recentActivity": "Recent Activity"
   },
   "priority": {
     "low": "Low",

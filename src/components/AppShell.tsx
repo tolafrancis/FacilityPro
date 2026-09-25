@@ -41,6 +41,7 @@ import { useOrg } from '../contexts/OrgContext';
 import type { Role } from '../lib/database.types';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationBell from './NotificationBell';
+import { orgLogoUrl } from '../lib/orgLogo';
 import OfflineBanner from './OfflineBanner';
 import SyncIndicator from './SyncIndicator';
 
@@ -156,6 +157,18 @@ export default function AppShell() {
 
   const location = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const logo = orgLogoUrl(currentOrg?.logo_path);
+
+  // Phone tab bar: the four most-used destinations this role can open, then
+  // "Menu" for everything else.
+  const tabs = [
+    { to: '/', key: 'dashboard', icon: LayoutDashboard, end: true },
+    { to: '/requests', key: 'requests', icon: ClipboardList },
+    role === 'technician'
+      ? { to: '/my-work', key: 'myWork', icon: Hammer }
+      : { to: '/work-orders', key: 'workOrders', icon: Wrench },
+    { to: '/assets', key: 'assets', icon: Boxes },
+  ].filter((tab) => isNavItemVisible(tab.key, role) && (tab.key !== 'workOrders' || role === 'org_admin' || role === 'manager'));
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
@@ -179,10 +192,12 @@ export default function AppShell() {
 
   const sidebarContent = (
     <>
-      <div className="flex items-center gap-2 px-5 py-4">
-        <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand font-bold text-white">
-          F
-        </div>
+      <div className="flex items-center gap-2 px-5 py-4 pt-[max(1rem,env(safe-area-inset-top))] lg:pt-4">
+        {logo ? (
+          <img src={logo} alt="" className="h-8 w-8 rounded-lg border border-line object-contain" />
+        ) : (
+          <div className="grid h-8 w-8 place-items-center rounded-lg bg-brand font-bold text-white">F</div>
+        )}
         <span className="font-semibold text-ink">{t('app.name')}</span>
       </div>
       <nav className="flex-1 space-y-2 px-3 py-2">
@@ -216,7 +231,7 @@ export default function AppShell() {
                         to={to}
                         end={end}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                          `flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition lg:min-h-0 ${
                             isActive
                               ? 'bg-brand-50 text-brand-600'
                               : 'text-ink hover:bg-surface'
@@ -281,7 +296,7 @@ export default function AppShell() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <OfflineBanner />
-        <header className="flex items-center justify-between gap-3 border-b border-line bg-white px-4 py-3 sm:px-6">
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-white px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 lg:static lg:pt-3">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
@@ -289,7 +304,7 @@ export default function AppShell() {
               aria-label={t('actions.openMenu')}
               aria-controls="mobile-nav"
               aria-expanded={mobileNavOpen}
-              className="-ml-2 rounded-lg p-2 text-ink hover:bg-surface lg:hidden"
+              className="-ml-2 grid h-11 w-11 place-items-center rounded-lg text-ink hover:bg-surface lg:hidden"
             >
               <Menu size={22} aria-hidden />
             </button>
@@ -304,9 +319,51 @@ export default function AppShell() {
             <LanguageSwitcher />
           </div>
         </header>
-        <main className="flex-1 overflow-auto px-4 py-6 sm:px-6">
+        <main className="flex-1 overflow-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:pb-6 lg:pt-6">
           <Outlet />
         </main>
+
+        <nav
+          aria-label={t('nav.mobileTabs')}
+          className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+        >
+          <ul className="grid" style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }}>
+            {tabs.map(({ to, key, icon: Icon, end }) => (
+              <li key={key}>
+                <NavLink
+                  to={to}
+                  end={end}
+                  className={({ isActive }) =>
+                    `flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium ${isActive ? 'text-brand-600' : 'text-ink-muted'}`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <span className={`grid h-7 w-12 place-items-center rounded-full ${isActive ? 'bg-brand-50' : ''}`}>
+                        <Icon size={20} aria-hidden />
+                      </span>
+                      <span className="max-w-full truncate px-1">{t(`nav.${key}`)}</span>
+                    </>
+                  )}
+                </NavLink>
+              </li>
+            ))}
+            <li>
+              <button
+                type="button"
+                onClick={() => setMobileNavOpen(true)}
+                aria-controls="mobile-nav"
+                aria-expanded={mobileNavOpen}
+                className="flex h-16 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium text-ink-muted"
+              >
+                <span className="grid h-7 w-12 place-items-center rounded-full">
+                  <Menu size={20} aria-hidden />
+                </span>
+                {t('nav.menu')}
+              </button>
+            </li>
+          </ul>
+        </nav>
       </div>
     </div>
   );
