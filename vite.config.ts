@@ -23,8 +23,23 @@ function swBuildId(): Plugin {
   };
 }
 
+// A build without the Supabase settings loads as a blank page ("supabaseUrl is
+// required"), so fail the build instead of deploying it.
+function requireEnv(names: string[]): Plugin {
+  return {
+    name: 'require-env',
+    apply: 'build',
+    configResolved(config) {
+      const missing = names.filter((n) => !config.env[n]);
+      if (missing.length) {
+        throw new Error(`Missing build variables: ${missing.join(', ')} (see .env.example / .env.production)`);
+      }
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), swBuildId()],
+  plugins: [react(), swBuildId(), requireEnv(['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'])],
   // Absolute asset URLs: with './' a deep link such as /work-orders/123 made the
   // browser request /work-orders/assets/*.js, which the SPA fallback answers
   // with index.html — a blank page on refresh or when opening a shared link.
