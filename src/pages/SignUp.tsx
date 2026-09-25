@@ -29,7 +29,12 @@ export default function SignUp() {
   const [busy, setBusy] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaKey, setCaptchaKey] = useState(0);
-  const [sentTo, setSentTo] = useState<string | null>(null);
+  // ?verify=<email>: straight to the code step (sign-in sends unconfirmed
+  // accounts here to enter their code or get a new one).
+  const [sentTo, setSentTo] = useState<string | null>(() => {
+    const v = params.get('verify')?.trim() ?? '';
+    return EMAIL_RE.test(v) ? v : null;
+  });
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -209,6 +214,15 @@ function VerifyEmail({ email, next, onBack }: { email: string; next: string | nu
             {t('verify.changeEmail')}
           </button>
         </div>
+        {/* Tapping the email's button in this browser signs this page in
+            automatically; confirmed on another device (a phone), the account
+            is ready but this browser has no session, so offer sign-in. */}
+        <p className="border-t border-white/20 pt-4 text-white/90">
+          {t('verify.otherDevice')}{' '}
+          <Link to={`/signin?email=${encodeURIComponent(email)}`} className="font-semibold text-white underline underline-offset-2">
+            {t('verify.signIn')}
+          </Link>
+        </p>
       </div>
     </AuthLayout>
   );

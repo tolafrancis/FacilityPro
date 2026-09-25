@@ -98,6 +98,12 @@ export default function App() {
   if (authLoading) return <FullPageLoader />;
 
   if (!session) {
+    // A confirmation or reset link that has expired (or was already used)
+    // comes back as #error=…&error_code=otp_expired: say so on the sign-in
+    // page instead of leaving the visitor on the home page.
+    if (/(^|[#&?])error_code=|(^|[#&?])error=access_denied/.test(location.hash + location.search) && location.pathname !== '/signin') {
+      return <Navigate to="/signin?link=expired" replace />;
+    }
     const next = encodeURIComponent(location.pathname + location.search);
     return (
       <Suspense fallback={<FullPageLoader />}>

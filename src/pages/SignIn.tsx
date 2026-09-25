@@ -17,6 +17,8 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [keep, setKeep] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Set when the account exists but its email isn't confirmed yet.
+  const [unconfirmed, setUnconfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaKey, setCaptchaKey] = useState(0);
@@ -25,6 +27,7 @@ export default function SignIn() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setUnconfirmed(false);
     if (!email || !password) {
       setError(t('errors.missingFields'));
       return;
@@ -40,7 +43,9 @@ export default function SignIn() {
     setCaptchaKey((k) => k + 1);
     setBusy(false);
     if (err) {
-      setError(/invalid login credentials/i.test(err) ? t('errors.badCredentials') : /email not confirmed/i.test(err) ? t('errors.notConfirmed') : err);
+      const notConfirmed = /email not confirmed/i.test(err);
+      setUnconfirmed(notConfirmed);
+      setError(/invalid login credentials/i.test(err) ? t('errors.badCredentials') : notConfirmed ? t('errors.notConfirmed') : err);
       return;
     }
     navigate(next ?? '/', { replace: true });
@@ -62,6 +67,7 @@ export default function SignIn() {
     >
       {next?.startsWith('/invite') && <div className="mb-4"><AuthNotice>{t('signIn.invited')}</AuthNotice></div>}
       {params.get('reset') === 'done' && <div className="mb-4"><AuthNotice>{t('reset.done')}</AuthNotice></div>}
+      {params.get('link') === 'expired' && <div className="mb-4"><AuthNotice>{t('signIn.linkExpired')}</AuthNotice></div>}
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <AuthField label={t('signIn.email')} htmlFor="signin-email">
           <AuthInput
@@ -100,6 +106,14 @@ export default function SignIn() {
         </div>
         <Turnstile key={captchaKey} onToken={setCaptchaToken} action="login" />
         {error && <AuthError>{error}</AuthError>}
+        {unconfirmed && (
+          <Link
+            to={`/signup?verify=${encodeURIComponent(email.trim())}${next ? `&next=${encodeURIComponent(next)}` : ''}`}
+            className="flex min-h-[44px] items-center justify-center rounded-lg border-2 border-white text-sm font-semibold text-white hover:bg-white/10"
+          >
+            {t('signIn.enterCode')}
+          </Link>
+        )}
         <Button type="submit" variant="inverse" loading={busy} className={authButtonClass}>
           {t('signIn.submit')}
         </Button>
