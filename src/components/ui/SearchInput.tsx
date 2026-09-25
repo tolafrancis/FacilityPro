@@ -56,7 +56,7 @@ export default function SearchInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           maxLength={100}
-          className="min-h-[44px] w-full rounded-lg border border-line bg-white py-2 pl-9 pr-9 text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 lg:min-h-0 [&::-webkit-search-cancel-button]:hidden"
+          className="min-h-[44px] w-full rounded-lg border border-line bg-panel py-2 pl-9 pr-9 text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 lg:min-h-0 [&::-webkit-search-cancel-button]:hidden"
         />
         {value && (
           <button

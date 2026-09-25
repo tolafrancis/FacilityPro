@@ -84,6 +84,22 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   const current =
     memberships.find((m) => m.org_id === currentId) ?? memberships[0] ?? null;
 
+  // Daily activity for the platform's DAU/MAU and "last active" (0083):
+  // one call per organisation per day and browser.
+  const activeOrgId = current?.org_id;
+  useEffect(() => {
+    if (!activeOrgId || !user) return;
+    const day = new Date().toISOString().slice(0, 10);
+    const key = `fp.activity.${user.id}.${activeOrgId}`;
+    try {
+      if (localStorage.getItem(key) === day) return;
+      localStorage.setItem(key, day);
+    } catch {
+      /* no storage: record anyway (the database ignores repeats) */
+    }
+    void supabase.rpc('fp_record_activity', { p_org: activeOrgId }).then(() => undefined, () => undefined);
+  }, [activeOrgId, user]);
+
   return (
     <OrgContext.Provider
       value={{

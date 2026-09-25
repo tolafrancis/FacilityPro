@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme tokens (tailwind.config.js): space-separated RGB so opacity
+   modifiers work (bg-ink/10). .dark is set by the admin panel. */
+:root {
+  --c-surface: 247 247 248;   /* #F7F7F8 */
+  --c-panel: 255 255 255;
+  --c-ink: 31 36 48;          /* #1F2430 */
+  --c-ink-muted: 107 114 128; /* #6B7280 */
+  --c-line: 229 231 235;      /* #E5E7EB */
+}
+.dark {
+  --c-surface: 11 13 18;
+  --c-panel: 21 24 32;
+  --c-ink: 236 238 243;
+  --c-ink-muted: 148 155 170;
+  --c-line: 44 49 62;
+  color-scheme: dark;
+}
+
 html,
 body,
 #root {

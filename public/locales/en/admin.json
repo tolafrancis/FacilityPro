@@ -1,0 +1,180 @@
+{
+  "consoleName": "Admin console",
+  "soon": "Soon",
+  "expand": "Expand sidebar",
+  "collapse": "Collapse",
+  "closeMenu": "Close menu",
+  "openMenu": "Open menu",
+  "loading": "Loading…",
+  "retry": "Retry",
+  "table": "Table",
+  "empty": "Nothing to show yet.",
+  "nav": {
+    "label": "Admin navigation",
+    "groups": {
+      "customers": "Customers",
+      "platform": "Platform",
+      "security": "Security & system"
+    },
+    "items": {
+      "overview": "Overview",
+      "tenants": "Tenants",
+      "users": "Users",
+      "billing": "Plans & billing",
+      "tickets": "Support tickets",
+      "reports": "Analytics & reports",
+      "flags": "Features & modules",
+      "announcements": "Announcements",
+      "settings": "App settings",
+      "audit": "Audit log",
+      "security": "Security",
+      "monitoring": "Monitoring",
+      "team": "Admin team"
+    }
+  },
+  "search": {
+    "placeholder": "Search tenants and pages…",
+    "label": "Search",
+    "pages": "Pages",
+    "tenants": "Tenants",
+    "noTenants": "No tenants found."
+  },
+  "status": {
+    "deleted": "Deleted",
+    "suspended": "Suspended"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "unread_one": "{{count}} new notification",
+    "unread_other": "{{count}} new notifications",
+    "empty": "No platform events yet."
+  },
+  "profile": {
+    "menu": "Account menu",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "Auto"
+    },
+    "backToApp": "Back to the app",
+    "signOut": "Sign out"
+  },
+  "roles": {
+    "super_admin": "Super admin",
+    "admin": "Admin",
+    "support": "Support agent",
+    "analyst": "Analyst (read-only)"
+  },
+  "events": {
+    "signup": "Sign-up",
+    "upgrade": "Upgrade",
+    "downgrade": "Downgrade",
+    "cancellation": "Cancellation",
+    "reactivation": "Reactivated",
+    "trial_started": "Trial started",
+    "payment_failed": "Payment failed",
+    "payment_succeeded": "Payment",
+    "suspended": "Suspended",
+    "unsuspended": "Unsuspended",
+    "deleted": "Deleted"
+  },
+  "range": {
+    "label": "Date range",
+    "7d": "7D",
+    "30d": "30D",
+    "90d": "90D",
+    "12m": "12M",
+    "ytd": "YTD",
+    "custom": "Custom",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply"
+  },
+  "overview": {
+    "title": "Overview",
+    "subtitle": "How the platform is doing across all tenants.",
+    "revenue": "Revenue",
+    "revenueHint": "Payments received (after refunds), by period",
+    "noRevenue": "No payments in this period.",
+    "paid": "Received",
+    "period": "Period",
+    "byPlan": "Tenants by plan",
+    "noTenants": "No tenants yet.",
+    "plan": "Plan",
+    "tenants": "Tenants",
+    "tenantGrowth": "Tenant growth",
+    "tenantGrowthHint": "Total tenants at the end of each period",
+    "activeUsers": "Active users",
+    "activeUsersHint": "People who used the app, per {{bucket}}",
+    "noActivity": "No activity recorded in this period.",
+    "users": "Users",
+    "topTenants": "Top tenants by usage",
+    "topTenantsHint": "Requests and work orders created in this period",
+    "noUsage": "No usage in this period.",
+    "usageHint": "{{wo}} work orders · {{req}} requests · {{users}} active users",
+    "tenant": "Tenant",
+    "items": "Requests + work orders",
+    "activity": "Recent activity",
+    "activityHint": "Sign-ups, plan changes, cancellations, payments",
+    "noEvents": "Nothing happened in this period."
+  },
+  "buckets": {
+    "day": "day",
+    "week": "week",
+    "month": "month"
+  },
+  "plans": {
+    "free": "Free",
+    "pro": "Pro",
+    "business": "Business",
+    "none": "No plan"
+  },
+  "kpi": {
+    "totalTenants": "Total tenants",
+    "activeTenants": "Active tenants",
+    "onTrial_one": "{{count}} on trial",
+    "onTrial_other": "{{count}} on trial",
+    "newTenants": "New tenants",
+    "inRange": "In the selected period",
+    "totalUsers": "Total users",
+    "dauMau": "{{dau}} today · {{mau}} in 30 days",
+    "mrr": "MRR",
+    "mrrHint": "Monthly recurring revenue, paying tenants",
+    "arr": "ARR",
+    "arrHint": "MRR × 12",
+    "churn": "Churn rate",
+    "churned_one": "{{count}} cancellation",
+    "churned_other": "{{count}} cancellations",
+    "openTickets": "Open tickets"
+  },
+  "health": {
+    "title": "System health",
+    "checked": "Checked {{when}}",
+    "allGood": "All good",
+    "attention": "Needs attention",
+    "ok": "OK",
+    "warn": "Warning",
+    "jobs": "Background jobs on schedule",
+    "jobsValue": "{{ok}} / {{total}}",
+    "jobFailures": "Job failures (24 h)",
+    "outboxPending": "Messages waiting to send",
+    "outboxFailed": "Failed messages (24 h)",
+    "apiNote": "API uptime and error rates come with the Monitoring module."
+  },
+  "errors": {
+    "load": "Couldn’t load this data. Check your connection and try again."
+  },
+  "denied": {
+    "title": "You don’t have access to this page",
+    "body": "Ask a super admin if you need it."
+  },
+  "comingSoon": {
+    "title": "This module is on its way",
+    "body": "It’s part of the admin panel build and will appear here in an upcoming release."
+  },
+  "notStaff": {
+    "title": "Admin access only",
+    "body": "This area is for FacilityPro platform staff. Your account isn’t on the admin team."
+  }
+}

@@ -42,7 +42,7 @@ export default function SearchSelect({
     : options;
 
   const inputClass =
-    'w-full rounded-lg border border-line bg-white px-3 py-2 pr-8 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:opacity-60';
+    'w-full rounded-lg border border-line bg-panel px-3 py-2 pr-8 text-sm text-ink placeholder:text-ink-muted/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:opacity-60';
 
   return (
     <div className="relative">
@@ -65,7 +65,7 @@ export default function SearchSelect({
       <ChevronDown size={15} className="pointer-events-none absolute right-2 top-2.5 text-ink-muted" aria-hidden />
 
       {open && (
-        <div className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-line bg-white py-1 shadow-lg">
+        <div className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-line bg-panel py-1 shadow-lg">
           {emptyLabel && (
             <button
               type="button"

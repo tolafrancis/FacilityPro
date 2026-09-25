@@ -22,6 +22,8 @@ const AssetScan = lazy(() => import('./pages/AssetScan'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const TenantHome = lazy(() => import('./pages/TenantHome'));
 const JoinOrg = lazy(() => import('./pages/JoinOrg'));
+// Platform admin panel: its own bundle, downloaded only by staff who open /admin.
+const AdminApp = lazy(() => import('./admin/AdminApp'));
 const Locations = lazy(() => import('./pages/Locations'));
 const Assets = lazy(() => import('./pages/Assets'));
 const AssetDetail = lazy(() => import('./pages/AssetDetail'));
@@ -118,6 +120,7 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/invite" element={<InviteSignedOut next={next} />} />
           <Route path="/join/:token" element={<JoinOrg />} />
+          <Route path="/admin/*" element={<Navigate to={`/signin?next=${next}`} replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
@@ -137,6 +140,8 @@ export default function App() {
       <Routes>
         <Route path="/invite" element={<AcceptInvite />} />
         <Route path="/join/:token" element={<JoinOrg />} />
+        {/* Platform staff may have no organisation of their own. */}
+        <Route path="/admin/*" element={<AdminApp />} />
         <Route path="/report" element={<PublicReport />} />
         <Route path="/a/:code" element={<AssetScan />} />
         {/* The reset email's link signs the user in; they set the password here. */}

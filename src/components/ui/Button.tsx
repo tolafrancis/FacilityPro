@@ -9,7 +9,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<Variant, string> = {
   primary: 'bg-brand text-white hover:bg-brand-600',
-  secondary: 'bg-white text-ink border border-line hover:bg-surface',
+  secondary: 'bg-panel text-ink border border-line hover:bg-surface',
   ghost: 'text-ink hover:bg-surface',
   danger: 'bg-status-crit text-white hover:opacity-90',
   // On the brand colour (auth screens).

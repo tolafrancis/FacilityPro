@@ -1,0 +1,180 @@
+{
+  "consoleName": "Bảng quản trị",
+  "soon": "Sắp có",
+  "expand": "Mở rộng thanh bên",
+  "collapse": "Thu gọn",
+  "closeMenu": "Đóng menu",
+  "openMenu": "Mở menu",
+  "loading": "Đang tải…",
+  "retry": "Thử lại",
+  "table": "Bảng",
+  "empty": "Chưa có dữ liệu.",
+  "nav": {
+    "label": "Điều hướng quản trị",
+    "groups": {
+      "customers": "Khách hàng",
+      "platform": "Nền tảng",
+      "security": "Bảo mật & hệ thống"
+    },
+    "items": {
+      "overview": "Tổng quan",
+      "tenants": "Khách thuê (tổ chức)",
+      "users": "Người dùng",
+      "billing": "Gói & thanh toán",
+      "tickets": "Yêu cầu hỗ trợ",
+      "reports": "Phân tích & báo cáo",
+      "flags": "Tính năng & mô-đun",
+      "announcements": "Thông báo",
+      "settings": "Cài đặt ứng dụng",
+      "audit": "Nhật ký kiểm tra",
+      "security": "Bảo mật",
+      "monitoring": "Giám sát",
+      "team": "Đội quản trị"
+    }
+  },
+  "search": {
+    "placeholder": "Tìm tổ chức và trang…",
+    "label": "Tìm kiếm",
+    "pages": "Trang",
+    "tenants": "Tổ chức",
+    "noTenants": "Không tìm thấy tổ chức."
+  },
+  "status": {
+    "deleted": "Đã xóa",
+    "suspended": "Tạm ngưng"
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "unread_one": "{{count}} thông báo mới",
+    "unread_other": "{{count}} thông báo mới",
+    "empty": "Chưa có sự kiện nào."
+  },
+  "profile": {
+    "menu": "Menu tài khoản",
+    "theme": "Giao diện",
+    "themes": {
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Tự động"
+    },
+    "backToApp": "Quay lại ứng dụng",
+    "signOut": "Đăng xuất"
+  },
+  "roles": {
+    "super_admin": "Quản trị cấp cao",
+    "admin": "Quản trị viên",
+    "support": "Nhân viên hỗ trợ",
+    "analyst": "Phân tích (chỉ xem)"
+  },
+  "events": {
+    "signup": "Đăng ký",
+    "upgrade": "Nâng cấp",
+    "downgrade": "Hạ cấp",
+    "cancellation": "Hủy gói",
+    "reactivation": "Kích hoạt lại",
+    "trial_started": "Bắt đầu dùng thử",
+    "payment_failed": "Thanh toán lỗi",
+    "payment_succeeded": "Thanh toán",
+    "suspended": "Tạm ngưng",
+    "unsuspended": "Mở lại",
+    "deleted": "Đã xóa"
+  },
+  "range": {
+    "label": "Khoảng thời gian",
+    "7d": "7N",
+    "30d": "30N",
+    "90d": "90N",
+    "12m": "12T",
+    "ytd": "Từ đầu năm",
+    "custom": "Tùy chọn",
+    "from": "Từ",
+    "to": "Đến",
+    "apply": "Áp dụng"
+  },
+  "overview": {
+    "title": "Tổng quan",
+    "subtitle": "Tình hình nền tảng trên tất cả tổ chức.",
+    "revenue": "Doanh thu",
+    "revenueHint": "Tiền đã nhận (sau hoàn tiền), theo kỳ",
+    "noRevenue": "Không có thanh toán trong kỳ này.",
+    "paid": "Đã nhận",
+    "period": "Kỳ",
+    "byPlan": "Tổ chức theo gói",
+    "noTenants": "Chưa có tổ chức.",
+    "plan": "Gói",
+    "tenants": "Tổ chức",
+    "tenantGrowth": "Tăng trưởng tổ chức",
+    "tenantGrowthHint": "Tổng số tổ chức cuối mỗi kỳ",
+    "activeUsers": "Người dùng hoạt động",
+    "activeUsersHint": "Số người dùng ứng dụng, theo {{bucket}}",
+    "noActivity": "Chưa ghi nhận hoạt động trong kỳ này.",
+    "users": "Người dùng",
+    "topTenants": "Tổ chức dùng nhiều nhất",
+    "topTenantsHint": "Yêu cầu và lệnh công việc tạo trong kỳ",
+    "noUsage": "Không có sử dụng trong kỳ này.",
+    "usageHint": "{{wo}} lệnh công việc · {{req}} yêu cầu · {{users}} người hoạt động",
+    "tenant": "Tổ chức",
+    "items": "Yêu cầu + lệnh công việc",
+    "activity": "Hoạt động gần đây",
+    "activityHint": "Đăng ký, đổi gói, hủy gói, thanh toán",
+    "noEvents": "Không có gì xảy ra trong kỳ này."
+  },
+  "buckets": {
+    "day": "ngày",
+    "week": "tuần",
+    "month": "tháng"
+  },
+  "plans": {
+    "free": "Miễn phí",
+    "pro": "Pro",
+    "business": "Business",
+    "none": "Chưa có gói"
+  },
+  "kpi": {
+    "totalTenants": "Tổng số tổ chức",
+    "activeTenants": "Tổ chức hoạt động",
+    "onTrial_one": "{{count}} đang dùng thử",
+    "onTrial_other": "{{count}} đang dùng thử",
+    "newTenants": "Tổ chức mới",
+    "inRange": "Trong kỳ đã chọn",
+    "totalUsers": "Tổng người dùng",
+    "dauMau": "{{dau}} hôm nay · {{mau}} trong 30 ngày",
+    "mrr": "MRR",
+    "mrrHint": "Doanh thu định kỳ hàng tháng, tổ chức trả phí",
+    "arr": "ARR",
+    "arrHint": "MRR × 12",
+    "churn": "Tỷ lệ rời bỏ",
+    "churned_one": "{{count}} lượt hủy",
+    "churned_other": "{{count}} lượt hủy",
+    "openTickets": "Yêu cầu hỗ trợ mở"
+  },
+  "health": {
+    "title": "Tình trạng hệ thống",
+    "checked": "Kiểm tra {{when}}",
+    "allGood": "Ổn định",
+    "attention": "Cần chú ý",
+    "ok": "Ổn",
+    "warn": "Cảnh báo",
+    "jobs": "Tác vụ nền chạy đúng lịch",
+    "jobsValue": "{{ok}} / {{total}}",
+    "jobFailures": "Tác vụ lỗi (24 giờ)",
+    "outboxPending": "Tin nhắn chờ gửi",
+    "outboxFailed": "Tin nhắn lỗi (24 giờ)",
+    "apiNote": "Thời gian hoạt động và tỷ lệ lỗi API sẽ có trong mô-đun Giám sát."
+  },
+  "errors": {
+    "load": "Không tải được dữ liệu. Kiểm tra kết nối và thử lại."
+  },
+  "denied": {
+    "title": "Bạn không có quyền xem trang này",
+    "body": "Hãy hỏi quản trị cấp cao nếu cần."
+  },
+  "comingSoon": {
+    "title": "Mô-đun này đang được xây dựng",
+    "body": "Mô-đun thuộc bảng quản trị và sẽ xuất hiện ở bản phát hành tới."
+  },
+  "notStaff": {
+    "title": "Chỉ dành cho quản trị",
+    "body": "Khu vực này dành cho nhân viên nền tảng FacilityPro. Tài khoản của bạn không thuộc đội quản trị."
+  }
+}
