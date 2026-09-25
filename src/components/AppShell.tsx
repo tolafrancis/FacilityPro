@@ -26,7 +26,6 @@ import {
   Users,
   Sparkles,
   Building,
-  Bell,
   Landmark,
   Workflow,
   Star,
@@ -110,12 +109,10 @@ const NAV_GROUPS: NavGroup[] = [
       { to: '/facilities', key: 'facilities', icon: DoorOpen },
       { to: '/reports', key: 'reports', icon: BarChart3 },
       { to: '/security', key: 'security', icon: ShieldCheck },
-      { to: '/billing', key: 'billing', icon: CreditCard },
       { to: '/documents', key: 'documents', icon: FileText },
       { to: '/permits', key: 'permits', icon: ShieldCheck },
       { to: '/attendance', key: 'attendance', icon: Users },
       { to: '/tenant-experience', key: 'tenantExperience', icon: Building },
-      { to: '/tenant-experience', key: 'broadcasts', icon: Bell },
     ],
   },
   {
@@ -123,7 +120,6 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/financial', key: 'financial', icon: Landmark },
       { to: '/billing', key: 'billing', icon: CreditCard },
-      { to: '/vendors', key: 'vendors', icon: Building2 },
     ],
   },
   {
