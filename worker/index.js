@@ -19,6 +19,13 @@ export default {
       if (request.method !== 'POST' && request.method !== 'GET') {
         return new Response('Method not allowed', { status: 405, headers: { allow: 'GET, POST' } });
       }
+      // Zalo's "Check" button (and any other unsigned request) only needs a
+      // 200 to accept the URL. Nothing unsigned is forwarded or processed:
+      // real events always carry X-ZEvent-Signature, which the function
+      // verifies.
+      if (request.method === 'GET' || !request.headers.get('x-zevent-signature')) {
+        return new Response('ok', { status: 200, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+      }
       const headers = new Headers();
       for (const name of FORWARD_HEADERS) {
         const value = request.headers.get(name);
@@ -26,9 +33,9 @@ export default {
       }
       const target = (env.ZALO_WEBHOOK_TARGET || DEFAULT_TARGET) + url.search;
       const upstream = await fetch(target, {
-        method: request.method,
+        method: 'POST',
         headers,
-        body: request.method === 'POST' ? await request.arrayBuffer() : undefined,
+        body: await request.arrayBuffer(),
       });
       return new Response(upstream.body, {
         status: upstream.status,
