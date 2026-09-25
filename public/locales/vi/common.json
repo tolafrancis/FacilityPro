@@ -175,5 +175,9 @@
     "title": "Không tìm thấy",
     "body": "Trang hoặc bản ghi này không tồn tại, hoặc bạn không có quyền truy cập.",
     "back": "Về trang tổng quan"
+  },
+  "captcha": {
+    "unavailable": "Không tải được bước kiểm tra bảo mật. Hãy kiểm tra kết nối hoặc tắt trình chặn nội dung cho trang này.",
+    "retry": "Thử lại"
   }
 }

@@ -10,13 +10,20 @@
 // Deploy:
 //   supabase functions deploy public-report
 //   supabase secrets set TURNSTILE_SECRET_KEY=0x...
+//   # Optional: only accept tokens issued on these hostnames (comma-separated)
+//   supabase secrets set TURNSTILE_ALLOWED_HOSTNAMES=app.yourdomain.com
 // Then make the CAPTCHA mandatory by closing the direct RPC to anonymous
 // callers (see README):
 //   revoke execute on function fp_public_report(uuid, text, text, text, text, uuid, uuid, text, text) from anon;
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { verifyTurnstile } from '../_shared/turnstile.ts';
 
 const TURNSTILE_SECRET_KEY = Deno.env.get('TURNSTILE_SECRET_KEY') ?? '';
+const ALLOWED_HOSTNAMES = (Deno.env.get('TURNSTILE_ALLOWED_HOSTNAMES') ?? '')
+  .split(',')
+  .map((h) => h.trim().toLowerCase())
+  .filter(Boolean);
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -40,20 +47,6 @@ function clientIp(req: Request): string | null {
   );
 }
 
-async function verifyCaptcha(token: string, ip: string | null): Promise<boolean> {
-  const form = new FormData();
-  form.append('secret', TURNSTILE_SECRET_KEY);
-  form.append('response', token);
-  if (ip) form.append('remoteip', ip);
-  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    body: form,
-  });
-  if (!res.ok) return false;
-  const data = (await res.json()) as { success?: boolean };
-  return data.success === true;
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
@@ -70,9 +63,11 @@ Deno.serve(async (req) => {
 
   const ip = clientIp(req);
   const token = typeof body.captchaToken === 'string' ? body.captchaToken : '';
-  if (!token || !(await verifyCaptcha(token, ip))) {
-    return json({ error: 'captcha_failed' }, 403);
-  }
+  const captcha = token
+    ? await verifyTurnstile(token, { secret: TURNSTILE_SECRET_KEY, ip, action: 'public_report', hostnames: ALLOWED_HOSTNAMES })
+    : 'failed';
+  if (captcha === 'unavailable') return json({ error: 'captcha_unavailable' }, 503);
+  if (captcha !== 'ok') return json({ error: 'captcha_failed' }, 403);
 
   const str = (v: unknown) => (typeof v === 'string' && v.trim() !== '' ? v : null);
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);

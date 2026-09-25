@@ -201,12 +201,15 @@ VITE_PUBLIC_APP_URL=https://app.yourdomain.com
   - future timestamps clamped
   - duplicate readings ignored
 
-To add a CAPTCHA:
-1. Create a Turnstile widget in Cloudflare and set `VITE_TURNSTILE_SITE_KEY` in the web app.
-2. Deploy the function: `supabase functions deploy public-report`, then `supabase secrets set TURNSTILE_SECRET_KEY=…`.
-3. In Supabase → Authentication → Attack Protection, enable CAPTCHA with provider **Turnstile** and the same secret.
-4. Once the new web app is live, make the CAPTCHA mandatory for public reports:
+**CAPTCHA (Cloudflare Turnstile).** The widget exists and its site key is set in `.env.production`, so production builds show it on the public report form (action `public_report`), sign-in (`login`) and sign-up (`signup`). Do these in order, or reports and sign-ins will fail in between:
+1. `supabase secrets set TURNSTILE_SECRET_KEY=<the widget's secret key>` (optional: `TURNSTILE_ALLOWED_HOSTNAMES=app.yourdomain.com` to accept only tokens issued on your domain), then `supabase functions deploy public-report`.
+2. In Cloudflare → Turnstile → the widget, make sure its **hostnames** include your app's domain.
+3. Build and deploy the web app (`npm run build`).
+4. In Supabase → Authentication → Attack Protection, enable **CAPTCHA protection**, provider **Turnstile**, with the same secret key. (Only sign-in and sign-up call Supabase Auth, and both send the token.)
+5. Make the CAPTCHA mandatory for public reports, so the form can't be bypassed by calling the database directly:
    `revoke execute on function fp_public_report(uuid, text, text, text, text, uuid, uuid, text, text) from anon;`
+
+The server checks each token with Cloudflare Siteverify: single use, not expired, issued for this form (a sign-in token can't submit a report) and, if configured, on your hostname. If Cloudflare is unreachable or the secret is wrong, the form says "try again" rather than blaming the visitor. For local testing use Cloudflare's testing keys (site `1x00000000000000000000AA`, secret `1x0000000000000000000000000000000AA`).
 
 Also review Authentication → Rate Limits; the defaults are low for sign-up emails, so configure custom SMTP before launch.
 

@@ -67,7 +67,7 @@ export default function SignIn() {
             autoComplete="current-password"
           />
         </div>
-        <Turnstile key={captchaKey} onToken={setCaptchaToken} />
+        <Turnstile key={captchaKey} onToken={setCaptchaToken} action="login" />
         {error && <p className="text-sm text-status-crit">{error}</p>}
         <Button type="submit" loading={busy} className="w-full">
           {t('signIn.submit')}

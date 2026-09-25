@@ -20,6 +20,7 @@
     "report_invalid_location": "Mã QR này không khớp với vị trí nào của tổ chức.",
     "captcha_failed": "Kiểm tra bảo mật không thành công. Vui lòng thử lại.",
     "captcha_required": "Vui lòng hoàn tất bước kiểm tra bảo mật.",
-    "generic": "Đã xảy ra lỗi. Vui lòng thử lại."
+    "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "captcha_unavailable": "Dịch vụ kiểm tra bảo mật đang tạm thời không khả dụng. Vui lòng thử lại sau một phút."
   }
 }

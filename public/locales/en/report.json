@@ -20,6 +20,7 @@
     "report_invalid_location": "This QR code doesn't match a location of this organisation.",
     "captcha_failed": "The security check failed. Please try again.",
     "captcha_required": "Please complete the security check first.",
-    "generic": "Something went wrong. Please try again."
+    "generic": "Something went wrong. Please try again.",
+    "captcha_unavailable": "The security check service is unavailable right now. Please try again in a minute."
   }
 }

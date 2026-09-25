@@ -1,0 +1,13 @@
+// Cloudflare Workers deploy (`npx wrangler deploy`): serves the Vite build in
+// dist/ as static assets. With this file present Wrangler doesn't try to
+// auto-configure the project (which needs Vite 6+).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "facilitypro",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist",
+    // Client-side routes (/devices/…, /work-orders/…) load index.html.
+    "not_found_handling": "single-page-application"
+  }
+}
