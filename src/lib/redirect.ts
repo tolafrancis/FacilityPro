@@ -35,3 +35,31 @@ export function forgetInvite() {
     /* ignore */
   }
 }
+
+// A join link (0082) opened while signed out, kept the same way as invites:
+// onboarding offers to finish joining instead of creating a new organisation.
+const PENDING_JOIN = 'fp.pendingJoin';
+
+export function rememberJoin(token: string) {
+  try {
+    localStorage.setItem(PENDING_JOIN, token);
+  } catch {
+    /* storage unavailable: the ?next= link still carries the token */
+  }
+}
+
+export function pendingJoin(): string | null {
+  try {
+    return localStorage.getItem(PENDING_JOIN);
+  } catch {
+    return null;
+  }
+}
+
+export function forgetJoin() {
+  try {
+    localStorage.removeItem(PENDING_JOIN);
+  } catch {
+    /* ignore */
+  }
+}

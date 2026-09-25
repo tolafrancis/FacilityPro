@@ -21,6 +21,7 @@ const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
 const AssetScan = lazy(() => import('./pages/AssetScan'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const TenantHome = lazy(() => import('./pages/TenantHome'));
+const JoinOrg = lazy(() => import('./pages/JoinOrg'));
 const Locations = lazy(() => import('./pages/Locations'));
 const Assets = lazy(() => import('./pages/Assets'));
 const AssetDetail = lazy(() => import('./pages/AssetDetail'));
@@ -116,6 +117,7 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/invite" element={<InviteSignedOut next={next} />} />
+          <Route path="/join/:token" element={<JoinOrg />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
@@ -134,6 +136,7 @@ export default function App() {
     <Suspense fallback={<FullPageLoader />}>
       <Routes>
         <Route path="/invite" element={<AcceptInvite />} />
+        <Route path="/join/:token" element={<JoinOrg />} />
         <Route path="/report" element={<PublicReport />} />
         <Route path="/a/:code" element={<AssetScan />} />
         {/* The reset email's link signs the user in; they set the password here. */}

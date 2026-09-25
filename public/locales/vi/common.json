@@ -62,7 +62,8 @@
     "printQr": "In mã QR",
     "reportFault": "Báo cáo sự cố",
     "createWorkOrder": "Tạo lệnh công việc",
-    "viewAll": "Xem tất cả"
+    "viewAll": "Xem tất cả",
+    "close": "Đóng"
   },
   "roles": {
     "super_admin": "Quản trị cấp cao",
@@ -229,5 +230,40 @@
     "announcements": "Thông báo",
     "myRequestsSubtitle": "Các sự cố bạn đã báo và tiến độ xử lý.",
     "followUp": "Chúng tôi sẽ cập nhật trạng thái tại đây khi công việc tiến triển."
+  },
+  "share": {
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "more": "Chia sẻ (Zalo, Messenger…)",
+    "email": "Email",
+    "downloadQr": "Tải mã QR",
+    "printQr": "In mã QR",
+    "zaloHint": "Trên điện thoại, nút “Chia sẻ” có cả Zalo và các ứng dụng khác."
+  },
+  "join": {
+    "sectionTitle": "Liên kết tham gia & mã QR",
+    "intro": "Tạo liên kết cho một vai trò và chia sẻ ở bất cứ đâu — WhatsApp, Zalo, SMS, email hoặc mã QR in sẵn. Ai mở liên kết sẽ đăng ký và tham gia với vai trò đó. Có thể thu hồi liên kết bất cứ lúc nào.",
+    "role": "Tham gia với vai trò",
+    "label": "Tên (không bắt buộc)",
+    "labelPlaceholder": "VD: Cư dân tòa A",
+    "expires": "Hết hạn",
+    "never": "Không bao giờ",
+    "days_one": "Sau {{count}} ngày",
+    "days_other": "Sau {{count}} ngày",
+    "maxUses": "Số người tối đa",
+    "unlimited": "Không giới hạn",
+    "managerWarning": "Ai có liên kết quản lý đều có thể quản lý công việc của tổ chức. Hãy đặt hạn dùng hoặc giới hạn và chỉ chia sẻ cho đúng người.",
+    "create": "Tạo liên kết",
+    "share": "Chia sẻ",
+    "revoke": "Thu hồi liên kết",
+    "expired": "Đã hết hạn",
+    "usedUp": "Đã hết lượt",
+    "uses_one": "{{count}} người đã tham gia",
+    "uses_other": "{{count}} người đã tham gia",
+    "until": "đến {{date}}",
+    "shareTitle": "Chia sẻ liên kết {{role}}",
+    "shareMessage": "Tham gia {{org}} trên FacilityPro với vai trò {{role}}:",
+    "qrTitle": "Tham gia {{org}} trên FacilityPro",
+    "qrSubtitle": "Quét để tham gia với vai trò {{role}}"
   }
 }

@@ -23,6 +23,7 @@ import type { AssetType, FaultType, Priority, Role, Site } from '../lib/database
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
+import JoinLinks from '../components/JoinLinks';
 import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
 
@@ -598,6 +599,13 @@ function TeamSection() {
           ))}
           {members.data?.length === 0 && <li className="text-sm text-ink-muted">No members yet.</li>}
         </ul>
+      </section>
+
+      <section className="rounded-xl border border-line bg-white p-4">
+        <h2 className="font-semibold text-ink">{tc('join.sectionTitle')}</h2>
+        <div className="mt-3">
+          <JoinLinks />
+        </div>
       </section>
 
       <section className="rounded-xl border border-line bg-white p-4">

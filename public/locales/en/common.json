@@ -62,7 +62,8 @@
     "printQr": "Print QR",
     "reportFault": "Report fault",
     "createWorkOrder": "Create work order",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "close": "Close"
   },
   "roles": {
     "super_admin": "Super admin",
@@ -231,5 +232,40 @@
     "announcements": "Announcements",
     "myRequestsSubtitle": "Faults you have reported and their progress.",
     "followUp": "We’ll update the status here as the work progresses."
+  },
+  "share": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "more": "Share (Zalo, Messenger…)",
+    "email": "Email",
+    "downloadQr": "Download QR",
+    "printQr": "Print QR",
+    "zaloHint": "On a phone, “Share” also offers Zalo and your other apps."
+  },
+  "join": {
+    "sectionTitle": "Join links & QR codes",
+    "intro": "Create a link for a role and share it anywhere — WhatsApp, Zalo, SMS, email, or a printed QR code. Whoever opens it signs up and joins with that role. Revoke a link at any time.",
+    "role": "Joins as",
+    "label": "Name (optional)",
+    "labelPlaceholder": "e.g. Tower A tenants",
+    "expires": "Expires",
+    "never": "Never",
+    "days_one": "In {{count}} day",
+    "days_other": "In {{count}} days",
+    "maxUses": "Max. people",
+    "unlimited": "No limit",
+    "managerWarning": "Anyone with a manager link can manage your organisation’s work. Set an expiry or a limit and share it only with the right people.",
+    "create": "Create link",
+    "share": "Share",
+    "revoke": "Revoke link",
+    "expired": "Expired",
+    "usedUp": "All uses taken",
+    "uses_one": "{{count}} joined",
+    "uses_other": "{{count}} joined",
+    "until": "until {{date}}",
+    "shareTitle": "Share the {{role}} link",
+    "shareMessage": "Join {{org}} on FacilityPro as {{role}}:",
+    "qrTitle": "Join {{org}} on FacilityPro",
+    "qrSubtitle": "Scan to join as {{role}}"
   }
 }

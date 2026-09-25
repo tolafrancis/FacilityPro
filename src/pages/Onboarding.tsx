@@ -8,7 +8,7 @@ import { useOrg } from '../contexts/OrgContext';
 import { SUPPORTED } from '../i18n';
 import AuthLayout, { AuthError, AuthField, AuthInput, AuthNotice, authButtonClass } from '../components/AuthLayout';
 import Button from '../components/ui/Button';
-import { pendingInvite } from '../lib/redirect';
+import { pendingInvite, pendingJoin } from '../lib/redirect';
 import { LOGO_TYPES, orgLogoUrl, uploadOrgLogo } from '../lib/orgLogo';
 
 export const INDUSTRIES = [
@@ -40,6 +40,8 @@ export default function Onboarding() {
   // Someone who opened an invite before signing up shouldn't end up creating
   // a separate organisation by mistake.
   const [invite] = useState(pendingInvite);
+  // Same for a join link (0082) opened before signing up.
+  const [joinToken] = useState(pendingJoin);
 
   const createOrg = async (e: FormEvent) => {
     e.preventDefault();
@@ -128,6 +130,20 @@ export default function Onboarding() {
 
   return (
     <AuthLayout title={t('onboarding.title')} subtitle={t('onboarding.stepOf', { step: 1, total: 2 })}>
+      {joinToken && !invite && (
+        <div className="mb-5">
+          <AuthNotice>
+            <p>{t('onboarding.pendingJoin')}</p>
+            <Link
+              to={`/join/${encodeURIComponent(joinToken)}`}
+              className="mt-2 inline-flex min-h-[44px] items-center rounded-lg bg-white px-4 text-sm font-semibold text-brand-600"
+            >
+              {t('onboarding.finishJoin')}
+            </Link>
+            <p className="mt-2 text-white/85">{t('onboarding.orCreate')}</p>
+          </AuthNotice>
+        </div>
+      )}
       {invite && (
         <div className="mb-5">
           <AuthNotice>
