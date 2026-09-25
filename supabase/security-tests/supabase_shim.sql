@@ -16,7 +16,13 @@ end $$;
 create extension if not exists pgcrypto;
 
 create schema auth;
-create table auth.users (id uuid primary key, email text);
+create table auth.users (
+  id uuid primary key, email text,
+  -- Columns Supabase has that the admin panel reads (0084).
+  raw_user_meta_data jsonb not null default '{}'::jsonb,
+  last_sign_in_at timestamptz, banned_until timestamptz, email_confirmed_at timestamptz,
+  created_at timestamptz not null default now()
+);
 create function auth.uid() returns uuid language sql stable as
   $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 create function auth.role() returns text language sql stable as
@@ -28,7 +34,7 @@ grant select on auth.users to service_role;
 create schema storage;
 create table storage.buckets (id text primary key, name text, public boolean,
   file_size_limit bigint, allowed_mime_types text[]);
-create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text);
+create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text, metadata jsonb);
 alter table storage.objects enable row level security;
 create function storage.foldername(name text) returns text[] language sql immutable as
   $$ select (string_to_array(name, '/'))[1:array_length(string_to_array(name, '/'), 1) - 1] $$;

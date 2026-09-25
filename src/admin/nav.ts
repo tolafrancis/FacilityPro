@@ -39,7 +39,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   {
     key: 'customers',
     items: [
-      { key: 'tenants', to: '/admin/tenants', icon: Building2, permission: 'tenants.view', ready: false },
+      { key: 'tenants', to: '/admin/tenants', icon: Building2, permission: 'tenants.view', ready: true },
       { key: 'users', to: '/admin/users', icon: Users, permission: 'users.view', ready: false },
       { key: 'billing', to: '/admin/billing', icon: CreditCard, permission: 'billing.view', ready: false },
       { key: 'tickets', to: '/admin/tickets', icon: LifeBuoy, permission: 'tickets.view', ready: false },

@@ -22,6 +22,7 @@ const AssetScan = lazy(() => import('./pages/AssetScan'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const TenantHome = lazy(() => import('./pages/TenantHome'));
 const JoinOrg = lazy(() => import('./pages/JoinOrg'));
+const OrgClosed = lazy(() => import('./pages/OrgClosed'));
 // Platform admin panel: its own bundle, downloaded only by staff who open /admin.
 const AdminApp = lazy(() => import('./admin/AdminApp'));
 const Locations = lazy(() => import('./pages/Locations'));
@@ -95,7 +96,7 @@ function InviteSignedOut({ next }: { next: string }) {
 
 export default function App() {
   const { session, loading: authLoading } = useAuth();
-  const { memberships, role, loading: orgLoading, error: orgError, refresh: refreshOrgs } = useOrg();
+  const { memberships, role, closedOrgs, loading: orgLoading, error: orgError, refresh: refreshOrgs } = useOrg();
   const location = useLocation();
 
   if (authLoading) return <FullPageLoader />;
@@ -146,7 +147,11 @@ export default function App() {
         <Route path="/a/:code" element={<AssetScan />} />
         {/* The reset email's link signs the user in; they set the password here. */}
         <Route path="/reset-password" element={<ResetPassword />} />
-        {!hasOrg ? (
+        {!hasOrg && closedOrgs.length > 0 ? (
+          // Every organisation this user belongs to is suspended or deleted:
+          // explain, rather than offering to create a new one.
+          <Route path="*" element={<OrgClosed orgs={closedOrgs} />} />
+        ) : !hasOrg ? (
           <>
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="*" element={<Navigate to="/onboarding" replace />} />

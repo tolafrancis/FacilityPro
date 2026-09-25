@@ -12,15 +12,22 @@ export function orgLogoUrl(path: string | null | undefined): string | null {
 }
 
 /** Uploads a new logo, points the organisation at it and removes the old file. */
-export async function uploadOrgLogo(orgId: string, file: File, previous?: string | null): Promise<string> {
+/**
+ * Uploads a logo into the organisation's folder. `saveToOrg: false` leaves
+ * the organisation row alone (the admin panel saves the path through
+ * fp_admin_update_tenant, which staff use instead of a direct update).
+ */
+export async function uploadOrgLogo(orgId: string, file: File, previous?: string | null, saveToOrg = true): Promise<string> {
   if (!LOGO_TYPES.includes(file.type)) throw new Error('logo_type');
   if (file.size > LOGO_MAX_BYTES) throw new Error('logo_size');
   const ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
   const path = `${orgId}/logo-${Date.now()}.${ext}`;
   const { error: upErr } = await supabase.storage.from(LOGO_BUCKET).upload(path, file, { contentType: file.type, cacheControl: '31536000' });
   if (upErr) throw upErr;
-  const { error } = await supabase.from('fp_organizations').update({ logo_path: path }).eq('id', orgId);
-  if (error) throw error;
-  if (previous && previous !== path) await supabase.storage.from(LOGO_BUCKET).remove([previous]);
+  if (saveToOrg) {
+    const { error } = await supabase.from('fp_organizations').update({ logo_path: path }).eq('id', orgId);
+    if (error) throw error;
+    if (previous && previous !== path) await supabase.storage.from(LOGO_BUCKET).remove([previous]);
+  }
   return path;
 }

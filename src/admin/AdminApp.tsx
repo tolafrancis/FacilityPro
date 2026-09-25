@@ -7,6 +7,8 @@ import type { Permission } from './permissions';
 import AdminShell from './components/AdminShell';
 import { EmptyState, PageHeader, Skeleton } from './components/ui';
 import Overview from './pages/Overview';
+import Tenants from './pages/Tenants';
+import TenantDetail from './pages/TenantDetail';
 
 /**
  * The platform admin panel (/admin), loaded only when opened. Every route
@@ -29,6 +31,8 @@ function AdminRoutes() {
     <Routes>
       <Route element={<AdminShell />}>
         <Route index element={<Guard permission="dashboard.view"><Overview /></Guard>} />
+        <Route path="tenants" element={<Guard permission="tenants.view"><Tenants /></Guard>} />
+        <Route path="tenants/:id" element={<Guard permission="tenants.view"><TenantDetail /></Guard>} />
         {ADMIN_NAV.flatMap((g) => g.items)
           .filter((i) => !i.ready)
           .map((i) => (

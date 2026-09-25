@@ -94,6 +94,43 @@ disabled_at)`. A disabled account has no access.
 - **Dashboard**: `fp_admin_overview(from, to)` returns KPIs, series (bucketed by day/week/month),
   plans, top tenants, activity and health in one call.
 
+## Tenant management (0084)
+
+- **List** (`/admin/tenants`): server-side search (name, contact email, subdomain, ID), status and
+  plan filters, sorting, paging, column choice (remembered per browser), row selection with bulk
+  suspend / reactivate / export, and CSV export of everything matching (formula-safe, UTF-8).
+- **Create / edit**: company, industry, language, contact, address, time zone, currency, subdomain,
+  brand colour, logo; on create also plan, billing interval, trial length and an owner invitation.
+- **Detail** (`/admin/tenants/:id`) tabs: Overview (health score, usage, plan limits, profile),
+  Users (invite, change role, remove, password reset email, sign in as user), Facilities (sites,
+  buildings, bookable facilities), Subscription & billing (plan, status, requests, invoices for
+  billing staff), Features (per-tenant module/feature switches), Activity log, internal Notes.
+- **Actions**: suspend (reason required) / reactivate, soft delete (type the name) / restore,
+  change plan, extend trial. Every action is a database function that checks the permission and
+  writes a named audit entry.
+- **Suspension is enforced**: members of a suspended or deleted tenant can't read or change its data
+  (`fp_is_member`, `fp_has_role`, `fp_my_org_ids` only count open organisations), see an
+  "Access paused" screen instead of onboarding, and its join links and public fault reports stop.
+  Reactivating restores everything, including the public-report setting.
+- **Sign in as user** (`supabase/functions/admin-impersonate`): support staff get a one-time sign-in
+  link for a tenant member, to open in a private window. Needs `tenants.impersonate`, a written reason,
+  never works on platform staff, max 20 per hour, and is recorded (who, whom, why, IP) before the link
+  is made. Deploy with JWT verification on:
+  `supabase functions deploy admin-impersonate --project-ref <ref>`.
+
+### Demo data (local or staging only)
+
+```sql
+set fp.allow_demo_seed = 'yes';
+\i supabase/seed/admin_demo.sql
+```
+
+Creates 20 tenants across plans and statuses (active, trial, past due, cancelled, one suspended),
+200 users within each plan's member limit, 12 months of invoices (Stripe, PayPal, manual; paid,
+open, failed, refunded), 30 support tickets with internal notes, 60 days of activity, requests and
+work orders. Refuses to run without the opt-in or twice; the end of the file removes it all.
+Never run it on the production database: the fake tenants would count in the real figures.
+
 ## Setup
 
 1. Apply the migrations (0083 and later) as usual.
@@ -114,6 +151,6 @@ keys are Edge Function secrets, added with the Billing module.
 |---|---|
 | Foundation: schema, RBAC, layout, theme, toasts, skeletons | Done |
 | 1. Main dashboard | Done |
-| 2. Tenant management | Next |
+| 2. Tenant management | Done |
 | 3. Users · 4. Plans & billing (Stripe + PayPal) · 5. App management · 6. Support · 7. Analytics · 8. Audit & security · 9. Monitoring · 10. Admin team | Planned, schema in place |
-| Demo seed data (20 tenants, 200 users, invoices, tickets, logs) | With tenant management, for local/staging only |
+| Demo seed data (20 tenants, 200 users, invoices, tickets, activity) | Done: `supabase/seed/admin_demo.sql`, local/staging only |

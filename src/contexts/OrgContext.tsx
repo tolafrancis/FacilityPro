@@ -24,10 +24,22 @@ interface OrgContextValue {
   error: string | null;
   refresh: () => Promise<void>;
   setCurrentOrg: (orgId: string) => void;
+  /** Suspended or deleted organisations the user belongs to (0084). */
+  closedOrgs: ClosedOrg[];
 }
 
 const OrgContext = createContext<OrgContextValue | undefined>(undefined);
 const STORAGE_KEY = 'fp_current_org';
+
+/** An organisation the user belongs to that platform staff suspended or deleted. */
+export interface ClosedOrg {
+  org_id: string;
+  name: string;
+  role: string;
+  suspended: boolean;
+  deleted: boolean;
+  reason: string | null;
+}
 
 export function OrgProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -42,6 +54,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   // /onboarding and then to the dashboard).
   const [loadedFor, setLoadedFor] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [closedOrgs, setClosedOrgs] = useState<ClosedOrg[]>([]);
 
   const refresh = useCallback(async () => {
     if (!userId) {
@@ -61,7 +74,18 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     if (err) {
       setError(err.message);
     } else {
-      setMemberships((data ?? []) as unknown as Membership[]);
+      // A suspended or deleted organisation's membership row still comes
+      // back, but the organisation itself is hidden (0084): keep only open
+      // ones, and ask why the others are closed.
+      const rows = (data ?? []) as unknown as Membership[];
+      const open = rows.filter((m) => m.fp_organizations);
+      setMemberships(open);
+      if (open.length < rows.length) {
+        const { data: status } = await supabase.rpc('fp_my_org_status');
+        setClosedOrgs(((status ?? []) as ClosedOrg[]).filter((o) => o.suspended || o.deleted));
+      } else {
+        setClosedOrgs([]);
+      }
       setError(null);
     }
     setLoadedFor(userId);
@@ -112,6 +136,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
         error,
         refresh,
         setCurrentOrg,
+        closedOrgs,
       }}
     >
       {children}
