@@ -175,5 +175,9 @@
     "title": "Not found",
     "body": "This page or record doesn't exist, or you don't have access to it.",
     "back": "Back to dashboard"
+  },
+  "captcha": {
+    "unavailable": "The security check couldn't load. Check your connection or disable content blockers for this site.",
+    "retry": "Try again"
   }
 }

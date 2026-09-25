@@ -66,6 +66,6 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno test supabase/functions/_shared/iot-adapters.test.ts
+      - run: deno test supabase/functions/_shared/iot-adapters.test.ts supabase/functions/_shared/turnstile.test.ts
       # process-outbox is left out: its esm.sh web-push import has no usable types.
       - run: deno check $(ls supabase/functions/*/index.ts | grep -v process-outbox)

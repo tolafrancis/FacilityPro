@@ -69,7 +69,7 @@ export default function PublicReport() {
 
   // Known server refusals, shown in the reporter's language.
   const errorText = (code: string) =>
-    ['rate_limited', 'report_too_long', 'report_invalid_asset', 'report_invalid_location', 'captcha_failed'].includes(code)
+    ['rate_limited', 'report_too_long', 'report_invalid_asset', 'report_invalid_location', 'captcha_failed', 'captcha_unavailable'].includes(code)
       ? t(`errors.${code}`)
       : t('errors.generic');
 
@@ -202,7 +202,7 @@ export default function PublicReport() {
                 <label className="mb-1 block text-sm font-medium text-ink">{t('reporter')}</label>
                 <Input value={reporter} onChange={(e) => setReporter(e.target.value)} placeholder={t('reporterPlaceholder')} maxLength={200} />
               </div>
-              <Turnstile key={captchaKey} onToken={setCaptchaToken} />
+              <Turnstile key={captchaKey} onToken={setCaptchaToken} action="public_report" />
               {error && <p role="alert" className="text-sm text-status-crit">{error}</p>}
               <Button type="submit" loading={busy} disabled={!title.trim()} className="w-full justify-center">
                 {t('submit')}
