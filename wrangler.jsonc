@@ -5,6 +5,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "facilitypro",
   "compatibility_date": "2025-09-01",
+  // Attached on every deploy; Cloudflare creates the DNS records and
+  // certificates (the domain must be in this Cloudflare account).
+  "routes": [
+    { "pattern": "facilitypro.tech", "custom_domain": true },
+    { "pattern": "www.facilitypro.tech", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./dist",
     // Client-side routes (/devices/…, /work-orders/…) load index.html.
