@@ -312,6 +312,8 @@ export interface DashboardKpis {
   resolved_7d?: number;
   categories?: { fault_type_id: string | null; count: number }[];
   setup?: { members: number; invites: number; assets: number; parts: number; locations: number };
+  /** 0080: last seven days, oldest first (organisation time zone) */
+  daily?: { day: string; reported: number; resolved: number }[];
 }
 
 /** Dashboard counts, computed in the database (fp_dashboard_kpis, 0069). */

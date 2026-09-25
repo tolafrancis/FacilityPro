@@ -18,7 +18,7 @@ void i18n
     load: 'languageOnly',
     ns: ['common', 'auth', 'locations', 'settings', 'assets', 'requests', 'workorders', 'checklists', 'maintenance', 'parts', 'vendors', 'reports', 'security', 'approvals', 'jobsheet', 'inbox', 'billing', 'report', 'devices'],
     defaultNS: 'common',
-    backend: { loadPath: '/locales/{{lng}}/{{ns}}.json' },
+    backend: { loadPath: `/locales/{{lng}}/{{ns}}.json?v=${__LOCALES_VERSION__}` },
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],

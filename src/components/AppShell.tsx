@@ -204,9 +204,9 @@ export default function AppShell() {
               <button
                 type="button"
                 onClick={() => toggleGroup(group.title)}
-                className="mb-1 flex w-full items-center justify-between rounded-lg px-2 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted"
+                className="mb-1 flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-ink-muted hover:bg-surface"
               >
-                <span>{t(`navGroups.${group.title}`)}</span>
+                <span className="leading-snug">{t(`navGroups.${group.title}`)}</span>
                 {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </button>
               {isOpen && (

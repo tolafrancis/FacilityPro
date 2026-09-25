@@ -61,10 +61,15 @@ select t.check('the dashboard reports this week''s faults, resolutions and the s
   and (:'k'::jsonb -> 'setup' ->> 'locations')::int = 1 and (:'k'::jsonb -> 'setup' ->> 'members')::int = 2
   and :'k'::jsonb ? 'tasks' and :'k'::jsonb ? 'pending_tasks' and :'k'::jsonb ? 'assets'
   and jsonb_typeof(:'k'::jsonb -> 'categories') = 'array');
+select t.check('the weekly chart has seven days, oldest first, ending today with today''s faults',
+  jsonb_array_length(:'k'::jsonb -> 'daily') = 7
+  and (:'k'::jsonb -> 'daily' -> 6 ->> 'reported')::int = 2
+  and (:'k'::jsonb -> 'daily' -> 0 ->> 'day')::date < (:'k'::jsonb -> 'daily' -> 6 ->> 'day')::date);
 create temp table kb as select fp_dashboard_kpis(:'org') as k limit 0;
 grant all on kb to authenticated;
 select t.run('authenticated', :'adminB', format($q$insert into kb select fp_dashboard_kpis(%L)$q$, :'org'));
 select t.check('another organisation''s admin sees none of these figures',
-  (select (k ->> 'faults_7d')::int = 0 and (k -> 'setup' ->> 'locations')::int = 0 from kb));
+  (select (k ->> 'faults_7d')::int = 0 and (k -> 'setup' ->> 'locations')::int = 0
+     and (k -> 'daily' -> 6 ->> 'reported')::int = 0 from kb));
 
 \ir _report.sql

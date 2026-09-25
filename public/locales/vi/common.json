@@ -103,7 +103,13 @@
     },
     "invite": "Mời",
     "quickActions": "Thao tác nhanh",
-    "recentActivity": "Hoạt động gần đây"
+    "recentActivity": "Hoạt động gần đây",
+    "weeklySubtitle": "Sự cố được báo và đã xử lý trong 7 ngày qua",
+    "reported": "Đã báo",
+    "resolvedLegend": "Đã xử lý",
+    "chartLabel": "Biểu đồ cột: số sự cố được báo và đã xử lý mỗi ngày, 7 ngày qua",
+    "noActivity": "Chưa có hoạt động nào.",
+    "justNow": "Vừa xong"
   },
   "priority": {
     "low": "Thấp",

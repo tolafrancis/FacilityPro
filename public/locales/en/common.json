@@ -105,7 +105,13 @@
     },
     "invite": "Invite",
     "quickActions": "Quick actions",
-    "recentActivity": "Recent Activity"
+    "recentActivity": "Recent Activity",
+    "weeklySubtitle": "Faults reported and resolved over the last 7 days",
+    "reported": "Reported",
+    "resolvedLegend": "Resolved",
+    "chartLabel": "Bar chart: faults reported and resolved per day, last 7 days",
+    "noActivity": "No activity yet.",
+    "justNow": "Just now"
   },
   "priority": {
     "low": "Low",

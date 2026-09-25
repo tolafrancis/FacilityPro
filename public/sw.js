@@ -68,6 +68,24 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Translations (/locales/*.json) keep their names between deploys:
+  // network-first so new text shows at once; the cached copy is for offline.
+  if (url.pathname.startsWith('/locales/')) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          const type = res.headers.get('content-type') || '';
+          if (res.ok && !type.includes('text/html')) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then((r) => r || Response.error()))
+    );
+    return;
+  }
+
   // Static assets: cache-first, then network (and cache the result).
   // Only cache real assets: the host's SPA fallback answers a missing file with
   // index.html (200, text/html), which must never be stored under a .js/.css URL.

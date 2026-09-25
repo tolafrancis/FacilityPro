@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -21,6 +22,19 @@ function swBuildId(): Plugin {
       writeFileSync(swPath, readFileSync(swPath, 'utf8').replace(/__BUILD_ID__/g, id));
     },
   };
+}
+
+// Hash of every translation file: added to their URLs (src/i18n) so a deploy
+// that changes any text is never answered from an old cached copy.
+function localesVersion(): string {
+  const dir = fileURLToPath(new URL('./public/locales', import.meta.url));
+  const h = createHash('sha256');
+  for (const lng of readdirSync(dir).sort()) {
+    for (const f of readdirSync(resolve(dir, lng)).sort()) {
+      h.update(`${lng}/${f}`).update(readFileSync(resolve(dir, lng, f)));
+    }
+  }
+  return h.digest('hex').slice(0, 12);
 }
 
 // A build without the Supabase settings loads as a blank page ("supabaseUrl is
@@ -44,6 +58,9 @@ export default defineConfig({
   // browser request /work-orders/assets/*.js, which the SPA fallback answers
   // with index.html — a blank page on refresh or when opening a shared link.
   base: '/',
+  define: {
+    __LOCALES_VERSION__: JSON.stringify(localesVersion()),
+  },
   server: {
     port: 5173,
   },
