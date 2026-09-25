@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Wrench } from 'lucide-react';
@@ -9,6 +9,7 @@ import type { Priority, WorkOrderStatus } from '../lib/database.types';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
 import Pagination from '../components/ui/Pagination';
+import SearchInput, { useUrlSearch } from '../components/ui/SearchInput';
 
 const PAGE_SIZE = 25;
 
@@ -24,8 +25,9 @@ export default function WorkOrders() {
   const [assignedTo, setAssignedTo] = useState('');
   const [priority, setPriority] = useState<Priority | 'all'>('all');
   const [page, setPage] = useState(1);
+  const { q, query, setQuery } = useUrlSearch(useCallback(() => setPage(1), []));
 
-  const filters = { status, locationId: locationId || undefined, assignedTo: assignedTo || undefined, priority };
+  const filters = { status, locationId: locationId || undefined, assignedTo: assignedTo || undefined, priority, search: q };
   const workOrders = useWorkOrdersPage(page, PAGE_SIZE, filters);
 
   const assignee = (userId: string | null) => {
@@ -53,6 +55,14 @@ export default function WorkOrders() {
       </div>
 
       <div className="mt-5 flex flex-wrap items-end gap-3">
+        <SearchInput
+          id="work-orders-search"
+          label={t('filter.search')}
+          placeholder={t('filter.searchPlaceholder')}
+          clearLabel={t('filter.clearSearch')}
+          value={query}
+          onChange={setQuery}
+        />
         <div>
           <label className="mb-1 block text-xs text-ink-muted">{t('detail.status')}</label>
           <Select value={status} onChange={(e) => updateFilter(setStatus)(e.target.value as WorkOrderStatus | 'all')} className="w-auto">
@@ -96,7 +106,7 @@ export default function WorkOrders() {
       {rows.length === 0 ? (
         <div className="mt-6 rounded-xl border border-dashed border-line bg-white p-8 text-center">
           <Wrench className="mx-auto text-ink-muted" aria-hidden />
-          <p className="mt-2 text-sm text-ink-muted">{t('empty')}</p>
+          <p className="mt-2 text-sm text-ink-muted">{q ? t('filter.noMatches', { q }) : t('empty')}</p>
         </div>
       ) : (
         <div className="mt-4 overflow-hidden rounded-xl border border-line bg-white">

@@ -78,5 +78,11 @@
   "uploadRejected": {
     "too_large": "That file is too large (25 MB maximum).",
     "unsupported_type": "Only photos and videos can be attached here."
+  },
+  "filter": {
+    "search": "Search work orders",
+    "searchPlaceholder": "Search by title or instructions",
+    "noMatches": "No work orders match “{{q}}”.",
+    "clearSearch": "Clear search"
   }
 }

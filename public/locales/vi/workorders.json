@@ -78,5 +78,11 @@
   "uploadRejected": {
     "too_large": "Tệp quá lớn (tối đa 25 MB).",
     "unsupported_type": "Chỉ có thể đính kèm ảnh và video tại đây."
+  },
+  "filter": {
+    "search": "Tìm lệnh công việc",
+    "searchPlaceholder": "Tìm theo tiêu đề hoặc hướng dẫn",
+    "noMatches": "Không có lệnh công việc nào khớp với “{{q}}”.",
+    "clearSearch": "Xóa tìm kiếm"
   }
 }

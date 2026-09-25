@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useCallback, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Plus, ClipboardList, Search, X } from 'lucide-react';
+import { Plus, ClipboardList } from 'lucide-react';
 import { useRequestsPage, useFaultTypes, useLocations } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { formatDate, PRIORITY_CLASS, REQUEST_STATUS_CLASS, REQUEST_STATUSES } from '../lib/ui';
@@ -10,6 +10,7 @@ import Button from '../components/ui/Button';
 import Select from '../components/ui/Select';
 import Pill from '../components/ui/Pill';
 import Pagination from '../components/ui/Pagination';
+import SearchInput, { useUrlSearch } from '../components/ui/SearchInput';
 
 const PAGE_SIZE = 25;
 
@@ -23,23 +24,7 @@ export default function Requests() {
   const [status, setStatus] = useState<RequestStatus | 'all'>('all');
   const [locationId, setLocationId] = useState('');
   const [page, setPage] = useState(1);
-  // The search lives in the URL (?q=) so the dashboard's search box and shared
-  // links open the filtered list; typing updates it after a short pause.
-  const [params, setParams] = useSearchParams();
-  const q = params.get('q') ?? '';
-  const [query, setQuery] = useState(q);
-  useEffect(() => setQuery(q), [q]);
-  useEffect(() => {
-    if (query.trim() === q.trim()) return;
-    const id = setTimeout(() => {
-      const next = new URLSearchParams(params);
-      if (query.trim()) next.set('q', query.trim());
-      else next.delete('q');
-      setParams(next, { replace: true });
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(id);
-  }, [query, q, params, setParams]);
+  const { q, query, setQuery } = useUrlSearch(useCallback(() => setPage(1), []));
 
   const requests = useRequestsPage(page, PAGE_SIZE, { status, locationId: locationId || undefined, search: q });
 
@@ -68,31 +53,14 @@ export default function Requests() {
       </div>
 
       <div className="mt-5 flex flex-wrap items-end gap-3">
-        <div className="w-full sm:w-72">
-          <label htmlFor="requests-search" className="mb-1 block text-xs text-ink-muted">{t('filter.search')}</label>
-          <div className="relative">
-            <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" aria-hidden />
-            <input
-              id="requests-search"
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t('filter.searchPlaceholder')}
-              maxLength={100}
-              className="min-h-[44px] w-full rounded-lg border border-line bg-white py-2 pl-9 pr-9 text-sm text-ink placeholder:text-ink-muted focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 lg:min-h-0 [&::-webkit-search-cancel-button]:hidden"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery('')}
-                className="absolute right-1 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-md text-ink-muted hover:bg-surface hover:text-ink"
-                aria-label={t('filter.clearSearch')}
-              >
-                <X size={16} aria-hidden />
-              </button>
-            )}
-          </div>
-        </div>
+        <SearchInput
+          id="requests-search"
+          label={t('filter.search')}
+          placeholder={t('filter.searchPlaceholder')}
+          clearLabel={t('filter.clearSearch')}
+          value={query}
+          onChange={setQuery}
+        />
         <div>
           <label className="mb-1 block text-xs text-ink-muted">{t('filter.status')}</label>
           <Select

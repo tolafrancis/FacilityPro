@@ -488,12 +488,13 @@ export interface RequestPageFilters {
 }
 
 /**
- * PostgREST filter for a request search: every word must appear in the title
- * or the description (any order, any case). Characters that carry meaning in
- * the filter syntax (, ( ) * % \ " :) are treated as spaces; values are quoted. Returns the body
- * of an or=(…) filter, or null for an empty search.
+ * PostgREST filter for a text search: every word must appear in one of the
+ * columns (any order, any case). Characters that carry meaning in the filter
+ * syntax (, ( ) * % \ " :) are treated as spaces; values are quoted so a word
+ * with a dot (v1.2) stays one value. Returns the body of an or=(…) filter, or
+ * null for an empty search.
  */
-export function requestSearchFilter(term: string | undefined): string | null {
+export function textSearchFilter(term: string | undefined, columns: string[]): string | null {
   const words = (term ?? '')
     .slice(0, 100)
     .replace(/[,()*%\\":]/g, ' ')
@@ -501,8 +502,7 @@ export function requestSearchFilter(term: string | undefined): string | null {
     .filter(Boolean)
     .slice(0, 6);
   if (!words.length) return null;
-  // Quoted values, so a word with a dot (v1.2) stays one value.
-  const perWord = words.map((w) => `or(title.ilike."*${w}*",body_original.ilike."*${w}*")`);
+  const perWord = words.map((w) => `or(${columns.map((c) => `${c}.ilike."*${w}*"`).join(',')})`);
   return `and(${perWord.join(',')})`;
 }
 
@@ -518,7 +518,7 @@ export function useRequestsPage(page: number, pageSize: number, filters: Request
       let q = supabase.from('fp_requests').select('*', { count: 'exact' }).eq('org_id', orgId!);
       if (filters.status && filters.status !== 'all') q = q.eq('status', filters.status);
       if (filters.locationId) q = q.eq('location_id', filters.locationId);
-      const search = requestSearchFilter(filters.search);
+      const search = textSearchFilter(filters.search, ['title', 'body_original']);
       if (search) q = q.or(search);
       const { data, error, count } = await q
         .order('created_at', { ascending: false })
@@ -551,6 +551,8 @@ export interface WorkOrderPageFilters {
   locationId?: string;
   assignedTo?: string;
   priority?: Priority | 'all';
+  /** Words to find in the title or instructions. */
+  search?: string;
 }
 
 /** Server-paginated work-order list for WorkOrders.tsx. */
@@ -567,6 +569,8 @@ export function useWorkOrdersPage(page: number, pageSize: number, filters: WorkO
       if (filters.locationId) q = q.eq('location_id', filters.locationId);
       if (filters.assignedTo) q = q.eq('assigned_to', filters.assignedTo);
       if (filters.priority && filters.priority !== 'all') q = q.eq('priority', filters.priority);
+      const search = textSearchFilter(filters.search, ['title', 'instructions']);
+      if (search) q = q.or(search);
       const { data, error, count } = await q
         .order('created_at', { ascending: false })
         .range(from, from + pageSize - 1);
