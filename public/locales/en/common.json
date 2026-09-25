@@ -34,13 +34,17 @@
     "broadcasts": "Broadcasts",
     "financial": "Financial",
     "mobileTabs": "Main",
-    "menu": "Menu"
+    "menu": "Menu",
+    "home": "Home",
+    "reportFault": "Report a fault",
+    "myRequests": "My requests"
   },
   "navGroups": {
     "maintenance": "Maintenance Operations",
     "operations": "Operations & control",
     "finance": "Financial",
-    "ai": "Intelligence & settings"
+    "ai": "Intelligence & settings",
+    "tenant": "My building"
   },
   "actions": {
     "signOut": "Sign out",
@@ -219,5 +223,13 @@
   "captcha": {
     "unavailable": "The security check couldn't load. Check your connection or disable content blockers for this site.",
     "retry": "Try again"
+  },
+  "tenant": {
+    "reportTitle": "Report a fault",
+    "reportBody": "Something broken or not working? Tell us and we’ll fix it.",
+    "noRequests": "You haven’t reported anything yet.",
+    "announcements": "Announcements",
+    "myRequestsSubtitle": "Faults you have reported and their progress.",
+    "followUp": "We’ll update the status here as the work progresses."
   }
 }

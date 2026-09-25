@@ -20,6 +20,7 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite'));
 const AssetScan = lazy(() => import('./pages/AssetScan'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const TenantHome = lazy(() => import('./pages/TenantHome'));
 const Locations = lazy(() => import('./pages/Locations'));
 const Assets = lazy(() => import('./pages/Assets'));
 const AssetDetail = lazy(() => import('./pages/AssetDetail'));
@@ -91,7 +92,7 @@ function InviteSignedOut({ next }: { next: string }) {
 
 export default function App() {
   const { session, loading: authLoading } = useAuth();
-  const { memberships, loading: orgLoading, error: orgError, refresh: refreshOrgs } = useOrg();
+  const { memberships, role, loading: orgLoading, error: orgError, refresh: refreshOrgs } = useOrg();
   const location = useLocation();
 
   if (authLoading) return <FullPageLoader />;
@@ -136,6 +137,16 @@ export default function App() {
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="*" element={<Navigate to="/onboarding" replace />} />
           </>
+        ) : role === 'occupant' ? (
+          // Tenants: report a fault and follow their own requests (0081 closes
+          // the staff data to them; these are the only pages they need).
+          <Route element={<AppShell />}>
+            <Route path="/" element={<TenantHome />} />
+            <Route path="/requests" element={<Requests />} />
+            <Route path="/requests/new" element={<NewRequest />} />
+            <Route path="/requests/:id" element={<RequestDetail />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
         ) : (
           <>
             <Route path="/work-orders/:id/print" element={<JobSheet />} />

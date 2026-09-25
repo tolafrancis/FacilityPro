@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Plus, ClipboardList } from 'lucide-react';
+import { Plus, ClipboardList, ChevronRight } from 'lucide-react';
 import { useRequestsPage, useFaultTypes, useLocations } from '../lib/queries';
+import { useOrg } from '../contexts/OrgContext';
 import { resolveI18n } from '../i18n/resolver';
 import { formatDate, PRIORITY_CLASS, REQUEST_STATUS_CLASS, REQUEST_STATUSES } from '../lib/ui';
 import type { RequestStatus } from '../lib/database.types';
@@ -19,6 +20,9 @@ export default function Requests() {
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
   const navigate = useNavigate();
+  // Tenants see only their own requests (RLS, 0081): same list, their wording,
+  // and cards instead of the staff table.
+  const isTenant = useOrg().role === 'occupant';
   const faultTypes = useFaultTypes();
   const locations = useLocations();
   const [status, setStatus] = useState<RequestStatus | 'all'>('all');
@@ -44,11 +48,11 @@ export default function Requests() {
     <div className="max-w-5xl">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
-          <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
+          <h1 className="text-2xl font-semibold text-ink">{isTenant ? tc('nav.myRequests') : t('title')}</h1>
+          <p className="mt-1 text-sm text-ink-muted">{isTenant ? tc('tenant.myRequestsSubtitle') : t('subtitle')}</p>
         </div>
         <Button onClick={() => navigate('/requests/new')}>
-          <Plus size={16} /> {t('new')}
+          <Plus size={16} /> {isTenant ? tc('nav.reportFault') : t('new')}
         </Button>
       </div>
 
@@ -79,6 +83,7 @@ export default function Requests() {
             ))}
           </Select>
         </div>
+        {!isTenant && (
         <div className="min-w-[160px]">
           <label className="mb-1 block text-xs text-ink-muted">{t('columns.location')}</label>
           <Select
@@ -94,13 +99,31 @@ export default function Requests() {
             ))}
           </Select>
         </div>
+        )}
       </div>
 
       {rows.length === 0 ? (
         <div className="mt-6 rounded-xl border border-dashed border-line bg-white p-8 text-center">
           <ClipboardList className="mx-auto text-ink-muted" aria-hidden />
-          <p className="mt-2 text-sm text-ink-muted">{q ? t('filter.noMatches', { q }) : t('empty')}</p>
+          <p className="mt-2 text-sm text-ink-muted">{q ? t('filter.noMatches', { q }) : isTenant ? tc('tenant.noRequests') : t('empty')}</p>
         </div>
+      ) : isTenant ? (
+        <ul className="mt-4 divide-y divide-line overflow-hidden rounded-xl border border-line bg-white">
+          {rows.map((r) => (
+            <li key={r.id}>
+              <Link to={`/requests/${r.id}`} className="flex min-h-[56px] items-center gap-3 px-4 py-3 hover:bg-surface">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-ink">{r.title ?? '—'}</p>
+                  <p className="mt-0.5 truncate text-xs text-ink-muted">
+                    {faultName(r.fault_type_id)} · {formatDate(r.created_at, lng)}
+                  </p>
+                </div>
+                <Pill className={REQUEST_STATUS_CLASS[r.status]}>{tc(`requestStatus.${r.status}`)}</Pill>
+                <ChevronRight size={18} className="shrink-0 text-ink-muted" aria-hidden />
+              </Link>
+            </li>
+          ))}
+        </ul>
       ) : (
         <div className="mt-4 overflow-hidden rounded-xl border border-line bg-white">
           <div className="overflow-x-auto">

@@ -114,7 +114,9 @@ insert into fp_documents (org_id, title, file_path, visibility) values
 -- ===========================================================================
 -- Reading
 -- ===========================================================================
-select t.check('members can view work-order evidence', t.can_read(:'occ', :'wopath') and t.can_read(:'tech2', :'wopath'));
+select t.check('staff can view work-order evidence', t.can_read(:'tech2', :'wopath') and t.can_read(:'vendor', :'wopath'));
+select t.check('an occupant cannot view work-order evidence (0081)', not t.can_read(:'occ', :'wopath'));
+select t.check('an occupant can view the photo of their own request', t.can_read(:'occ', :'reqpath'));
 select t.check('another org cannot read this org''s evidence', not t.can_read(:'adminB', :'wopath'));
 select t.check('a file with no record behind it is not readable by non-managers',
   not t.can_read(:'tech', :'org' || '/work-orders/40000000-0000-0000-0000-000000000001/5.jpg'));

@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Settings,
   LogOut,
+  PlusCircle,
   ChevronDown,
   ChevronRight,
   FileText,
@@ -81,6 +82,20 @@ function isNavItemVisible(key: string, role: Role | null): boolean {
   return role === 'org_admin' || role === 'manager';
 }
 
+// Tenants (occupants) get their own short menu: report a fault and follow
+// their requests. The staff data behind the other pages is closed to them
+// (0081), and App.tsx only routes them to these pages.
+const OCCUPANT_NAV: NavGroup[] = [
+  {
+    title: 'tenant',
+    items: [
+      { to: '/', key: 'home', icon: LayoutDashboard, end: true },
+      { to: '/requests/new', key: 'reportFault', icon: PlusCircle, end: true },
+      { to: '/requests', key: 'myRequests', icon: ClipboardList, end: true },
+    ],
+  },
+];
+
 const NAV_GROUPS: NavGroup[] = [
   {
     title: 'maintenance',
@@ -135,7 +150,9 @@ export default function AppShell() {
   const { t } = useTranslation();
   const { signOut } = useAuth();
   const { currentOrg, role } = useOrg();
+  const isOccupant = role === 'occupant';
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    tenant: true,
     maintenance: true,
     operations: true,
     finance: true,
@@ -146,10 +163,12 @@ export default function AppShell() {
     setOpenGroups((prev) => ({ ...prev, [group]: !prev[group] }));
   };
 
-  const visibleNavGroups = NAV_GROUPS.map((group) => ({
-    ...group,
-    items: group.items.filter((item) => isNavItemVisible(item.key, role)),
-  })).filter((group) => group.items.length > 0);
+  const visibleNavGroups = isOccupant
+    ? OCCUPANT_NAV
+    : NAV_GROUPS.map((group) => ({
+        ...group,
+        items: group.items.filter((item) => isNavItemVisible(item.key, role)),
+      })).filter((group) => group.items.length > 0);
 
   const location = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -157,7 +176,7 @@ export default function AppShell() {
 
   // Phone tab bar: the four most-used destinations this role can open, then
   // "Menu" for everything else.
-  const tabs = [
+  const tabs = isOccupant ? OCCUPANT_NAV[0].items : [
     { to: '/', key: 'dashboard', icon: LayoutDashboard, end: true },
     { to: '/requests', key: 'requests', icon: ClipboardList },
     role === 'technician'
@@ -165,6 +184,8 @@ export default function AppShell() {
       : { to: '/work-orders', key: 'workOrders', icon: Wrench },
     { to: '/assets', key: 'assets', icon: Boxes },
   ].filter((tab) => isNavItemVisible(tab.key, role) && (tab.key !== 'workOrders' || role === 'org_admin' || role === 'manager'));
+  // /requests/:id belongs under "My requests" for tenants.
+  const tenantRequestDetail = isOccupant && /^\/requests\/(?!new$)[^/]+$/.test(location.pathname);
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
@@ -228,7 +249,7 @@ export default function AppShell() {
                         end={end}
                         className={({ isActive }) =>
                           `flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition lg:min-h-0 ${
-                            isActive
+                            isActive || (key === 'myRequests' && tenantRequestDetail)
                               ? 'bg-brand-50 text-brand-600'
                               : 'text-ink hover:bg-surface'
                           }`
@@ -330,12 +351,12 @@ export default function AppShell() {
                   to={to}
                   end={end}
                   className={({ isActive }) =>
-                    `flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium ${isActive ? 'text-brand-600' : 'text-ink-muted'}`
+                    `flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium ${isActive || (key === 'myRequests' && tenantRequestDetail) ? 'text-brand-600' : 'text-ink-muted'}`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      <span className={`grid h-7 w-12 place-items-center rounded-full ${isActive ? 'bg-brand-50' : ''}`}>
+                      <span className={`grid h-7 w-12 place-items-center rounded-full ${isActive || (key === 'myRequests' && tenantRequestDetail) ? 'bg-brand-50' : ''}`}>
                         <Icon size={20} aria-hidden />
                       </span>
                       <span className="max-w-full truncate px-1">{t(`nav.${key}`)}</span>

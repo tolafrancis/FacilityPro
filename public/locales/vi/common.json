@@ -34,13 +34,17 @@
     "broadcasts": "Thông báo chung",
     "financial": "Tài chính",
     "mobileTabs": "Chính",
-    "menu": "Menu"
+    "menu": "Menu",
+    "home": "Trang chủ",
+    "reportFault": "Báo sự cố",
+    "myRequests": "Yêu cầu của tôi"
   },
   "navGroups": {
     "maintenance": "Vận hành bảo trì",
     "operations": "Vận hành & kiểm soát",
     "finance": "Tài chính",
-    "ai": "Trí tuệ & cài đặt"
+    "ai": "Trí tuệ & cài đặt",
+    "tenant": "Tòa nhà của tôi"
   },
   "actions": {
     "signOut": "Đăng xuất",
@@ -217,5 +221,13 @@
   "captcha": {
     "unavailable": "Không tải được bước kiểm tra bảo mật. Hãy kiểm tra kết nối hoặc tắt trình chặn nội dung cho trang này.",
     "retry": "Thử lại"
+  },
+  "tenant": {
+    "reportTitle": "Báo sự cố",
+    "reportBody": "Có gì hỏng hoặc không hoạt động? Hãy báo cho chúng tôi để được sửa.",
+    "noRequests": "Bạn chưa báo sự cố nào.",
+    "announcements": "Thông báo",
+    "myRequestsSubtitle": "Các sự cố bạn đã báo và tiến độ xử lý.",
+    "followUp": "Chúng tôi sẽ cập nhật trạng thái tại đây khi công việc tiến triển."
   }
 }

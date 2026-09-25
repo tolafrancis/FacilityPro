@@ -33,8 +33,12 @@ export default function NewRequest() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const { user } = useAuth();
-  const { currentOrg } = useOrg();
+  const { currentOrg, role } = useOrg();
   const orgId = currentOrg?.id;
+  // Tenants report with the essentials only: no asset pickers and no
+  // "create new" options (those catalogues are staff data, 0081). An asset
+  // or location from a scanned QR code (?asset=, ?location=) is still kept.
+  const isTenant = role === 'occupant';
   const queryClient = useQueryClient();
 
   const faultTypes = useFaultTypes();
@@ -120,7 +124,7 @@ export default function NewRequest() {
           <label className="mb-1 block text-sm font-medium text-ink">{t('form.summary')}</label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('form.summaryPlaceholder')} />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium text-ink">{t('form.faultType')}</label>
             <SearchSelect
@@ -130,7 +134,7 @@ export default function NewRequest() {
               placeholder={t('form.none')}
               emptyLabel={t('form.none')}
               createLabel="Create new fault type"
-              onCreate={(query) => setCreateModal({ kind: 'fault', query })}
+              onCreate={isTenant ? undefined : (query) => setCreateModal({ kind: 'fault', query })}
             />
           </div>
           <div>
@@ -148,9 +152,10 @@ export default function NewRequest() {
               placeholder={t('form.none')}
               emptyLabel={t('form.none')}
               createLabel="Add new location"
-              onCreate={(query) => setCreateModal({ kind: 'location', query })}
+              onCreate={isTenant ? undefined : (query) => setCreateModal({ kind: 'location', query })}
             />
           </div>
+          {!isTenant && (<>
           <div>
             <label className="mb-1 block text-sm font-medium text-ink">Asset type</label>
             <SearchSelect
@@ -177,6 +182,7 @@ export default function NewRequest() {
             />
             <p className="mt-1 text-xs text-ink-muted">A specific registered asset (optional).</p>
           </div>
+          </>)}
         </div>
         <div>
           <label className="mb-1 block text-sm font-medium text-ink">{t('form.description')}</label>

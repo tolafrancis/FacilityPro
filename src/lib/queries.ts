@@ -1655,3 +1655,29 @@ export function useTelemetry(deviceId: string | undefined, limit = 50) {
     },
   });
 }
+
+export interface Announcement {
+  id: string;
+  title: string;
+  message: string;
+  created_at: string;
+}
+
+/** Latest announcements (fp_broadcasts) for the tenant home screen. */
+export function useAnnouncements(limit: number) {
+  const orgId = useOrgId();
+  return useQuery({
+    queryKey: ['broadcasts', orgId, 'latest', limit],
+    enabled: !!orgId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('fp_broadcasts')
+        .select('id, title, message, created_at')
+        .eq('org_id', orgId!)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      return (data ?? []) as Announcement[];
+    },
+  });
+}

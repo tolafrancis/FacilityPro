@@ -22,6 +22,9 @@ export default function RequestDetail() {
   const queryClient = useQueryClient();
   const { currentOrg, role } = useOrg();
   const isManager = role === 'org_admin' || role === 'manager';
+  // Tenants follow their request here; status changes and work orders are
+  // staff-only (RLS, 0081), so those controls are hidden for them.
+  const isTenant = role === 'occupant';
   const orgId = currentOrg?.id;
 
   const requestQuery = useRequest(id);
@@ -77,7 +80,7 @@ export default function RequestDetail() {
         onClick={() => navigate('/requests')}
         className="mb-3 inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink"
       >
-        <ArrowLeft size={15} /> {t('title')}
+        <ArrowLeft size={15} /> {isTenant ? tc('nav.myRequests') : t('title')}
       </button>
 
       <div className="flex items-start justify-between gap-4">
@@ -90,6 +93,7 @@ export default function RequestDetail() {
             </Pill>
           </p>
         </div>
+        {!isTenant && (
         <Select
           value={request.status}
           onChange={(e) => setStatus.mutate(e.target.value as RequestStatus)}
@@ -101,7 +105,12 @@ export default function RequestDetail() {
             </option>
           ))}
         </Select>
+        )}
       </div>
+
+      {isTenant && (
+        <p className="mt-4 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-600">{tc('tenant.followUp')}</p>
+      )}
 
       <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
         <Field label={t('detail.status')}>
@@ -110,8 +119,8 @@ export default function RequestDetail() {
           </Pill>
         </Field>
         <Field label={t('form.location')}>{loc ? resolveI18n(loc.name_i18n, lng) : '—'}</Field>
-        <Field label={t('detail.channel')}>{request.channel}</Field>
-        <Field label={t('detail.sourceLng')}>{request.source_lng.toUpperCase()}</Field>
+        {!isTenant && <Field label={t('detail.channel')}>{request.channel}</Field>}
+        {!isTenant && <Field label={t('detail.sourceLng')}>{request.source_lng.toUpperCase()}</Field>}
         <Field label={t('detail.reported')}>{formatDate(request.created_at, lng)}</Field>
       </dl>
 
@@ -122,6 +131,7 @@ export default function RequestDetail() {
         </p>
       </div>
 
+      {!isTenant && (
       <div className="mt-5">
         {linkedWo ? (
           <Link
@@ -146,6 +156,7 @@ export default function RequestDetail() {
           </p>
         )}
       </div>
+      )}
     </div>
   );
 }
