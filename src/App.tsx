@@ -8,7 +8,7 @@ import { useOrg } from './contexts/OrgContext';
 import AppShell from './components/AppShell';
 import RequireRole from './components/RequireRole';
 import NotFound from './components/NotFound';
-import { rememberInvite } from './lib/redirect';
+import { rememberInvite, safeNext } from './lib/redirect';
 
 // Every page is its own chunk, fetched on first visit rather than bundled
 // into the initial load — the whole app (Financial, Devices, Workflows and
@@ -89,6 +89,13 @@ function OrgLoadError({ onRetry }: { onRetry: () => void }) {
       </div>
     </div>
   );
+}
+
+// Sign-in / sign-up pages opened while signed in: go where the link was
+// heading (?next=, e.g. /admin from a staff invite), else the dashboard.
+function SignedInRedirect() {
+  const location = useLocation();
+  return <Navigate to={safeNext(new URLSearchParams(location.search).get('next')) ?? '/'} replace />;
 }
 
 // An invite opened while signed out: remember the token (it must survive
@@ -177,6 +184,13 @@ export default function App() {
         <Route path="/a/:code" element={<AssetScan />} />
         {/* The reset email's link signs the user in; they set the password here. */}
         <Route path="/reset-password" element={<ResetPassword />} />
+        {/* Already signed in: the sign-in/sign-up pages go to the app. */}
+        <Route path="/signin" element={<SignedInRedirect />} />
+        <Route path="/signup" element={<SignedInRedirect />} />
+        <Route path="/forgot-password" element={<Navigate to="/" replace />} />
+        {/* Finishing onboarding leaves the address at /onboarding while the
+            new organisation loads: send it to the dashboard, not "Not found". */}
+        {hasOrg && <Route path="/onboarding" element={<Navigate to="/" replace />} />}
         {!hasOrg && closedOrgs.length > 0 ? (
           // Every organisation this user belongs to is suspended or deleted:
           // explain, rather than offering to create a new one.

@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ImagePlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -88,7 +88,11 @@ export default function Onboarding() {
   };
 
   // Routing sees the new membership and shows the dashboard.
-  const finish = () => void refresh();
+  const navigate = useNavigate();
+  const finish = async () => {
+    await refresh();
+    navigate('/', { replace: true });
+  };
 
   if (step === 2) {
     const url = orgLogoUrl(logoPath);
