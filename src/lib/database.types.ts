@@ -680,6 +680,13 @@ export interface Plan {
   payment_url: string | null;
   sort: number;
   active: boolean;
+  // 0083/0086: yearly price, features, and the provider price/plan IDs.
+  price_year?: number | null;
+  features?: string[];
+  stripe_price_month?: string | null;
+  stripe_price_year?: string | null;
+  paypal_plan_month?: string | null;
+  paypal_plan_year?: string | null;
 }
 
 export type SubscriptionStatus =
@@ -701,6 +708,11 @@ export interface Subscription {
   requested_at: string | null;
   cancel_requested_at: string | null;
   updated_at: string;
+  billing_interval?: 'month' | 'year';
+  trial_ends_at?: string | null;
+  cancel_at_period_end?: boolean;
+  provider_customer_id?: string | null;
+  provider_subscription_id?: string | null;
 }
 
 /** Row of fp_job_health(): one background job's status (platform admins). */

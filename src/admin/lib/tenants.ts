@@ -237,7 +237,9 @@ export function useAdminAction<V>(fn: (v: V) => Promise<unknown>, success: strin
     onSuccess: (_d, v) => {
       notify(typeof success === 'function' ? success(v) : success, 'success');
       for (const k of ['admin_tenants', 'admin_tenant', 'admin_tenant_users', 'admin_tenant_invites', 'admin_tenant_activity',
-        'admin_tenant_flags', 'admin_tenant_notes', 'admin_overview', 'admin_events', 'admin_users', 'admin_user']) {
+        'admin_tenant_flags', 'admin_tenant_notes', 'admin_overview', 'admin_events', 'admin_users', 'admin_user',
+        'admin_invoices', 'admin_invoice', 'admin_billing_overview', 'admin_subscriptions', 'admin_plans_full', 'admin_plans',
+        'admin_coupons', 'admin_billing_events']) {
         void qc.invalidateQueries({ queryKey: [k] });
       }
     },
@@ -252,7 +254,10 @@ export function adminErrorMessage(e: unknown): string {
   if (err?.message?.includes('fp_organizations_subdomain_uk')) return t('subdomainTaken');
   if (err?.message?.includes('plan_limit_reached')) return t('planFull');
   if (err?.message?.includes('last') && err?.message?.includes('admin')) return t('lastAdmin');
-  return err?.details || err?.message || t('generic');
+  if (err?.details) return err.details;
+  // Error codes from the billing functions ("provider_not_configured", …).
+  if (err?.message && /^[a-z_]+$/.test(err.message) && i18n.exists(`admin:errors2.${err.message}`)) return t(err.message);
+  return err?.message || t('generic');
 }
 
 /** Calls a database function and throws its error. */

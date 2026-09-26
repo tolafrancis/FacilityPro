@@ -9,11 +9,8 @@
   "sites": "Sites",
   "perMonth": "/mo",
   "perYear": "/yr",
-  "choose": "Subscribe via PayPal",
   "current": "Current plan",
-  "linkMissing": "Payment link not set",
   "cancel": "Cancel plan",
-  "editPlan": "Edit plan",
   "limitsUnlimited": "Unlimited",
   "statusLabels": {
     "active": "Active",
@@ -22,30 +19,8 @@
     "canceled": "Canceled",
     "trialing": "Trial"
   },
-  "dialog": {
-    "title": "Edit plan",
-    "price": "Price",
-    "currency": "Currency",
-    "interval": "Interval",
-    "month": "Monthly",
-    "year": "Yearly",
-    "limitAssets": "Assets",
-    "limitMembers": "Members",
-    "limitSites": "Sites",
-    "limitHint": "Leave a limit blank for unlimited.",
-    "paymentUrl": "PayPal payment link",
-    "paymentHint": "Paste your PayPal payment or subscription link. The Subscribe button opens it."
-  },
   "requestedNote": "You requested {{plan}}. It becomes active once we confirm your payment.",
   "cancelRequestedNote": "Cancellation requested. We will confirm it shortly.",
-  "platform": {
-    "title": "Subscription requests (platform)",
-    "hint": "Activate a plan only after you have confirmed the payment in PayPal.",
-    "empty": "No pending requests.",
-    "activate": "Activate",
-    "confirmCancel": "Confirm cancellation",
-    "cancelRequested": "cancellation requested"
-  },
   "jobs": {
     "title": "Background jobs (platform)",
     "hint": "Scheduled work: PM generation, SLA escalation, reminders, workflows and message delivery, plus delivery and workflow error checks. Platform admins are emailed when something is late or failing.",
@@ -64,5 +39,72 @@
     }
   },
   "trialEnds": "Trial ends",
-  "trialEnded": "Your trial has ended: the Free plan's limits apply until you upgrade."
+  "trialEnded": "Your trial has ended: the Free plan's limits apply until you upgrade.",
+  "free": "Free",
+  "yearly": "Yearly",
+  "monthly": "Monthly",
+  "billingPeriod": "Billing period",
+  "plansTitle": "Plans",
+  "save": "Save {{pct}}%",
+  "paidWith": {
+    "stripe": "Paid by card (Stripe)",
+    "paypal": "Paid with PayPal",
+    "manual": "Paid by invoice"
+  },
+  "endsOn": "Ends on {{date}}. You keep the plan until then.",
+  "pastDueNote": "Your last payment didn't go through. Update your payment method so you don't lose the plan's limits.",
+  "manageBilling": "Manage billing",
+  "switchViaPortal": "To switch plans or update your card, use Manage billing.",
+  "switchPaypal": "To switch plans, cancel your PayPal subscription first, then choose the new plan.",
+  "changeFirst": "Change via your current subscription",
+  "payByCard": "Pay by card",
+  "payWithPaypal": "Pay with PayPal",
+  "request": "Request this plan",
+  "requested": "Requested",
+  "requestSent": "Request sent. We'll confirm your plan shortly.",
+  "coupon": "Coupon code",
+  "couponPlaceholder": "Coupon code",
+  "couponHint": "Applied when you pay by card.",
+  "haveCoupon": "Have a coupon?",
+  "secureNote": "Payments are handled by Stripe and PayPal. FacilityPro never sees your card details.",
+  "cancelled": "Your subscription is cancelled.",
+  "cancelTitle": "Cancel your subscription?",
+  "cancelPaypalBody": "Your PayPal subscription stops now and you won't be charged again. The Free plan's limits apply; nothing is deleted.",
+  "cancelManualBody": "We'll confirm the cancellation. After that the Free plan's limits apply; nothing is deleted.",
+  "keep": "Keep my plan",
+  "close": "Close",
+  "checkout": {
+    "confirming": "Confirming your payment…",
+    "success": "Payment received. Your new plan is active.",
+    "pending": "Thanks! Your payment is being confirmed; your plan updates within a minute.",
+    "cancelled": "Payment cancelled. Nothing was charged."
+  },
+  "invoices": {
+    "title": "Invoices",
+    "empty": "No invoices yet.",
+    "view": "View",
+    "status": {
+      "open": "Due",
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded",
+      "void": "Void",
+      "draft": "Draft"
+    }
+  },
+  "errors": {
+    "failed": "Something went wrong. Please try again.",
+    "provider_not_configured": "This payment method isn't available yet.",
+    "provider_error": "The payment provider couldn't start the payment. Please try again.",
+    "already_subscribed": "You already have a subscription. Change or cancel it first.",
+    "invalid_coupon": "This coupon code isn't valid.",
+    "plan_not_for_sale": "This plan can't be bought this way yet.",
+    "not_signed_in": "Please sign in again.",
+    "no_card_subscription": "There's no card subscription to manage.",
+    "no_paypal_subscription": "There's no PayPal subscription to cancel."
+  },
+  "platform": {
+    "moved": "Plans, subscription requests and invoices are managed in the admin console.",
+    "open": "Open admin billing"
+  }
 }

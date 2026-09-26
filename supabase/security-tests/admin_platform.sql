@@ -74,10 +74,12 @@ select t.check('internal notes are hidden from tenants',
 -- ===========================================================================
 insert into fp_platform_invoices (number, org_id, plan_code, amount, status, provider, paid_at)
   values ('INV-0001', :'orgA', 'pro', 29, 'paid', 'stripe', now());
-select t.check('only billing staff read invoices',
+-- Since 0086 a tenant's org admin also reads their own organisation's invoices.
+select t.check('billing staff read all invoices; other staff none; a tenant only its own',
   t.run('authenticated', :'super', 'select * from fp_platform_invoices') = 'ok:1'
   and t.run('authenticated', :'padmin', 'select * from fp_platform_invoices') = 'ok:0'
-  and t.run('authenticated', :'ownerA', 'select * from fp_platform_invoices') = 'ok:0');
+  and t.run('authenticated', :'ownerA', 'select * from fp_platform_invoices') = 'ok:1'
+  and t.run('authenticated', :'ownerB', 'select * from fp_platform_invoices') = 'ok:0');
 select t.check('only super admins change platform settings',
   t.run('authenticated', :'super', $q$update fp_platform_settings set maintenance_message = 'Back at 10:00'$q$) = 'ok:1'
   and t.run('authenticated', :'padmin', $q$update fp_platform_settings set maintenance_mode = true$q$) = 'ok:0'

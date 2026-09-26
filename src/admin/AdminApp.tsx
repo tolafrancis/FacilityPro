@@ -11,6 +11,7 @@ import Tenants from './pages/Tenants';
 import TenantDetail from './pages/TenantDetail';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
+import Billing from './pages/Billing';
 
 /**
  * The platform admin panel (/admin), loaded only when opened. Every route
@@ -37,6 +38,7 @@ function AdminRoutes() {
         <Route path="tenants/:id" element={<Guard permission="tenants.view"><TenantDetail /></Guard>} />
         <Route path="users" element={<Guard permission="users.view"><Users /></Guard>} />
         <Route path="users/:id" element={<Guard permission="users.view"><UserDetail /></Guard>} />
+        <Route path="billing" element={<Guard permission="billing.view"><Billing /></Guard>} />
         {ADMIN_NAV.flatMap((g) => g.items)
           .filter((i) => !i.ready)
           .map((i) => (

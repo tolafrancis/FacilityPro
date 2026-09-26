@@ -9,11 +9,8 @@
   "sites": "Cơ sở",
   "perMonth": "/tháng",
   "perYear": "/năm",
-  "choose": "Đăng ký qua PayPal",
   "current": "Gói hiện tại",
-  "linkMissing": "Chưa đặt liên kết thanh toán",
   "cancel": "Hủy gói",
-  "editPlan": "Sửa gói",
   "limitsUnlimited": "Không giới hạn",
   "statusLabels": {
     "active": "Đang hoạt động",
@@ -22,30 +19,8 @@
     "canceled": "Đã hủy",
     "trialing": "Dùng thử"
   },
-  "dialog": {
-    "title": "Sửa gói",
-    "price": "Giá",
-    "currency": "Tiền tệ",
-    "interval": "Chu kỳ",
-    "month": "Hàng tháng",
-    "year": "Hàng năm",
-    "limitAssets": "Tài sản",
-    "limitMembers": "Thành viên",
-    "limitSites": "Cơ sở",
-    "limitHint": "Để trống nếu không giới hạn.",
-    "paymentUrl": "Liên kết thanh toán PayPal",
-    "paymentHint": "Dán liên kết thanh toán hoặc đăng ký PayPal của bạn. Nút Đăng ký sẽ mở liên kết này."
-  },
   "requestedNote": "Bạn đã yêu cầu gói {{plan}}. Gói sẽ được kích hoạt sau khi chúng tôi xác nhận thanh toán.",
   "cancelRequestedNote": "Đã gửi yêu cầu hủy gói. Chúng tôi sẽ xác nhận sớm.",
-  "platform": {
-    "title": "Yêu cầu gói dịch vụ (nền tảng)",
-    "hint": "Chỉ kích hoạt gói sau khi đã xác nhận thanh toán trên PayPal.",
-    "empty": "Không có yêu cầu nào đang chờ.",
-    "activate": "Kích hoạt",
-    "confirmCancel": "Xác nhận hủy",
-    "cancelRequested": "đã yêu cầu hủy"
-  },
   "jobs": {
     "title": "Tác vụ nền (nền tảng)",
     "hint": "Các tác vụ định kỳ: tạo lệnh bảo trì, leo thang SLA, nhắc nhở, quy trình tự động và gửi thông báo, cùng các kiểm tra lỗi gửi tin và quy trình. Quản trị nền tảng sẽ nhận email khi có mục bị trễ hoặc lỗi.",
@@ -64,5 +39,72 @@
     }
   },
   "trialEnds": "Dùng thử đến",
-  "trialEnded": "Thời gian dùng thử đã kết thúc: áp dụng giới hạn gói Miễn phí cho đến khi bạn nâng cấp."
+  "trialEnded": "Thời gian dùng thử đã kết thúc: áp dụng giới hạn gói Miễn phí cho đến khi bạn nâng cấp.",
+  "free": "Miễn phí",
+  "yearly": "Hàng năm",
+  "monthly": "Hàng tháng",
+  "billingPeriod": "Chu kỳ thanh toán",
+  "plansTitle": "Các gói",
+  "save": "Tiết kiệm {{pct}}%",
+  "paidWith": {
+    "stripe": "Thanh toán bằng thẻ (Stripe)",
+    "paypal": "Thanh toán qua PayPal",
+    "manual": "Thanh toán theo hóa đơn"
+  },
+  "endsOn": "Kết thúc vào {{date}}. Bạn vẫn dùng gói đến ngày đó.",
+  "pastDueNote": "Lần thanh toán gần nhất không thành công. Hãy cập nhật phương thức thanh toán để không mất giới hạn của gói.",
+  "manageBilling": "Quản lý thanh toán",
+  "switchViaPortal": "Để đổi gói hoặc cập nhật thẻ, hãy dùng Quản lý thanh toán.",
+  "switchPaypal": "Để đổi gói, hãy hủy đăng ký PayPal hiện tại trước, rồi chọn gói mới.",
+  "changeFirst": "Đổi qua gói đăng ký hiện tại",
+  "payByCard": "Thanh toán bằng thẻ",
+  "payWithPaypal": "Thanh toán qua PayPal",
+  "request": "Yêu cầu gói này",
+  "requested": "Đã yêu cầu",
+  "requestSent": "Đã gửi yêu cầu. Chúng tôi sẽ sớm xác nhận gói của bạn.",
+  "coupon": "Mã giảm giá",
+  "couponPlaceholder": "Mã giảm giá",
+  "couponHint": "Áp dụng khi thanh toán bằng thẻ.",
+  "haveCoupon": "Bạn có mã giảm giá?",
+  "secureNote": "Thanh toán do Stripe và PayPal xử lý. FacilityPro không bao giờ thấy thông tin thẻ của bạn.",
+  "cancelled": "Đã hủy gói đăng ký.",
+  "cancelTitle": "Hủy gói đăng ký?",
+  "cancelPaypalBody": "Đăng ký PayPal dừng ngay và bạn sẽ không bị trừ tiền nữa. Giới hạn gói Miễn phí sẽ được áp dụng; không dữ liệu nào bị xóa.",
+  "cancelManualBody": "Chúng tôi sẽ xác nhận việc hủy. Sau đó giới hạn gói Miễn phí sẽ được áp dụng; không dữ liệu nào bị xóa.",
+  "keep": "Giữ gói",
+  "close": "Đóng",
+  "checkout": {
+    "confirming": "Đang xác nhận thanh toán…",
+    "success": "Đã nhận thanh toán. Gói mới của bạn đã được kích hoạt.",
+    "pending": "Cảm ơn bạn! Thanh toán đang được xác nhận; gói sẽ cập nhật trong vòng một phút.",
+    "cancelled": "Đã hủy thanh toán. Bạn chưa bị trừ tiền."
+  },
+  "invoices": {
+    "title": "Hóa đơn",
+    "empty": "Chưa có hóa đơn.",
+    "view": "Xem",
+    "status": {
+      "open": "Chờ thanh toán",
+      "paid": "Đã thanh toán",
+      "failed": "Thất bại",
+      "refunded": "Đã hoàn tiền",
+      "void": "Đã hủy",
+      "draft": "Nháp"
+    }
+  },
+  "errors": {
+    "failed": "Đã có lỗi. Vui lòng thử lại.",
+    "provider_not_configured": "Phương thức thanh toán này chưa khả dụng.",
+    "provider_error": "Nhà cung cấp thanh toán không thể bắt đầu giao dịch. Vui lòng thử lại.",
+    "already_subscribed": "Bạn đã có gói đăng ký. Hãy đổi hoặc hủy gói đó trước.",
+    "invalid_coupon": "Mã giảm giá không hợp lệ.",
+    "plan_not_for_sale": "Gói này chưa thể mua theo cách này.",
+    "not_signed_in": "Vui lòng đăng nhập lại.",
+    "no_card_subscription": "Không có gói thanh toán bằng thẻ để quản lý.",
+    "no_paypal_subscription": "Không có gói PayPal để hủy."
+  },
+  "platform": {
+    "moved": "Gói, yêu cầu đăng ký và hóa đơn được quản lý trong bảng điều khiển quản trị.",
+    "open": "Mở trang thanh toán quản trị"
+  }
 }

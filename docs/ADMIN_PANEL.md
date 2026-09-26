@@ -134,6 +134,52 @@ disabled_at)`. A disabled account has no access.
   tokens or authenticator secrets. A signed-out user's current access token stays valid until it
   expires (at most an hour, Supabase's default).
 
+## Plans & billing (0086)
+
+Stripe **and** PayPal subscriptions, plus manual invoices.
+
+- **Tenants pay** from **Billing** in the app: choose monthly or yearly, then **Pay by card** (Stripe
+  Checkout) or **Pay with PayPal**. Coupons work with card payments. Card customers get **Manage
+  billing** (Stripe's customer portal: card, plan switch, cancel, receipts); PayPal customers can cancel
+  in the app. Org admins see their invoices with links to the provider's receipt. Plans without provider
+  IDs fall back to "Request this plan" (the manual queue).
+- **Staff** (`/admin/billing`, billing permissions):
+  - Overview: MRR, ARR, collected, refunded, outstanding, failed payments, past due, trials; revenue by
+    month, by provider and MRR by plan; invoices needing attention.
+  - Invoices: search, filters, CSV export; manual invoices (with coupon), mark paid, void, refund.
+    Stripe/PayPal refunds go to the provider first, then are recorded.
+  - Subscriptions: every tenant's plan, provider, renewal date and MRR; cancel a Stripe subscription at
+    period end or now, or a PayPal subscription.
+  - Plans: prices (monthly, yearly), limits, feature list, Stripe price IDs and PayPal plan IDs.
+  - Coupons: percent or amount off, once / for N months / forever, max uses, expiry.
+  - Stripe & PayPal: what is set up (never the keys), the webhook address, and the webhook log.
+- **How payments are applied**: `billing-webhook` checks each delivery (Stripe signing secret; PayPal's
+  own verification API), records it once in `fp_billing_events`, re-reads the object from the provider's
+  API and applies it with service-only database functions. Retries of a failed event are processed again.
+  A provider subscription keeps its plan limits for 3 days after the period end, so a late renewal never
+  drops a paying tenant to the free limits.
+
+### Billing setup
+
+1. **Stripe** (dashboard.stripe.com):
+   - For each paid plan create a Product with a monthly (and optionally yearly) recurring Price; paste
+     the `price_…` IDs into **Admin → Plans & billing → Plans**.
+   - Developers → Webhooks → Add endpoint: the address shown under **Stripe & PayPal**, with events
+     `checkout.session.completed`, `customer.subscription.created/updated/deleted`, `invoice.paid`,
+     `invoice.payment_failed`, `invoice.finalized`, `invoice.voided`, `charge.refunded`.
+   - Settings → Billing → Customer portal: turn it on (update card, cancel, switch plan).
+2. **PayPal** (developer.paypal.com): create an app (REST API credentials); create a Product and a
+   billing Plan per paid plan and interval; paste the `P-…` plan IDs into Plans. Add a webhook to the same
+   address with all `BILLING.SUBSCRIPTION.*` events plus `PAYMENT.SALE.COMPLETED`,
+   `PAYMENT.SALE.REFUNDED`, `PAYMENT.SALE.REVERSED`; note its webhook ID.
+3. **Secrets** (Supabase → Project settings → Edge Functions → Secrets; never in the app or in chat):
+   `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`,
+   `PAYPAL_WEBHOOK_ID`, `PAYPAL_ENV` (`sandbox` or `live`; default sandbox). `APP_URL` (already set)
+   is where customers return after paying.
+4. Functions (already deployed): `billing-checkout` and `admin-billing` with JWT verification,
+   `billing-webhook` without (`--no-verify-jwt`), since the providers call it.
+5. Test with Stripe test keys / PayPal sandbox first; switch to live keys and `PAYPAL_ENV=live` after.
+
 ### Demo data (local or staging only)
 
 ```sql
@@ -159,7 +205,7 @@ Never run it on the production database: the fake tenants would count in the rea
    (or with the same insert and a role of `admin`, `support` or `analyst`).
 
 No new environment variables are needed for the panel itself. Stripe and PayPal
-keys are Edge Function secrets, added with the Billing module.
+keys are Edge Function secrets (see Billing setup).
 
 ## Build status
 
@@ -169,5 +215,6 @@ keys are Edge Function secrets, added with the Billing module.
 | 1. Main dashboard | Done |
 | 2. Tenant management | Done |
 | 3. Users | Done |
-| 4. Plans & billing (Stripe + PayPal) · 5. App management · 6. Support · 7. Analytics · 8. Audit & security · 9. Monitoring · 10. Admin team | Planned, schema in place |
+| 4. Plans & billing (Stripe + PayPal) | Done: add provider keys to go live |
+| 5. App management · 6. Support · 7. Analytics · 8. Audit & security · 9. Monitoring · 10. Admin team | Planned, schema in place |
 | Demo seed data (20 tenants, 200 users, invoices, tickets, activity) | Done: `supabase/seed/admin_demo.sql`, local/staging only |

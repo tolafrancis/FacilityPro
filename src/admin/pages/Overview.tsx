@@ -188,7 +188,7 @@ function Kpis({ data, lng }: { data: OverviewData | undefined; lng: string }) {
   );
 }
 
-function ChartCard({ title, description, loading, empty, emptyText, render, className = '' }: {
+export function ChartCard({ title, description, loading, empty, emptyText, render, className = '' }: {
   title: string;
   description?: string;
   loading: boolean;
