@@ -51,10 +51,13 @@ const T = {
     ],
     pricingTitle: 'Plans',
     tiers: [
-      ['Starter', '$0 / month', 'Up to 5 users, work orders, requests and basic reporting.'],
-      ['Growth', '$49 / month', 'Unlimited users, preventive maintenance, workflows, surveys and alerts.'],
-      ['Enterprise', 'Let’s talk', 'Multi-site teams: IoT, dedicated support and custom integrations.'],
+      ['Free', '$0', '3 staff users, 1 site, 25 assets. Requests, work orders, mobile app.'],
+      ['Starter', '$29 / mo', '6 staff, 2 sites, 150 assets. Adds preventive maintenance, checklists, parts.'],
+      ['Professional', '$49 / mo', '25 staff, 5 sites, 1,000 assets. Adds workflows, SLAs, vendors, inbox.'],
+      ['Business', '$99 / mo', '75 staff, 20 sites. Adds budgets, permits, bookings, IoT, SMS.'],
+      ['Enterprise', 'Custom', 'Unlimited. Adds Modbus, WhatsApp, custom integrations, dedicated support.'],
     ],
+    tiersNote: 'Occupants and vendors are free on every plan. Pay yearly and get 2 months free.',
     ctaTitle: 'Start a free trial or book a demo',
     ctaBody: 'No credit card required. Our team can help you plan your pilot, load your data and train your champions.',
     page: 'Page',
@@ -98,10 +101,13 @@ const T = {
     ],
     pricingTitle: 'Các gói',
     tiers: [
-      ['Khởi đầu', '0 USD / tháng', 'Tối đa 5 người dùng, phiếu công việc, yêu cầu và báo cáo cơ bản.'],
-      ['Tăng trưởng', '49 USD / tháng', 'Không giới hạn người dùng, bảo trì phòng ngừa, quy trình, khảo sát và cảnh báo.'],
-      ['Doanh nghiệp', 'Liên hệ', 'Cho đội nhiều cơ sở: IoT, hỗ trợ riêng và tích hợp theo yêu cầu.'],
+      ['Miễn phí', '$0', '3 nhân sự, 1 cơ sở, 25 tài sản. Yêu cầu, phiếu công việc, ứng dụng di động.'],
+      ['Khởi đầu', '$29 / tháng', '6 nhân sự, 2 cơ sở, 150 tài sản. Thêm bảo trì phòng ngừa, danh sách kiểm tra, phụ tùng.'],
+      ['Chuyên nghiệp', '$49 / tháng', '25 nhân sự, 5 cơ sở, 1.000 tài sản. Thêm quy trình, SLA, nhà cung cấp, hộp thư.'],
+      ['Doanh nghiệp', '$99 / tháng', '75 nhân sự, 20 cơ sở. Thêm ngân sách, giấy phép, đặt chỗ, IoT, SMS.'],
+      ['Doanh nghiệp lớn', 'Liên hệ', 'Không giới hạn. Thêm Modbus, WhatsApp, tích hợp riêng, hỗ trợ riêng.'],
     ],
+    tiersNote: 'Cư dân và nhà cung cấp được miễn phí ở mọi gói. Thanh toán theo năm được tặng 2 tháng.',
     ctaTitle: 'Dùng thử miễn phí hoặc đặt lịch demo',
     ctaBody: 'Không cần thẻ tín dụng. Đội ngũ của chúng tôi có thể giúp bạn lên kế hoạch thí điểm, nhập dữ liệu và đào tạo nhân sự nòng cốt.',
     page: 'Trang',
@@ -134,7 +140,7 @@ body{font-family:BVP,sans-serif;color:#1F2937;font-size:10.5pt;line-height:1.5}
 .eyebrow{margin-top:10mm;color:#E8552D;font-weight:600;font-size:9pt;letter-spacing:.12em;text-transform:uppercase}
 h1{font-size:25pt;line-height:1.2;margin-top:3mm;font-weight:700;max-width:160mm}
 .lead{margin-top:4mm;font-size:11.5pt;color:#4B5563;max-width:165mm}
-h2{font-size:13.5pt;font-weight:700;margin:6mm 0 2.5mm}
+h2{font-size:13pt;font-weight:700;margin:5mm 0 2mm}
 .why{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
 .card{border:1px solid #E5E7EB;border-radius:10px;padding:4mm;background:#fff}
 .card b{display:block;font-weight:600;margin-bottom:1mm}
@@ -148,11 +154,14 @@ li:before{content:"";position:absolute;left:0;top:2.2mm;width:1.6mm;height:1.6mm
 .steps p{font-size:9pt}
 .num{display:grid;place-items:center;width:8mm;height:8mm;border-radius:50%;background:#E8552D;color:#fff;font-weight:700;margin-bottom:2mm}
 .chips{display:flex;flex-wrap:wrap;gap:2mm}
-.chip{border:1px solid #E5E7EB;border-radius:999px;padding:1mm 3.5mm;font-size:9pt}
+.chip{border:1px solid #E5E7EB;border-radius:999px;padding:0.8mm 3mm;font-size:8.5pt}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:6mm}
-.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
-.price{font-size:14pt;font-weight:700;margin:1mm 0}
-.cta{margin-top:6mm;background:#E8552D;color:#fff;border-radius:14px;padding:5mm 7mm}
+.tiers{display:grid;grid-template-columns:repeat(5,1fr);gap:2.5mm}
+.tiers .card{padding:3mm}
+.tiers p{font-size:8.5pt}
+.note{margin-top:2mm;font-size:8.5pt;color:#6B7280}
+.price{font-size:12pt;font-weight:700;margin:1mm 0}
+.cta{margin-top:5mm;background:#E8552D;color:#fff;border-radius:14px;padding:5mm 7mm}
 .cta{display:flex;align-items:center;justify-content:space-between;gap:6mm}
 .cta h3{font-size:16pt;font-weight:700}
 .cta p{margin-top:1.5mm;opacity:.92}
@@ -183,6 +192,7 @@ li:before{content:"";position:absolute;left:0;top:2.2mm;width:1.6mm;height:1.6mm
   </div>
   <h2>${esc(t.pricingTitle)}</h2>
   <div class="tiers">${t.tiers.map(([n, p, d]) => `<div class="card"><b>${esc(n)}</b><div class="price">${esc(p)}</div><p>${esc(d)}</p></div>`).join('')}</div>
+  <p class="note">${esc(t.tiersNote)}</p>
   <div class="cta"><div><h3>${esc(t.ctaTitle)}</h3><p>${esc(t.ctaBody)}</p></div><p class="url">facilitypro.tech</p></div>
   <div class="foot"><span>© ${new Date().getFullYear()} FacilityPro</span><span>${t.page} 2 / 2</span></div>
 </section>

@@ -691,6 +691,8 @@ export interface Plan {
   stripe_price_year?: string | null;
   paypal_plan_month?: string | null;
   paypal_plan_year?: string | null;
+  /** 0095: no list price; shown as "Custom" with a request button. */
+  contact_sales?: boolean;
 }
 
 export type SubscriptionStatus =

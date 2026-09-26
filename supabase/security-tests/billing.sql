@@ -181,6 +181,6 @@ update fp_subscriptions set status = 'trialing', current_period_end = now() - in
 select t.run('authenticated', :'super', format($q$select fp_admin_change_plan(%L, 'business', 'month', 'active')$q$, :'orgB')) as r \gset
 select t.check('a manual plan change doesn''t inherit an expired trial end',
   :'r' = 'ok:1' and (select current_period_end is null and provider = 'manual' from fp_subscriptions where org_id = :'orgB')
-  and fp_plan_limit(:'orgB', 'members') is null);
+  and fp_plan_limit(:'orgB', 'assets') is null);  -- Business: unlimited assets (0095)
 
 \ir _report.sql

@@ -49,6 +49,16 @@ select t.check('pending invitations count towards the member limit',
 select token as "tok" from fp_invites where email = 'u2@a.test' \gset
 select t.check('invited members within the limit can still join',
   t.run('authenticated', '00000000-0000-0000-0000-000000000002', format($q$select fp_accept_invite(%L)$q$, :'tok')) = 'ok:1');
+select t.check('occupants and vendors don''t count towards the member limit (0095)',
+  t.run('authenticated', :'admin', format($q$
+    insert into fp_invites (org_id, email, role) values (%L, 'u5@a.test', 'occupant'), (%L, 'u6@a.test', 'vendor')$q$, :'org', :'org')) = 'ok:2');
+select token as "tok" from fp_invites where email = 'u5@a.test' \gset
+select t.check('an occupant can join when the staff limit is full, and isn''t counted in usage',
+  t.run('authenticated', '00000000-0000-0000-0000-000000000005', format($q$select fp_accept_invite(%L)$q$, :'tok')) = 'ok:1'
+  and fp_staff_count(:'org') = 2);
+select t.check('five active plans, Enterprise priced on request (0095)',
+  (select array_agg(code order by sort) from fp_plans where active) = array['free', 'starter', 'pro', 'business', 'enterprise']
+  and (select contact_sales from fp_plans where code = 'enterprise'));
 
 update fp_subscriptions set plan_code = 'business', status = 'active', current_period_end = now() + interval '30 days' where org_id = :'org';
 select t.check('an active paid plan lifts the limits',
