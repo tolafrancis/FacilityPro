@@ -24,16 +24,18 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import JoinLinks from '../components/JoinLinks';
+import DisplayBoards from '../components/DisplayBoards';
 import Pill from '../components/ui/Pill';
 import BilingualName from '../components/ui/BilingualName';
 
-type TabKey = 'general' | 'catalogs' | 'sla' | 'team' | 'integrations';
+type TabKey = 'general' | 'catalogs' | 'sla' | 'team' | 'displays' | 'integrations';
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: 'general', label: 'General' },
   { key: 'catalogs', label: 'Catalogs' },
   { key: 'sla', label: 'SLA' },
   { key: 'team', label: 'Team & roles' },
+  { key: 'displays', label: 'TV displays' },
   { key: 'integrations', label: 'Integrations' },
 ];
 
@@ -79,6 +81,7 @@ export default function Settings() {
         {tab === 'catalogs' && <CatalogsSection />}
         {tab === 'sla' && <SlaSection />}
         {tab === 'team' && role === 'org_admin' && <TeamSection />}
+        {tab === 'displays' && <DisplayBoards />}
         {tab === 'integrations' && <IntegrationsSection />}
       </div>
     </div>

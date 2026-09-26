@@ -1,0 +1,125 @@
+{
+  "loading": "Đang tải…",
+  "connecting": "Đang kết nối…",
+  "reconnecting": "Mất kết nối — đang kết nối lại. Đang hiển thị bản cập nhật gần nhất.",
+  "updated": "Cập nhật {{time}}",
+  "poweredBy": "FacilityPro",
+  "fullscreen": "Toàn màn hình",
+  "untitled": "Lệnh công việc",
+  "notFound": {
+    "title": "Liên kết hiển thị này không hoạt động",
+    "body": "Có thể liên kết đã được thay mới. Hãy hỏi quản lý tòa nhà liên kết hiện tại."
+  },
+  "off": {
+    "title": "Màn hình hiển thị này đã tắt",
+    "body": "Có thể bật lại trong FacilityPro → Cài đặt → Màn hình TV."
+  },
+  "stats": {
+    "open": "Đang mở",
+    "overdue": "Quá hạn"
+  },
+  "columns": {
+    "new": "Mới",
+    "in_progress": "Đang làm",
+    "on_hold": "Tạm dừng",
+    "done": "Hoàn thành"
+  },
+  "empty": {
+    "new": "Không có việc mới",
+    "in_progress": "Không có việc đang làm",
+    "on_hold": "Không có việc tạm dừng",
+    "done": "Chưa có việc hoàn thành",
+    "all": "Không có lệnh công việc"
+  },
+  "status": {
+    "open": "Mới",
+    "assigned": "Đã giao",
+    "in_progress": "Đang làm",
+    "on_hold": "Tạm dừng",
+    "resolved": "Hoàn thành",
+    "verified": "Đã xác nhận",
+    "closed": "Đã đóng"
+  },
+  "priority": {
+    "critical": "Khẩn cấp",
+    "high": "Cao",
+    "medium": "Trung bình",
+    "low": "Thấp"
+  },
+  "due": "Hạn {{time}}",
+  "overdue": "Quá hạn · hạn {{time}}",
+  "created": "Mở {{time}}",
+  "list": {
+    "job": "Công việc",
+    "where": "Vị trí",
+    "priority": "Ưu tiên",
+    "status": "Trạng thái",
+    "due": "Hạn",
+    "assignee": "Người thực hiện"
+  },
+  "fields": {
+    "priority": "Mức ưu tiên",
+    "due": "Hạn & quá hạn",
+    "location": "Vị trí",
+    "assignee": "Người thực hiện (tên)",
+    "asset": "Tài sản",
+    "created": "Thời điểm mở"
+  },
+  "manage": {
+    "intro": "Hiển thị trạng thái lệnh công việc trực tiếp trên TV hoặc màn hình treo tường, giống bảng “món đã sẵn sàng”. Mở liên kết bằng trình duyệt của màn hình — không cần đăng nhập. Tự cập nhật mỗi 20 giây.",
+    "create": "Màn hình mới",
+    "createAndShare": "Tạo màn hình",
+    "editTitle": "Sửa màn hình",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "close": "Đóng",
+    "saved": "Đã lưu màn hình",
+    "rotated": "Đã tạo liên kết mới — liên kết cũ không còn hoạt động",
+    "copied": "Đã sao chép liên kết",
+    "loadError": "Không tải được danh sách màn hình.",
+    "empty": "Chưa có màn hình nào.",
+    "name": "Tên",
+    "namePlaceholder": "VD: TV sảnh",
+    "nameRequired": "Hãy đặt tên cho màn hình.",
+    "site": "Địa điểm",
+    "allSites": "Tất cả địa điểm",
+    "columnsLabel": "Các cột hiển thị",
+    "columnRequired": "Chọn ít nhất một cột.",
+    "doneFor": "Giữ việc đã hoàn thành trên màn hình trong",
+    "doneNone": "Không hiển thị",
+    "hours_other": "{{count}} giờ",
+    "fieldsLabel": "Thông tin trên mỗi việc",
+    "privacy": "Ai nhìn thấy màn hình cũng thấy các thông tin này. Hướng dẫn, thông tin người yêu cầu và chi phí không bao giờ được hiển thị.",
+    "prioritiesLabel": "Mức ưu tiên",
+    "priorityRequired": "Chọn ít nhất một mức ưu tiên.",
+    "layoutLabel": "Bố cục",
+    "layout": {
+      "columns": "Cột theo trạng thái",
+      "list": "Danh sách"
+    },
+    "themeLabel": "Màu",
+    "theme": {
+      "dark": "Tối",
+      "light": "Sáng"
+    },
+    "language": "Ngôn ngữ màn hình",
+    "online": "Đang hiển thị",
+    "off": "Đã tắt",
+    "neverOpened": "Chưa mở",
+    "lastSeen": "Hiển thị lần cuối {{date}}",
+    "copy": "Sao chép liên kết",
+    "open": "Mở màn hình",
+    "share": "Chia sẻ / QR",
+    "edit": "Sửa",
+    "turnOff": "Tắt",
+    "turnOn": "Bật",
+    "rotate": "Liên kết mới",
+    "rotateBody": "Các màn hình đang dùng liên kết hiện tại của “{{name}}” sẽ ngừng hoạt động cho đến khi bạn mở liên kết mới trên đó.",
+    "delete": "Xóa",
+    "deleteBody": "Xóa “{{name}}”? Các màn hình đang hiển thị sẽ dừng.",
+    "shareTitle": "Hiển thị “{{name}}” trên màn hình",
+    "shareHint": "Mở liên kết này bằng trình duyệt của TV (hoặc thiết bị như Fire TV / Chromecast / Android TV box), rồi bấm Toàn màn hình. Ai có liên kết đều xem được bảng, nên chỉ chia sẻ cho màn hình.",
+    "shareMessage": "Màn hình lệnh công việc “{{name}}”:",
+    "qrSubtitle": "Quét để mở màn hình lệnh công việc"
+  }
+}

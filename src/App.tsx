@@ -15,6 +15,7 @@ import { rememberInvite } from './lib/redirect';
 // everything else) was shipping as one ~900KB entry chunk regardless of
 // which page a role ever opens.
 const SignIn = lazy(() => import('./pages/SignIn'));
+const DisplayBoard = lazy(() => import('./pages/DisplayBoard'));
 const SignUp = lazy(() => import('./pages/SignUp'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
@@ -107,6 +108,18 @@ export default function App() {
   const appStatus = useAppStatus().data;
   const maintenance = !!appStatus?.maintenance_mode;
   const staffRole = useStaffRole(!!session && maintenance);
+
+  // TV display boards (0092): the link is the key; no sign-in, organisation
+  // or maintenance screen, so a wall screen keeps working on its own.
+  if (location.pathname.startsWith('/display/')) {
+    return (
+      <Suspense fallback={<FullPageLoader />}>
+        <Routes>
+          <Route path="/display/:token" element={<DisplayBoard />} />
+        </Routes>
+      </Suspense>
+    );
+  }
 
   if (authLoading) return <FullPageLoader />;
 

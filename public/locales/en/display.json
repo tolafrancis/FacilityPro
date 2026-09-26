@@ -1,0 +1,126 @@
+{
+  "loading": "Loading…",
+  "connecting": "Connecting…",
+  "reconnecting": "Connection lost — reconnecting. Showing the last update.",
+  "updated": "Updated {{time}}",
+  "poweredBy": "FacilityPro",
+  "fullscreen": "Full screen",
+  "untitled": "Work order",
+  "notFound": {
+    "title": "This display link doesn’t work",
+    "body": "It may have been replaced with a new link. Ask your facility manager for the current one."
+  },
+  "off": {
+    "title": "This display is switched off",
+    "body": "It can be switched on again in FacilityPro → Settings → TV displays."
+  },
+  "stats": {
+    "open": "Open",
+    "overdue": "Overdue"
+  },
+  "columns": {
+    "new": "New",
+    "in_progress": "In progress",
+    "on_hold": "On hold",
+    "done": "Done"
+  },
+  "empty": {
+    "new": "No new jobs",
+    "in_progress": "Nothing in progress",
+    "on_hold": "Nothing on hold",
+    "done": "Nothing finished yet",
+    "all": "No work orders to show"
+  },
+  "status": {
+    "open": "New",
+    "assigned": "Assigned",
+    "in_progress": "In progress",
+    "on_hold": "On hold",
+    "resolved": "Done",
+    "verified": "Verified",
+    "closed": "Closed"
+  },
+  "priority": {
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "due": "Due {{time}}",
+  "overdue": "Overdue · due {{time}}",
+  "created": "Opened {{time}}",
+  "list": {
+    "job": "Job",
+    "where": "Where",
+    "priority": "Priority",
+    "status": "Status",
+    "due": "Due",
+    "assignee": "Assigned to"
+  },
+  "fields": {
+    "priority": "Priority",
+    "due": "Due date & overdue",
+    "location": "Location",
+    "assignee": "Assigned to (first name)",
+    "asset": "Asset",
+    "created": "When opened"
+  },
+  "manage": {
+    "intro": "Show live work order status on a TV or wall screen, like an “order ready” board. Open the link on the screen’s browser — no sign-in needed. It updates itself every 20 seconds.",
+    "create": "New display",
+    "createAndShare": "Create display",
+    "editTitle": "Edit display",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "saved": "Display saved",
+    "rotated": "New link created — the old link no longer works",
+    "copied": "Link copied",
+    "loadError": "Couldn’t load your displays.",
+    "empty": "No displays yet.",
+    "name": "Name",
+    "namePlaceholder": "e.g. Lobby TV",
+    "nameRequired": "Give the display a name.",
+    "site": "Site",
+    "allSites": "All sites",
+    "columnsLabel": "Columns to show",
+    "columnRequired": "Choose at least one column.",
+    "doneFor": "Keep finished work on screen for",
+    "doneNone": "Don’t show",
+    "hours_one": "{{count}} hour",
+    "hours_other": "{{count}} hours",
+    "fieldsLabel": "Details on each job",
+    "privacy": "Anyone who can see the screen sees these. Instructions, requester details and costs are never shown.",
+    "prioritiesLabel": "Priorities",
+    "priorityRequired": "Choose at least one priority.",
+    "layoutLabel": "Layout",
+    "layout": {
+      "columns": "Status columns",
+      "list": "List"
+    },
+    "themeLabel": "Colours",
+    "theme": {
+      "dark": "Dark",
+      "light": "Light"
+    },
+    "language": "Screen language",
+    "online": "On screen now",
+    "off": "Switched off",
+    "neverOpened": "Not opened yet",
+    "lastSeen": "Last on screen {{date}}",
+    "copy": "Copy link",
+    "open": "Open display",
+    "share": "Share / QR",
+    "edit": "Edit",
+    "turnOff": "Switch off",
+    "turnOn": "Switch on",
+    "rotate": "New link",
+    "rotateBody": "Screens using the current link for “{{name}}” stop working until you open the new link on them.",
+    "delete": "Delete",
+    "deleteBody": "Delete “{{name}}”? Screens showing it will stop.",
+    "shareTitle": "Show “{{name}}” on a screen",
+    "shareHint": "Open this link in the TV’s browser (or a stick like Fire TV / Chromecast / Android TV box), then press Full screen. Anyone with the link can view the board, so share it only with the screen.",
+    "shareMessage": "Work order display “{{name}}”:",
+    "qrSubtitle": "Scan to open the work order display"
+  }
+}

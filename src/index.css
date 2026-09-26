@@ -56,3 +56,12 @@ label {
     font-size: 16px;
   }
 }
+
+/* TV display boards: a work order that just changed pulses for a few seconds. */
+@keyframes fp-display-flash {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.03); }
+  30% { transform: scale(1); }
+}
+.fp-display-flash { animation: fp-display-flash 1.6s ease-in-out 3; }
+@media (prefers-reduced-motion: reduce) { .fp-display-flash { animation: none; } }

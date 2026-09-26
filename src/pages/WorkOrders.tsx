@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Wrench } from 'lucide-react';
+import { MonitorPlay, Wrench } from 'lucide-react';
+import { useOrg } from '../contexts/OrgContext';
 import { useWorkOrdersPage, useOrgMembers, useAssets, useLocations } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
 import { formatDate, PRIORITIES, PRIORITY_CLASS, WO_STATUS_CLASS, WO_STATUSES } from '../lib/ui';
@@ -18,6 +19,7 @@ export default function WorkOrders() {
   const { t: tc } = useTranslation('common');
   const lng = i18n.resolvedLanguage ?? 'en';
   const members = useOrgMembers();
+  const { role } = useOrg();
   const assets = useAssets();
   const locations = useLocations();
   const [status, setStatus] = useState<WorkOrderStatus | 'all'>('all');
@@ -49,9 +51,16 @@ export default function WorkOrders() {
 
   return (
     <div className="max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
-        <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-ink">{t('title')}</h1>
+          <p className="mt-1 text-sm text-ink-muted">{t('subtitle')}</p>
+        </div>
+        {(role === 'org_admin' || role === 'manager') && (
+          <Link to="/settings?tab=displays" className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-line bg-panel px-3 text-sm font-medium text-ink hover:bg-surface">
+            <MonitorPlay size={16} aria-hidden /> {t('tvDisplay')}
+          </Link>
+        )}
       </div>
 
       <div className="mt-5 flex flex-wrap items-end gap-3">

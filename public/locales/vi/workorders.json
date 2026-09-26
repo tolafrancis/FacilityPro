@@ -84,5 +84,6 @@
     "searchPlaceholder": "Tìm theo tiêu đề hoặc hướng dẫn",
     "noMatches": "Không có lệnh công việc nào khớp với “{{q}}”.",
     "clearSearch": "Xóa tìm kiếm"
-  }
+  },
+  "tvDisplay": "Màn hình TV"
 }
