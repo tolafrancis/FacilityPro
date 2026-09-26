@@ -302,6 +302,16 @@ Stripe **and** PayPal subscriptions, plus manual invoices.
   written only through `fp_admin_save_blog_post` / `fp_admin_delete_blog_post` and every change is in
   the audit log. Markdown is rendered as React elements, never raw HTML, and only http(s), site and
   mailto links are allowed — so a post can't inject scripts.
+- **AI Generate Blog** (beside the title): type a title or topic and the post is drafted — article
+  (Markdown with headings, lists and up to 3 links to FacilityPro's own feature/solution pages),
+  summary, 3–5 tags, search title and search description — in English or Vietnamese to match the
+  topic. It runs in the existing `smart-assistant` Edge Function (`task: 'blog_post'`, OpenAI key
+  already used by the Smart assistant; optional `OPENAI_BLOG_MODEL`), only for staff with the blog
+  permission, 20 drafts per person per hour. It never saves or publishes: the fields are filled for
+  review. Your title stays (the AI's title is offered as a suggestion), fields you've typed in are
+  kept (with "Use AI …" buttons to replace them), and **Regenerate** writes a different version while
+  keeping anything you've edited. Fields it couldn't produce are listed; cover images are always
+  yours to add. Errors show a message with **Try again**; generation can be cancelled.
 - `/blog` lists posts (newest first, the latest featured) with tag filters; `/blog/<slug>` shows the
   post with its cover, author, date, reading time, a free-trial box and related posts.
 

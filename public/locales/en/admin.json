@@ -1926,6 +1926,39 @@
       "published": "Post published",
       "scheduled": "Post scheduled",
       "deleted": "Post deleted"
+    },
+    "ai": {
+      "generate": "AI Generate Blog",
+      "generating": "Generating…",
+      "regenerate": "Regenerate",
+      "retry": "Try again",
+      "titleHint": "Type a title or topic, then use AI Generate Blog to draft the post. Nothing is published until you choose to.",
+      "needTitle": "Enter a blog title or topic first.",
+      "writing": "Writing your post — structure, article, summary, tags and search fields…",
+      "writingHint": "{{seconds}} s · usually 20–60 seconds. You can keep editing other fields meanwhile.",
+      "ready": "AI draft ready. Review and edit everything before you save or publish.",
+      "filled": "Filled in: {{fields}}.",
+      "kept": "Kept what you wrote in: {{fields}}.",
+      "useAi": "Use AI {{field}}",
+      "useAiAll": "Use AI version for all",
+      "suggestedTitle": "Suggested title:",
+      "useTitle": "Use this title",
+      "missing": "Couldn’t generate: {{fields}} — please fill these in yourself.",
+      "truncated": "The article may have been cut short — check the ending.",
+      "noCover": "Cover image: add one yourself — AI doesn’t create images.",
+      "review": "The post is still unsaved. Regenerate for a different version; fields you’ve edited are kept.",
+      "errors": {
+        "not_configured": "AI writing isn’t set up on the server yet (OPENAI_API_KEY).",
+        "not_authorized": "Only staff who manage the blog can use AI writing.",
+        "rate_limited": "You’ve generated a lot of drafts this hour. Please try again later.",
+        "provider_busy": "The AI service is busy right now. Try again in a moment.",
+        "timeout": "The AI took too long to answer. Try again.",
+        "invalid_output": "The AI didn’t return a usable draft. Try again.",
+        "upstream_failed": "Something went wrong while generating. Try again.",
+        "network": "Couldn’t reach the server. Check your connection and try again.",
+        "topic_required": "Enter a blog title or topic first.",
+        "topic_too_long": "The title or topic is too long for AI writing (300 characters max)."
+      }
     }
   }
 }

@@ -1911,6 +1911,39 @@
       "published": "Đã xuất bản bài viết",
       "scheduled": "Đã hẹn giờ đăng bài",
       "deleted": "Đã xóa bài viết"
+    },
+    "ai": {
+      "generate": "Tạo blog bằng AI",
+      "generating": "Đang tạo…",
+      "regenerate": "Tạo lại",
+      "retry": "Thử lại",
+      "titleHint": "Nhập tiêu đề hoặc chủ đề, rồi dùng Tạo blog bằng AI để soạn bài. Không có gì được xuất bản cho đến khi bạn chọn.",
+      "needTitle": "Hãy nhập tiêu đề hoặc chủ đề trước.",
+      "writing": "Đang viết bài — bố cục, nội dung, tóm tắt, thẻ và thông tin tìm kiếm…",
+      "writingHint": "{{seconds}} giây · thường mất 20–60 giây. Bạn vẫn có thể sửa các trường khác.",
+      "ready": "Bản nháp AI đã sẵn sàng. Hãy xem lại và chỉnh sửa trước khi lưu hoặc xuất bản.",
+      "filled": "Đã điền: {{fields}}.",
+      "kept": "Giữ nguyên nội dung bạn đã viết ở: {{fields}}.",
+      "useAi": "Dùng {{field}} của AI",
+      "useAiAll": "Dùng bản AI cho tất cả",
+      "suggestedTitle": "Tiêu đề gợi ý:",
+      "useTitle": "Dùng tiêu đề này",
+      "missing": "Không tạo được: {{fields}} — vui lòng tự điền.",
+      "truncated": "Bài viết có thể bị cắt ngắn — hãy kiểm tra phần kết.",
+      "noCover": "Ảnh bìa: hãy tự thêm — AI không tạo hình ảnh.",
+      "review": "Bài viết chưa được lưu. Tạo lại để có phiên bản khác; các trường bạn đã sửa được giữ nguyên.",
+      "errors": {
+        "not_configured": "Máy chủ chưa được thiết lập viết bằng AI (OPENAI_API_KEY).",
+        "not_authorized": "Chỉ nhân viên quản lý blog mới dùng được tính năng viết bằng AI.",
+        "rate_limited": "Bạn đã tạo nhiều bản nháp trong giờ này. Vui lòng thử lại sau.",
+        "provider_busy": "Dịch vụ AI đang bận. Vui lòng thử lại sau giây lát.",
+        "timeout": "AI phản hồi quá lâu. Vui lòng thử lại.",
+        "invalid_output": "AI không trả về bản nháp dùng được. Vui lòng thử lại.",
+        "upstream_failed": "Đã có lỗi khi tạo bài. Vui lòng thử lại.",
+        "network": "Không kết nối được máy chủ. Kiểm tra mạng và thử lại.",
+        "topic_required": "Hãy nhập tiêu đề hoặc chủ đề trước.",
+        "topic_too_long": "Tiêu đề hoặc chủ đề quá dài cho AI (tối đa 300 ký tự)."
+      }
     }
   }
 }

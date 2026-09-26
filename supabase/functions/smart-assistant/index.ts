@@ -11,12 +11,20 @@
 //
 // Only signed-in members of the given organisation can call it; each user
 // gets 30 requests per hour, and prompts are capped at 2,000 characters.
+//
+// { task: 'blog_post' } (admin console → Blog → AI Generate Blog) drafts a
+// whole blog post for platform staff who can manage content: 20 drafts per
+// hour, JSON fields for the editor. It never saves or publishes anything.
+//   supabase secrets set OPENAI_BLOG_MODEL=gpt-4o      # optional, defaults to OPENAI_MODEL
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { MAX_TOPIC, buildBlogMessages, cleanLinks, parseJsonObject, sanitizeBlogDraft } from '../_shared/blog-ai.ts';
 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') ?? '';
 const OPENAI_MODEL = Deno.env.get('OPENAI_MODEL') ?? 'gpt-4o-mini';
+const OPENAI_BLOG_MODEL = Deno.env.get('OPENAI_BLOG_MODEL') ?? OPENAI_MODEL;
 const HOURLY_LIMIT = 30;
+const BLOG_HOURLY_LIMIT = 20;
 const MAX_PROMPT = 2000;
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -42,12 +50,13 @@ Deno.serve(async (req) => {
   const { data: auth } = await asCaller.auth.getUser();
   if (!auth?.user) return json({ error: 'not_signed_in' }, 401);
 
-  let body: { prompt?: unknown; org_id?: unknown };
+  let body: { prompt?: unknown; org_id?: unknown; task?: unknown; topic?: unknown; lng?: unknown; links?: unknown; variation?: unknown };
   try {
     body = await req.json();
   } catch {
     return json({ error: 'invalid_request' }, 400);
   }
+  if (body.task === 'blog_post') return blogPost(asCaller, auth.user.id, body);
   const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
   const orgId = typeof body.org_id === 'string' ? body.org_id : '';
   if (!prompt) return json({ error: 'prompt_required' }, 400);
@@ -99,3 +108,75 @@ Deno.serve(async (req) => {
     actions: lines.slice(1, 4).map((line) => line.replace(/^([-*•]|\d+[.)])\s*/, '')),
   });
 });
+
+// ---------------------------------------------------------------------------
+// Blog drafts (admin console)
+// ---------------------------------------------------------------------------
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Caller = { rpc: (fn: string) => PromiseLike<{ data: any }> };
+
+async function blogPost(
+  asCaller: Caller,
+  userId: string,
+  body: { topic?: unknown; lng?: unknown; links?: unknown; variation?: unknown },
+) {
+  // Staff who manage content (the same permission the blog itself requires).
+  const { data: perms } = await asCaller.rpc('fp_admin_permissions');
+  const permissions = ((perms as { permissions?: unknown } | null)?.permissions ?? []) as unknown[];
+  if (!permissions.includes('announcements.manage')) return json({ error: 'not_authorized' }, 403);
+
+  const topic = typeof body.topic === 'string' ? body.topic.trim() : '';
+  if (!topic) return json({ error: 'topic_required' }, 400);
+  if (topic.length > MAX_TOPIC) return json({ error: 'topic_too_long' }, 400);
+  const lng = body.lng === 'vi' ? 'vi' : 'en';
+  const links = cleanLinks(body.links);
+  const variation = Number.isInteger(body.variation) ? Math.min(Math.max(body.variation as number, 0), 20) : 0;
+
+  const since = new Date(Date.now() - 3600 * 1000).toISOString();
+  const { count } = await service
+    .from('fp_assistant_usage')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .is('org_id', null)
+    .gte('created_at', since);
+  if ((count ?? 0) >= BLOG_HOURLY_LIMIT) return json({ error: 'rate_limited' }, 429);
+  await service.from('fp_assistant_usage').insert({ user_id: userId, org_id: null });
+
+  const { system, user } = buildBlogMessages(topic, lng, links, variation);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 120_000);
+  let res: Response;
+  try {
+    res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      signal: ctrl.signal,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${OPENAI_API_KEY}` },
+      body: JSON.stringify({
+        model: OPENAI_BLOG_MODEL,
+        max_tokens: 4000,
+        temperature: variation > 0 ? 0.9 : 0.7,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user },
+        ],
+      }),
+    });
+  } catch (e) {
+    clearTimeout(timer);
+    console.error('smart-assistant blog: request failed', e);
+    return json({ error: (e as Error).name === 'AbortError' ? 'timeout' : 'upstream_failed' }, 504);
+  }
+  clearTimeout(timer);
+  if (!res.ok) {
+    console.error('smart-assistant blog: OpenAI', res.status, await res.text());
+    return json({ error: res.status === 429 ? 'provider_busy' : 'upstream_failed' }, 502);
+  }
+  const data = await res.json();
+  const choice = data?.choices?.[0];
+  const parsed = parseJsonObject((choice?.message?.content as string | undefined) ?? '');
+  if (!parsed) return json({ error: 'invalid_output' }, 502);
+  const { draft, missing } = sanitizeBlogDraft(parsed, links);
+  if (!draft.body) return json({ error: 'invalid_output' }, 502);
+  return json({ draft, missing, truncated: choice?.finish_reason === 'length' });
+}

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Bold, ExternalLink, Eye, Heading2, ImagePlus, Italic, Link2, List, Newspaper, Pencil, Plus, Quote, Trash2, Upload, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Bold, CheckCircle2, ExternalLink, Eye, Heading2, ImagePlus, Italic, Link2, List, Loader2, Newspaper, Pencil, Plus, Quote, RefreshCw, Sparkles, Trash2, Upload, X } from 'lucide-react';
 import { Badge, Card, EmptyState, ErrorState, PageHeader, Skeleton, type Tone } from '../components/ui';
 import Button from '../../components/ui/Button';
 import { notify } from '../../components/Toaster';
@@ -10,6 +10,8 @@ import { Markdown } from '../../lib/markdown';
 import { blogImageUrl, isLive, slugify, uploadBlogImage, useAdminPost, useAllPosts, type BlogPost } from '../../lib/blog';
 import { adminErrorMessage, rpc, useAdminAction } from '../lib/tenants';
 import { timeAgo } from '../lib/format';
+import { AI_FILL_FIELDS, AiBlogError, detectLng, generateBlogDraft, mergeDraft, type AiFillField, type AiResult } from '../lib/blogAi';
+import { ALL_FEATURES, ALL_SOLUTIONS } from '../../marketing/content';
 import { ConfirmDialog, IconButton } from './TenantDetail';
 import { Field, control } from './billing/shared';
 
@@ -137,10 +139,77 @@ function EditorForm({ initial }: { initial: Draft }) {
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const coverInput = useRef<HTMLInputElement>(null);
   const inlineInput = useRef<HTMLInputElement>(null);
+  // AI drafting: which fields still hold untouched AI text (a user edit takes
+  // the field back), and the last result for the review panel.
+  const [aiOwned, setAiOwned] = useState<Set<AiFillField>>(new Set());
+  const [ai, setAi] = useState<
+    | { state: 'idle' }
+    | { state: 'loading'; started: number }
+    | { state: 'error'; code: string }
+    | { state: 'done'; result: AiResult; filled: AiFillField[]; kept: AiFillField[] }
+  >({ state: 'idle' });
+  const [variation, setVariation] = useState(0);
+  const aiRun = useRef(0);
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (ai.state !== 'loading') return;
+    const id = setInterval(() => setElapsed(Math.round((Date.now() - ai.started) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [ai]);
+
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => {
     setD((x) => ({ ...x, [k]: v }));
     setDirty(true);
     setError(null);
+    if ((AI_FILL_FIELDS as readonly string[]).includes(k)) {
+      setAiOwned((o) => {
+        if (!o.has(k as AiFillField)) return o;
+        const n = new Set(o);
+        n.delete(k as AiFillField);
+        return n;
+      });
+    }
+  };
+
+  // Latest values for applying a draft that arrives after an await.
+  const latest = useRef({ d, aiOwned });
+  latest.current = { d, aiOwned };
+  const applyAi = (result: AiResult, replace: Set<AiFillField> = new Set()) => {
+    const { d: cur, aiOwned: owned } = latest.current;
+    const o = mergeDraft({ excerpt: cur.excerpt, body: cur.body, tags: cur.tags, seo_title: cur.seo_title, seo_description: cur.seo_description }, owned, result.draft, replace);
+    // Only the filled fields are written, so nothing else the user is typing is touched.
+    const patch = Object.fromEntries(o.filled.map((f) => [f, o.next[f]])) as Partial<Draft>;
+    setD((x) => ({ ...x, ...patch }));
+    setAiOwned(o.owned);
+    setDirty(true);
+    setError(null);
+    setAi({ state: 'done', result, filled: o.filled, kept: o.kept });
+  };
+
+  const generate = async (again: boolean) => {
+    const topic = d.title.trim();
+    if (!topic) return setError(t('blog.ai.needTitle'));
+    const run = ++aiRun.current;
+    const v = again ? variation + 1 : variation;
+    setVariation(v);
+    setElapsed(0);
+    setAi({ state: 'loading', started: Date.now() });
+    try {
+      const result = await generateBlogDraft({
+        topic, lng: detectLng(topic), variation: v,
+        links: [...ALL_FEATURES.map((f) => ({ path: `/features/${f.slug}`, title: f.title })), ...ALL_SOLUTIONS.map((x) => ({ path: `/solutions/${x.slug}`, title: x.title }))],
+      });
+      if (run !== aiRun.current) return; // cancelled or superseded
+      applyAi(result);
+      setTab('write');
+    } catch (err) {
+      if (run !== aiRun.current) return;
+      setAi({ state: 'error', code: err instanceof AiBlogError ? err.code : 'upstream_failed' });
+    }
+  };
+  const cancelAi = () => {
+    aiRun.current += 1;
+    setAi({ state: 'idle' });
   };
 
   // Warn before leaving with unsaved changes.
@@ -241,14 +310,39 @@ function EditorForm({ initial }: { initial: Draft }) {
         <div className="space-y-4">
           <Card>
             <div className="space-y-4">
-              <Field id="bp-title" label={t('blog.fields.title')}>
-                <input id="bp-title" value={d.title} onChange={(e) => onTitle(e.target.value)} maxLength={200} className={`${control} h-11 w-full text-lg font-medium`} placeholder={t('blog.fields.titlePh')} />
+              <Field id="bp-title" label={t('blog.fields.title')} hint={t('blog.ai.titleHint')}>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input id="bp-title" value={d.title} onChange={(e) => onTitle(e.target.value)} maxLength={200} className={`${control} h-11 w-full min-w-0 flex-1 text-lg font-medium`} placeholder={t('blog.fields.titlePh')} />
+                  <Button
+                    type="button"
+                    onClick={() => void generate(ai.state === 'done')}
+                    disabled={ai.state === 'loading' || !d.title.trim()}
+                    title={!d.title.trim() ? t('blog.ai.needTitle') : undefined}
+                    className="h-11 shrink-0 whitespace-nowrap bg-gradient-to-r from-brand to-[#F0782F]"
+                  >
+                    {ai.state === 'loading' ? <Loader2 size={16} className="animate-spin" aria-hidden /> : ai.state === 'done' ? <RefreshCw size={16} aria-hidden /> : <Sparkles size={16} aria-hidden />}
+                    {ai.state === 'loading' ? t('blog.ai.generating') : ai.state === 'done' ? t('blog.ai.regenerate') : t('blog.ai.generate')}
+                  </Button>
+                </div>
               </Field>
               <Field id="bp-excerpt" label={t('blog.fields.excerpt')} hint={t('blog.fields.excerptHint')}>
                 <textarea id="bp-excerpt" value={d.excerpt} onChange={(e) => set('excerpt', e.target.value)} maxLength={400} rows={2} className={`${control} h-auto w-full py-2`} />
               </Field>
             </div>
           </Card>
+
+          <AiPanel
+            ai={ai}
+            elapsed={elapsed}
+            suggestedTitle={ai.state === 'done' && ai.result.draft.title && ai.result.draft.title !== d.title.trim() ? ai.result.draft.title : null}
+            hasCover={!!d.cover_path}
+            onRetry={() => void generate(false)}
+            onRegenerate={() => void generate(true)}
+            onCancel={cancelAi}
+            onUseTitle={(title) => onTitle(title)}
+            onReplace={(fields) => ai.state === 'done' && applyAi(ai.result, new Set(fields))}
+            onDismiss={() => setAi({ state: 'idle' })}
+          />
 
           <Card>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -272,11 +366,19 @@ function EditorForm({ initial }: { initial: Draft }) {
               )}
             </div>
             {tab === 'write' ? (
-              <>
+              <div className="relative">
+                {ai.state === 'loading' && !d.body.trim() && (
+                  <div className="absolute inset-0 z-10 space-y-3 rounded-md bg-panel/90 p-5" aria-hidden>
+                    <div className="h-6 w-1/2 animate-pulse rounded bg-brand/15" />
+                    {[0, 1, 2, 3, 4, 5].map((i) => <div key={i} className="h-3.5 animate-pulse rounded bg-ink/10" style={{ width: `${92 - i * 7}%` }} />)}
+                    <div className="h-6 w-2/5 animate-pulse rounded bg-brand/15" />
+                    {[0, 1, 2].map((i) => <div key={i} className="h-3.5 animate-pulse rounded bg-ink/10" style={{ width: `${85 - i * 9}%` }} />)}
+                  </div>
+                )}
                 <textarea ref={bodyRef} aria-label={t('blog.fields.body')} value={d.body} onChange={(e) => set('body', e.target.value)}
                   rows={22} className={`${control} h-auto min-h-[28rem] w-full py-3 font-mono text-[14px] leading-6`} placeholder={t('blog.fields.bodyPh')} />
                 <p className="mt-2 text-xs text-ink-muted">{t('blog.markdownHelp')}</p>
-              </>
+              </div>
             ) : (
               <div className="min-h-[28rem] rounded-lg border border-line bg-white p-6">
                 {d.title && <h1 className="mb-4 text-3xl font-semibold text-ink">{d.title}</h1>}
@@ -343,6 +445,106 @@ function EditorForm({ initial }: { initial: Draft }) {
               </Field>
             </div>
           </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const FIELD_LABEL: Record<AiFillField, string> = {
+  excerpt: 'blog.fields.excerpt', body: 'blog.fields.body', tags: 'blog.fields.tags', seo_title: 'blog.fields.seoTitle', seo_description: 'blog.fields.seoDescription',
+};
+
+/** Progress, result review and errors for "AI Generate Blog". */
+function AiPanel({ ai, elapsed, suggestedTitle, hasCover, onRetry, onRegenerate, onCancel, onUseTitle, onReplace, onDismiss }: {
+  ai:
+    | { state: 'idle' }
+    | { state: 'loading'; started: number }
+    | { state: 'error'; code: string }
+    | { state: 'done'; result: AiResult; filled: AiFillField[]; kept: AiFillField[] };
+  elapsed: number;
+  suggestedTitle: string | null;
+  hasCover: boolean;
+  onRetry: () => void;
+  onRegenerate: () => void;
+  onCancel: () => void;
+  onUseTitle: (title: string) => void;
+  onReplace: (fields: AiFillField[]) => void;
+  onDismiss: () => void;
+}) {
+  const { t } = useTranslation('admin');
+  if (ai.state === 'idle') return null;
+  const label = (f: AiFillField) => t(FIELD_LABEL[f]);
+
+  if (ai.state === 'loading') {
+    return (
+      <div role="status" aria-live="polite" className="flex flex-wrap items-center gap-3 rounded-xl border border-brand/30 bg-brand/5 px-4 py-3">
+        <Loader2 size={18} className="animate-spin text-brand" aria-hidden />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-ink">{t('blog.ai.writing')}</p>
+          <p className="text-xs text-ink-muted">{t('blog.ai.writingHint', { seconds: elapsed })}</p>
+        </div>
+        <button type="button" onClick={onCancel} className="text-sm font-medium text-ink-muted hover:text-ink">{t('cancel')}</button>
+      </div>
+    );
+  }
+
+  if (ai.state === 'error') {
+    return (
+      <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl border border-status-crit/30 bg-status-crit/5 px-4 py-3">
+        <AlertTriangle size={18} className="text-status-crit" aria-hidden />
+        <p className="min-w-0 flex-1 text-sm text-ink">{t(`blog.ai.errors.${ai.code}`, { defaultValue: t('blog.ai.errors.upstream_failed') })}</p>
+        {!['not_authorized', 'not_configured'].includes(ai.code) && (
+          <Button variant="secondary" onClick={onRetry}><RefreshCw size={15} aria-hidden /> {t('blog.ai.retry')}</Button>
+        )}
+        <IconButton label={t('close')} onClick={onDismiss}><X size={15} /></IconButton>
+      </div>
+    );
+  }
+
+  const { result, filled, kept } = ai;
+  const missing = result.missing.filter((f): f is AiFillField => (AI_FILL_FIELDS as readonly string[]).includes(f));
+  return (
+    <div role="status" className="rounded-xl border border-status-ok/30 bg-status-ok/5 px-4 py-3 text-sm">
+      <div className="flex flex-wrap items-start gap-3">
+        <CheckCircle2 size={18} className="mt-0.5 text-status-ok" aria-hidden />
+        <div className="min-w-0 flex-1 space-y-2">
+          <p className="font-medium text-ink">{t('blog.ai.ready')}</p>
+          {filled.length > 0 && <p className="text-ink-muted">{t('blog.ai.filled', { fields: filled.map(label).join(', ') })}</p>}
+          {kept.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 text-ink-muted">
+              <span>{t('blog.ai.kept', { fields: kept.map(label).join(', ') })}</span>
+              {kept.map((f) => (
+                <button key={f} type="button" onClick={() => onReplace([f])} className="rounded-md border border-line bg-panel px-2 py-0.5 text-xs font-medium text-ink hover:border-brand hover:text-brand">
+                  {t('blog.ai.useAi', { field: label(f) })}
+                </button>
+              ))}
+              {kept.length > 1 && (
+                <button type="button" onClick={() => onReplace(kept)} className="text-xs font-medium text-brand hover:underline">{t('blog.ai.useAiAll')}</button>
+              )}
+            </div>
+          )}
+          {suggestedTitle && (
+            <p className="flex flex-wrap items-center gap-2 text-ink-muted">
+              <span>{t('blog.ai.suggestedTitle')} <span className="font-medium text-ink">“{suggestedTitle}”</span></span>
+              <button type="button" onClick={() => onUseTitle(suggestedTitle)} className="rounded-md border border-line bg-panel px-2 py-0.5 text-xs font-medium text-ink hover:border-brand hover:text-brand">{t('blog.ai.useTitle')}</button>
+            </p>
+          )}
+          {(missing.length > 0 || result.truncated) && (
+            <p className="flex items-start gap-1.5 text-amber-700 dark:text-amber-300">
+              <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden />
+              <span>
+                {missing.length > 0 && t('blog.ai.missing', { fields: missing.map(label).join(', ') })}
+                {result.truncated && ` ${t('blog.ai.truncated')}`}
+              </span>
+            </p>
+          )}
+          {!hasCover && <p className="text-ink-muted">{t('blog.ai.noCover')}</p>}
+          <p className="text-xs text-ink-muted">{t('blog.ai.review')}</p>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button variant="secondary" onClick={onRegenerate}><RefreshCw size={15} aria-hidden /> {t('blog.ai.regenerate')}</Button>
+          <IconButton label={t('close')} onClick={onDismiss}><X size={15} /></IconButton>
         </div>
       </div>
     </div>
