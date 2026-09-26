@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
-  Activity, BadgeCheck, BarChart3, BellRing, Bot, Boxes, Briefcase, Building, Building2, CalendarCheck, CalendarClock,
-  Camera, Church, ClipboardCheck, ClipboardList, Cpu, CreditCard, Factory, FileSignature, FileText, Flame, Gauge,
+  Activity, BadgeCheck, BarChart3, BellRing, BookOpen, Bot, Boxes, Briefcase, Building, Building2, CalendarCheck, CalendarClock,
+  Camera, Church, ClipboardCheck, ClipboardList, Cpu, CreditCard, Factory, FileDown, FileSignature, FileText, Flame, Gauge,
   GitBranch, GraduationCap, Hammer, HardHat, Hospital, Hotel, Inbox, KeyRound, Landmark, Languages, LayoutGrid,
   LifeBuoy, MapPin, Megaphone, MessageSquareHeart, MonitorPlay, Network, Package, Plug, QrCode, Receipt, Rocket,
   Newspaper, ShieldCheck, ShoppingBag, ShoppingCart, Smartphone, Sparkles, SprayCan, Tag, Truck, UserCheck, Users,
@@ -314,9 +314,19 @@ export interface Resource {
   /** Somewhere else instead of a resource page. */
   href?: string;
   summary?: string;
-  sections?: { heading: string; body: string[] }[];
+  sections?: ResourceSection[];
   /** A page with its own layout instead of sections. */
-  view?: 'integrations';
+  view?: 'integrations' | 'brochure';
+}
+
+export interface ResourceSection {
+  heading: string;
+  body: string[];
+  /** Bullet points after the paragraphs. */
+  list?: string[];
+  table?: { head: string[]; rows: string[][] };
+  /** Questions and answers, shown as expandable rows. */
+  faq?: { q: string; a: string }[];
 }
 
 // ---------------------------------------------------------------------------
@@ -404,6 +414,142 @@ export const RESOURCES: Resource[][] = [
           '☐ Goals and rollout owner agreed · ☐ Pilot site locations and critical assets loaded · ☐ Fault types and SLA targets set · ☐ Team invited by role · ☐ QR labels printed and placed · ☐ Old reporting channels retired · ☐ First PM schedules running · ☐ 30-day review booked',
         ] },
       ] },
+    { slug: 'cmms-guide', title: 'CMMS Deployment & Optimization Guide', icon: BookOpen,
+      summary: 'How to plan, launch and keep improving a CMMS, from the first data audit to site-wide adoption.',
+      sections: [
+        { heading: 'What deploying a CMMS really means', body: [
+          'A computerised maintenance management system (CMMS) can be switched on in an afternoon. Getting technicians, supervisors and occupants to rely on it every shift takes longer, and that second part is what this guide is about.',
+          'Deployment is the move from phone calls, paper job sheets and spreadsheets to one system built around requests, work orders, preventive maintenance schedules, asset histories and live reports. Optimisation is what comes after: tuning that system month by month until it reflects how your sites actually run.',
+          'Most rollouts that disappoint do so for the same reason. They were run as a software installation handed to IT, when they are really a change in how the maintenance team works. Treat it as an operational change from day one and the software becomes the easy part.',
+        ] },
+        { heading: 'Five questions to answer before you start', body: [
+          'Write your answers down and share them with everyone involved. They become the yardstick for every decision that follows.',
+        ], list: [
+          'Outcomes: which two or three numbers should improve, and by how much? For example, response time to urgent faults, the share of preventive work completed on time, or maintenance cost per site.',
+          'People: who sponsors the change at management level, who runs it day to day, and who on each site will help colleagues?',
+          'Data: is your list of assets and locations accurate enough to load, or does it need a clean-up first?',
+          'Support: who answers questions and fixes problems in the first weeks after launch?',
+          'Transition: how long will the old channels (hotlines, chat groups, paper forms) run alongside the new system, and when do they close?',
+        ] },
+        { heading: 'Prepare: understand how work flows today', body: [
+          'Before changing a single setting, spend a few days learning how maintenance really happens on your sites. Rushing into configuration is the most common reason rollouts stall a few months in.',
+        ], list: [
+          'Walk the sites with a technician. Note how faults are reported, who decides priority, how parts are found and how jobs are signed off.',
+          'Mark the equipment that matters most for safety, comfort or revenue: chillers, lifts, fire systems, generators, pumps. These are your critical assets.',
+          'List what already works well, and where requests get lost or delayed. The weak points tell you which FacilityPro features to switch on first.',
+          'Check capacity honestly: who has time to clean data, who can train others, and whether site supervisors will back the change on the floor.',
+          'Agree the business case with your sponsor: fewer breakdowns, faster response, audit-ready records and decisions based on data rather than memory.',
+        ] },
+        { heading: 'Readiness checklist', body: [
+          'You are ready to configure when every line below is true.',
+        ], list: [
+          'A named sponsor is actively involved, not just informed',
+          'Two or three measurable goals are written down and agreed',
+          'Critical assets are identified on every site in scope',
+          'Today’s request, approval and escalation steps are documented',
+          'A rollout lead and one champion per site have time set aside',
+          'A pilot site and a target go-live date are chosen',
+        ] },
+        { heading: 'Choosing the right system', body: [
+          'If you are still comparing platforms, judge them on how well they fit your daily work, not on the length of the feature list. Ask every vendor to show these with your own examples during the demo.',
+        ], table: { head: ['Area', 'What good looks like'], rows: [
+          ['Requests & work orders', 'Anyone can report a fault in seconds (QR code, link, chat app), and a technician can take the job from assignment to sign-off on a phone.'],
+          ['Preventive maintenance', 'Schedules by calendar or by meter reading, with reusable checklists and work orders created automatically before they are due.'],
+          ['Assets & locations', 'A clear site → building → floor → room hierarchy, with each asset’s full history, documents and costs in one place.'],
+          ['Mobile & offline', 'Technicians can update jobs where there is no signal, and changes sync when they reconnect.'],
+          ['Reporting', 'Response times, overdue work, PM completion and cost per site, ready to use without building spreadsheets.'],
+          ['Language & support', 'Screens, notifications and help in the languages your team speaks, with a support team that works your hours.'],
+          ['Pricing', 'Clear prices that don’t punish you for inviting technicians, occupants and vendors.'],
+        ] } },
+        { heading: 'Build your deployment team', body: [
+          'Even a small rollout needs these roles. One person can hold more than one on a single site; on a large portfolio they are usually separate people.',
+        ], table: { head: ['Role', 'What they own'], rows: [
+          ['Sponsor', 'Sets the goals, removes blockers and tells the organisation, more than once, that this is now how maintenance is managed.'],
+          ['Rollout lead', 'Runs the plan, keeps the timeline, and is the single point of contact for questions and decisions.'],
+          ['Data owner', 'Collects, cleans and loads locations, assets, parts and vendors, and keeps naming consistent.'],
+          ['Site champions', 'A respected technician or supervisor on each site who tests workflows, trains colleagues and reports what isn’t working.'],
+          ['FacilityPro team', 'Helps with setup, imports, integrations such as Zalo or sensors, and answers questions during the pilot and go-live.'],
+        ] } },
+        { heading: 'The deployment plan at a glance', body: [
+          'A single site can go live in two to four weeks. A multi-site portfolio usually takes six to ten, because each wave of sites reuses what the pilot proved.',
+        ], table: { head: ['Phase', 'When', 'Main activities'], rows: [
+          ['1. Plan', 'Week 1', 'Agree goals and scope, name the team, pick the pilot site, document today’s process.'],
+          ['2. Build', 'Weeks 1–3', 'Load locations and critical assets, set roles, fault types, SLA targets, PM schedules and checklists.'],
+          ['3. Pilot', 'Weeks 3–5', 'Run real requests and work orders on one site, train by role, fix what slows people down.'],
+          ['4. Go live', 'Weeks 5–7', 'Open the new reporting channels, close the old ones, watch usage daily.'],
+          ['5. Optimise', 'Month 2 onwards', 'Review the numbers at 30, 90 and 180 days, automate more, roll out to the next sites.'],
+        ] } },
+        { heading: 'Phase 1: Plan', body: [
+          'Confirm the scope (which sites, which teams, which types of work) and write it down. Keep the first wave small: one site with an engaged team and a manageable number of assets proves the value fastest.',
+          'Map today’s process on one page: how a fault is reported, who approves what, and how a job is closed. This page becomes the blueprint for your workflows in FacilityPro.',
+        ] },
+        { heading: 'Phase 2: Build your data and settings', body: [
+          'Poor data is the fastest way to lose trust in a new system. Load less, but load it well.',
+        ], list: [
+          'Locations first: add each site, then its buildings, floors and rooms under Locations. Names can be entered in both English and Vietnamese.',
+          'Critical assets next: register the equipment that breaks most or costs most, linked to its room. Add the rest in later waves.',
+          'One naming rule: pick a convention such as AHU-03 or CH-B1-02 and use it everywhere from day one. Inconsistent names make reports unreadable.',
+          'Import history selectively: bring in clean, structured records (recent repairs, costs, last service dates) and leave messy notes behind.',
+          'Catalogs and SLA: load the default fault and asset types under Settings → Catalogs, adjust them to your terms, and set response and resolution targets per priority under Settings → SLA.',
+          'Roles: give each person the role they need (admin, manager, technician, occupant or vendor) and limit staff to their own sites where it makes sense.',
+          'Preventive maintenance: create schedules by calendar or meter reading under Maintenance, attach a checklist to each, and let FacilityPro generate the work orders.',
+          'Safety: switch on permits to work for hot work, confined spaces and electrical isolation, so a job can’t start until its permit is approved.',
+          'Front door for faults: print QR labels for assets and rooms, share the public report link, and connect email or Zalo so occupants can report in the way they already communicate.',
+        ] },
+        { heading: 'Phase 3: Pilot and train', body: [
+          'Run the pilot on real work, with no paper back-up running in parallel. That is the only way to find the friction while the stakes are low.',
+        ], list: [
+          'Train champions first, then let them train their colleagues. People learn faster from someone they work beside.',
+          'Keep training role-specific: technicians learn to accept, update and close jobs on their phones; supervisors learn scheduling and approvals; managers learn Reports.',
+          'Leave quick references where people work: a three-to-five step card for “report a fault”, “close a job” and “complete a checklist”. The Help Center quick-starts per role are a good starting point.',
+          'Hold a short weekly check-in with champions. Fix the top two complaints each week and tell people what changed.',
+        ] },
+        { heading: 'Phase 4: Go live', body: [
+          'Announce the date, explain why the change matters and show everyone the new way to report faults. On the day, retire the old hotline numbers and chat groups, or redirect them to the new channels, so every request lands in one list.',
+          'Watch usage every day for the first two weeks: how many requests arrive through the new channels, how quickly work orders are accepted, how many are closed on a phone, and who hasn’t signed in yet. A TV display board in the maintenance office keeps the queue visible to everyone.',
+        ] },
+        { heading: 'Phase 5: Optimise', body: [
+          'Go-live is the start of the useful part. The teams that get the most from a CMMS keep adjusting it.',
+        ], list: [
+          '30 days: compare response times and overdue work with your goals. Remove fields and steps nobody uses.',
+          '90 days: add workflows that assign, remind and escalate automatically; send a short survey after completed jobs to measure occupant satisfaction.',
+          '6 months: move from calendar-based to condition-based maintenance where it pays, using meter readings or IoT sensors that open work orders when a threshold is crossed.',
+          'Every quarter: review PM completion, repeat failures per asset and cost per site with the sponsor, then roll out to the next group of sites.',
+        ] },
+        { heading: 'The numbers that show it’s working', body: [
+          'Track a handful of indicators consistently rather than many occasionally. FacilityPro’s Reports show most of these per site and per asset.',
+        ], table: { head: ['Indicator', 'What it tells you'], rows: [
+          ['Response time', 'How long it takes from a fault being reported to someone accepting it. The first number occupants notice.'],
+          ['Mean time to repair (MTTR)', 'How long a failure takes to fix once work starts. Falling MTTR means better planning and parts availability.'],
+          ['Mean time between failures (MTBF)', 'How long an asset runs between breakdowns. Rising MTBF means maintenance is making equipment more reliable.'],
+          ['PM completion rate', 'The share of scheduled preventive jobs finished on time. The clearest sign that planned work is really happening.'],
+          ['Planned vs. reactive work', 'How much effort goes into planned jobs rather than emergencies. Healthy operations aim for most work to be planned.'],
+          ['SLA compliance', 'The share of requests answered and resolved within target. Useful for reporting to owners, tenants and clients.'],
+          ['Cost per site or asset', 'Where maintenance money goes, and which assets are cheaper to replace than to keep repairing.'],
+        ] } },
+        { heading: 'Common mistakes and how to avoid them', body: [], list: [
+          'Configuring before planning: agree goals, scope and owners first, then touch settings.',
+          'Loading everything at once: start with locations and critical assets, and add the rest once people trust the data.',
+          'Skipping the pilot: test every workflow with real technicians on real jobs before the wider launch.',
+          'One-size-fits-all training: teach each role only what it needs, and back it with short quick-reference cards.',
+          'Keeping the old channels open: if the hotline still works, people will use it. Close or redirect it on go-live day.',
+          'Treating go-live as the finish line: book the 30-, 90- and 180-day reviews before you launch.',
+        ] },
+        { heading: 'Frequently asked questions', body: [], faq: [
+          { q: 'How long does deployment take?', a: 'A single site with a clear scope can go live in two to four weeks. Portfolios of many sites usually take six to ten weeks, rolled out in waves after a pilot.' },
+          { q: 'Do we need an outside consultant?', a: 'Usually not. A committed rollout lead, a few site champions and support from the FacilityPro team are enough for most organisations. Very large or regulated portfolios sometimes add a consultant for process design.' },
+          { q: 'What matters most for adoption?', a: 'Visible backing from management, a system that is quicker than the old way for technicians, training by role, and closing the old reporting channels on go-live day.' },
+          { q: 'Is a CMMS worth it for a small team?', a: 'Yes. Small teams feel the benefit quickly because they have the least time to chase lost requests. FacilityPro’s Starter plan is free for up to five users.' },
+          { q: 'What return can we expect?', a: 'Most gains come from fewer emergency repairs, longer asset life, less time spent chasing information and clearer spending. Measure your starting point before go-live so you can show the difference.' },
+          { q: 'Can FacilityPro work with sensors and building systems?', a: 'Yes. Devices can send readings over MQTT or HTTP, LoRaWAN devices connect through The Things Network or ChirpStack, and Modbus equipment connects through the FacilityPro edge gateway. Alerts can open work orders automatically.' },
+          { q: 'Is a CMMS the same as an EAM system?', a: 'They overlap. A CMMS focuses on running maintenance day to day: requests, work orders, schedules and asset histories. Enterprise asset management adds full life-cycle planning, capital budgeting and deeper finance links. FacilityPro covers the CMMS core plus budgets, procurement and vendor invoices.' },
+          { q: 'Can our team use it in Vietnamese?', a: 'Yes. Every screen, notification and help page is available in English and Vietnamese, and each person chooses their own language.' },
+          { q: 'What should we ask any vendor before signing?', a: 'Ask to see your own workflow end to end in the demo, how data is imported, what support looks like after go-live, how pricing changes as you add users and sites, and how your data is protected and exported if you leave.' },
+        ] },
+        { heading: 'Ready to deploy FacilityPro?', body: [
+          'Start a free trial and follow the Getting started guide, or book a demo and our team will help you plan your pilot, load your data and train your champions.',
+        ] },
+      ] },
     { slug: 'pricing', title: 'Pricing', icon: CreditCard, href: '/#pricing' },
   ],
   [
@@ -436,6 +582,8 @@ export const RESOURCES: Resource[][] = [
     { slug: 'tv-display-guide', title: 'TV display boards', icon: MonitorPlay, href: '/features/tv-displays' },
     { slug: 'integrations', title: 'Integrations', icon: Plug, view: 'integrations',
       summary: 'Everything FacilityPro connects to today: messaging, notifications, sensors and payments.' },
+    { slug: 'brochure', title: 'Brochure (PDF)', icon: FileDown, view: 'brochure',
+      summary: 'A two-page overview of FacilityPro to share with your team, in English or Vietnamese.' },
     { slug: 'help', title: 'Help & support', icon: LifeBuoy,
       summary: 'Where to find answers inside FacilityPro, and how to reach our team.',
       sections: [
