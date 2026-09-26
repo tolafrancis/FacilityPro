@@ -74,7 +74,7 @@ export interface PagedResult<T> {
   count: number;
 }
 
-function useOrgId() {
+export function useOrgId() {
   return useOrg().currentOrg?.id;
 }
 

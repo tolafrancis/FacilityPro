@@ -48,6 +48,8 @@ const EVENT_TONES: Record<string, Tone> = {
   suspended: 'crit',
   unsuspended: 'ok',
   deleted: 'neutral',
+  ticket_created: 'info',
+  ticket_reply: 'brand',
 };
 
 export function eventTone(type: string): Tone {

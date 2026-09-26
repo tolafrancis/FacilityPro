@@ -1,6 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAppStatus, useStaffRole } from './lib/platform';
+import { MaintenanceScreen, MaintenanceStaffStrip } from './components/PlatformNotices';
 import { useAuth } from './contexts/AuthContext';
 import { useOrg } from './contexts/OrgContext';
 import AppShell from './components/AppShell';
@@ -46,6 +48,8 @@ const Security = lazy(() => import('./pages/Security'));
 const JobSheet = lazy(() => import('./pages/JobSheet'));
 const Inbox = lazy(() => import('./pages/Inbox'));
 const Billing = lazy(() => import('./pages/Billing'));
+const Support = lazy(() => import('./pages/Support'));
+const SupportTicket = lazy(() => import('./pages/SupportTicket'));
 const Devices = lazy(() => import('./pages/Devices'));
 const DeviceDetail = lazy(() => import('./pages/DeviceDetail'));
 const PublicReport = lazy(() => import('./pages/PublicReport'));
@@ -98,8 +102,20 @@ export default function App() {
   const { session, loading: authLoading } = useAuth();
   const { memberships, role, closedOrgs, loading: orgLoading, error: orgError, refresh: refreshOrgs } = useOrg();
   const location = useLocation();
+  // Maintenance mode (admin panel, 0088): everyone but platform staff sees
+  // the maintenance page; staff can still sign in and work.
+  const appStatus = useAppStatus().data;
+  const maintenance = !!appStatus?.maintenance_mode;
+  const staffRole = useStaffRole(!!session && maintenance);
 
   if (authLoading) return <FullPageLoader />;
+
+  if (maintenance && appStatus) {
+    const signInPages = ['/signin', '/forgot-password', '/reset-password'];
+    if (!session && !signInPages.includes(location.pathname)) return <MaintenanceScreen status={appStatus} />;
+    if (session && staffRole.isLoading) return <FullPageLoader />;
+    if (session && !staffRole.data) return <MaintenanceScreen status={appStatus} />;
+  }
 
   if (!session) {
     // A confirmation or reset link that has expired (or was already used)
@@ -138,6 +154,7 @@ export default function App() {
 
   return (
     <Suspense fallback={<FullPageLoader />}>
+      {maintenance && <MaintenanceStaffStrip />}
       <Routes>
         <Route path="/invite" element={<AcceptInvite />} />
         <Route path="/join/:token" element={<JoinOrg />} />
@@ -196,6 +213,8 @@ export default function App() {
               <Route path="/attendance" element={<Attendance />} />
               <Route path="/smart-assistant" element={<SmartAssistant />} />
               <Route path="/tenant-experience" element={<TenantExperience />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/support/:id" element={<SupportTicket />} />
               {/* Admin/manager pages: their data and writes are limited to these
                   roles by RLS, so other roles would only see controls that fail. */}
               {/* Devices: technicians see live data, alerts and history (0077);

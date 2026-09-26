@@ -239,7 +239,8 @@ export function useAdminAction<V>(fn: (v: V) => Promise<unknown>, success: strin
       for (const k of ['admin_tenants', 'admin_tenant', 'admin_tenant_users', 'admin_tenant_invites', 'admin_tenant_activity',
         'admin_tenant_flags', 'admin_tenant_notes', 'admin_overview', 'admin_events', 'admin_users', 'admin_user',
         'admin_invoices', 'admin_invoice', 'admin_billing_overview', 'admin_subscriptions', 'admin_plans_full', 'admin_plans',
-        'admin_coupons', 'admin_billing_events']) {
+        'admin_coupons', 'admin_billing_events', 'admin_tickets', 'admin_ticket', 'admin_ticket_stats', 'admin_ticket_macros',
+        'admin_flags', 'admin_announcements', 'admin_platform_settings', 'admin_templates', 'app_status']) {
         void qc.invalidateQueries({ queryKey: [k] });
       }
     },

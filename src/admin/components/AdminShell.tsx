@@ -309,7 +309,14 @@ function Notifications() {
                   <Badge tone={eventTone(e.type)}>{eventLabel(e.type, t)}</Badge>
                   <span className="text-[11px] text-ink-muted">{timeAgo(e.at, i18n.resolvedLanguage ?? 'en')}</span>
                 </div>
-                <p className="mt-1 truncate text-sm text-ink">{e.fp_organizations?.name ?? '—'}</p>
+                {typeof e.detail.ticket === 'string' ? (
+                  <Link to={`/admin/tickets/${e.detail.ticket}`} onClick={() => setOpen(false)} className="mt-1 block truncate text-sm text-ink hover:underline">
+                    #{String(e.detail.number ?? '')} {String(e.detail.subject ?? '')}
+                    <span className="block truncate text-xs text-ink-muted">{e.fp_organizations?.name ?? '—'}</span>
+                  </Link>
+                ) : (
+                  <p className="mt-1 truncate text-sm text-ink">{e.fp_organizations?.name ?? '—'}</p>
+                )}
               </li>
             ))}
           </ul>

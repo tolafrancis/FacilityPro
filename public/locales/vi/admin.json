@@ -77,7 +77,9 @@
     "payment_succeeded": "Thanh toán",
     "suspended": "Tạm ngưng",
     "unsuspended": "Mở lại",
-    "deleted": "Đã xóa"
+    "deleted": "Đã xóa",
+    "ticket_created": "Phiếu mới",
+    "ticket_reply": "Khách hàng trả lời"
   },
   "range": {
     "label": "Khoảng thời gian",
@@ -567,7 +569,11 @@
     "invoice_mark_paid": "Đánh dấu đã thanh toán",
     "invoice_void": "Hủy hóa đơn",
     "invoice_refund": "Hoàn tiền",
-    "subscription_cancel": "Hủy gói đăng ký"
+    "subscription_cancel": "Hủy gói đăng ký",
+    "ticket_create": "Mở phiếu cho khách",
+    "ticket_update": "Cập nhật phiếu",
+    "ticket_reply": "Trả lời phiếu",
+    "ticket_note": "Ghi chú nội bộ trên phiếu"
   },
   "errors2": {
     "permission": "Bạn không có quyền làm việc này.",
@@ -584,7 +590,9 @@
     "manual_invoice": "Hóa đơn thủ công được hoàn tiền trong hộp thoại riêng.",
     "no_provider_subscription": "Khách hàng này không có gói Stripe hay PayPal.",
     "not_authorized": "Bạn không có quyền thực hiện việc này.",
-    "failed": "Đã có lỗi."
+    "failed": "Đã có lỗi.",
+    "invalid_default_language": "Ngôn ngữ mặc định phải thuộc các ngôn ngữ được hỗ trợ.",
+    "invalid_version": "Kiểm tra lại số phiên bản."
   },
   "users": {
     "subtitle": "Mọi tài khoản trên nền tảng, thuộc tất cả khách hàng.",
@@ -932,6 +940,297 @@
         "ignored": "Bỏ qua",
         "failed": "Lỗi"
       }
+    }
+  },
+  "tickets": {
+    "subtitle": "Câu hỏi và sự cố từ khách hàng, kèm mục tiêu thời gian phản hồi.",
+    "new": "Phiếu mới",
+    "newHint": "Mở phiếu cho khách hàng đã gọi điện hoặc gửi email. Phản hồi sẽ gửi tới email hoặc ứng dụng của họ.",
+    "create": "Tạo phiếu",
+    "macros": "Mẫu trả lời",
+    "search": "Tìm tiêu đề, khách hàng, email, #số hoặc thẻ",
+    "views": "Chế độ xem",
+    "view": {
+      "active": "Đang xử lý",
+      "mine": "Của tôi",
+      "unassigned": "Chưa giao",
+      "breached": "Quá hạn",
+      "all": "Tất cả"
+    },
+    "allPriorities": "Mọi mức ưu tiên",
+    "clearTenant": "Hiện mọi khách hàng",
+    "empty": "Không có phiếu nào.",
+    "noBreached": "Không có phiếu quá hạn. Tốt lắm.",
+    "awaitingReply": "Khách hàng đã trả lời",
+    "unassigned": "Chưa giao",
+    "assignToMe": "Giao cho tôi",
+    "assignTo": "Giao cho…",
+    "setStatus": "Đặt trạng thái…",
+    "hours": "{{value}} giờ",
+    "kpi": {
+      "open": "Đang mở",
+      "unassigned": "Chưa giao",
+      "mine": "Giao cho tôi",
+      "breached": "Quá hạn",
+      "firstResponse": "Phản hồi đầu (TB, 30 ngày)",
+      "slaMet": "Trả lời đúng hạn (30 ngày)",
+      "satisfaction": "Mức hài lòng (30 ngày)",
+      "solved": "Đã giải quyết (7 ngày)"
+    },
+    "cols": {
+      "subject": "Phiếu",
+      "status": "Trạng thái",
+      "priority": "Ưu tiên",
+      "sla": "Hạn tiếp theo",
+      "assignee": "Người phụ trách",
+      "updated": "Hoạt động gần nhất",
+      "category": "Loại",
+      "requester": "Người gửi",
+      "created": "Ngày tạo"
+    },
+    "status": {
+      "open": "Đang mở",
+      "pending": "Chờ khách hàng",
+      "on_hold": "Tạm giữ",
+      "solved": "Đã giải quyết",
+      "closed": "Đã đóng"
+    },
+    "priority": {
+      "urgent": "Khẩn cấp",
+      "high": "Cao",
+      "normal": "Bình thường",
+      "low": "Thấp"
+    },
+    "category": {
+      "question": "Câu hỏi",
+      "problem": "Sự cố",
+      "billing": "Thanh toán",
+      "account": "Tài khoản",
+      "feature": "Đề xuất tính năng",
+      "other": "Khác"
+    },
+    "channel": {
+      "app": "Từ ứng dụng",
+      "admin": "Do nhân viên mở",
+      "email": "Qua email"
+    },
+    "sla": {
+      "ok": "Đúng tiến độ",
+      "due_soon": "Sắp đến hạn",
+      "breached": "Quá hạn",
+      "paused": "Tạm dừng",
+      "done": "Xong",
+      "met": "Đạt",
+      "missed": "Trễ"
+    },
+    "notFound": "Phiếu này không tồn tại.",
+    "opened": "mở {{when}}",
+    "customer": "Khách hàng",
+    "otherTickets_one": "{{count}} phiếu khác từ khách hàng này",
+    "otherTickets_other": "{{count}} phiếu khác từ khách hàng này",
+    "rating": "Đánh giá của khách",
+    "ratings": {
+      "good": "Tốt: khách hàng hài lòng",
+      "bad": "Chưa tốt: khách hàng chưa hài lòng"
+    },
+    "staff": "Hỗ trợ",
+    "internalNote": "Ghi chú nội bộ",
+    "composer": "Trả lời hoặc ghi chú",
+    "mode": {
+      "reply": "Trả lời khách hàng",
+      "note": "Ghi chú nội bộ"
+    },
+    "closedHint": "Phiếu đã đóng. Trả lời sẽ mở lại phiếu.",
+    "replyPlaceholder": "Viết câu trả lời…",
+    "notePlaceholder": "Chỉ nhân viên thấy ghi chú này.",
+    "insertMacro": "Chèn mẫu trả lời…",
+    "noMacros": "Chưa có mẫu trả lời",
+    "thenSet": "Sau đó đặt",
+    "keepStatus": "Giữ trạng thái",
+    "addNote": "Thêm ghi chú",
+    "send": "Gửi trả lời",
+    "replyNotifies": "Khách hàng được thông báo trong ứng dụng và qua email.",
+    "properties": "Chi tiết",
+    "tags": "Thẻ",
+    "slaTitle": "Mục tiêu phản hồi",
+    "slaHint": "Tạm dừng khi chờ khách hàng hoặc đang tạm giữ.",
+    "firstResponse": "Phản hồi đầu tiên",
+    "resolution": "Giải quyết",
+    "dueAt": "Hạn {{when}}",
+    "description": "Mô tả",
+    "tenantOptional": "Khách hàng (không bắt buộc)",
+    "requesterEmail": "Email khách hàng",
+    "macrosHint": "Câu trả lời dùng lại cho các câu hỏi thường gặp. Chèn khi trả lời.",
+    "newMacro": "Mẫu trả lời mới",
+    "macroTitle": "Tên",
+    "macroBody": "Nội dung",
+    "macroVars": "Có thể dùng {{first_name}}, {{name}}, {{ticket}} và {{agent}}.",
+    "editMacro": "Sửa {{title}}",
+    "deleteMacro": "Xóa {{title}}",
+    "toast": {
+      "created": "Đã tạo phiếu.",
+      "updated": "Đã cập nhật phiếu.",
+      "replied": "Đã gửi trả lời.",
+      "noted": "Đã thêm ghi chú.",
+      "macroSaved": "Đã lưu mẫu trả lời.",
+      "macroDeleted": "Đã xóa mẫu trả lời."
+    }
+  },
+  "features": {
+    "subtitle": "Bật hoặc tắt mô-đun và tính năng cho mọi khách hàng, hoặc triển khai dần một tính năng cho một phần khách hàng.",
+    "new": "Tính năng mới",
+    "create": "Tạo tính năng",
+    "modules": "Mô-đun",
+    "modulesHint": "Mô-đun bị tắt sẽ biến mất khỏi menu của khách hàng.",
+    "features": "Tính năng",
+    "featuresHint": "Cờ cho chức năng mới; triển khai dần theo tỷ lệ phần trăm.",
+    "noFeatures": "Chưa có cờ tính năng.",
+    "on": "Bật",
+    "off": "Tắt",
+    "toggle": "Bật/tắt {{name}}",
+    "rollout": "Triển khai",
+    "rolloutFor": "Tỷ lệ triển khai cho {{name}}",
+    "reach": "Đang bật cho {{on}}/{{total}} khách hàng",
+    "overrides": "{{on}} bắt buộc bật, {{off}} bắt buộc tắt",
+    "overridesHint": "Để bật/tắt cho riêng một khách hàng, dùng thẻ Tính năng trên trang của khách hàng đó.",
+    "key": "Mã",
+    "keyHint": "Chữ thường, số, dấu chấm, - hoặc _. Lập trình viên kiểm tra mã này.",
+    "description": "Mô tả",
+    "rolloutStart": "Bắt đầu với tỷ lệ khách hàng (%)",
+    "rolloutHint": "0 = chưa ai; tăng dần từng bước.",
+    "delete": "Xóa",
+    "deleteTitle": "Xóa {{key}}?",
+    "deleteBody": "Các thiết lập riêng của khách hàng cho tính năng này cũng bị xóa.",
+    "toast": {
+      "saved": "Đã lưu.",
+      "deleted": "Đã xóa tính năng."
+    }
+  },
+  "announcements": {
+    "subtitle": "Thông điệp tới khách hàng, hiển thị thành dải thông báo ở đầu ứng dụng.",
+    "new": "Thông báo mới",
+    "editTitle": "Sửa thông báo",
+    "empty": "Chưa có thông báo.",
+    "emptyBody": "Thông báo tính năng mới, bảo trì theo kế hoạch hoặc sự cố cho khách hàng.",
+    "state": {
+      "draft": "Nháp",
+      "scheduled": "Đã lên lịch",
+      "live": "Đang hiển thị",
+      "ended": "Đã kết thúc"
+    },
+    "level": {
+      "info": "Thông tin",
+      "warning": "Cảnh báo",
+      "critical": "Khẩn cấp"
+    },
+    "levelLabel": "Loại",
+    "criticalHint": "Không thể ẩn thông báo khẩn cấp.",
+    "audience": "Hiển thị cho",
+    "audiences": {
+      "all": "Mọi khách hàng",
+      "plans": "Khách hàng theo gói",
+      "tenants": "Khách hàng cụ thể"
+    },
+    "toAll": "Mọi khách hàng",
+    "toPlans": "Gói: {{plans}}",
+    "toTenants_one": "{{count}} khách hàng",
+    "toTenants_other": "{{count}} khách hàng",
+    "from": "Từ {{when}}",
+    "until": "đến {{when}}",
+    "notPublished": "Chưa đăng",
+    "reach_one": "tới {{count}} khách hàng",
+    "reach_other": "tới {{count}} khách hàng",
+    "dismissed_one": "{{count}} người đã ẩn",
+    "dismissed_other": "{{count}} người đã ẩn",
+    "publishNow": "Đăng ngay",
+    "endNow": "Kết thúc ngay",
+    "unschedule": "Hủy lịch",
+    "edit": "Sửa {{title}}",
+    "delete": "Xóa {{title}}",
+    "deleteTitle": "Xóa thông báo này?",
+    "deleteBody": "“{{title}}” sẽ biến mất với mọi người.",
+    "deleteConfirm": "Xóa",
+    "title": "Tiêu đề",
+    "body": "Nội dung",
+    "choosePlans": "Gói",
+    "chooseTenants": "Khách hàng",
+    "removeTenant": "Bỏ {{name}}",
+    "show": "Thời điểm",
+    "startNow": "Đăng ngay",
+    "startLater": "Lên lịch",
+    "startDraft": "Lưu nháp",
+    "startAt": "Bắt đầu",
+    "endAt": "Kết thúc (không bắt buộc)",
+    "endHint": "Để trống để giữ cho đến khi bạn kết thúc.",
+    "preview": "Xem trước",
+    "saveDraft": "Lưu nháp",
+    "schedule": "Lên lịch",
+    "publish": "Đăng",
+    "toast": {
+      "saved": "Đã lưu thông báo.",
+      "deleted": "Đã xóa thông báo."
+    }
+  },
+  "appSettings": {
+    "subtitle": "Tên, ngôn ngữ, người gửi email, chế độ bảo trì, phiên bản ứng dụng di động và mẫu tin nhắn.",
+    "tabsLabel": "Các mục cài đặt",
+    "tabs": {
+      "general": "Chung",
+      "maintenance": "Bảo trì",
+      "mobile": "Ứng dụng di động",
+      "templates": "Mẫu tin nhắn"
+    },
+    "appName": "Tên ứng dụng",
+    "timezone": "Múi giờ mặc định",
+    "timezoneHint": "Cho khách hàng mới; mỗi khách hàng có thể tự đổi.",
+    "languages": "Ngôn ngữ",
+    "lng": {
+      "en": "Tiếng Anh",
+      "vi": "Tiếng Việt"
+    },
+    "defaultLanguage": "Ngôn ngữ mặc định",
+    "defaultNotSupported": "Chọn một trong các ngôn ngữ được hỗ trợ.",
+    "fromName": "Tên người gửi email",
+    "fromAddress": "Địa chỉ gửi email",
+    "fromAddressHint": "Phải thuộc tên miền đã xác minh với nhà cung cấp email (Resend).",
+    "supportEmail": "Email hỗ trợ",
+    "supportEmailHint": "Hiển thị cho người dùng trên trang bảo trì.",
+    "maintenanceMode": "Chế độ bảo trì",
+    "maintenanceHint": "Khi bật, mọi người trừ nhân viên nền tảng sẽ thấy trang bảo trì. Nhân viên vẫn đăng nhập và làm việc được.",
+    "maintenanceOn": "Đang bật",
+    "maintenanceOff": "Đang tắt",
+    "message": "Thông điệp",
+    "messageHint": "Nội dung người dùng thấy. Để trống để dùng thông điệp mặc định.",
+    "until": "Dự kiến hoạt động lại",
+    "untilHint": "Không bắt buộc; hiển thị cho người dùng.",
+    "previewTitle": "{{app}} đang được nâng cấp",
+    "previewDefault": "Chúng tôi đang cải tiến hệ thống và sẽ sớm quay lại.",
+    "previewUntil": "Dự kiến hoạt động lại: {{when}}",
+    "saveMessage": "Lưu thông điệp",
+    "turnOn": "Bật chế độ bảo trì",
+    "turnOff": "Tắt chế độ bảo trì",
+    "mobileHint": "Ứng dụng di động kiểm tra các giá trị này khi khởi động.",
+    "latestVersion": "Phiên bản mới nhất",
+    "minVersion": "Phiên bản tối thiểu được hỗ trợ",
+    "minVersionHint": "Ứng dụng cũ hơn sẽ được nhắc cập nhật.",
+    "forceUpdate": "Chặn ứng dụng cũ cho đến khi cập nhật",
+    "versionFormat": "Dùng dạng phiên bản như 1.4 hoặc 1.4.2.",
+    "versionOrder": "Phiên bản tối thiểu không được mới hơn phiên bản mới nhất.",
+    "noTemplates": "Chưa có mẫu.",
+    "templateHint": "Gửi cho khách hàng. Các chỗ trong ngoặc nhọn kép sẽ được điền khi gửi.",
+    "templateNames": {
+      "support_ticket_reply": "Hỗ trợ: nhân viên trả lời",
+      "support_ticket_solved": "Hỗ trợ: phiếu đã giải quyết"
+    },
+    "subject": "Tiêu đề",
+    "body": "Nội dung",
+    "variables": "Chỗ điền: {{list}}",
+    "unknownVars": "Chỗ điền không hợp lệ: {{list}}",
+    "sampleMessage": "Vui lòng cập nhật ứng dụng lên phiên bản 1.4 và quét lại mã.",
+    "revert": "Hoàn tác",
+    "toast": {
+      "saved": "Đã lưu cài đặt.",
+      "templateSaved": "Đã lưu mẫu."
     }
   }
 }

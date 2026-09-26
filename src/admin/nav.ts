@@ -42,16 +42,16 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { key: 'tenants', to: '/admin/tenants', icon: Building2, permission: 'tenants.view', ready: true },
       { key: 'users', to: '/admin/users', icon: Users, permission: 'users.view', ready: true },
       { key: 'billing', to: '/admin/billing', icon: CreditCard, permission: 'billing.view', ready: true },
-      { key: 'tickets', to: '/admin/tickets', icon: LifeBuoy, permission: 'tickets.view', ready: false },
+      { key: 'tickets', to: '/admin/tickets', icon: LifeBuoy, permission: 'tickets.view', ready: true },
       { key: 'reports', to: '/admin/reports', icon: BarChart3, permission: 'reports.view', ready: false },
     ],
   },
   {
     key: 'platform',
     items: [
-      { key: 'flags', to: '/admin/features', icon: Flag, permission: 'platform.manage', ready: false },
-      { key: 'announcements', to: '/admin/announcements', icon: Megaphone, permission: 'announcements.manage', ready: false },
-      { key: 'settings', to: '/admin/settings', icon: Settings2, permission: 'platform.manage', ready: false },
+      { key: 'flags', to: '/admin/features', icon: Flag, permission: 'platform.manage', ready: true },
+      { key: 'announcements', to: '/admin/announcements', icon: Megaphone, permission: 'announcements.manage', ready: true },
+      { key: 'settings', to: '/admin/settings', icon: Settings2, permission: 'platform.manage', ready: true },
     ],
   },
   {

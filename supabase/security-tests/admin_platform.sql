@@ -89,8 +89,11 @@ select t.check('anyone can read the app status (maintenance mode, mobile version
   t.run('anon', null, $q$select 1 where fp_app_status() ->> 'maintenance_message' = 'Back at 10:00'$q$) = 'ok:1'
   and t.run('anon', null, 'select * from fp_platform_settings') in ('ok:0')
   and t.run('authenticated', :'ownerA', 'select * from fp_platform_settings') in ('ok:0'));
+-- Since 0087 staff change tickets only through the ticket functions (due
+-- dates, notifications, audit), not by writing the table.
 select t.check('tickets: support works them, analysts and tenants cannot see them',
-  t.run('authenticated', :'support', format($q$insert into fp_support_tickets (org_id, subject) values (%L, 'Cannot log in')$q$, :'orgA')) = 'ok:1'
+  t.run('authenticated', :'support', format($q$select fp_admin_create_ticket(jsonb_build_object('org_id', %L, 'requester_email', 'owner@alpha.test', 'subject', 'Cannot log in', 'body', 'Password reset email never arrives.'))$q$, :'orgA')) = 'ok:1'
+  and t.run('authenticated', :'support', format($q$insert into fp_support_tickets (org_id, subject) values (%L, 'Direct')$q$, :'orgA')) like 'err:%'
   and t.run('authenticated', :'analyst', 'select * from fp_support_tickets') = 'ok:0'
   and t.run('authenticated', :'ownerA', 'select * from fp_support_tickets') = 'ok:0');
 

@@ -180,6 +180,39 @@ Stripe **and** PayPal subscriptions, plus manual invoices.
    `billing-webhook` without (`--no-verify-jwt`), since the providers call it.
 5. Test with Stripe test keys / PayPal sandbox first; switch to live keys and `PAYPAL_ENV=live` after.
 
+## Support tickets (0087)
+
+- **Tenants** (every role but occupants; occupants keep reporting faults to their own team) open
+  tickets under **Help & support** with a type and urgency. The requester sees their tickets; an org
+  admin sees every ticket of the organisation. They get staff replies in the app and by email, can
+  reply (reopens the ticket), mark it solved and rate the answer. At most 10 new tickets a day each.
+- **Staff** (`/admin/tickets`): open / unassigned / mine / overdue counts, average first response,
+  share answered on time, satisfaction; views (active, mine, unassigned, overdue, all), search, bulk
+  assign and status. A ticket page has the conversation, replies and yellow internal notes (never
+  shown to tenants), saved replies with `{{first_name}}`, `{{name}}`, `{{ticket}}`, `{{agent}}`, status,
+  priority, category, assignee (support staff only), tags, response-target status, the requester and
+  the tenant. Staff can open a ticket for a customer who called or emailed.
+- **Response targets** (`fp_ticket_sla`, calendar time): urgent 1 h / 8 h, high 4 h / 24 h, normal
+  8 h / 3 days, low 24 h / 5 days (first response / resolution). Paused while waiting on the customer
+  or on hold. Solved tickets close after 7 days (job `close_solved_tickets`).
+- New tickets and customer replies appear in the admin bell and open the ticket.
+
+## App management (0088)
+
+- **Features & modules** (`/admin/features`, super admin): switch modules and features on or off for
+  everyone, roll features out to a percentage of tenants, see how many tenants have each; per-tenant
+  overrides stay on the tenant's Features tab. Switched-off modules disappear from the tenant's menu
+  and their pages show "This module is switched off" (a menu/page switch, not a data lock).
+- **Announcements** (`/admin/announcements`): to every tenant, some plans or chosen tenants;
+  information / warning / critical; publish now, schedule or keep as draft; optional end. Tenants see
+  a banner above every page; critical ones can't be dismissed. Staff see reach and dismissals.
+- **App settings** (`/admin/settings`, super admin): app name, languages, default time zone, email
+  sender, support email; **maintenance mode** (message and expected end; everyone but platform staff
+  sees a maintenance page, checked every minute; staff see a strip and keep working); mobile app
+  latest / minimum version and forced update (read by the apps from `fp_app_status()`); **message
+  templates** (English and Vietnamese) with placeholders and a preview. The support ticket emails and
+  notifications use them.
+
 ### Demo data (local or staging only)
 
 ```sql
@@ -216,5 +249,7 @@ keys are Edge Function secrets (see Billing setup).
 | 2. Tenant management | Done |
 | 3. Users | Done |
 | 4. Plans & billing (Stripe + PayPal) | Done: add provider keys to go live |
-| 5. App management · 6. Support · 7. Analytics · 8. Audit & security · 9. Monitoring · 10. Admin team | Planned, schema in place |
+| 5. App management | Done |
+| 6. Support tickets | Done |
+| 7. Analytics · 8. Audit & security · 9. Monitoring · 10. Admin team | Planned, schema in place |
 | Demo seed data (20 tenants, 200 users, invoices, tickets, activity) | Done: `supabase/seed/admin_demo.sql`, local/staging only |

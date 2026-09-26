@@ -154,7 +154,7 @@ begin
   -- Support tickets with conversations and internal notes.
   for i in 1 .. 30 loop
     select id into v_org from fp_organizations where settings ->> 'demo' = 'true' order by created_at offset (i % 20) limit 1;
-    insert into fp_support_tickets (org_id, requester_email, subject, status, priority, sla_due_at, first_response_at, solved_at, created_at)
+    insert into fp_support_tickets (org_id, requester_email, subject, status, priority, sla_due_at, first_response_at, solved_at, created_at, updated_at, last_message_at, last_message_by)
     values (v_org, 'user' || (i * 6) || '@demo.facilitypro.test',
             (array['Cannot log in', 'Invoice question', 'How do I add a site?', 'Work order emails not arriving', 'Request to upgrade plan', 'Data export needed', 'QR codes not scanning', 'Add more users'])[1 + i % 8],
             (array['open', 'pending', 'on_hold', 'solved', 'closed', 'open'])[1 + i % 6],
@@ -162,11 +162,12 @@ begin
             now() - make_interval(days => i) + interval '1 day',
             case when i % 3 <> 0 then now() - make_interval(days => i) + interval '2 hours' end,
             case when i % 6 in (3, 4) then now() - make_interval(days => i) + interval '1 day' end,
-            now() - make_interval(days => i))
+            now() - make_interval(days => i), now() - make_interval(days => i) + interval '2 hours',
+            now() - make_interval(days => i) + interval '2 hours', case when i % 3 <> 0 then 'staff' else 'requester' end)
     returning id into v_ticket;
-    insert into fp_ticket_messages (ticket_id, author_id, body, internal, created_at) values
-      (v_ticket, null, 'Hello, we need help with this. (demo)', false, now() - make_interval(days => i)),
-      (v_ticket, null, 'Checked the logs; looks like a configuration issue. (demo internal note)', true, now() - make_interval(days => i) + interval '1 hour');
+    insert into fp_ticket_messages (ticket_id, author_id, body, internal, author_kind, created_at) values
+      (v_ticket, null, 'Hello, we need help with this. (demo)', false, 'requester', now() - make_interval(days => i)),
+      (v_ticket, null, 'Checked the logs; looks like a configuration issue. (demo internal note)', true, 'staff', now() - make_interval(days => i) + interval '1 hour');
   end loop;
 
   -- Two tenants changed plans recently (activity feed).

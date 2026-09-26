@@ -37,7 +37,8 @@
     "menu": "Menu",
     "home": "Home",
     "reportFault": "Report a fault",
-    "myRequests": "My requests"
+    "myRequests": "My requests",
+    "support": "Help & support"
   },
   "navGroups": {
     "maintenance": "Maintenance Operations",
@@ -319,5 +320,25 @@
       "room": "Room",
       "zone": "Zone"
     }
+  },
+  "maintenance": {
+    "title": "{{app}} is being updated",
+    "body": "We're making improvements and will be back shortly.",
+    "until": "Expected back: {{when}}",
+    "autoRefresh": "This page checks again every minute.",
+    "contact": "Questions?",
+    "retry": "Try again",
+    "signOut": "Sign out",
+    "staffStrip": "Maintenance mode is on: only platform staff can use the app."
+  },
+  "announcements": {
+    "label": "Announcements from FacilityPro",
+    "more": "Show more",
+    "less": "Show less",
+    "dismiss": "Dismiss"
+  },
+  "moduleOff": {
+    "title": "This module is switched off",
+    "body": "It isn't available for your organisation. Ask your administrator or FacilityPro support if you need it."
   }
 }

@@ -12,6 +12,11 @@ import TenantDetail from './pages/TenantDetail';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
 import Billing from './pages/Billing';
+import Tickets from './pages/Tickets';
+import TicketDetail from './pages/TicketDetail';
+import Features from './pages/Features';
+import Announcements from './pages/Announcements';
+import AppSettings from './pages/AppSettings';
 
 /**
  * The platform admin panel (/admin), loaded only when opened. Every route
@@ -39,6 +44,11 @@ function AdminRoutes() {
         <Route path="users" element={<Guard permission="users.view"><Users /></Guard>} />
         <Route path="users/:id" element={<Guard permission="users.view"><UserDetail /></Guard>} />
         <Route path="billing" element={<Guard permission="billing.view"><Billing /></Guard>} />
+        <Route path="tickets" element={<Guard permission="tickets.view"><Tickets /></Guard>} />
+        <Route path="tickets/:id" element={<Guard permission="tickets.view"><TicketDetail /></Guard>} />
+        <Route path="features" element={<Guard permission="platform.manage"><Features /></Guard>} />
+        <Route path="announcements" element={<Guard permission="announcements.manage"><Announcements /></Guard>} />
+        <Route path="settings" element={<Guard permission="platform.manage"><AppSettings /></Guard>} />
         {ADMIN_NAV.flatMap((g) => g.items)
           .filter((i) => !i.ready)
           .map((i) => (

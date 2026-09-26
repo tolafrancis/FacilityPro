@@ -37,7 +37,8 @@
     "menu": "Menu",
     "home": "Trang chủ",
     "reportFault": "Báo sự cố",
-    "myRequests": "Yêu cầu của tôi"
+    "myRequests": "Yêu cầu của tôi",
+    "support": "Trợ giúp & hỗ trợ"
   },
   "navGroups": {
     "maintenance": "Vận hành bảo trì",
@@ -317,5 +318,25 @@
       "room": "Phòng",
       "zone": "Khu vực"
     }
+  },
+  "maintenance": {
+    "title": "{{app}} đang được nâng cấp",
+    "body": "Chúng tôi đang cải tiến hệ thống và sẽ sớm quay lại.",
+    "until": "Dự kiến hoạt động lại: {{when}}",
+    "autoRefresh": "Trang này tự kiểm tra lại mỗi phút.",
+    "contact": "Cần hỏi?",
+    "retry": "Thử lại",
+    "signOut": "Đăng xuất",
+    "staffStrip": "Đang bật chế độ bảo trì: chỉ nhân viên nền tảng dùng được ứng dụng."
+  },
+  "announcements": {
+    "label": "Thông báo từ FacilityPro",
+    "more": "Xem thêm",
+    "less": "Thu gọn",
+    "dismiss": "Ẩn"
+  },
+  "moduleOff": {
+    "title": "Mô-đun này đang tắt",
+    "body": "Mô-đun không khả dụng cho tổ chức của bạn. Hãy hỏi quản trị viên hoặc bộ phận hỗ trợ FacilityPro nếu bạn cần."
   }
 }

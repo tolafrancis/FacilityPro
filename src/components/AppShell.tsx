@@ -35,7 +35,10 @@ import {
   Menu,
   X,
   type LucideIcon,
+  LifeBuoy,
 } from 'lucide-react';
+import { hiddenNavKeys, useOrgFlags } from '../lib/platform';
+import { AnnouncementBar, ModuleGate } from './PlatformNotices';
 import { useAuth } from '../contexts/AuthContext';
 import { useOrg } from '../contexts/OrgContext';
 import type { Role } from '../lib/database.types';
@@ -142,6 +145,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/smart-assistant', key: 'smartAssistant', icon: Sparkles },
       { to: '/settings', key: 'settings', icon: Settings },
+      { to: '/support', key: 'support', icon: LifeBuoy },
     ],
   },
 ];
@@ -163,11 +167,13 @@ export default function AppShell() {
     setOpenGroups((prev) => ({ ...prev, [group]: !prev[group] }));
   };
 
+  // Modules switched off for this organisation in the admin panel (0088).
+  const hiddenByModule = hiddenNavKeys(useOrgFlags().data);
   const visibleNavGroups = isOccupant
     ? OCCUPANT_NAV
     : NAV_GROUPS.map((group) => ({
         ...group,
-        items: group.items.filter((item) => isNavItemVisible(item.key, role)),
+        items: group.items.filter((item) => isNavItemVisible(item.key, role) && !hiddenByModule.has(item.key)),
       })).filter((group) => group.items.length > 0);
 
   const location = useLocation();
@@ -183,7 +189,7 @@ export default function AppShell() {
       ? { to: '/my-work', key: 'myWork', icon: Hammer }
       : { to: '/work-orders', key: 'workOrders', icon: Wrench },
     { to: '/assets', key: 'assets', icon: Boxes },
-  ].filter((tab) => isNavItemVisible(tab.key, role) && (tab.key !== 'workOrders' || role === 'org_admin' || role === 'manager'));
+  ].filter((tab) => isNavItemVisible(tab.key, role) && !hiddenByModule.has(tab.key) && (tab.key !== 'workOrders' || role === 'org_admin' || role === 'manager'));
   // /requests/:id belongs under "My requests" for tenants.
   const tenantRequestDetail = isOccupant && /^\/requests\/(?!new$)[^/]+$/.test(location.pathname);
 
@@ -337,7 +343,10 @@ export default function AppShell() {
           </div>
         </header>
         <main className="flex-1 overflow-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:pb-6 lg:pt-6">
-          <Outlet />
+          <AnnouncementBar />
+          <ModuleGate>
+            <Outlet />
+          </ModuleGate>
         </main>
 
         <nav

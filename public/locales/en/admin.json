@@ -77,7 +77,9 @@
     "payment_succeeded": "Payment",
     "suspended": "Suspended",
     "unsuspended": "Unsuspended",
-    "deleted": "Deleted"
+    "deleted": "Deleted",
+    "ticket_created": "New ticket",
+    "ticket_reply": "Customer replied"
   },
   "range": {
     "label": "Date range",
@@ -567,7 +569,11 @@
     "invoice_mark_paid": "Invoice marked paid",
     "invoice_void": "Invoice voided",
     "invoice_refund": "Refund issued",
-    "subscription_cancel": "Subscription cancelled"
+    "subscription_cancel": "Subscription cancelled",
+    "ticket_create": "Ticket opened for customer",
+    "ticket_update": "Ticket updated",
+    "ticket_reply": "Replied to ticket",
+    "ticket_note": "Internal note on ticket"
   },
   "errors2": {
     "permission": "You don’t have permission to do that.",
@@ -584,7 +590,9 @@
     "manual_invoice": "Manual invoices are refunded from their own dialog.",
     "no_provider_subscription": "This tenant has no Stripe or PayPal subscription.",
     "not_authorized": "You don't have permission to do this.",
-    "failed": "Something went wrong."
+    "failed": "Something went wrong.",
+    "invalid_default_language": "The default language must be one of the supported languages.",
+    "invalid_version": "Check the version numbers."
   },
   "users": {
     "subtitle": "Every account on the platform, across all tenants.",
@@ -932,6 +940,297 @@
         "ignored": "Ignored",
         "failed": "Failed"
       }
+    }
+  },
+  "tickets": {
+    "subtitle": "Questions and problems from tenants, with response targets.",
+    "new": "New ticket",
+    "newHint": "Open a ticket for a customer who called or emailed. Replies go to their email or app.",
+    "create": "Create ticket",
+    "macros": "Saved replies",
+    "search": "Search subject, tenant, email, #number or tag",
+    "views": "Ticket views",
+    "view": {
+      "active": "Active",
+      "mine": "Mine",
+      "unassigned": "Unassigned",
+      "breached": "Overdue",
+      "all": "All"
+    },
+    "allPriorities": "All priorities",
+    "clearTenant": "Show all tenants",
+    "empty": "No tickets here.",
+    "noBreached": "Nothing overdue. Nice work.",
+    "awaitingReply": "Customer replied",
+    "unassigned": "Unassigned",
+    "assignToMe": "Assign to me",
+    "assignTo": "Assign to…",
+    "setStatus": "Set status…",
+    "hours": "{{value}} h",
+    "kpi": {
+      "open": "Open",
+      "unassigned": "Unassigned",
+      "mine": "Assigned to me",
+      "breached": "Overdue",
+      "firstResponse": "First response (avg, 30 days)",
+      "slaMet": "Answered on time (30 days)",
+      "satisfaction": "Satisfaction (30 days)",
+      "solved": "Solved (7 days)"
+    },
+    "cols": {
+      "subject": "Ticket",
+      "status": "Status",
+      "priority": "Priority",
+      "sla": "Next due",
+      "assignee": "Assignee",
+      "updated": "Last activity",
+      "category": "Category",
+      "requester": "Requester",
+      "created": "Created"
+    },
+    "status": {
+      "open": "Open",
+      "pending": "Waiting on customer",
+      "on_hold": "On hold",
+      "solved": "Solved",
+      "closed": "Closed"
+    },
+    "priority": {
+      "urgent": "Urgent",
+      "high": "High",
+      "normal": "Normal",
+      "low": "Low"
+    },
+    "category": {
+      "question": "Question",
+      "problem": "Problem",
+      "billing": "Billing",
+      "account": "Account",
+      "feature": "Feature request",
+      "other": "Other"
+    },
+    "channel": {
+      "app": "From the app",
+      "admin": "Opened by staff",
+      "email": "By email"
+    },
+    "sla": {
+      "ok": "On track",
+      "due_soon": "Due soon",
+      "breached": "Overdue",
+      "paused": "Paused",
+      "done": "Done",
+      "met": "Met",
+      "missed": "Missed"
+    },
+    "notFound": "This ticket doesn't exist.",
+    "opened": "opened {{when}}",
+    "customer": "Customer",
+    "otherTickets_one": "{{count}} other ticket from this tenant",
+    "otherTickets_other": "{{count}} other tickets from this tenant",
+    "rating": "Customer rating",
+    "ratings": {
+      "good": "Good: the customer was happy",
+      "bad": "Bad: the customer wasn't happy"
+    },
+    "staff": "Support",
+    "internalNote": "Internal note",
+    "composer": "Reply or note",
+    "mode": {
+      "reply": "Reply to customer",
+      "note": "Internal note"
+    },
+    "closedHint": "This ticket is closed. A reply reopens it.",
+    "replyPlaceholder": "Write your reply…",
+    "notePlaceholder": "Only staff can see this note.",
+    "insertMacro": "Insert saved reply…",
+    "noMacros": "No saved replies yet",
+    "thenSet": "Then set to",
+    "keepStatus": "Keep status",
+    "addNote": "Add note",
+    "send": "Send reply",
+    "replyNotifies": "The customer is notified in the app and by email.",
+    "properties": "Details",
+    "tags": "Tags",
+    "slaTitle": "Response targets",
+    "slaHint": "Paused while waiting on the customer or on hold.",
+    "firstResponse": "First response",
+    "resolution": "Resolution",
+    "dueAt": "Due {{when}}",
+    "description": "Description",
+    "tenantOptional": "Tenant (optional)",
+    "requesterEmail": "Customer email",
+    "macrosHint": "Reusable answers for common questions. Insert them while replying.",
+    "newMacro": "New saved reply",
+    "macroTitle": "Name",
+    "macroBody": "Reply text",
+    "macroVars": "You can use {{first_name}}, {{name}}, {{ticket}} and {{agent}}.",
+    "editMacro": "Edit {{title}}",
+    "deleteMacro": "Delete {{title}}",
+    "toast": {
+      "created": "Ticket created.",
+      "updated": "Ticket updated.",
+      "replied": "Reply sent.",
+      "noted": "Note added.",
+      "macroSaved": "Saved reply saved.",
+      "macroDeleted": "Saved reply deleted."
+    }
+  },
+  "features": {
+    "subtitle": "Switch modules and features on or off for everyone, or roll a feature out to a share of tenants.",
+    "new": "New feature",
+    "create": "Create feature",
+    "modules": "Modules",
+    "modulesHint": "Switched-off modules disappear from tenants' menus.",
+    "features": "Features",
+    "featuresHint": "Flags for new functionality; roll out gradually with the percentage.",
+    "noFeatures": "No feature flags yet.",
+    "on": "On",
+    "off": "Off",
+    "toggle": "Switch {{name}} on or off",
+    "rollout": "Rollout",
+    "rolloutFor": "Rollout percentage for {{name}}",
+    "reach": "On for {{on}} of {{total}} tenants",
+    "overrides": "{{on}} forced on, {{off}} forced off",
+    "overridesHint": "To switch something on or off for one tenant only, use the Features tab on that tenant's page.",
+    "key": "Key",
+    "keyHint": "Lowercase letters, digits, dots, - or _. Developers check this key.",
+    "description": "Description",
+    "rolloutStart": "Start with this share of tenants (%)",
+    "rolloutHint": "0 = nobody yet; raise it step by step.",
+    "delete": "Delete",
+    "deleteTitle": "Delete {{key}}?",
+    "deleteBody": "Tenant overrides for this feature are removed too.",
+    "toast": {
+      "saved": "Saved.",
+      "deleted": "Feature deleted."
+    }
+  },
+  "announcements": {
+    "subtitle": "Messages to tenants, shown as a banner at the top of their app.",
+    "new": "New announcement",
+    "editTitle": "Edit announcement",
+    "empty": "No announcements yet.",
+    "emptyBody": "Tell tenants about new features, planned maintenance or incidents.",
+    "state": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "live": "Live",
+      "ended": "Ended"
+    },
+    "level": {
+      "info": "Information",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "levelLabel": "Type",
+    "criticalHint": "Critical announcements can't be dismissed.",
+    "audience": "Show to",
+    "audiences": {
+      "all": "Every tenant",
+      "plans": "Tenants on some plans",
+      "tenants": "Specific tenants"
+    },
+    "toAll": "Every tenant",
+    "toPlans": "Plans: {{plans}}",
+    "toTenants_one": "{{count}} tenant",
+    "toTenants_other": "{{count}} tenants",
+    "from": "From {{when}}",
+    "until": "until {{when}}",
+    "notPublished": "Not published",
+    "reach_one": "reaches {{count}} tenant",
+    "reach_other": "reaches {{count}} tenants",
+    "dismissed_one": "dismissed by {{count}} person",
+    "dismissed_other": "dismissed by {{count}} people",
+    "publishNow": "Publish now",
+    "endNow": "End now",
+    "unschedule": "Unschedule",
+    "edit": "Edit {{title}}",
+    "delete": "Delete {{title}}",
+    "deleteTitle": "Delete this announcement?",
+    "deleteBody": "“{{title}}” disappears for everyone.",
+    "deleteConfirm": "Delete",
+    "title": "Title",
+    "body": "Message",
+    "choosePlans": "Plans",
+    "chooseTenants": "Tenants",
+    "removeTenant": "Remove {{name}}",
+    "show": "When",
+    "startNow": "Publish now",
+    "startLater": "Schedule",
+    "startDraft": "Save as draft",
+    "startAt": "Start",
+    "endAt": "End (optional)",
+    "endHint": "Leave empty to keep it until you end it.",
+    "preview": "Preview",
+    "saveDraft": "Save draft",
+    "schedule": "Schedule",
+    "publish": "Publish",
+    "toast": {
+      "saved": "Announcement saved.",
+      "deleted": "Announcement deleted."
+    }
+  },
+  "appSettings": {
+    "subtitle": "Name, languages, email sender, maintenance mode, mobile app versions and message templates.",
+    "tabsLabel": "Settings sections",
+    "tabs": {
+      "general": "General",
+      "maintenance": "Maintenance",
+      "mobile": "Mobile app",
+      "templates": "Message templates"
+    },
+    "appName": "App name",
+    "timezone": "Default time zone",
+    "timezoneHint": "For new tenants; each tenant can change theirs.",
+    "languages": "Languages",
+    "lng": {
+      "en": "English",
+      "vi": "Vietnamese"
+    },
+    "defaultLanguage": "Default language",
+    "defaultNotSupported": "Choose one of the supported languages.",
+    "fromName": "Email sender name",
+    "fromAddress": "Email sender address",
+    "fromAddressHint": "Must be a domain verified with your email provider (Resend).",
+    "supportEmail": "Support email",
+    "supportEmailHint": "Shown to users on the maintenance page.",
+    "maintenanceMode": "Maintenance mode",
+    "maintenanceHint": "While on, everyone except platform staff sees a maintenance page. Staff can still sign in and work.",
+    "maintenanceOn": "On",
+    "maintenanceOff": "Off",
+    "message": "Message",
+    "messageHint": "What users see. Leave empty for a standard message.",
+    "until": "Expected back",
+    "untilHint": "Optional; shown to users.",
+    "previewTitle": "{{app}} is being updated",
+    "previewDefault": "We're making improvements and will be back shortly.",
+    "previewUntil": "Expected back: {{when}}",
+    "saveMessage": "Save message",
+    "turnOn": "Turn on maintenance mode",
+    "turnOff": "Turn off maintenance mode",
+    "mobileHint": "The mobile apps check these at start-up.",
+    "latestVersion": "Latest version",
+    "minVersion": "Minimum supported version",
+    "minVersionHint": "Older apps are told to update.",
+    "forceUpdate": "Block older apps until they update",
+    "versionFormat": "Use a version like 1.4 or 1.4.2.",
+    "versionOrder": "The minimum can't be newer than the latest version.",
+    "noTemplates": "No templates yet.",
+    "templateHint": "Sent to customers. Placeholders in double braces are filled in when the message is sent.",
+    "templateNames": {
+      "support_ticket_reply": "Support: staff reply",
+      "support_ticket_solved": "Support: ticket solved"
+    },
+    "subject": "Subject",
+    "body": "Message",
+    "variables": "Placeholders: {{list}}",
+    "unknownVars": "Unknown placeholders: {{list}}",
+    "sampleMessage": "Please update the app to version 1.4 and scan the code again.",
+    "revert": "Undo changes",
+    "toast": {
+      "saved": "Settings saved.",
+      "templateSaved": "Template saved."
     }
   }
 }
