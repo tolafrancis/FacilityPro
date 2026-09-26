@@ -397,7 +397,8 @@
       "pending": "Pending invitations",
       "expires": "expires {{when}}",
       "removeTitle": "Remove this member?",
-      "removeBody": "{{email}} loses access to this tenant. Their account and the records they created stay."
+      "removeBody": "{{email}} loses access to this tenant. Their account and the records they created stay.",
+      "openInUsers": "Open in Users"
     },
     "impersonate": {
       "title": "Sign in as {{email}}",
@@ -556,7 +557,12 @@
     "client_user_password_reset": "Password reset sent",
     "insert": "Record added",
     "update": "Record changed",
-    "delete": "Record deleted"
+    "delete": "Record deleted",
+    "user_ban": "Account banned",
+    "user_unban": "Ban lifted",
+    "user_sign_out": "Signed out everywhere",
+    "user_reset_mfa": "2FA reset",
+    "user_confirm_email": "Email marked confirmed"
   },
   "errors2": {
     "permission": "You don’t have permission to do that.",
@@ -564,5 +570,148 @@
     "planFull": "The tenant’s plan has no room for more members.",
     "lastAdmin": "A tenant must keep at least one org admin.",
     "generic": "Something went wrong."
+  },
+  "users": {
+    "subtitle": "Every account on the platform, across all tenants.",
+    "exportAll": "Export CSV",
+    "exportSelected": "Export selected",
+    "searchPlaceholder": "Search email, name, phone, tenant or ID",
+    "allStatuses": "All statuses",
+    "allRoles": "All roles",
+    "role": "Role in a tenant",
+    "noMatches": "No users match these filters.",
+    "empty": "No users yet.",
+    "more_one": "+{{count}} more",
+    "more_other": "+{{count}} more",
+    "yes": "Yes",
+    "no": "No",
+    "on": "On",
+    "off": "Off",
+    "inTenant": "In {{name}}",
+    "clearTenant": "Show users of every tenant",
+    "toast": {
+      "exported_one": "Exported {{count}} user.",
+      "exported_other": "Exported {{count}} users."
+    },
+    "cols": {
+      "user": "User",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "status": "Status",
+      "tenants": "Tenants",
+      "staff": "Staff role",
+      "mfa": "2FA",
+      "created": "Signed up",
+      "lastSignIn": "Last sign-in"
+    },
+    "filters": {
+      "active": "Active",
+      "banned": "Banned",
+      "unconfirmed": "Email not confirmed",
+      "inactive": "No sign-in for 30 days",
+      "no_org": "Not in any tenant",
+      "staff": "Platform staff"
+    }
+  },
+  "userStatus": {
+    "active": "Active",
+    "banned": "Banned",
+    "unconfirmed": "Unconfirmed"
+  },
+  "user": {
+    "notFound": "This account doesn't exist.",
+    "toast": {
+      "banned": "Account banned and signed out everywhere.",
+      "unbanned": "Ban lifted.",
+      "signedOut": "Signed out of every device.",
+      "mfaReset": "Two-factor authentication reset.",
+      "confirmed": "Email address marked as confirmed."
+    },
+    "mfaOn": "2FA on",
+    "mfaOff": "2FA off",
+    "joined": "Signed up {{when}}",
+    "actions": {
+      "ban": "Ban",
+      "unban": "Lift ban",
+      "signOut": "Sign out everywhere",
+      "resetMfa": "Reset 2FA",
+      "confirmEmail": "Mark email confirmed"
+    },
+    "bannedForever": "Banned until the ban is lifted.",
+    "bannedUntil": "Banned until {{when}}.",
+    "staffNote": "This is a platform staff account. Staff are managed under Admin team.",
+    "tenantsTitle_one": "{{count}} tenant",
+    "tenantsTitle_other": "{{count}} tenants",
+    "noTenants": "Not a member of any tenant.",
+    "tenant": "Tenant",
+    "joinedCol": "Joined",
+    "sessionsTitle": "Signed-in devices",
+    "sessionsHint": "Sessions that are still signed in.",
+    "noSessions": "Not signed in on any device.",
+    "unknownDevice": "Unknown device",
+    "started": "signed in {{when}}",
+    "with2fa": "verified with 2FA",
+    "lastUsed": "last used {{when}}",
+    "loginsTitle": "Sign-in history",
+    "loginsHint": "The last 50 account events recorded by Supabase Auth.",
+    "noLogins": "No sign-in events recorded.",
+    "loginActions": {
+      "login": "Signed in",
+      "logout": "Signed out",
+      "user_signedup": "Signed up",
+      "user_recovery_requested": "Asked for a password reset",
+      "user_updated_password": "Changed password",
+      "user_modified": "Updated account",
+      "token_revoked": "Session ended"
+    },
+    "profileTitle": "Account",
+    "idCopied": "ID copied.",
+    "signInWith": "Signs in with",
+    "providers": {
+      "email": "Email and password",
+      "google": "Google",
+      "apple": "Apple",
+      "phone": "Phone",
+      "azure": "Microsoft"
+    },
+    "emailConfirmed": "Email confirmed",
+    "activeDays": "Active days (30)",
+    "mfaTitle": "Two-factor authentication",
+    "noMfa": "No authenticator set up.",
+    "factorTypes": {
+      "totp": "Authenticator app",
+      "webauthn": "Security key",
+      "phone": "SMS code"
+    },
+    "factorStatus": {
+      "verified": "Active",
+      "unverified": "Not finished"
+    },
+    "historyTitle": "Staff actions",
+    "noHistory": "No staff actions on this account.",
+    "signOut": {
+      "title": "Sign out everywhere?",
+      "body_one": "{{email}} is signed out of {{count}} device and must sign in again.",
+      "body_other": "{{email}} is signed out of {{count}} devices and must sign in again. Their access tokens stop working within an hour."
+    },
+    "resetMfa": {
+      "title": "Reset two-factor authentication?",
+      "body": "{{email}}'s authenticator is removed, so they can sign in with just their password and set up 2FA again. Only do this after confirming who you're talking to."
+    },
+    "confirmEmail": {
+      "title": "Mark the email address as confirmed?",
+      "body": "{{email}} can sign in without clicking the confirmation email. Only do this if you're sure they own the address."
+    },
+    "ban": {
+      "title": "Ban {{email}}?",
+      "body": "They're signed out everywhere and can't sign in until the ban ends. Their tenants and records stay as they are.",
+      "length": "Ban for",
+      "forever": "Until I lift it",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "reason": "Reason (required)",
+      "audited": "Recorded in the audit log with your name."
+    }
   }
 }

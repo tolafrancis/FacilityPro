@@ -191,7 +191,7 @@ function BackLink() {
   );
 }
 
-function MoreMenu({ items }: { items: { key: string; icon: typeof Pencil; label: string; onClick: () => void; danger?: boolean }[] }) {
+export function MoreMenu({ items }: { items: { key: string; icon: typeof Pencil; label: string; onClick: () => void; danger?: boolean }[] }) {
   const { t } = useTranslation('admin');
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -402,7 +402,10 @@ function UsersTab({ orgId, closed, lng }: { orgId: string; closed: boolean; lng:
         </Card>
       )}
 
-      <Card title={t('tenant.users.title', { count: users.data?.length ?? 0 })}>
+      <Card
+        title={t('tenant.users.title', { count: users.data?.length ?? 0 })}
+        actions={<Link to={`/admin/users?org=${orgId}`} className="text-sm text-brand-600 hover:underline dark:text-brand">{t('tenant.users.openInUsers')}</Link>}
+      >
         {users.isLoading ? (
           <div className="space-y-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-10" />)}</div>
         ) : users.isError ? (
@@ -425,7 +428,7 @@ function UsersTab({ orgId, closed, lng }: { orgId: string; closed: boolean; lng:
                 {(users.data ?? []).map((u) => (
                   <tr key={u.user_id} className="border-b border-line last:border-0">
                     <td className="px-5 py-2.5">
-                      <p className="font-medium text-ink">{u.full_name ?? u.email}</p>
+                      <Link to={`/admin/users/${u.user_id}`} className="font-medium text-ink hover:underline">{u.full_name ?? u.email}</Link>
                       <p className="text-xs text-ink-muted">
                         {u.email}
                         {!u.confirmed && <> · <Badge tone="warn">{t('tenant.users.unconfirmed')}</Badge></>}
@@ -498,7 +501,7 @@ function UsersTab({ orgId, closed, lng }: { orgId: string; closed: boolean; lng:
   );
 }
 
-function IconButton({ label, onClick, danger, children }: { label: string; onClick: () => void; danger?: boolean; children: ReactNode }) {
+export function IconButton({ label, onClick, danger, children }: { label: string; onClick: () => void; danger?: boolean; children: ReactNode }) {
   return (
     <button
       type="button"
@@ -512,7 +515,7 @@ function IconButton({ label, onClick, danger, children }: { label: string; onCli
   );
 }
 
-function ImpersonateDialog({ orgId, user, onClose }: { orgId: string; user: { id: string; email: string }; onClose: () => void }) {
+export function ImpersonateDialog({ orgId, user, onClose }: { orgId: string; user: { id: string; email: string }; onClose: () => void }) {
   const { t } = useTranslation('admin');
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
@@ -797,7 +800,7 @@ function DeleteDialog({ orgId, name, onClose }: { orgId: string; name: string; o
   );
 }
 
-function ConfirmDialog({ title, body, confirmLabel, danger, busy, onClose, onConfirm }: {
+export function ConfirmDialog({ title, body, confirmLabel, danger, busy, onClose, onConfirm }: {
   title: string; body: string; confirmLabel: string; danger?: boolean; busy?: boolean; onClose: () => void; onConfirm: () => void;
 }) {
   const { t } = useTranslation('admin');

@@ -36,8 +36,8 @@ src/admin/
   pages/
     Overview.tsx          main dashboard
 public/locales/{en,vi}/admin.json   all admin text, English and Vietnamese
-supabase/migrations/0083_admin_platform.sql
-supabase/security-tests/admin_platform.sql
+supabase/migrations/0083_admin_platform.sql   (+ 0084 tenants, 0085 users)
+supabase/security-tests/admin_*.sql
 ```
 
 Later modules add `src/admin/pages/<Module>.tsx`, their data hooks, and a
@@ -118,6 +118,22 @@ disabled_at)`. A disabled account has no access.
   is made. Deploy with JWT verification on:
   `supabase functions deploy admin-impersonate --project-ref <ref>`.
 
+## Users (0085)
+
+- **List** (`/admin/users`): every account across tenants. Server-side search (email, name, phone,
+  tenant name, ID), filters (active, banned, email not confirmed, no sign-in for 30 days, not in any
+  tenant, platform staff; role held in a tenant; one tenant via `?org=`), sorting, paging, column
+  choice and CSV export. A tenant's Users tab links here with that tenant pre-selected.
+- **Detail** (`/admin/users/:id`): profile, tenants and roles, signed-in devices (browser, IP, when),
+  2FA factors, the last 50 sign-in events from Supabase Auth, and every staff action on the account.
+- **Actions** (`users.manage`; never on platform staff or your own account; all audited):
+  send password reset, ban for 1/7/30/90 days or until lifted (reason required; also signs the user
+  out everywhere), lift ban, sign out everywhere, reset 2FA, mark email confirmed. Sign in as the user
+  (support) is offered per tenant, as on the tenant page.
+- Only named, non-secret columns are read from the `auth` schema: never password hashes, refresh
+  tokens or authenticator secrets. A signed-out user's current access token stays valid until it
+  expires (at most an hour, Supabase's default).
+
 ### Demo data (local or staging only)
 
 ```sql
@@ -152,5 +168,6 @@ keys are Edge Function secrets, added with the Billing module.
 | Foundation: schema, RBAC, layout, theme, toasts, skeletons | Done |
 | 1. Main dashboard | Done |
 | 2. Tenant management | Done |
-| 3. Users · 4. Plans & billing (Stripe + PayPal) · 5. App management · 6. Support · 7. Analytics · 8. Audit & security · 9. Monitoring · 10. Admin team | Planned, schema in place |
+| 3. Users | Done |
+| 4. Plans & billing (Stripe + PayPal) · 5. App management · 6. Support · 7. Analytics · 8. Audit & security · 9. Monitoring · 10. Admin team | Planned, schema in place |
 | Demo seed data (20 tenants, 200 users, invoices, tickets, activity) | Done: `supabase/seed/admin_demo.sql`, local/staging only |

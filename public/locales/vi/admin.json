@@ -397,7 +397,8 @@
       "pending": "Lời mời đang chờ",
       "expires": "hết hạn {{when}}",
       "removeTitle": "Xóa thành viên này?",
-      "removeBody": "{{email}} sẽ mất quyền truy cập tổ chức này. Tài khoản và dữ liệu họ tạo vẫn được giữ."
+      "removeBody": "{{email}} sẽ mất quyền truy cập tổ chức này. Tài khoản và dữ liệu họ tạo vẫn được giữ.",
+      "openInUsers": "Mở trong Người dùng"
     },
     "impersonate": {
       "title": "Đăng nhập với tư cách {{email}}",
@@ -556,7 +557,12 @@
     "client_user_password_reset": "Gửi đặt lại mật khẩu",
     "insert": "Thêm bản ghi",
     "update": "Sửa bản ghi",
-    "delete": "Xóa bản ghi"
+    "delete": "Xóa bản ghi",
+    "user_ban": "Cấm tài khoản",
+    "user_unban": "Gỡ lệnh cấm",
+    "user_sign_out": "Đăng xuất mọi nơi",
+    "user_reset_mfa": "Đặt lại 2FA",
+    "user_confirm_email": "Đánh dấu đã xác nhận email"
   },
   "errors2": {
     "permission": "Bạn không có quyền làm việc này.",
@@ -564,5 +570,148 @@
     "planFull": "Gói của tổ chức đã hết chỗ cho thành viên.",
     "lastAdmin": "Tổ chức phải còn ít nhất một quản trị.",
     "generic": "Đã xảy ra lỗi."
+  },
+  "users": {
+    "subtitle": "Mọi tài khoản trên nền tảng, thuộc tất cả khách hàng.",
+    "exportAll": "Xuất CSV",
+    "exportSelected": "Xuất mục đã chọn",
+    "searchPlaceholder": "Tìm email, tên, số điện thoại, khách hàng hoặc ID",
+    "allStatuses": "Mọi trạng thái",
+    "allRoles": "Mọi vai trò",
+    "role": "Vai trò trong khách hàng",
+    "noMatches": "Không có người dùng nào khớp bộ lọc.",
+    "empty": "Chưa có người dùng.",
+    "more_one": "+{{count}} nữa",
+    "more_other": "+{{count}} nữa",
+    "yes": "Có",
+    "no": "Không",
+    "on": "Bật",
+    "off": "Tắt",
+    "inTenant": "Trong {{name}}",
+    "clearTenant": "Hiện người dùng của mọi khách hàng",
+    "toast": {
+      "exported_one": "Đã xuất {{count}} người dùng.",
+      "exported_other": "Đã xuất {{count}} người dùng."
+    },
+    "cols": {
+      "user": "Người dùng",
+      "name": "Tên",
+      "email": "Email",
+      "phone": "Điện thoại",
+      "status": "Trạng thái",
+      "tenants": "Khách hàng",
+      "staff": "Vai trò nhân viên",
+      "mfa": "2FA",
+      "created": "Ngày đăng ký",
+      "lastSignIn": "Đăng nhập gần nhất"
+    },
+    "filters": {
+      "active": "Đang hoạt động",
+      "banned": "Bị cấm",
+      "unconfirmed": "Chưa xác nhận email",
+      "inactive": "Không đăng nhập 30 ngày",
+      "no_org": "Không thuộc khách hàng nào",
+      "staff": "Nhân viên nền tảng"
+    }
+  },
+  "userStatus": {
+    "active": "Hoạt động",
+    "banned": "Bị cấm",
+    "unconfirmed": "Chưa xác nhận"
+  },
+  "user": {
+    "notFound": "Tài khoản này không tồn tại.",
+    "toast": {
+      "banned": "Đã cấm tài khoản và đăng xuất khỏi mọi thiết bị.",
+      "unbanned": "Đã gỡ lệnh cấm.",
+      "signedOut": "Đã đăng xuất khỏi mọi thiết bị.",
+      "mfaReset": "Đã đặt lại xác thực hai lớp.",
+      "confirmed": "Đã đánh dấu email là đã xác nhận."
+    },
+    "mfaOn": "Đã bật 2FA",
+    "mfaOff": "Chưa bật 2FA",
+    "joined": "Đăng ký {{when}}",
+    "actions": {
+      "ban": "Cấm",
+      "unban": "Gỡ lệnh cấm",
+      "signOut": "Đăng xuất mọi nơi",
+      "resetMfa": "Đặt lại 2FA",
+      "confirmEmail": "Đánh dấu đã xác nhận email"
+    },
+    "bannedForever": "Bị cấm cho đến khi được gỡ.",
+    "bannedUntil": "Bị cấm đến {{when}}.",
+    "staffNote": "Đây là tài khoản nhân viên nền tảng. Nhân viên được quản lý trong mục Đội ngũ quản trị.",
+    "tenantsTitle_one": "{{count}} khách hàng",
+    "tenantsTitle_other": "{{count}} khách hàng",
+    "noTenants": "Không là thành viên của khách hàng nào.",
+    "tenant": "Khách hàng",
+    "joinedCol": "Tham gia",
+    "sessionsTitle": "Thiết bị đang đăng nhập",
+    "sessionsHint": "Các phiên vẫn còn đăng nhập.",
+    "noSessions": "Không đăng nhập trên thiết bị nào.",
+    "unknownDevice": "Thiết bị không rõ",
+    "started": "đăng nhập {{when}}",
+    "with2fa": "đã xác thực 2FA",
+    "lastUsed": "dùng lần cuối {{when}}",
+    "loginsTitle": "Lịch sử đăng nhập",
+    "loginsHint": "50 sự kiện tài khoản gần nhất do Supabase Auth ghi lại.",
+    "noLogins": "Chưa ghi nhận lần đăng nhập nào.",
+    "loginActions": {
+      "login": "Đăng nhập",
+      "logout": "Đăng xuất",
+      "user_signedup": "Đăng ký",
+      "user_recovery_requested": "Yêu cầu đặt lại mật khẩu",
+      "user_updated_password": "Đổi mật khẩu",
+      "user_modified": "Cập nhật tài khoản",
+      "token_revoked": "Phiên kết thúc"
+    },
+    "profileTitle": "Tài khoản",
+    "idCopied": "Đã sao chép ID.",
+    "signInWith": "Đăng nhập bằng",
+    "providers": {
+      "email": "Email và mật khẩu",
+      "google": "Google",
+      "apple": "Apple",
+      "phone": "Điện thoại",
+      "azure": "Microsoft"
+    },
+    "emailConfirmed": "Xác nhận email",
+    "activeDays": "Số ngày hoạt động (30)",
+    "mfaTitle": "Xác thực hai lớp",
+    "noMfa": "Chưa thiết lập ứng dụng xác thực.",
+    "factorTypes": {
+      "totp": "Ứng dụng xác thực",
+      "webauthn": "Khóa bảo mật",
+      "phone": "Mã SMS"
+    },
+    "factorStatus": {
+      "verified": "Đang dùng",
+      "unverified": "Chưa hoàn tất"
+    },
+    "historyTitle": "Thao tác của nhân viên",
+    "noHistory": "Chưa có thao tác nào của nhân viên trên tài khoản này.",
+    "signOut": {
+      "title": "Đăng xuất mọi nơi?",
+      "body_one": "{{email}} sẽ bị đăng xuất khỏi {{count}} thiết bị và phải đăng nhập lại.",
+      "body_other": "{{email}} sẽ bị đăng xuất khỏi {{count}} thiết bị và phải đăng nhập lại. Mã truy cập hiện tại hết hiệu lực trong vòng một giờ."
+    },
+    "resetMfa": {
+      "title": "Đặt lại xác thực hai lớp?",
+      "body": "Ứng dụng xác thực của {{email}} sẽ bị gỡ, họ có thể đăng nhập chỉ bằng mật khẩu và thiết lập lại 2FA. Chỉ làm việc này sau khi đã xác minh danh tính người yêu cầu."
+    },
+    "confirmEmail": {
+      "title": "Đánh dấu email là đã xác nhận?",
+      "body": "{{email}} có thể đăng nhập mà không cần bấm email xác nhận. Chỉ làm việc này khi chắc chắn họ sở hữu địa chỉ đó."
+    },
+    "ban": {
+      "title": "Cấm {{email}}?",
+      "body": "Người dùng bị đăng xuất khỏi mọi nơi và không thể đăng nhập cho đến khi hết lệnh cấm. Khách hàng và dữ liệu của họ vẫn giữ nguyên.",
+      "length": "Thời hạn cấm",
+      "forever": "Đến khi tôi gỡ",
+      "days_one": "{{count}} ngày",
+      "days_other": "{{count}} ngày",
+      "reason": "Lý do (bắt buộc)",
+      "audited": "Được ghi vào nhật ký kiểm tra kèm tên bạn."
+    }
   }
 }

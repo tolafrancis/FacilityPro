@@ -21,7 +21,34 @@ create table auth.users (
   -- Columns Supabase has that the admin panel reads (0084).
   raw_user_meta_data jsonb not null default '{}'::jsonb,
   last_sign_in_at timestamptz, banned_until timestamptz, email_confirmed_at timestamptz,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- 0085
+  phone text, raw_app_meta_data jsonb not null default '{}'::jsonb
+);
+-- Session, 2FA and sign-in tables the admin panel reads and clears (0085),
+-- with Supabase's column names and types.
+create type auth.aal_level as enum ('aal1', 'aal2', 'aal3');
+create type auth.factor_type as enum ('totp', 'webauthn', 'phone');
+create type auth.factor_status as enum ('unverified', 'verified');
+create table auth.sessions (
+  id uuid primary key, user_id uuid not null references auth.users (id) on delete cascade,
+  created_at timestamptz default now(), updated_at timestamptz default now(),
+  aal auth.aal_level, not_after timestamptz, refreshed_at timestamp without time zone,
+  user_agent text, ip inet, tag text
+);
+create table auth.refresh_tokens (
+  id bigserial primary key, token varchar(255), user_id varchar(255), revoked boolean,
+  created_at timestamptz default now(), updated_at timestamptz,
+  session_id uuid references auth.sessions (id) on delete cascade
+);
+create table auth.mfa_factors (
+  id uuid primary key, user_id uuid not null references auth.users (id) on delete cascade,
+  friendly_name text, factor_type auth.factor_type not null, status auth.factor_status not null,
+  created_at timestamptz not null default now(), updated_at timestamptz not null default now(), secret text
+);
+create table auth.audit_log_entries (
+  instance_id uuid, id uuid primary key, payload json,
+  created_at timestamptz, ip_address varchar(64) not null default ''
 );
 create function auth.uid() returns uuid language sql stable as
   $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;

@@ -237,7 +237,7 @@ export function useAdminAction<V>(fn: (v: V) => Promise<unknown>, success: strin
     onSuccess: (_d, v) => {
       notify(typeof success === 'function' ? success(v) : success, 'success');
       for (const k of ['admin_tenants', 'admin_tenant', 'admin_tenant_users', 'admin_tenant_invites', 'admin_tenant_activity',
-        'admin_tenant_flags', 'admin_tenant_notes', 'admin_overview', 'admin_events']) {
+        'admin_tenant_flags', 'admin_tenant_notes', 'admin_overview', 'admin_events', 'admin_users', 'admin_user']) {
         void qc.invalidateQueries({ queryKey: [k] });
       }
     },

@@ -9,6 +9,8 @@ import { EmptyState, PageHeader, Skeleton } from './components/ui';
 import Overview from './pages/Overview';
 import Tenants from './pages/Tenants';
 import TenantDetail from './pages/TenantDetail';
+import Users from './pages/Users';
+import UserDetail from './pages/UserDetail';
 
 /**
  * The platform admin panel (/admin), loaded only when opened. Every route
@@ -33,6 +35,8 @@ function AdminRoutes() {
         <Route index element={<Guard permission="dashboard.view"><Overview /></Guard>} />
         <Route path="tenants" element={<Guard permission="tenants.view"><Tenants /></Guard>} />
         <Route path="tenants/:id" element={<Guard permission="tenants.view"><TenantDetail /></Guard>} />
+        <Route path="users" element={<Guard permission="users.view"><Users /></Guard>} />
+        <Route path="users/:id" element={<Guard permission="users.view"><UserDetail /></Guard>} />
         {ADMIN_NAV.flatMap((g) => g.items)
           .filter((i) => !i.ready)
           .map((i) => (
