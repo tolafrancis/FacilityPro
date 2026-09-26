@@ -30,7 +30,7 @@ select t.check('failing emails, a stuck queue and failing workflows are all flag
     = array['outbox_backlog', 'outbox_failed', 'workflow_failures']);
 
 select t.check('platform admins can see the checks; org admins cannot',
-  t.run('authenticated', :'ops', $q$select * from fp_system_health()$q$) = 'ok:3'
+  t.run('authenticated', :'ops', $q$select * from fp_system_health()$q$) = 'ok:4'  -- 4 checks since 0090 (payment webhooks)
   and t.run('authenticated', :'admin', $q$select * from fp_system_health()$q$) like 'err:%');
 select t.check('only the service role can read the status verdict',
   t.run('service_role', null, $q$select fp_system_status()$q$) = 'ok:1'

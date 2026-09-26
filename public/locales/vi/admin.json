@@ -162,7 +162,7 @@
     "jobFailures": "Tác vụ lỗi (24 giờ)",
     "outboxPending": "Tin nhắn chờ gửi",
     "outboxFailed": "Tin nhắn lỗi (24 giờ)",
-    "apiNote": "Thời gian hoạt động và tỷ lệ lỗi API sẽ có trong mô-đun Giám sát."
+    "openMonitoring": "Mở Giám sát →"
   },
   "errors": {
     "load": "Không tải được dữ liệu. Kiểm tra kết nối và thử lại."
@@ -576,7 +576,13 @@
     "ticket_note": "Ghi chú nội bộ trên phiếu",
     "report_send_now": "Gửi báo cáo",
     "settings_change": "Thay đổi cài đặt nền tảng",
-    "staff_change": "Thay đổi tài khoản nhân viên"
+    "staff_change": "Thay đổi tài khoản nhân viên",
+    "job_run": "Chạy tác vụ thủ công",
+    "outbox_retry": "Gửi lại tin nhắn",
+    "outbox_cancel": "Hủy tin nhắn",
+    "error_resolved": "Đánh dấu lỗi đã xử lý",
+    "error_ignored": "Bỏ qua lỗi",
+    "error_open": "Mở lại lỗi"
   },
   "errors2": {
     "permission": "Bạn không có quyền làm việc này.",
@@ -1398,7 +1404,10 @@
       "report": "Báo cáo",
       "insert": "Thêm bản ghi",
       "update": "Sửa bản ghi",
-      "delete": "Xóa bản ghi"
+      "delete": "Xóa bản ghi",
+      "job": "Tác vụ",
+      "outbox": "Hàng đợi email",
+      "error": "Lỗi ứng dụng"
     },
     "cols": {
       "at": "Thời điểm",
@@ -1476,5 +1485,256 @@
     "active": "Xác thực hai lớp đang bật cho phiên này.",
     "gateTitle": "Yêu cầu xác thực hai lớp",
     "gateBody": "Nhân viên nền tảng phải xác nhận đăng nhập bằng ứng dụng xác thực."
+  },
+  "monitoring": {
+    "subtitle": "Nền tảng có đang hoạt động tốt không? Tác vụ nền, gửi email, lỗi ứng dụng và webhook thanh toán.",
+    "tabsLabel": "Các mục giám sát",
+    "tabs": {
+      "status": "Trạng thái",
+      "jobs": "Tác vụ nền",
+      "email": "Hàng đợi email",
+      "errors": "Lỗi",
+      "webhooks": "Webhook"
+    },
+    "refresh": "Làm mới",
+    "actions": "Thao tác",
+    "hour": "Giờ",
+    "prev": "Trước",
+    "next": "Sau",
+    "pageOf": "Trang {{page}}/{{pages}}",
+    "status": {
+      "allGood": "Mọi hệ thống bình thường",
+      "problems_other": "{{count}} mục cần chú ý",
+      "autoRefresh": "tự làm mới mỗi phút"
+    },
+    "tiles": {
+      "jobs": "Tác vụ đúng lịch",
+      "sent": "Email đã gửi (24 giờ)",
+      "failed": "Email lỗi (24 giờ)",
+      "pending": "Đang chờ gửi",
+      "errors": "Lỗi ứng dụng đang mở",
+      "webhooks": "Webhook lỗi (24 giờ)"
+    },
+    "hourly": {
+      "sent": "Email đã gửi mỗi giờ",
+      "failed": "Email lỗi mỗi giờ",
+      "job_failures": "Tác vụ lỗi mỗi giờ",
+      "errors": "Lỗi ứng dụng mới mỗi giờ"
+    },
+    "hourlyHint": "24 giờ qua",
+    "hourlyEmpty": "Không có gì trong 24 giờ qua",
+    "checks": {
+      "title": "Kiểm tra sức khỏe",
+      "jobs": "Tác vụ nền chạy đúng lịch",
+      "late": "Trễ hoặc lỗi: {{jobs}}",
+      "outbox_failed": "Email được gửi thành công",
+      "outbox_backlog": "Hàng đợi email đang chạy",
+      "workflow_failures": "Quy trình của khách hàng đang chạy",
+      "webhook_failures": "Webhook thanh toán được xử lý"
+    },
+    "setup": {
+      "title": "Thiết lập bộ lập lịch",
+      "hint": "Những gì tác vụ nền và việc gửi email cần trong Supabase.",
+      "cron": "pg_cron (chạy tác vụ theo lịch)",
+      "cronFix": "Bật pg_cron trong Supabase → Database → Extensions; khi chưa bật, không tác vụ nào tự chạy.",
+      "net": "pg_net (cho phép tác vụ gọi Edge Function)",
+      "netFix": "Bật pg_net trong Supabase → Database → Extensions; nếu không, email sẽ không được gửi tự động.",
+      "vault": "Bí mật Vault project_url và service_role_key",
+      "vaultFix": "Thêm cả hai bí mật trong Supabase → Project Settings → Vault (xem OPERATIONS.md); thiếu chúng, tác vụ gửi email không thể chạy.",
+      "unknown": "Không rõ",
+      "unknownHint": "Không kiểm tra được từ đây. Nếu tác vụ gửi email báo lỗi Vault, hãy thêm các bí mật.",
+      "uptime": "Để vẫn nhận cảnh báo khi email ngừng hoạt động, hãy trỏ một dịch vụ giám sát uptime (UptimeRobot, Better Stack) tới Edge Function health — xem OPERATIONS.md."
+    },
+    "db": {
+      "title": "Cơ sở dữ liệu",
+      "size": "Dung lượng",
+      "table": "Bảng",
+      "rows_other": "~{{count}} dòng",
+      "connections_other": "{{count}} kết nối"
+    },
+    "cron": {
+      "notScheduled": "Chưa lên lịch",
+      "raw": "Cron {{expr}} (UTC)",
+      "everyMinutes_other": "Mỗi {{count}} phút",
+      "hourly": "Mỗi giờ vào phút {{minute}}",
+      "everyHours_other": "Mỗi {{count}} giờ vào phút {{minute}}",
+      "daily": "Hằng ngày lúc {{time}} UTC"
+    },
+    "jobNames": {
+      "generate_due_pm": "Lệnh công việc bảo trì định kỳ",
+      "escalate_overdue": "Chuyển cấp lệnh công việc quá hạn",
+      "expiry_reminders": "Nhắc hạn hợp đồng & giấy phép",
+      "scheduled_workflows": "Quy trình theo lịch",
+      "process_outbox": "Gửi email, SMS & thông báo đẩy",
+      "check_job_health": "Kiểm tra sức khỏe & cảnh báo",
+      "offline_devices": "Thiết bị IoT ngoại tuyến",
+      "prune_telemetry": "Lưu trữ dữ liệu IoT",
+      "prune_audit_log": "Lưu trữ nhật ký kiểm tra",
+      "escalate_device_alerts": "Chuyển cấp cảnh báo IoT",
+      "close_solved_tickets": "Đóng yêu cầu hỗ trợ đã giải quyết",
+      "send_scheduled_reports": "Email báo cáo theo lịch"
+    },
+    "jobs": {
+      "title": "Tác vụ nền",
+      "hint": "Công việc nền tảng tự thực hiện theo lịch. Nhân viên có quyền Giám sát nhận email khi một tác vụ bị trễ hoặc lỗi (tối đa 6 giờ một lần).",
+      "cols": {
+        "job": "Tác vụ",
+        "schedule": "Lịch",
+        "status": "Trạng thái",
+        "lastRun": "Lần chạy gần nhất",
+        "runs24h": "Số lần (24 giờ)",
+        "avg": "Thời gian TB",
+        "started": "Bắt đầu",
+        "processed": "Mục",
+        "duration": "Thời lượng"
+      },
+      "runsIn": {
+        "database": "cơ sở dữ liệu",
+        "edge": "Edge Function",
+        "external": "bên ngoài"
+      },
+      "state": {
+        "ok": "Tốt",
+        "running": "Đang chạy",
+        "late": "Trễ",
+        "failing": "Đang lỗi",
+        "never": "Chưa chạy"
+      },
+      "run": {
+        "ok": "Thành công",
+        "failed": "Lỗi",
+        "running": "Đang chạy"
+      },
+      "paused": "Tạm dừng",
+      "alertAfter": "Cảnh báo nếu im lặng {{time}}",
+      "lastOk": "Thành công gần nhất {{when}}",
+      "processed_other": "{{count}} mục",
+      "failures_other": "{{count}} lỗi",
+      "history": "Lịch sử",
+      "runNow": "Chạy ngay",
+      "noRuns": "Tác vụ này chưa chạy lần nào.",
+      "started": "Đã khởi động {{job}}. Lần chạy sẽ hiện ở đây khi hoàn tất.",
+      "ran_other": "{{job}} đã xong: {{count}} mục.",
+      "runFailed": "{{job}} bị lỗi: {{error}}",
+      "tooSoon": "Tác vụ này vừa chạy chưa đến một phút. Vui lòng thử lại sau."
+    },
+    "email": {
+      "last7": "7 ngày qua",
+      "oldest": "Tin nhắn chờ lâu nhất được xếp hàng {{when}}",
+      "topErrors": "Lý do tin nhắn gửi lỗi",
+      "topErrorsHint": "Các lỗi gửi thường gặp nhất trong 7 ngày qua. Chọn một lỗi để xem các tin nhắn đó.",
+      "noErrors": "Không có tin nhắn lỗi trong 7 ngày qua.",
+      "unknownError": "(không có thông báo lỗi)",
+      "retryAll": "Gửi lại tin lỗi (24 giờ)",
+      "retryAllBody": "Mọi tin nhắn gửi lỗi trong 24 giờ qua sẽ được đưa lại vào hàng đợi và gửi ở lần chạy tới (tối đa 500). Hãy khắc phục nguyên nhân trước — ví dụ khóa của nhà cung cấp email — nếu không chúng sẽ lại lỗi.",
+      "retry": "Gửi lại",
+      "cancel": "Hủy gửi",
+      "cancelBody_other": "{{count}} tin nhắn đang chờ sẽ không được gửi. Không thể hoàn tác.",
+      "retried": "Đã đưa tin nhắn vào hàng đợi lại",
+      "cancelled": "Đã hủy tin nhắn",
+      "search": "Tìm người nhận, tiêu đề, lỗi",
+      "allStatuses": "Mọi trạng thái",
+      "allChannels": "Mọi kênh",
+      "empty": "Không có tin nhắn phù hợp",
+      "platform": "Nền tảng",
+      "privacy": "Nội dung tin nhắn không hiển thị ở đây vì có thể chứa dữ liệu của khách hàng.",
+      "cols": {
+        "queued": "Xếp hàng",
+        "to": "Người nhận",
+        "subject": "Tiêu đề",
+        "channel": "Kênh",
+        "status": "Trạng thái",
+        "attempts": "Số lần thử",
+        "sent": "Đã gửi"
+      },
+      "status": {
+        "pending": "Đang chờ",
+        "sending": "Đang gửi",
+        "sent": "Đã gửi",
+        "failed": "Lỗi"
+      },
+      "channel": {
+        "email": "Email",
+        "sms": "SMS",
+        "push": "Thông báo đẩy",
+        "zalo": "Zalo"
+      }
+    },
+    "errors": {
+      "cols": {
+        "error": "Lỗi",
+        "source": "Nơi xảy ra",
+        "count": "Số lần",
+        "last": "Gần nhất",
+        "first": "Lần đầu",
+        "status": "Trạng thái"
+      },
+      "source": {
+        "web": "Ứng dụng khách hàng",
+        "admin": "Trang quản trị",
+        "edge": "Edge Function",
+        "other": "Khác"
+      },
+      "status": {
+        "open": "Đang mở",
+        "resolved": "Đã xử lý",
+        "ignored": "Bỏ qua"
+      },
+      "view": {
+        "open": "Đang mở",
+        "resolved": "Đã xử lý",
+        "ignored": "Bỏ qua",
+        "all": "Tất cả"
+      },
+      "regressed": "Tái diễn",
+      "reopenedTimes_other": "Mở lại {{count}} lần sau khi đã xử lý",
+      "resolve": "Đánh dấu đã xử lý",
+      "ignore": "Bỏ qua",
+      "reopen": "Mở lại",
+      "toast": {
+        "resolved_other": "Đã xử lý {{count}} lỗi",
+        "ignored_other": "Đã bỏ qua {{count}} lỗi",
+        "open_other": "Đã mở lại {{count}} lỗi"
+      },
+      "search": "Tìm lỗi",
+      "allSources": "Mọi nơi",
+      "noneOpen": "Không có lỗi đang mở",
+      "noneOpenHint": "Các lỗi bất ngờ người dùng gặp trong ứng dụng sẽ hiện ở đây, được gộp để mỗi lỗi là một dòng.",
+      "empty": "Không có lỗi phù hợp",
+      "howItWorks": "Ứng dụng tự động báo các lỗi bất ngờ (sập trang, yêu cầu thất bại). Cùng một lỗi được đếm trong một dòng. Lỗi đã xử lý mà xảy ra lại sẽ được mở lại, đánh dấu “Tái diễn”. Lỗi bị bỏ qua vẫn được đếm nhưng không làm phiền. Lỗi không xuất hiện trong 90 ngày sẽ bị xóa.",
+      "detail": "Chi tiết lỗi",
+      "countDetail_other": "{{count}} lần · lần đầu {{first}} · gần nhất {{last}}",
+      "resolvedBy": "bởi {{who}}, {{when}}",
+      "page": "Trang",
+      "release": "Phiên bản",
+      "lastUser": "Người gặp gần nhất",
+      "context": "Ngữ cảnh",
+      "stack": "Stack trace",
+      "workflows": "Quy trình khách hàng bị lỗi",
+      "workflowsHint": "Các lần chạy tự động hóa bị lỗi trong 7 ngày qua.",
+      "noWorkflowFailures": "Không có quy trình lỗi trong 7 ngày qua."
+    },
+    "webhooks": {
+      "last7": "Webhook trong 7 ngày qua",
+      "none": "Chưa nhận webhook nào.",
+      "empty": "Không có webhook phù hợp",
+      "allProviders": "Mọi nhà cung cấp",
+      "allStatuses": "Mọi trạng thái",
+      "cols": {
+        "received": "Nhận lúc",
+        "provider": "Nhà cung cấp",
+        "type": "Sự kiện",
+        "status": "Trạng thái",
+        "event": "Mã sự kiện"
+      },
+      "status": {
+        "processed": "Đã xử lý",
+        "ignored": "Bỏ qua",
+        "failed": "Lỗi",
+        "received": "Đang xử lý"
+      },
+      "resend": "Stripe và PayPal tự động gửi lại webhook bị lỗi; bạn cũng có thể gửi lại từ trang quản lý của họ. Mỗi sự kiện chỉ được áp dụng một lần.",
+      "setup": "Thiết lập nhà cung cấp thanh toán"
+    }
   }
 }

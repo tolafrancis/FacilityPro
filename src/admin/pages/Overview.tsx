@@ -249,6 +249,7 @@ function ActivityFeed({ data, lng }: { data: OverviewData | undefined; lng: stri
 
 function Health({ data, lng }: { data: OverviewData | undefined; lng: string }) {
   const { t } = useTranslation('admin');
+  const { can } = useAdmin();
   const h = data?.health;
   const rows = h
     ? [
@@ -276,7 +277,11 @@ function Health({ data, lng }: { data: OverviewData | undefined; lng: string }) 
               <span className="tabular-nums text-ink-muted">{r.value}</span>
             </li>
           ))}
-          <li className="pt-1 text-xs text-ink-muted">{t('health.apiNote')}</li>
+          {can('monitoring.view') && (
+            <li className="pt-1 text-xs">
+              <Link to="/admin/monitoring" className="text-brand-600 hover:underline dark:text-brand">{t('health.openMonitoring')}</Link>
+            </li>
+          )}
         </ul>
       )}
     </Card>

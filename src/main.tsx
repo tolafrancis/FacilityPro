@@ -15,6 +15,10 @@ import { initMonitoring, reportError } from './lib/monitoring';
 
 void initMonitoring();
 window.addEventListener('unhandledrejection', (e) => reportError(e.reason, { kind: 'unhandledrejection' }));
+window.addEventListener('error', (e) => {
+  // Script errors only; failed <img>/<script> loads have no error object.
+  if (e.error) reportError(e.error, { kind: 'error' });
+});
 
 // Expected refusals (validation, permission, business rules, offline) are
 // shown to the user; only unexpected failures go to error tracking.

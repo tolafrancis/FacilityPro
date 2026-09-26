@@ -162,7 +162,7 @@
     "jobFailures": "Job failures (24 h)",
     "outboxPending": "Messages waiting to send",
     "outboxFailed": "Failed messages (24 h)",
-    "apiNote": "API uptime and error rates come with the Monitoring module."
+    "openMonitoring": "Open Monitoring →"
   },
   "errors": {
     "load": "Couldn’t load this data. Check your connection and try again."
@@ -576,7 +576,13 @@
     "ticket_note": "Internal note on ticket",
     "report_send_now": "Report sent",
     "settings_change": "Platform settings changed",
-    "staff_change": "Staff accounts changed"
+    "staff_change": "Staff accounts changed",
+    "job_run": "Job run manually",
+    "outbox_retry": "Messages retried",
+    "outbox_cancel": "Messages cancelled",
+    "error_resolved": "Errors resolved",
+    "error_ignored": "Errors ignored",
+    "error_open": "Errors reopened"
   },
   "errors2": {
     "permission": "You don’t have permission to do that.",
@@ -1398,7 +1404,10 @@
       "report": "Reports",
       "insert": "Records added",
       "update": "Records changed",
-      "delete": "Records deleted"
+      "delete": "Records deleted",
+      "job": "Jobs",
+      "outbox": "Email queue",
+      "error": "App errors"
     },
     "cols": {
       "at": "When",
@@ -1476,5 +1485,270 @@
     "active": "Two-factor authentication is on for this session.",
     "gateTitle": "Two-factor authentication required",
     "gateBody": "Platform staff must confirm their sign-in with an authenticator app."
+  },
+  "monitoring": {
+    "subtitle": "Is the platform healthy? Background jobs, email delivery, app errors and payment webhooks.",
+    "tabsLabel": "Monitoring sections",
+    "tabs": {
+      "status": "Status",
+      "jobs": "Background jobs",
+      "email": "Email queue",
+      "errors": "Errors",
+      "webhooks": "Webhooks"
+    },
+    "refresh": "Refresh",
+    "actions": "Actions",
+    "hour": "Hour",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{pages}}",
+    "status": {
+      "allGood": "All systems normal",
+      "problems_one": "{{count}} thing needs attention",
+      "problems_other": "{{count}} things need attention",
+      "autoRefresh": "refreshes every minute"
+    },
+    "tiles": {
+      "jobs": "Jobs on schedule",
+      "sent": "Emails sent (24 h)",
+      "failed": "Emails failed (24 h)",
+      "pending": "Waiting to send",
+      "errors": "Open app errors",
+      "webhooks": "Failed webhooks (24 h)"
+    },
+    "hourly": {
+      "sent": "Emails sent per hour",
+      "failed": "Emails failed per hour",
+      "job_failures": "Job failures per hour",
+      "errors": "New app errors per hour"
+    },
+    "hourlyHint": "Last 24 hours",
+    "hourlyEmpty": "Nothing in the last 24 hours",
+    "checks": {
+      "title": "Health checks",
+      "jobs": "Background jobs on schedule",
+      "late": "Late or failing: {{jobs}}",
+      "outbox_failed": "Emails are being delivered",
+      "outbox_backlog": "Email queue is moving",
+      "workflow_failures": "Tenant workflows are running",
+      "webhook_failures": "Payment webhooks are processed"
+    },
+    "setup": {
+      "title": "Scheduler set-up",
+      "hint": "What background jobs and email delivery need in Supabase.",
+      "cron": "pg_cron (runs scheduled jobs)",
+      "cronFix": "Turn on pg_cron in Supabase → Database → Extensions; until then no job runs on its own.",
+      "net": "pg_net (lets jobs call Edge Functions)",
+      "netFix": "Turn on pg_net in Supabase → Database → Extensions; emails won’t be sent automatically without it.",
+      "vault": "Vault secrets project_url and service_role_key",
+      "vaultFix": "Add both secrets in Supabase → Project Settings → Vault (see OPERATIONS.md); the email job can’t start without them.",
+      "unknown": "Unknown",
+      "unknownHint": "Couldn’t check from here. If the email queue job fails with a Vault message, add the secrets.",
+      "uptime": "For alerts that still arrive when email is down, point an uptime monitor (UptimeRobot, Better Stack) at the health Edge Function — see OPERATIONS.md."
+    },
+    "db": {
+      "title": "Database",
+      "size": "Size",
+      "table": "Table",
+      "rows_one": "~{{count}} row",
+      "rows_other": "~{{count}} rows",
+      "connections_one": "{{count}} connection",
+      "connections_other": "{{count}} connections"
+    },
+    "cron": {
+      "notScheduled": "Not scheduled",
+      "raw": "Cron {{expr}} (UTC)",
+      "everyMinutes_one": "Every minute",
+      "everyMinutes_other": "Every {{count}} minutes",
+      "hourly": "Hourly at :{{minute}}",
+      "everyHours_one": "Hourly at :{{minute}}",
+      "everyHours_other": "Every {{count}} hours at :{{minute}}",
+      "daily": "Daily at {{time}} UTC"
+    },
+    "jobNames": {
+      "generate_due_pm": "Preventive maintenance work orders",
+      "escalate_overdue": "Overdue work order escalation",
+      "expiry_reminders": "Contract & licence reminders",
+      "scheduled_workflows": "Scheduled workflows",
+      "process_outbox": "Send emails, SMS & push",
+      "check_job_health": "Health check & alerts",
+      "offline_devices": "Offline IoT devices",
+      "prune_telemetry": "IoT data retention",
+      "prune_audit_log": "Audit log retention",
+      "escalate_device_alerts": "IoT alert escalation",
+      "close_solved_tickets": "Close solved tickets",
+      "send_scheduled_reports": "Scheduled report emails"
+    },
+    "jobs": {
+      "title": "Background jobs",
+      "hint": "Scheduled work the platform does on its own. Staff with Monitoring access get an email when a job is late or failing (at most every 6 hours).",
+      "cols": {
+        "job": "Job",
+        "schedule": "Schedule",
+        "status": "Status",
+        "lastRun": "Last run",
+        "runs24h": "Runs (24 h)",
+        "avg": "Avg. time",
+        "started": "Started",
+        "processed": "Items",
+        "duration": "Duration"
+      },
+      "runsIn": {
+        "database": "database",
+        "edge": "Edge Function",
+        "external": "external"
+      },
+      "state": {
+        "ok": "Healthy",
+        "running": "Running",
+        "late": "Late",
+        "failing": "Failing",
+        "never": "Never run"
+      },
+      "run": {
+        "ok": "Succeeded",
+        "failed": "Failed",
+        "running": "Running"
+      },
+      "paused": "Paused",
+      "alertAfter": "Alert if silent for {{time}}",
+      "lastOk": "Last success {{when}}",
+      "processed_one": "{{count}} item",
+      "processed_other": "{{count}} items",
+      "failures_one": "{{count}} failed",
+      "failures_other": "{{count}} failed",
+      "history": "History",
+      "runNow": "Run now",
+      "noRuns": "This job hasn’t run yet.",
+      "started": "Started {{job}}. Its run appears here when it finishes.",
+      "ran_one": "{{job}} finished: {{count}} item.",
+      "ran_other": "{{job}} finished: {{count}} items.",
+      "runFailed": "{{job}} failed: {{error}}",
+      "tooSoon": "This job ran less than a minute ago. Try again shortly."
+    },
+    "email": {
+      "last7": "Last 7 days",
+      "oldest": "Oldest waiting message queued {{when}}",
+      "topErrors": "Why messages failed",
+      "topErrorsHint": "Most common delivery errors in the last 7 days. Select one to see those messages.",
+      "noErrors": "No failed messages in the last 7 days.",
+      "unknownError": "(no error message)",
+      "retryAll": "Retry failed (24 h)",
+      "retryAllBody": "Every message that failed in the last 24 hours goes back in the queue and is sent on the next run (up to 500). Fix the cause first — for example the email provider key — or they’ll fail again.",
+      "retry": "Retry",
+      "cancel": "Cancel sending",
+      "cancelBody_one": "{{count}} waiting message won’t be sent. This can’t be undone.",
+      "cancelBody_other": "{{count}} waiting messages won’t be sent. This can’t be undone.",
+      "retried": "Messages queued again",
+      "cancelled": "Messages cancelled",
+      "search": "Search recipient, subject, error",
+      "allStatuses": "All statuses",
+      "allChannels": "All channels",
+      "empty": "No messages match",
+      "platform": "Platform",
+      "privacy": "Message contents aren’t shown here because they can hold tenants’ data.",
+      "cols": {
+        "queued": "Queued",
+        "to": "To",
+        "subject": "Subject",
+        "channel": "Channel",
+        "status": "Status",
+        "attempts": "Attempts",
+        "sent": "Sent"
+      },
+      "status": {
+        "pending": "Waiting",
+        "sending": "Sending",
+        "sent": "Sent",
+        "failed": "Failed"
+      },
+      "channel": {
+        "email": "Email",
+        "sms": "SMS",
+        "push": "Push",
+        "zalo": "Zalo"
+      }
+    },
+    "errors": {
+      "cols": {
+        "error": "Error",
+        "source": "Where",
+        "count": "Times",
+        "last": "Last seen",
+        "first": "First seen",
+        "status": "Status"
+      },
+      "source": {
+        "web": "Tenant app",
+        "admin": "Admin panel",
+        "edge": "Edge Function",
+        "other": "Other"
+      },
+      "status": {
+        "open": "Open",
+        "resolved": "Resolved",
+        "ignored": "Ignored"
+      },
+      "view": {
+        "open": "Open",
+        "resolved": "Resolved",
+        "ignored": "Ignored",
+        "all": "All"
+      },
+      "regressed": "Came back",
+      "reopenedTimes_one": "Reopened {{count}} time after being resolved",
+      "reopenedTimes_other": "Reopened {{count}} times after being resolved",
+      "resolve": "Resolve",
+      "ignore": "Ignore",
+      "reopen": "Reopen",
+      "toast": {
+        "resolved_one": "Error resolved",
+        "resolved_other": "{{count}} errors resolved",
+        "ignored_one": "Error ignored",
+        "ignored_other": "{{count}} errors ignored",
+        "open_one": "Error reopened",
+        "open_other": "{{count}} errors reopened"
+      },
+      "search": "Search errors",
+      "allSources": "Everywhere",
+      "noneOpen": "No open errors",
+      "noneOpenHint": "Unexpected errors people hit in the app appear here, grouped so each bug is one row.",
+      "empty": "No errors match",
+      "howItWorks": "The app reports unexpected errors (crashes, failed requests) automatically. The same bug is counted in one row. A resolved error that happens again reopens, marked “Came back”. Ignored errors keep counting but stay out of the way. Errors not seen for 90 days are deleted.",
+      "detail": "Error details",
+      "countDetail_one": "{{count}} time · first {{first}} · last {{last}}",
+      "countDetail_other": "{{count}} times · first {{first}} · last {{last}}",
+      "resolvedBy": "by {{who}}, {{when}}",
+      "page": "Page",
+      "release": "Version",
+      "lastUser": "Last seen by",
+      "context": "Context",
+      "stack": "Stack trace",
+      "workflows": "Failed tenant workflows",
+      "workflowsHint": "Automation runs that failed in the last 7 days.",
+      "noWorkflowFailures": "No workflow failures in the last 7 days."
+    },
+    "webhooks": {
+      "last7": "Webhooks in the last 7 days",
+      "none": "No webhooks received.",
+      "empty": "No webhooks match",
+      "allProviders": "All providers",
+      "allStatuses": "All statuses",
+      "cols": {
+        "received": "Received",
+        "provider": "Provider",
+        "type": "Event",
+        "status": "Status",
+        "event": "Event ID"
+      },
+      "status": {
+        "processed": "Processed",
+        "ignored": "Ignored",
+        "failed": "Failed",
+        "received": "Processing"
+      },
+      "resend": "A failed webhook is retried automatically by Stripe and PayPal; you can also resend it from their dashboard. Each event is only applied once.",
+      "setup": "Payment provider set-up"
+    }
   }
 }

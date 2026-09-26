@@ -242,6 +242,35 @@ Stripe **and** PayPal subscriptions, plus manual invoices.
     30 days, linked to the audit log.
   - Password rules for all users stay in Supabase (Authentication → Policies).
 
+## Monitoring (0090)
+
+`/admin/monitoring`, monitoring permission (super admin, admin). Refreshes every minute.
+
+- **Status**: one verdict plus every health check (jobs on schedule, emails delivered, email queue
+  moving, tenant workflows, payment webhooks), 24-hour hourly activity (emails sent/failed, job
+  failures, new app errors), scheduler set-up (pg_cron, pg_net, Vault secrets: names only, values are
+  never read) and database size with the largest tables.
+- **Background jobs**: every job in `fp_jobs` with its pg_cron schedule, state (healthy, late,
+  failing, never run), last run, runs and failures in 24 h, average time, run history, and
+  **Run now** (once a minute per job; audited). Database jobs run straight away as the scheduler;
+  the email job starts its Edge Function.
+- **Email queue**: counts by status, the most common failure reasons, list with search/filters,
+  **Retry** failed messages (selected, or everything failed in 24 h) and **Cancel** waiting ones
+  (audited). Message bodies are never shown to staff.
+- **Errors**: the web app reports unexpected errors (render crashes, failed requests, unhandled
+  rejections, script errors) to `fp_log_client_error`, also when signed out. They're grouped by
+  fingerprint (message + code location, ignoring ids, numbers and build hashes), with counts, first/
+  last seen, page, version, last user and tenant, and stack trace. Resolve, ignore or reopen; a
+  resolved error that happens again reopens ("Came back"). URLs are stored without query strings;
+  at most 300 new groups an hour; groups not seen for 90 days are deleted. Edge Functions can log
+  with `fp_log_server_error`. Failed tenant workflow runs (7 days) are listed below. Sentry
+  (`VITE_SENTRY_DSN`) still works alongside.
+- **Webhooks**: Stripe and PayPal deliveries with 7-day counts, filters and errors.
+- Alert emails from the hourly health check (late/failing jobs, email failures or backlog, workflow
+  failures and now failed payment webhooks) go to active staff with monitoring access and point to
+  the right Monitoring tab. For alerts that still arrive when email is down, use the `health` Edge
+  Function with an uptime monitor (docs/OPERATIONS.md).
+
 ### Demo data (local or staging only)
 
 ```sql
@@ -282,5 +311,6 @@ keys are Edge Function secrets (see Billing setup).
 | 6. Support tickets | Done |
 | 7. Analytics & reports | Done |
 | 8. Audit log & security | Done |
-| 9. Monitoring · 10. Admin team | Planned |
+| 9. Monitoring | Done |
+| 10. Admin team | Planned |
 | Demo seed data (20 tenants, 200 users, invoices, tickets, activity) | Done: `supabase/seed/admin_demo.sql`, local/staging only |
