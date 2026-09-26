@@ -15,8 +15,8 @@ const whyItems = ['why1', 'why2', 'why3'];
 // (tiers.<key>.*). Keep in line with fp_plans (0095) and the brochure.
 const PRICING_TIERS = [
   { key: 'free', features: 6, href: '/signup' },
-  { key: 'starter', features: 6, href: '/signup' },
-  { key: 'professional', features: 16, href: '/signup', featured: true },
+  { key: 'starter', features: 11, href: '/signup' },
+  { key: 'professional', features: 11, href: '/signup', featured: true },
   { key: 'business', features: 4, href: '#demo' },
   { key: 'enterprise', features: 6, href: '#demo' },
 ];
