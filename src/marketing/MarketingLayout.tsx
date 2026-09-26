@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
@@ -9,7 +9,7 @@ type MenuKey = 'features' | 'resources' | 'solutions';
 /** Public site header (mega menus) and footer, shared by the landing and marketing pages. */
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-surface text-ink">
+    <div className="min-h-screen bg-white text-ink">
       <MarketingHeader />
       <main>{children}</main>
       <MarketingFooter />
@@ -36,20 +36,20 @@ export function TrialForm({ size = 'md', className = '' }: { size?: 'md' | 'lg';
     const v = email.trim();
     navigate(v ? `/signup?email=${encodeURIComponent(v)}` : '/signup');
   };
-  const h = size === 'lg' ? 'h-14 text-base' : 'h-11 text-sm';
+  const h = size === 'lg' ? 'h-14 text-base' : 'h-14 text-[15px]';
   return (
-    <form onSubmit={submit} className={`flex w-full max-w-md ${className}`}>
+    <form onSubmit={submit} className={`flex w-full max-w-[26rem] ${className}`}>
       <label htmlFor={id} className="sr-only">Work email</label>
       <input
         id={id}
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Work email"
+        placeholder="Email"
         autoComplete="email"
-        className={`${h} min-w-0 flex-1 rounded-l-xl border border-r-0 border-line bg-white px-4 text-ink placeholder:text-ink-muted/70 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20`}
+        className={`${h} min-w-0 flex-1 rounded-l-lg border border-r-0 border-[#D9DDE3] bg-white px-4 text-ink placeholder:text-[#8A8F98] focus:border-brand focus:outline-none`}
       />
-      <button type="submit" className={`${h} shrink-0 rounded-r-xl border border-brand bg-white px-4 font-semibold uppercase tracking-wide text-brand transition hover:bg-brand hover:text-white`}>
+      <button type="submit" className={`${h} shrink-0 rounded-r-lg border border-brand bg-white px-5 font-bold uppercase tracking-wide text-brand transition hover:bg-brand hover:text-white`}>
         Start free trial
       </button>
     </form>
@@ -104,67 +104,134 @@ function MarketingHeader() {
     clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => setOpen(null), 150);
   };
+  // Which trigger each panel hangs from (for centring the panel under it).
+  const triggers = useRef<Partial<Record<MenuKey, HTMLButtonElement | null>>>({});
   const trigger = (k: MenuKey, label: string) => (
     <button
+      ref={(el) => { triggers.current[k] = el; }}
       type="button"
       aria-expanded={open === k}
       aria-haspopup="true"
       onClick={() => click(k)}
       onMouseEnter={() => enter(k)}
       onMouseLeave={leave}
-      className={`inline-flex items-center gap-1 py-2 text-[15px] font-semibold transition ${open === k ? 'text-brand' : 'text-ink/75 hover:text-brand'}`}
+      className={`inline-flex items-center gap-1 py-3 text-[17px] font-semibold transition ${open === k ? 'text-brand' : 'text-[#555] hover:text-brand'}`}
     >
       {label}
-      <ChevronDown size={15} className={`transition ${open === k ? 'rotate-180' : ''}`} aria-hidden />
+      <ChevronDown size={14} strokeWidth={2} className={`mt-0.5 transition ${open === k ? 'rotate-180' : ''}`} aria-hidden />
     </button>
   );
+  const plain = 'py-3 text-[17px] font-semibold text-[#555] transition hover:text-brand';
+
+  // A light shadow once the page scrolls under the header.
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 4);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
 
   return (
-    <header ref={headerRef} className="sticky top-0 z-40 border-b border-line/70 bg-white/95 backdrop-blur">
-      <div className="relative mx-auto flex h-20 max-w-7xl items-center gap-8 px-4 sm:px-6 lg:px-8">
+    <header ref={headerRef} className={`sticky top-0 z-40 bg-white transition-shadow ${scrolled ? 'shadow-[0_2px_12px_rgba(15,23,42,0.08)]' : ''}`}>
+      <div className="mx-auto flex h-20 max-w-[1320px] items-center gap-6 px-4 sm:px-6 lg:h-[104px] lg:px-8">
         <Logo />
-        <nav aria-label="Main" className="hidden items-center gap-7 lg:flex">
-          <Link to="/#pricing" className="py-2 text-[15px] font-semibold text-ink/75 transition hover:text-brand">Pricing</Link>
+        <nav aria-label="Main" className="ml-8 hidden shrink-0 items-center gap-8 lg:flex 2xl:ml-14 2xl:gap-10">
+          <Link to="/#pricing" className={plain}>Pricing</Link>
           {trigger('features', 'Features')}
           {trigger('resources', 'Resources')}
           {trigger('solutions', 'Solutions')}
-          <Link to="/signin" className="py-2 text-[15px] font-semibold text-ink/75 transition hover:text-brand">Sign in</Link>
+          <Link to="/signin" className={plain}>Sign In</Link>
         </nav>
-        <div className="ml-auto hidden xl:block"><TrialForm /></div>
-        <Link to="/signup" className="ml-auto hidden rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-600 lg:inline-flex xl:hidden">
+        <div className="ml-auto hidden w-[24rem] shrink-0 xl:block"><TrialForm /></div>
+        <Link to="/signup" className="ml-auto hidden rounded-lg border border-brand px-5 py-3 text-[15px] font-bold uppercase tracking-wide text-brand hover:bg-brand hover:text-white lg:inline-flex xl:hidden">
           Start free trial
         </Link>
         <button type="button" onClick={() => setMobile(true)} className="ml-auto grid h-11 w-11 place-items-center rounded-lg text-ink hover:bg-surface lg:hidden" aria-label="Open menu">
           <Menu size={24} aria-hidden />
         </button>
-
-        {open && (
-          <div
-            className="absolute left-4 right-4 top-full z-40 -mt-2 hidden justify-center lg:flex"
-            onMouseEnter={() => clearTimeout(closeTimer.current)}
-            onMouseLeave={leave}
-          >
-            {open === 'features' && <FeaturesPanel />}
-            {open === 'resources' && <ResourcesPanel />}
-            {open === 'solutions' && <SolutionsPanel />}
-          </div>
-        )}
       </div>
-      {/* A portal: the header's backdrop blur would otherwise trap this fixed overlay inside it. */}
+
+      {open && (
+        <PanelFrame
+          anchor={triggers.current[open] ?? null}
+          header={headerRef.current}
+          onMouseEnter={() => clearTimeout(closeTimer.current)}
+          onMouseLeave={leave}
+        >
+          {open === 'features' && <FeaturesPanel />}
+          {open === 'resources' && <ResourcesPanel />}
+          {open === 'solutions' && <SolutionsPanel />}
+        </PanelFrame>
+      )}
+      {/* A portal: the header's own stacking would otherwise trap this fixed overlay inside it. */}
       {mobile && createPortal(<MobileMenu onClose={() => setMobile(false)} />, document.body)}
     </header>
   );
 }
 
-const panel = 'rounded-xl border border-line bg-white shadow-[0_18px_50px_-12px_rgba(15,23,42,0.25)]';
-const itemLink = 'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] text-ink transition hover:bg-brand/5 hover:text-brand';
+/**
+ * The dropdown card: centred under its menu item (kept inside the window),
+ * with a small pointer, a soft shadow and a hover bridge so the mouse can
+ * travel from the item to the card without it closing.
+ */
+function PanelFrame({ anchor, header, children, onMouseEnter, onMouseLeave }: {
+  anchor: HTMLElement | null; header: HTMLElement | null; children: ReactNode;
+  onMouseEnter: () => void; onMouseLeave: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ left: number; notch: number; top: number } | null>(null);
+  useLayoutEffect(() => {
+    const place = () => {
+      if (!anchor || !header || !ref.current) return;
+      const h = header.getBoundingClientRect();
+      const a = anchor.getBoundingClientRect();
+      const w = ref.current.offsetWidth;
+      const center = a.left + a.width / 2 - h.left;
+      const left = Math.min(Math.max(16, center - w / 2), h.width - w - 16);
+      const next = { left, notch: center - left, top: a.bottom - h.top + 10 };
+      setPos((p) => (p && p.left === next.left && p.notch === next.notch && p.top === next.top ? p : next));
+    };
+    place();
+    // Re-centre when the window or the card's own size changes (e.g. another tab of Features).
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(place) : null;
+    if (ref.current) ro?.observe(ref.current);
+    window.addEventListener('resize', place);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', place);
+    };
+  }, [anchor, header]);
+  return (
+    <div
+      ref={ref}
+      className="absolute z-40 hidden lg:block"
+      style={{ left: pos?.left ?? 0, top: pos?.top ?? 0, visibility: pos ? 'visible' : 'hidden', maxWidth: 'calc(100vw - 32px)' }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {/* Hover bridge over the gap between the menu item and the card. */}
+      <div className="absolute -top-4 left-0 right-0 h-4" aria-hidden />
+      <span
+        className="absolute -top-[7px] h-3.5 w-3.5 rotate-45 border-l border-t border-[#E5E7EB] bg-white"
+        style={{ left: (pos?.notch ?? 0) - 7 }}
+        aria-hidden
+      />
+      {children}
+    </div>
+  );
+}
+
+const panel = 'rounded-lg border border-[#E5E7EB] bg-white shadow-[0_12px_32px_rgba(15,23,42,0.10)]';
+const itemLink = 'group flex items-center gap-3.5 whitespace-nowrap py-3 text-[15.5px] leading-snug text-[#333] transition hover:text-brand';
+const iconProps = { size: 19, strokeWidth: 2.2, className: 'shrink-0 text-brand', 'aria-hidden': true } as const;
 
 function FeaturesPanel() {
   const [group, setGroup] = useState(FEATURE_GROUPS[0].key);
   const g = FEATURE_GROUPS.find((x) => x.key === group) ?? FEATURE_GROUPS[0];
   return (
-    <div className={`${panel} flex w-full max-w-5xl overflow-hidden`} role="region" aria-label="Features">
-      <ul className="w-56 shrink-0 border-r border-line py-4" role="tablist" aria-orientation="vertical">
+    <div className={`${panel} flex w-max max-w-full`} role="region" aria-label="Features">
+      <ul className="my-5 w-[236px] shrink-0 border-r border-[#E5E7EB]" role="tablist" aria-orientation="vertical">
         {FEATURE_GROUPS.map((x) => (
           <li key={x.key}>
             <button
@@ -174,19 +241,19 @@ function FeaturesPanel() {
               onMouseEnter={() => setGroup(x.key)}
               onFocus={() => setGroup(x.key)}
               onClick={() => setGroup(x.key)}
-              className={`flex w-full items-center gap-2 border-r-2 px-5 py-3 text-left text-sm transition ${
-                x.key === group ? 'border-brand font-semibold text-brand' : 'border-transparent text-ink/80 hover:text-brand'}`}
+              className={`-mr-px flex w-[calc(100%+1px)] items-center gap-2 whitespace-nowrap border-r-2 px-5 py-3.5 text-left text-[15px] transition ${
+                x.key === group ? 'border-brand text-brand' : 'border-transparent text-[#333] hover:text-brand'}`}
             >
               {x.label}
-              {x.badge && <span className="rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">{x.badge}</span>}
+              {x.badge && <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold leading-none text-white">{x.badge}</span>}
             </button>
           </li>
         ))}
       </ul>
-      <div className="grid flex-1 content-start gap-x-4 gap-y-0.5 p-5 sm:grid-cols-2 xl:grid-cols-3" role="tabpanel">
+      <div className="grid min-w-[760px] flex-1 grid-cols-[repeat(3,max-content)] content-start gap-x-12 px-9 py-5" role="tabpanel">
         {g.items.map((f) => (
           <Link key={f.slug} to={`/features/${f.slug}`} className={itemLink}>
-            <f.icon size={19} className="shrink-0 text-brand" aria-hidden />
+            <f.icon {...iconProps} />
             <span>{f.title}</span>
           </Link>
         ))}
@@ -198,7 +265,7 @@ function FeaturesPanel() {
 function ResourceLink({ r }: { r: Resource }) {
   return (
     <Link to={resourceHref(r)} className={itemLink}>
-      <r.icon size={19} className="shrink-0 text-brand" aria-hidden />
+      <r.icon {...iconProps} />
       <span>{r.title}</span>
     </Link>
   );
@@ -206,9 +273,9 @@ function ResourceLink({ r }: { r: Resource }) {
 
 function ResourcesPanel() {
   return (
-    <div className={`${panel} grid w-full max-w-4xl gap-x-4 p-5 sm:grid-cols-3`} role="region" aria-label="Resources">
+    <div className={`${panel} grid w-max max-w-full grid-cols-[repeat(3,max-content)] gap-x-14 px-8 py-5`} role="region" aria-label="Resources">
       {RESOURCES.map((col, i) => (
-        <div key={i} className="space-y-0.5">
+        <div key={i}>
           {col.map((r) => <ResourceLink key={r.slug} r={r} />)}
         </div>
       ))}
@@ -218,14 +285,14 @@ function ResourcesPanel() {
 
 function SolutionsPanel() {
   return (
-    <div className={`${panel} grid w-full max-w-4xl gap-x-6 p-6 sm:grid-cols-3`} role="region" aria-label="Solutions">
+    <div className={`${panel} grid w-max max-w-full grid-cols-[repeat(3,max-content)] gap-x-7 px-5 py-6`} role="region" aria-label="Solutions">
       {SOLUTION_COLUMNS.map((c) => (
         <div key={c.key}>
-          <p className="mb-2 border-b-2 pb-2 text-sm font-semibold" style={{ color: c.color, borderColor: '#E5E7EB' }}>{c.label}</p>
-          <div className="space-y-0.5">
+          <p className="mb-2 min-w-[14rem] border-b-2 border-[#E5E7EB] pb-2.5 text-[15px] font-semibold" style={{ color: c.color }}>{c.label}</p>
+          <div className="pl-3">
             {c.items.map((s) => (
               <Link key={s.slug} to={`/solutions/${s.slug}`} className={itemLink}>
-                <s.icon size={18} className="shrink-0 text-brand" aria-hidden />
+                <s.icon {...iconProps} size={18} />
                 <span>{s.title}</span>
               </Link>
             ))}
