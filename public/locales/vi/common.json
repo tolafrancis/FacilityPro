@@ -38,7 +38,8 @@
     "home": "Trang chủ",
     "reportFault": "Báo sự cố",
     "myRequests": "Yêu cầu của tôi",
-    "support": "Trợ giúp & hỗ trợ"
+    "support": "Trợ giúp & hỗ trợ",
+    "userGuide": "Hướng dẫn sử dụng"
   },
   "navGroups": {
     "maintenance": "Vận hành bảo trì",
@@ -338,5 +339,9 @@
   "moduleOff": {
     "title": "Mô-đun này đang tắt",
     "body": "Mô-đun không khả dụng cho tổ chức của bạn. Hãy hỏi quản trị viên hoặc bộ phận hỗ trợ FacilityPro nếu bạn cần."
+  },
+  "demo": {
+    "badge": "DỮ LIỆU MẪU",
+    "banner": "Tổ chức mẫu – mọi tên, địa điểm và số liệu ở đây đều là giả định."
   }
 }

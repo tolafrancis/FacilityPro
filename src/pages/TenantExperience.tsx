@@ -11,6 +11,7 @@ interface BroadcastItem {
   id: string;
   title: string;
   audience: string;
+  is_published?: boolean;
   message: string;
   created_at: string;
 }
@@ -116,7 +117,12 @@ export default function TenantExperience() {
                   <h3 className="font-semibold text-ink">{item.title}</h3>
                   <p className="text-sm text-ink-muted">{item.audience}</p>
                 </div>
-                <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{formatDateOnly(item.created_at, lng)}</span>
+                <div className="flex items-center gap-2">
+                  {item.is_published === false && (
+                    <span className="rounded-full bg-surface px-3 py-1 text-xs font-medium text-ink-muted" title="Not shown to tenants">Draft</span>
+                  )}
+                  <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">{formatDateOnly(item.created_at, lng)}</span>
+                </div>
               </div>
               <p className="mt-3 text-sm text-ink-muted">{item.message}</p>
             </div>

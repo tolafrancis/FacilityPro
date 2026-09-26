@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase';
 import { useOrg } from '../contexts/OrgContext';
 import { useInventoryTransactions, useOrgMembers, usePartCategories, usePartsPage, useVendors } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { formatDate } from '../lib/ui';
+import { formatDate, formatMoney } from '../lib/ui';
 import type { Part } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -235,7 +235,8 @@ function PartRow({
   historyLabel: string;
   historyEmptyLabel: string;
 }) {
-  const { isManager: canRestock } = useOrg();
+  const { isManager: canRestock, currency } = useOrg();
+  const { i18n } = useTranslation();
   const [amount, setAmount] = useState('');
   const low = part.stock_balance <= part.reorder_level;
   const meta = [vendorName, categoryName].filter(Boolean).join(' · ');
@@ -265,7 +266,7 @@ function PartRow({
           {low && <Pill className="ml-2 bg-status-crit/10 text-status-crit">{lowLabel}</Pill>}
         </td>
         <td className="px-4 py-2 text-ink-muted">{part.reorder_level}</td>
-        <td className="px-4 py-2 text-ink-muted">{part.unit_cost}</td>
+        <td className="whitespace-nowrap px-4 py-2 text-ink-muted tabular-nums">{part.unit_cost == null ? '—' : formatMoney(part.unit_cost, currency, i18n.language)}</td>
         <td className="px-4 py-2">
           {/* Restocking writes the inventory ledger: admins/managers only (RLS). */}
           {canRestock && (

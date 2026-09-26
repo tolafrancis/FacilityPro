@@ -37,7 +37,12 @@
     "type": "Loại",
     "location": "Vị trí",
     "serial": "Số sê-ri",
-    "qrUrlWarning": "Chưa đặt địa chỉ công khai của ứng dụng (VITE_PUBLIC_APP_URL), nên mã này dùng địa chỉ hiện tại. Hãy đặt trước khi in mã."
+    "qrUrlWarning": "Chưa đặt địa chỉ công khai của ứng dụng (VITE_PUBLIC_APP_URL), nên mã này dùng địa chỉ hiện tại. Hãy đặt trước khi in mã.",
+    "manufacturer": "Nhà sản xuất",
+    "model": "Model",
+    "purchased": "Ngày mua",
+    "purchaseCost": "Giá mua",
+    "specs": "Thông số kỹ thuật"
   },
   "meters": {
     "tab": "Đồng hồ",

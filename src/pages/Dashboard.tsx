@@ -161,7 +161,7 @@ export default function Dashboard() {
       )}
 
       {/* Stat cards */}
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <div data-tour="stats" className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {cards.map(({ key, value, icon: Icon, to }) => (
           <Link
             key={key}
@@ -383,7 +383,7 @@ function CreateMenu({ isAdmin, onQuick }: { isAdmin: boolean; onQuick: (k: Setup
   ];
 
   return (
-    <div ref={ref} className="relative shrink-0">
+    <div ref={ref} className="relative shrink-0" data-tour="create">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

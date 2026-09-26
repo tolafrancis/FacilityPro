@@ -266,7 +266,7 @@ export default function Reports() {
                   <div className="h-4 flex-1 overflow-hidden rounded bg-surface">
                     <div className="h-full rounded bg-brand" style={{ width: `${(m.amount / maxMonthCost) * 100}%` }} />
                   </div>
-                  <span className="w-16 shrink-0 text-right tabular-nums text-ink-muted">{currency(m.amount)}</span>
+                  <span className="min-w-16 shrink-0 whitespace-nowrap text-right tabular-nums text-ink-muted">{currency(m.amount)}</span>
                 </div>
               ))}
             </div>
@@ -283,7 +283,7 @@ export default function Reports() {
                     <div className="h-4 flex-1 overflow-hidden rounded bg-surface">
                       <div className="h-full rounded bg-brand" style={{ width: `${(v.amount / maxVendorSpend) * 100}%` }} />
                     </div>
-                    <span className="w-16 shrink-0 text-right tabular-nums text-ink-muted">{currency(v.amount)}</span>
+                    <span className="min-w-16 shrink-0 whitespace-nowrap text-right tabular-nums text-ink-muted">{currency(v.amount)}</span>
                   </div>
                 ))}
               </div>

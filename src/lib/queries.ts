@@ -1215,11 +1215,13 @@ export function useProcurementReceiptLines(procurementId: string | undefined) {
     enabled: !!procurementId,
     queryFn: async () => {
       // Receipt lines don't carry procurement_id directly; join through the
-      // receipt so "received so far per line" can be computed for a PO.
+      // receipt so "received so far per line" can be computed for a PO. Two
+      // foreign keys link these tables (0059 added an org-aware one), so the
+      // embed must name one or PostgREST refuses it as ambiguous (PGRST201).
       const { data, error } = await supabase
         .from('fp_procurement_receipt_lines')
-        .select('*, fp_procurement_receipts!inner(procurement_id)')
-        .eq('fp_procurement_receipts.procurement_id', procurementId!);
+        .select('*, receipt:fp_procurement_receipts!fp_proc_rlines_receipt_org_fk!inner(procurement_id)')
+        .eq('receipt.procurement_id', procurementId!);
       if (error) throw error;
       return data as ProcurementReceiptLine[];
     },
@@ -1674,6 +1676,7 @@ export function useAnnouncements(limit: number) {
         .from('fp_broadcasts')
         .select('id, title, message, created_at')
         .eq('org_id', orgId!)
+        .eq('is_published', true)
         .order('created_at', { ascending: false })
         .limit(limit);
       if (error) throw error;

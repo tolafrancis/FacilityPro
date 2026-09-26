@@ -46,6 +46,7 @@ export default function TenantHome() {
       {/* Report */}
       <Link
         to="/requests/new"
+        data-tour="report-fault"
         className="mt-6 flex items-center gap-4 rounded-2xl bg-gradient-to-br from-brand to-brand-600 p-5 text-white shadow-sm transition hover:shadow-md sm:p-6"
       >
         <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/20">

@@ -54,6 +54,7 @@ const Inbox = lazy(() => import('./pages/Inbox'));
 const Billing = lazy(() => import('./pages/Billing'));
 const Support = lazy(() => import('./pages/Support'));
 const SupportTicket = lazy(() => import('./pages/SupportTicket'));
+const HelpCenter = lazy(() => import('./pages/HelpCenter'));
 const Devices = lazy(() => import('./pages/Devices'));
 const DeviceDetail = lazy(() => import('./pages/DeviceDetail'));
 const PublicReport = lazy(() => import('./pages/PublicReport'));
@@ -226,6 +227,7 @@ export default function App() {
             <Route path="/requests" element={<Requests />} />
             <Route path="/requests/new" element={<NewRequest />} />
             <Route path="/requests/:id" element={<RequestDetail />} />
+            <Route path="/help/*" element={<HelpCenter />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         ) : (
@@ -260,6 +262,7 @@ export default function App() {
               <Route path="/tenant-experience" element={<TenantExperience />} />
               <Route path="/support" element={<Support />} />
               <Route path="/support/:id" element={<SupportTicket />} />
+              <Route path="/help/*" element={<HelpCenter />} />
               {/* Admin/manager pages: their data and writes are limited to these
                   roles by RLS, so other roles would only see controls that fail. */}
               {/* Devices: technicians see live data, alerts and history (0077);

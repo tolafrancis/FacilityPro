@@ -16,7 +16,7 @@ export interface Organization {
   subscription_tier: string;
   allow_public_requests?: boolean;
   auto_create_work_orders?: boolean;
-  settings?: { timezone?: string; currency?: string } | null;
+  settings?: { timezone?: string; currency?: string; demo?: boolean } | null;
   /** 0079 */
   industry?: string | null;
   logo_path?: string | null;
@@ -105,6 +105,10 @@ export interface Asset {
   manufacturer: string | null;
   model: string | null;
   warranty_expiry: string | null;
+  purchase_date?: string | null;
+  purchase_cost?: number | null;
+  /** Free-form specifications, e.g. { "Capacity": "350 RT" }. */
+  specs?: Record<string, unknown> | null;
   qr_code: string | null;
   status: AssetStatus;
   retired_at: string | null;

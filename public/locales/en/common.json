@@ -38,7 +38,8 @@
     "home": "Home",
     "reportFault": "Report a fault",
     "myRequests": "My requests",
-    "support": "Help & support"
+    "support": "Help & support",
+    "userGuide": "User guide"
   },
   "navGroups": {
     "maintenance": "Maintenance Operations",
@@ -340,5 +341,9 @@
   "moduleOff": {
     "title": "This module is switched off",
     "body": "It isn't available for your organisation. Ask your administrator or FacilityPro support if you need it."
+  },
+  "demo": {
+    "badge": "DEMO DATA",
+    "banner": "Sample organisation – every name, place and number here is fictional."
   }
 }

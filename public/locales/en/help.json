@@ -1,0 +1,110 @@
+{
+  "button": "Help",
+  "drawer": {
+    "kicker": "Help for this page",
+    "generalTitle": "Help",
+    "generalBody": "Search the Help Center for step-by-step guides, or take the tour to learn the basics.",
+    "canDo": "What you can do here",
+    "fields": "Fields on this page",
+    "tip": "Tip:",
+    "openGuide": "Read the full guide",
+    "helpCenter": "Help Center",
+    "tour": "Take the tour",
+    "close": "Close help"
+  },
+  "tour": {
+    "progress": "Step {{current}} of {{total}}",
+    "skip": "Skip tour",
+    "previous": "Previous",
+    "next": "Next",
+    "finish": "Finish",
+    "dontShow": "Don't show this tour again",
+    "steps": {
+      "welcome": {
+        "title": "Welcome to FacilityPro",
+        "body": "This short tour shows you where everything is. It takes about a minute — you can skip it and restart it any time from Help."
+      },
+      "welcomeTenant": {
+        "title": "Welcome to FacilityPro",
+        "body": "Here you can report anything broken in your building and follow it until it is fixed. This tour takes under a minute."
+      },
+      "menu": {
+        "title": "The menu",
+        "body": "Every module is here, grouped into Maintenance, Operations, Financial and Settings. Click a group name to fold it away."
+      },
+      "myWork": {
+        "title": "My work",
+        "body": "The work orders assigned to you. Open one to start it, log parts and time, fill in its checklist and mark it resolved."
+      },
+      "stats": {
+        "title": "Your numbers at a glance",
+        "body": "Total and pending work, assets and recently completed jobs. Overdue work shows as a red banner above them."
+      },
+      "create": {
+        "title": "Create anything",
+        "body": "Report a fault, or add an asset, part, location, vendor, maintenance plan or checklist from this one button."
+      },
+      "org": {
+        "title": "Organisation and role",
+        "body": "The organisation you're working in and your role in it. Your role decides which pages and actions you see."
+      },
+      "bell": {
+        "title": "Notifications",
+        "body": "New assignments, status changes, approvals and IoT alerts arrive here. Choose email, SMS or push under Security."
+      },
+      "language": {
+        "title": "Language",
+        "body": "Switch between English and Tiếng Việt at any time. Your choice is remembered."
+      },
+      "help": {
+        "title": "Help on every page",
+        "body": "Click Help to see what the current page does and what its fields mean, with a link to the full guide."
+      },
+      "reportFault": {
+        "title": "Report a fault",
+        "body": "Tell us what's wrong and where. Add a photo if you can — it helps the technician bring the right parts."
+      },
+      "myRequests": {
+        "title": "My requests",
+        "body": "Everything you have reported, with its current status: New, Assigned, In progress, Resolved…"
+      },
+      "finish": {
+        "title": "You're ready",
+        "body": "That's the tour. The User guide in the menu has step-by-step instructions for every feature."
+      }
+    }
+  },
+  "center": {
+    "title": "Help Center",
+    "subtitle": "Step-by-step guides for every part of FacilityPro, with screenshots from the app.",
+    "search": "Search the help",
+    "searchPlaceholder": "e.g. close a work order, add a meter, restock",
+    "noResults": "Nothing matches “{{q}}”. Try fewer or different words.",
+    "results_one": "{{count}} result",
+    "results_other": "{{count}} results",
+    "guide": "User guide",
+    "features": "Feature directory",
+    "quickStarts": "Quick-start guides",
+    "knownIssues": "Known issues",
+    "takeTour": "Take the tour",
+    "onThisPage": "On this page",
+    "previous": "Previous",
+    "next": "Next",
+    "back": "Help Center",
+    "forRole": "For your role",
+    "allSections": "All guide sections",
+    "englishOnly": "The guide is written in English.",
+    "featureCount_one": "{{count}} feature",
+    "featureCount_other": "{{count}} features",
+    "purpose": "What it's for",
+    "who": "Who can use it",
+    "where": "Where to find it",
+    "prereq": "Before you start",
+    "steps": "How to use it",
+    "related": "Related",
+    "openPage": "Open this page",
+    "readGuide": "Read the guide",
+    "filterAll": "All areas",
+    "searchFeatures": "Search features"
+  }
+}

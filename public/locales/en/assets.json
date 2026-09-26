@@ -37,7 +37,12 @@
     "type": "Type",
     "location": "Location",
     "serial": "Serial",
-    "qrUrlWarning": "The public app address (VITE_PUBLIC_APP_URL) isn't set, so this code uses the current address. Set it before printing codes."
+    "qrUrlWarning": "The public app address (VITE_PUBLIC_APP_URL) isn't set, so this code uses the current address. Set it before printing codes.",
+    "manufacturer": "Manufacturer",
+    "model": "Model",
+    "purchased": "Purchased",
+    "purchaseCost": "Purchase cost",
+    "specs": "Specifications"
   },
   "meters": {
     "tab": "Meters",

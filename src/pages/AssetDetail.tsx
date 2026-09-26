@@ -18,7 +18,7 @@ import {
   useMeters,
 } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
-import { REQUEST_STATUS_CLASS, WO_STATUS_CLASS, formatDate, formatDateOnly, friendlyError, safeHref } from '../lib/ui';
+import { REQUEST_STATUS_CLASS, WO_STATUS_CLASS, formatDateOnly, formatMoney, friendlyError, safeHref } from '../lib/ui';
 import type { Meter } from '../lib/database.types';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -39,7 +39,7 @@ export default function AssetDetail() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('info');
   const [editing, setEditing] = useState(false);
-  const { isManager, currentOrg } = useOrg();
+  const { isManager, currentOrg, currency } = useOrg();
   const queryClient = useQueryClient();
 
   const assetQuery = useAsset(id);
@@ -227,7 +227,24 @@ export default function AssetDetail() {
           <Info label={t('detail.type')} value={typeName} />
           <Info label={t('detail.location')} value={locName} />
           <Info label={t('detail.serial')} value={asset.serial ?? '—'} />
-          <Info label={t('detail.warranty')} value={formatDate(asset.warranty_expiry, lng)} />
+          <Info label={t('detail.warranty')} value={asset.warranty_expiry ? formatDateOnly(asset.warranty_expiry, lng) : '—'} />
+          {asset.manufacturer && <Info label={t('detail.manufacturer')} value={asset.manufacturer} />}
+          {asset.model && <Info label={t('detail.model')} value={asset.model} />}
+          {asset.purchase_date && <Info label={t('detail.purchased')} value={formatDateOnly(asset.purchase_date, lng)} />}
+          {asset.purchase_cost != null && <Info label={t('detail.purchaseCost')} value={formatMoney(asset.purchase_cost, currency, lng)} />}
+          {specEntries(asset.specs).length > 0 && (
+            <div className="col-span-2 rounded-lg border border-line bg-white px-3 py-2">
+              <dt className="text-xs text-ink-muted">{t('detail.specs')}</dt>
+              <dd className="mt-1 grid gap-x-6 gap-y-1 sm:grid-cols-2">
+                {specEntries(asset.specs).map(([k, v]) => (
+                  <div key={k} className="flex justify-between gap-3 border-b border-line/60 py-1 last:border-0">
+                    <span className="text-ink-muted">{k}</span>
+                    <span className="text-right text-ink">{v}</span>
+                  </div>
+                ))}
+              </dd>
+            </div>
+          )}
         </dl>
       )}
 
@@ -286,6 +303,14 @@ export default function AssetDetail() {
       )}
     </div>
   );
+}
+
+/** Specifications as label/value pairs (only plain values are shown). */
+function specEntries(specs: Record<string, unknown> | null | undefined): [string, string][] {
+  if (!specs || typeof specs !== 'object' || Array.isArray(specs)) return [];
+  return Object.entries(specs)
+    .filter(([, v]) => ['string', 'number', 'boolean'].includes(typeof v) && String(v).trim() !== '')
+    .map(([k, v]) => [k, String(v)]);
 }
 
 function Info({ label, value }: { label: string; value: string }) {

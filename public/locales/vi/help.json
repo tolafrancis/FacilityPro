@@ -1,0 +1,108 @@
+{
+  "button": "Trợ giúp",
+  "drawer": {
+    "kicker": "Trợ giúp cho trang này",
+    "generalTitle": "Trợ giúp",
+    "generalBody": "Tìm trong Trung tâm trợ giúp để xem hướng dẫn từng bước, hoặc xem chuyến tham quan để nắm những điều cơ bản.",
+    "canDo": "Bạn có thể làm gì ở đây",
+    "fields": "Các trường trên trang này",
+    "tip": "Mẹo:",
+    "openGuide": "Đọc hướng dẫn đầy đủ",
+    "helpCenter": "Trung tâm trợ giúp",
+    "tour": "Xem hướng dẫn nhanh",
+    "close": "Đóng trợ giúp"
+  },
+  "tour": {
+    "progress": "Bước {{current}}/{{total}}",
+    "skip": "Bỏ qua",
+    "previous": "Trước",
+    "next": "Tiếp",
+    "finish": "Hoàn tất",
+    "dontShow": "Không hiển thị lại hướng dẫn này",
+    "steps": {
+      "welcome": {
+        "title": "Chào mừng đến với FacilityPro",
+        "body": "Chuyến tham quan ngắn này cho bạn biết mọi thứ nằm ở đâu, mất khoảng một phút. Bạn có thể bỏ qua và mở lại bất cứ lúc nào từ mục Trợ giúp."
+      },
+      "welcomeTenant": {
+        "title": "Chào mừng đến với FacilityPro",
+        "body": "Tại đây bạn có thể báo bất kỳ sự cố nào trong tòa nhà và theo dõi đến khi được xử lý xong. Chưa đến một phút."
+      },
+      "menu": {
+        "title": "Menu",
+        "body": "Mọi mô-đun đều ở đây, chia thành Bảo trì, Vận hành, Tài chính và Cài đặt. Bấm vào tên nhóm để thu gọn."
+      },
+      "myWork": {
+        "title": "Công việc của tôi",
+        "body": "Các lệnh công việc được giao cho bạn. Mở một lệnh để bắt đầu, ghi vật tư và thời gian, điền checklist và đánh dấu đã xử lý."
+      },
+      "stats": {
+        "title": "Số liệu tổng quan",
+        "body": "Tổng số công việc, công việc đang chờ, tài sản và việc vừa hoàn thành. Việc quá hạn hiện thành dải màu đỏ phía trên."
+      },
+      "create": {
+        "title": "Tạo mọi thứ",
+        "body": "Báo sự cố, hoặc thêm tài sản, vật tư, vị trí, nhà cung cấp, kế hoạch bảo trì hay checklist từ một nút duy nhất."
+      },
+      "org": {
+        "title": "Tổ chức và vai trò",
+        "body": "Tổ chức bạn đang làm việc và vai trò của bạn. Vai trò quyết định bạn thấy những trang và thao tác nào."
+      },
+      "bell": {
+        "title": "Thông báo",
+        "body": "Việc được giao, thay đổi trạng thái, phê duyệt và cảnh báo IoT hiện ở đây. Chọn email, SMS hoặc push trong mục Bảo mật."
+      },
+      "language": {
+        "title": "Ngôn ngữ",
+        "body": "Chuyển giữa English và Tiếng Việt bất cứ lúc nào. Lựa chọn của bạn được ghi nhớ."
+      },
+      "help": {
+        "title": "Trợ giúp trên mọi trang",
+        "body": "Bấm Trợ giúp để xem trang hiện tại dùng để làm gì và các trường có ý nghĩa gì, kèm liên kết đến hướng dẫn đầy đủ."
+      },
+      "reportFault": {
+        "title": "Báo sự cố",
+        "body": "Cho chúng tôi biết hỏng gì và ở đâu. Nếu được, hãy thêm ảnh để kỹ thuật viên mang đúng vật tư."
+      },
+      "myRequests": {
+        "title": "Yêu cầu của tôi",
+        "body": "Mọi sự cố bạn đã báo cùng trạng thái hiện tại: Mới, Đã giao, Đang xử lý, Đã xử lý…"
+      },
+      "finish": {
+        "title": "Bạn đã sẵn sàng",
+        "body": "Chuyến tham quan kết thúc. Mục Hướng dẫn sử dụng trong menu có hướng dẫn từng bước cho mọi tính năng."
+      }
+    }
+  },
+  "center": {
+    "title": "Trung tâm trợ giúp",
+    "subtitle": "Hướng dẫn từng bước cho mọi phần của FacilityPro, kèm ảnh chụp màn hình từ ứng dụng.",
+    "search": "Tìm trợ giúp",
+    "searchPlaceholder": "vd. đóng lệnh công việc, thêm đồng hồ đo, nhập kho",
+    "noResults": "Không có kết quả cho “{{q}}”. Hãy thử ít từ hơn hoặc từ khác.",
+    "results_other": "{{count}} kết quả",
+    "guide": "Hướng dẫn sử dụng",
+    "features": "Danh mục tính năng",
+    "quickStarts": "Hướng dẫn bắt đầu nhanh",
+    "knownIssues": "Vấn đề đã biết",
+    "takeTour": "Xem hướng dẫn nhanh",
+    "onThisPage": "Trong trang này",
+    "previous": "Trước",
+    "next": "Tiếp",
+    "back": "Trung tâm trợ giúp",
+    "forRole": "Dành cho vai trò của bạn",
+    "allSections": "Tất cả các phần",
+    "englishOnly": "Nội dung hướng dẫn hiện chỉ có bằng tiếng Anh.",
+    "featureCount_other": "{{count}} tính năng",
+    "purpose": "Dùng để làm gì",
+    "who": "Ai có thể dùng",
+    "where": "Tìm ở đâu",
+    "prereq": "Trước khi bắt đầu",
+    "steps": "Cách sử dụng",
+    "related": "Liên quan",
+    "openPage": "Mở trang này",
+    "readGuide": "Đọc hướng dẫn",
+    "filterAll": "Tất cả",
+    "searchFeatures": "Tìm tính năng"
+  }
+}

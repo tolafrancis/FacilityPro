@@ -117,17 +117,54 @@ export function renderInline(text: string, keyPrefix = 'i'): ReactNode[] {
   return out;
 }
 
-export function Markdown({ source, imageUrl = (s: string) => s }: { source: string; imageUrl?: (src: string) => string }) {
+/** URL fragment for a heading: "Closing a work order" → "closing-a-work-order". */
+export function headingId(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/gi, 'd')
+    .toLowerCase()
+    .replace(/[`*_[\]()'’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/** "> **Tip:** …" quotes become coloured call-outs. */
+export function calloutKind(text: string): 'tip' | 'warning' | 'note' | null {
+  const m = /^\*\*(Tip|Warning|Important|Note)[:.]?\*\*/i.exec(text.trim());
+  if (!m) return null;
+  const k = m[1].toLowerCase();
+  return k === 'tip' ? 'tip' : k === 'note' ? 'note' : 'warning';
+}
+
+const CALLOUT_CLASS = {
+  tip: 'border-emerald-500/60 bg-emerald-50 text-emerald-950 dark:bg-emerald-500/10 dark:text-emerald-100',
+  warning: 'border-amber-500/70 bg-amber-50 text-amber-950 dark:bg-amber-500/10 dark:text-amber-100',
+  note: 'border-sky-500/60 bg-sky-50 text-sky-950 dark:bg-sky-500/10 dark:text-sky-100',
+} as const;
+
+export function Markdown({
+  source,
+  imageUrl = (s: string) => s,
+  compact = false,
+}: {
+  source: string;
+  imageUrl?: (src: string) => string;
+  /** Smaller type for help articles (blog posts use the large reading size). */
+  compact?: boolean;
+}) {
   const blocks = parseMarkdown(source);
   return (
-    <div className="space-y-5 text-[17px] leading-8 text-ink/85">
+    <div className={compact ? 'space-y-4 text-[15px] leading-7 text-ink/85' : 'space-y-5 text-[17px] leading-8 text-ink/85'}>
       {blocks.map((b, i) => {
         const k = `b${i}`;
         switch (b.type) {
           case 'heading': {
-            const cls = b.level === 2 ? 'pt-4 text-2xl font-semibold text-ink' : b.level === 3 ? 'pt-2 text-xl font-semibold text-ink' : 'text-lg font-semibold text-ink';
+            const cls = compact
+              ? b.level === 2 ? 'scroll-mt-24 border-t border-line pt-6 text-xl font-semibold text-ink first:border-0 first:pt-0' : b.level === 3 ? 'scroll-mt-24 pt-2 text-lg font-semibold text-ink' : 'scroll-mt-24 font-semibold text-ink'
+              : b.level === 2 ? 'pt-4 text-2xl font-semibold text-ink' : b.level === 3 ? 'pt-2 text-xl font-semibold text-ink' : 'text-lg font-semibold text-ink';
             const Tag = `h${b.level}` as 'h2' | 'h3' | 'h4';
-            return <Tag key={k} className={cls}>{renderInline(b.text, k)}</Tag>;
+            return <Tag key={k} id={headingId(b.text) || undefined} className={cls}>{renderInline(b.text, k)}</Tag>;
           }
           case 'paragraph':
             return <p key={k}>{renderInline(b.text, k)}</p>;
@@ -139,15 +176,18 @@ export function Markdown({ source, imageUrl = (s: string) => s }: { source: stri
               </Tag>
             );
           }
-          case 'quote':
+          case 'quote': {
+            const kind = calloutKind(b.text);
+            if (kind) return <aside key={k} className={`rounded-xl border-l-4 px-4 py-3 ${CALLOUT_CLASS[kind]}`}>{renderInline(b.text, k)}</aside>;
             return <blockquote key={k} className="border-l-4 border-brand/60 pl-4 italic text-ink/75">{renderInline(b.text, k)}</blockquote>;
+          }
           case 'code':
             return <pre key={k} className="overflow-x-auto rounded-xl bg-[#0F172A] p-4 text-sm leading-6 text-[#E2E8F0]"><code>{b.text}</code></pre>;
           case 'image': {
             const safe = safeUrl(imageUrl(b.src));
             return safe ? (
               <figure key={k}>
-                <img src={safe} alt={b.alt} className="w-full rounded-2xl border border-line" loading="lazy" />
+                <img src={safe} alt={b.alt} className={`w-full border border-line ${compact ? 'rounded-xl shadow-sm' : 'rounded-2xl'}`} loading="lazy" />
                 {b.alt && <figcaption className="mt-2 text-center text-sm text-ink-muted">{b.alt}</figcaption>}
               </figure>
             ) : null;

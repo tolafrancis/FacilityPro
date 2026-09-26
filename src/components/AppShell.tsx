@@ -36,6 +36,7 @@ import {
   X,
   type LucideIcon,
   LifeBuoy,
+  BookOpen,
 } from 'lucide-react';
 import { hiddenNavKeys, useOrgFlags } from '../lib/platform';
 import { AnnouncementBar, ModuleGate } from './PlatformNotices';
@@ -46,6 +47,8 @@ import LanguageSwitcher from './LanguageSwitcher';
 import NotificationBell from './NotificationBell';
 import { orgLogoUrl } from '../lib/orgLogo';
 import OfflineBanner from './OfflineBanner';
+import HelpButton from './help/HelpButton';
+import ProductTour from './help/ProductTour';
 import SyncIndicator from './SyncIndicator';
 
 interface NavItem {
@@ -95,6 +98,7 @@ const OCCUPANT_NAV: NavGroup[] = [
       { to: '/', key: 'home', icon: LayoutDashboard, end: true },
       { to: '/requests/new', key: 'reportFault', icon: PlusCircle, end: true },
       { to: '/requests', key: 'myRequests', icon: ClipboardList, end: true },
+      { to: '/help', key: 'userGuide', icon: BookOpen },
     ],
   },
 ];
@@ -145,6 +149,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: '/smart-assistant', key: 'smartAssistant', icon: Sparkles },
       { to: '/settings', key: 'settings', icon: Settings },
+      { to: '/help', key: 'userGuide', icon: BookOpen },
       { to: '/support', key: 'support', icon: LifeBuoy },
     ],
   },
@@ -223,7 +228,7 @@ export default function AppShell() {
         )}
         <span className="font-semibold text-ink">{t('app.name')}</span>
       </div>
-      <nav className="flex-1 space-y-2 px-3 py-2">
+      <nav data-tour="nav" className="flex-1 space-y-2 px-3 py-2">
         {visibleNavGroups.map((group) => {
           const isOpen = openGroups[group.title];
           return (
@@ -253,6 +258,7 @@ export default function AppShell() {
                         key={key}
                         to={to}
                         end={end}
+                        data-tour={`nav-${key}`}
                         className={({ isActive }) =>
                           `flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition lg:min-h-0 ${
                             isActive || (key === 'myRequests' && tenantRequestDetail)
@@ -319,6 +325,12 @@ export default function AppShell() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <OfflineBanner />
+        {currentOrg?.settings?.demo && (
+          <div role="note" className="flex items-center justify-center gap-2 bg-amber-400 px-4 py-1.5 text-center text-xs font-semibold text-amber-950">
+            <span className="rounded bg-amber-950 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300">{t('demo.badge')}</span>
+            <span>{t('demo.banner')}</span>
+          </div>
+        )}
         <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-white px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-6 lg:static lg:pt-3">
           <div className="flex min-w-0 items-center gap-3">
             <button
@@ -331,15 +343,16 @@ export default function AppShell() {
             >
               <Menu size={22} aria-hidden />
             </button>
-            <div className="min-w-0">
+            <div className="min-w-0" data-tour="org">
               <p className="truncate text-sm font-medium text-ink">{currentOrg?.name}</p>
               {role && <p className="text-xs text-ink-muted">{t(`roles.${role}`)}</p>}
             </div>
           </div>
           <div className="flex items-center gap-3">
             <SyncIndicator />
-            <NotificationBell />
-            <LanguageSwitcher />
+            <HelpButton />
+            <span data-tour="bell" className="inline-flex"><NotificationBell /></span>
+            <span data-tour="language" className="inline-flex"><LanguageSwitcher /></span>
           </div>
         </header>
         <main className="flex-1 overflow-auto px-4 pb-[calc(5.5rem+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:pb-6 lg:pt-6">
@@ -348,6 +361,7 @@ export default function AppShell() {
             <Outlet />
           </ModuleGate>
         </main>
+        <ProductTour />
 
         <nav
           aria-label={t('nav.mobileTabs')}
@@ -359,6 +373,7 @@ export default function AppShell() {
                 <NavLink
                   to={to}
                   end={end}
+                  data-tour={`nav-${key}`}
                   className={({ isActive }) =>
                     `flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium ${isActive || (key === 'myRequests' && tenantRequestDetail) ? 'text-brand-600' : 'text-ink-muted'}`
                   }

@@ -1,0 +1,374 @@
+{
+  "signin": {
+    "title": "Sign in",
+    "legend": [
+      "Email address",
+      "Password",
+      "Keep me logged in",
+      "Forgot password?",
+      "Sign in",
+      "Create an account"
+    ]
+  },
+  "dashboard": {
+    "title": "Dashboard (Administrator)",
+    "legend": [
+      "Menu — every module, grouped",
+      "Organisation and your role",
+      "Create — report a fault or add anything",
+      "? Help for the page you are on",
+      "Notifications",
+      "Language (EN / VI)",
+      "Key numbers"
+    ]
+  },
+  "dashboard-charts": {
+    "title": "Dashboard — charts and lists",
+    "legend": [
+      "Weekly: faults reported vs resolved",
+      "Recent activity (latest requests)",
+      "Faults by category, last 30 days",
+      "To-do list for setting up"
+    ]
+  },
+  "dashboard-create": {
+    "title": "The Create menu",
+    "legend": [
+      "Everything you can create from the dashboard"
+    ]
+  },
+  "notifications": {
+    "title": "Notifications panel",
+    "legend": [
+      "Mark all read",
+      "A notification — click to open the related page"
+    ]
+  },
+  "locations": {
+    "title": "Locations tree",
+    "legend": [
+      "Add site",
+      "Add building to a site",
+      "Add floor to a building",
+      "Add room",
+      "Add zone (area such as a lobby or car park)",
+      "Rename / delete"
+    ]
+  },
+  "assets": {
+    "title": "Asset register",
+    "legend": [
+      "Add asset",
+      "Search and filters",
+      "An asset — click to open it"
+    ]
+  },
+  "asset-new": {
+    "title": "Add asset dialog",
+    "legend": []
+  },
+  "asset-detail": {
+    "title": "Asset details — Chiller CH-01",
+    "legend": [
+      "Asset name and type",
+      "Report fault on this asset",
+      "Edit / Delete (managers)",
+      "Tabs: Details, History, Meters, Documents, QR code",
+      "Details and specifications"
+    ]
+  },
+  "asset-history": {
+    "title": "Asset history tab",
+    "legend": []
+  },
+  "asset-meters": {
+    "title": "Asset meters tab",
+    "legend": []
+  },
+  "asset-qr": {
+    "title": "Asset QR code tab",
+    "legend": []
+  },
+  "maintenance": {
+    "title": "Preventive maintenance",
+    "legend": [
+      "New schedule",
+      "Generate due now",
+      "Calendar — dots show due dates",
+      "An overdue schedule",
+      "Required parts kit",
+      "Pause / Resume"
+    ]
+  },
+  "maintenance-new": {
+    "title": "New maintenance schedule dialog",
+    "legend": []
+  },
+  "checklist-template": {
+    "title": "Checklist template — items",
+    "legend": []
+  },
+  "requests": {
+    "title": "Requests list",
+    "legend": [
+      "New request",
+      "Search",
+      "Filter by status / location",
+      "A request — click to open"
+    ]
+  },
+  "request-detail": {
+    "title": "Request details (manager view)",
+    "legend": [
+      "Create work order from this request",
+      "Change the request status"
+    ]
+  },
+  "work-orders": {
+    "title": "Work orders list",
+    "legend": [
+      "Search",
+      "Filters: status, location, assignee, priority",
+      "TV display link",
+      "A work order — click to open"
+    ]
+  },
+  "wo-detail-top": {
+    "title": "Work order — header and details",
+    "legend": [
+      "Status — shows only the moves allowed next",
+      "Assignee",
+      "Vendor (or In-house)",
+      "Print job sheet",
+      "Timeline: started, resolved, verified, closed"
+    ]
+  },
+  "wo-detail-work": {
+    "title": "Work order — recording the work",
+    "legend": [
+      "Closing details: cause and completion code",
+      "Approval",
+      "Checklist",
+      "Parts used",
+      "Labour"
+    ]
+  },
+  "wo-closed": {
+    "title": "A closed work order with its checklist results",
+    "legend": []
+  },
+  "job-sheet": {
+    "title": "Printable job sheet",
+    "legend": []
+  },
+  "approvals": {
+    "title": "Approvals",
+    "legend": [
+      "Approve",
+      "Reject"
+    ]
+  },
+  "vendors": {
+    "title": "Vendors, contracts and licences",
+    "legend": [
+      "New vendor",
+      "New contract",
+      "New licence",
+      "Contract expiring soon",
+      "Expired licence"
+    ]
+  },
+  "parts": {
+    "title": "Parts & inventory",
+    "legend": [
+      "New part",
+      "Filter by category",
+      "Low-stock warning",
+      "Quantity to add",
+      "Restock",
+      "Show transaction history"
+    ]
+  },
+  "parts-history": {
+    "title": "Part transaction history",
+    "legend": []
+  },
+  "financial": {
+    "title": "Financial operations — procurement",
+    "legend": [
+      "Budget, committed spend, open POs",
+      "New PO",
+      "Purchase order number",
+      "PO status: RFQ → PO → Approved → Received"
+    ]
+  },
+  "financial-po": {
+    "title": "A purchase order opened",
+    "legend": []
+  },
+  "devices": {
+    "title": "IoT devices",
+    "legend": [
+      "Add device",
+      "Fleet summary",
+      "A device — click for live data"
+    ]
+  },
+  "device-detail": {
+    "title": "Device — CH-01 chiller monitor",
+    "legend": [
+      "Tabs: Overview, Alerts, Commands, Data points, Maintenance, Rules, Connection",
+      "Live data and history chart"
+    ]
+  },
+  "device-alerts": {
+    "title": "Device alerts",
+    "legend": [
+      "Resolve (Acknowledge appears while an alert is open)"
+    ]
+  },
+  "device-rules": {
+    "title": "Device threshold rules",
+    "legend": []
+  },
+  "reports": {
+    "title": "Reports",
+    "legend": [
+      "Filters: dates, location, technician, priority",
+      "Operational metrics",
+      "Cost & spend",
+      "CSV exports",
+      "Activity log"
+    ]
+  },
+  "settings-general": {
+    "title": "Settings — General",
+    "legend": []
+  },
+  "settings-catalogs": {
+    "title": "Settings — Catalogs",
+    "legend": []
+  },
+  "settings-sla": {
+    "title": "Settings — SLA targets",
+    "legend": []
+  },
+  "settings-team": {
+    "title": "Settings — Team & roles",
+    "legend": [
+      "Members and their roles",
+      "Change a member’s role",
+      "Join links & QR codes",
+      "Invite a member by email"
+    ]
+  },
+  "settings-displays": {
+    "title": "Settings — TV displays",
+    "legend": []
+  },
+  "settings-integrations": {
+    "title": "Settings — Integrations",
+    "legend": []
+  },
+  "workflows": {
+    "title": "Workflows",
+    "legend": []
+  },
+  "attendance": {
+    "title": "Technician attendance",
+    "legend": []
+  },
+  "documents": {
+    "title": "Documents",
+    "legend": []
+  },
+  "desks": {
+    "title": "Desk booking",
+    "legend": []
+  },
+  "facilities": {
+    "title": "Facility booking",
+    "legend": []
+  },
+  "permits": {
+    "title": "Permits to work",
+    "legend": []
+  },
+  "tenant-experience": {
+    "title": "Tenant experience — announcements",
+    "legend": []
+  },
+  "inbox": {
+    "title": "Inbox",
+    "legend": []
+  },
+  "security": {
+    "title": "Security & notification settings",
+    "legend": []
+  },
+  "surveys": {
+    "title": "Surveys",
+    "legend": []
+  },
+  "billing": {
+    "title": "Billing",
+    "legend": []
+  },
+  "checklists": {
+    "title": "Checklists",
+    "legend": []
+  },
+  "support": {
+    "title": "Help & support",
+    "legend": []
+  },
+  "help-drawer": {
+    "title": "The “? Help” panel",
+    "legend": [
+      "Which page this help is for",
+      "What you can do and what the fields mean",
+      "Read the full guide section",
+      "Take the tour"
+    ]
+  },
+  "tour": {
+    "title": "The guided tour",
+    "legend": [
+      "Step counter",
+      "Don’t show this tour again",
+      "Skip tour",
+      "Previous",
+      "Next / Finish"
+    ]
+  },
+  "my-work": {
+    "title": "My work (Technician)",
+    "legend": [
+      "Your assigned work order — priority, status and due date"
+    ]
+  },
+  "tenant-home": {
+    "title": "Tenant home (Occupant)",
+    "legend": [
+      "Report a fault",
+      "My requests — view all",
+      "Announcements from building management"
+    ]
+  },
+  "request-new": {
+    "title": "Report a fault form",
+    "legend": [
+      "Summary",
+      "Fault type",
+      "Severity",
+      "Location",
+      "Description",
+      "Photo (optional)",
+      "Submit report"
+    ]
+  },
+  "mobile-dashboard": {
+    "title": "FacilityPro on a phone",
+    "legend": []
+  }
+}
