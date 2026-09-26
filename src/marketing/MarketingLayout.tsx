@@ -2,7 +2,9 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent, ty
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, Menu, X } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { FEATURE_GROUPS, RESOURCES, SOLUTION_COLUMNS, resourceHref, type Resource } from './content';
+import { brochureHref, useMarketingT } from './i18n';
 
 type MenuKey = 'features' | 'resources' | 'solutions';
 
@@ -18,8 +20,9 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
 }
 
 function Logo() {
+  const { t } = useMarketingT();
   return (
-    <Link to="/" className="flex shrink-0 items-center gap-2.5" aria-label="FacilityPro home">
+    <Link to="/" className="flex shrink-0 items-center gap-2.5" aria-label={t('nav.home')}>
       <span className="grid h-10 w-10 place-items-center rounded-xl bg-brand text-lg font-bold text-white">F</span>
       <span className="text-xl font-semibold tracking-tight text-ink">Facility<span className="text-brand">Pro</span></span>
     </Link>
@@ -29,6 +32,7 @@ function Logo() {
 /** "email + Start free trial": carries the address into sign-up. */
 export function TrialForm({ size = 'md', className = '' }: { size?: 'md' | 'lg'; className?: string }) {
   const navigate = useNavigate();
+  const { t } = useMarketingT();
   const id = useId();
   const [email, setEmail] = useState('');
   const submit = (e: FormEvent) => {
@@ -39,24 +43,25 @@ export function TrialForm({ size = 'md', className = '' }: { size?: 'md' | 'lg';
   const h = size === 'lg' ? 'h-14 text-base' : 'h-14 text-[15px]';
   return (
     <form onSubmit={submit} className={`flex w-full max-w-[26rem] ${className}`}>
-      <label htmlFor={id} className="sr-only">Work email</label>
+      <label htmlFor={id} className="sr-only">{t('nav.workEmail')}</label>
       <input
         id={id}
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
+        placeholder={t('nav.email')}
         autoComplete="email"
         className={`${h} min-w-0 flex-1 rounded-l-lg border border-r-0 border-[#D9DDE3] bg-white px-4 text-ink placeholder:text-[#8A8F98] focus:border-brand focus:outline-none`}
       />
       <button type="submit" className={`${h} shrink-0 rounded-r-lg border border-brand bg-white px-5 font-bold uppercase tracking-wide text-brand transition hover:bg-brand hover:text-white`}>
-        Start free trial
+        {t('nav.startTrial')}
       </button>
     </form>
   );
 }
 
 function MarketingHeader() {
+  const { t } = useMarketingT();
   const [open, setOpen] = useState<MenuKey | null>(null);
   const [mobile, setMobile] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -137,17 +142,20 @@ function MarketingHeader() {
       <div className="mx-auto flex h-20 max-w-[1320px] items-center gap-6 px-4 sm:px-6 lg:h-[104px] lg:px-8">
         <Logo />
         <nav aria-label="Main" className="ml-8 hidden shrink-0 items-center gap-8 lg:flex 2xl:ml-14 2xl:gap-10">
-          <Link to="/#pricing" className={plain}>Pricing</Link>
-          {trigger('features', 'Features')}
-          {trigger('resources', 'Resources')}
-          {trigger('solutions', 'Solutions')}
-          <Link to="/signin" className={plain}>Sign In</Link>
+          <Link to="/#pricing" className={plain}>{t('nav.pricing')}</Link>
+          {trigger('features', t('nav.features'))}
+          {trigger('resources', t('nav.resources'))}
+          {trigger('solutions', t('nav.solutions'))}
+          <Link to="/signin" className={plain}>{t('nav.signIn')}</Link>
         </nav>
-        <div className="ml-auto hidden w-[24rem] shrink-0 xl:block"><TrialForm /></div>
-        <Link to="/signup" className="ml-auto hidden rounded-lg border border-brand px-5 py-3 text-[15px] font-bold uppercase tracking-wide text-brand hover:bg-brand hover:text-white lg:inline-flex xl:hidden">
-          Start free trial
-        </Link>
-        <button type="button" onClick={() => setMobile(true)} className="ml-auto grid h-11 w-11 place-items-center rounded-lg text-ink hover:bg-surface lg:hidden" aria-label="Open menu">
+        <div className="ml-auto flex shrink-0 items-center gap-4">
+          <LanguageSwitcher />
+          <div className="hidden w-[24rem] shrink-0 2xl:block"><TrialForm /></div>
+          <Link to="/signup" className="hidden rounded-lg border border-brand px-5 py-3 text-[15px] font-bold uppercase tracking-wide text-brand hover:bg-brand hover:text-white lg:inline-flex 2xl:hidden">
+            {t('nav.startTrial')}
+          </Link>
+        </div>
+        <button type="button" onClick={() => setMobile(true)} className="grid h-11 w-11 place-items-center rounded-lg text-ink hover:bg-surface lg:hidden" aria-label={t('nav.openMenu')}>
           <Menu size={24} aria-hidden />
         </button>
       </div>
@@ -227,10 +235,11 @@ const itemLink = 'group flex items-center gap-3.5 whitespace-nowrap py-3 text-[1
 const iconProps = { size: 19, strokeWidth: 2.2, className: 'shrink-0 text-brand', 'aria-hidden': true } as const;
 
 function FeaturesPanel() {
+  const m = useMarketingT();
   const [group, setGroup] = useState(FEATURE_GROUPS[0].key);
   const g = FEATURE_GROUPS.find((x) => x.key === group) ?? FEATURE_GROUPS[0];
   return (
-    <div className={`${panel} flex w-max max-w-full`} role="region" aria-label="Features">
+    <div className={`${panel} flex w-max max-w-full`} role="region" aria-label={m.t('nav.features')}>
       <ul className="my-5 w-[236px] shrink-0 border-r border-[#E5E7EB]" role="tablist" aria-orientation="vertical">
         {FEATURE_GROUPS.map((x) => (
           <li key={x.key}>
@@ -244,7 +253,7 @@ function FeaturesPanel() {
               className={`-mr-px flex w-[calc(100%+1px)] items-center gap-2 whitespace-nowrap border-r-2 px-5 py-3.5 text-left text-[15px] transition ${
                 x.key === group ? 'border-brand text-brand' : 'border-transparent text-[#333] hover:text-brand'}`}
             >
-              {x.label}
+              {m.group(x)}
               {x.badge && <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold leading-none text-white">{x.badge}</span>}
             </button>
           </li>
@@ -254,7 +263,7 @@ function FeaturesPanel() {
         {g.items.map((f) => (
           <Link key={f.slug} to={`/features/${f.slug}`} className={itemLink}>
             <f.icon {...iconProps} />
-            <span>{f.title}</span>
+            <span>{m.feature(f)}</span>
           </Link>
         ))}
       </div>
@@ -263,17 +272,19 @@ function FeaturesPanel() {
 }
 
 function ResourceLink({ r }: { r: Resource }) {
+  const m = useMarketingT();
   return (
     <Link to={resourceHref(r)} className={itemLink}>
       <r.icon {...iconProps} />
-      <span>{r.title}</span>
+      <span>{m.resource(r)}</span>
     </Link>
   );
 }
 
 function ResourcesPanel() {
+  const { t } = useMarketingT();
   return (
-    <div className={`${panel} grid w-max max-w-full grid-cols-[repeat(3,max-content)] gap-x-14 px-8 py-5`} role="region" aria-label="Resources">
+    <div className={`${panel} grid w-max max-w-full grid-cols-[repeat(3,max-content)] gap-x-14 px-8 py-5`} role="region" aria-label={t('nav.resources')}>
       {RESOURCES.map((col, i) => (
         <div key={i}>
           {col.map((r) => <ResourceLink key={r.slug} r={r} />)}
@@ -284,14 +295,15 @@ function ResourcesPanel() {
 }
 
 function SolutionsPanel() {
+  const m = useMarketingT();
   return (
-    <div className={`${panel} grid w-max max-w-full grid-cols-[repeat(3,max-content)] gap-x-10 px-8 py-5`} role="region" aria-label="Solutions">
+    <div className={`${panel} grid w-max max-w-full grid-cols-[repeat(3,max-content)] gap-x-10 px-8 py-5`} role="region" aria-label={m.t('nav.solutions')}>
       {SOLUTION_COLUMNS.map((c) => (
         <div key={c.key} className="min-w-[14rem]">
           {c.items.map((s) => (
             <Link key={s.slug} to={`/solutions/${s.slug}`} className={itemLink}>
               <s.icon {...iconProps} size={18} />
-              <span>{s.title}</span>
+              <span>{m.solution(s)}</span>
             </Link>
           ))}
         </div>
@@ -301,6 +313,8 @@ function SolutionsPanel() {
 }
 
 function MobileMenu({ onClose }: { onClose: () => void }) {
+  const m = useMarketingT();
+  const { t } = m;
   const [section, setSection] = useState<MenuKey | null>(null);
   const toggle = (k: MenuKey) => setSection((s) => (s === k ? null : k));
   const head = (k: MenuKey, label: string) => (
@@ -312,26 +326,26 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
   );
   const small = 'flex items-center gap-3 rounded-lg px-2 py-2.5 text-[15px] text-ink hover:bg-brand/5';
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+    <div className="fixed inset-0 z-50 flex flex-col bg-white lg:hidden" role="dialog" aria-modal="true" aria-label={t('nav.menu')}>
       <div className="flex h-20 items-center justify-between border-b border-line px-4 sm:px-6">
         <Logo />
-        <button type="button" onClick={onClose} className="grid h-11 w-11 place-items-center rounded-lg hover:bg-surface" aria-label="Close menu">
+        <button type="button" onClick={onClose} className="grid h-11 w-11 place-items-center rounded-lg hover:bg-surface" aria-label={t('nav.closeMenu')}>
           <X size={24} aria-hidden />
         </button>
       </div>
       <div className="flex-1 overflow-y-auto px-4 pb-8 sm:px-6">
         <div className="divide-y divide-line">
-          <Link to="/#pricing" className="block py-4 text-lg font-semibold text-ink">Pricing</Link>
+          <Link to="/#pricing" className="block py-4 text-lg font-semibold text-ink">{t('nav.pricing')}</Link>
           <div>
-            {head('features', 'Features')}
+            {head('features', t('nav.features'))}
             {section === 'features' && (
               <div className="space-y-4 pb-4">
                 {FEATURE_GROUPS.map((g) => (
                   <div key={g.key}>
-                    <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wide text-brand">{g.label}</p>
+                    <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wide text-brand">{m.group(g)}</p>
                     {g.items.map((f) => (
                       <Link key={f.slug} to={`/features/${f.slug}`} className={small}>
-                        <f.icon size={18} className="text-brand" aria-hidden />{f.title}
+                        <f.icon size={18} className="text-brand" aria-hidden />{m.feature(f)}
                       </Link>
                     ))}
                   </div>
@@ -340,27 +354,28 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
             )}
           </div>
           <div>
-            {head('resources', 'Resources')}
+            {head('resources', t('nav.resources'))}
             {section === 'resources' && (
               <div className="pb-4">
                 {RESOURCES.flat().map((r) => (
-                  <Link key={r.slug} to={resourceHref(r)} className={small}><r.icon size={18} className="text-brand" aria-hidden />{r.title}</Link>
+                  <Link key={r.slug} to={resourceHref(r)} className={small}><r.icon size={18} className="text-brand" aria-hidden />{m.resource(r)}</Link>
                 ))}
               </div>
             )}
           </div>
           <div>
-            {head('solutions', 'Solutions')}
+            {head('solutions', t('nav.solutions'))}
             {section === 'solutions' && (
               <div className="pb-4">
                 {SOLUTION_COLUMNS.flatMap((c) => c.items).map((s) => (
-                  <Link key={s.slug} to={`/solutions/${s.slug}`} className={small}><s.icon size={18} className="text-brand" aria-hidden />{s.title}</Link>
+                  <Link key={s.slug} to={`/solutions/${s.slug}`} className={small}><s.icon size={18} className="text-brand" aria-hidden />{m.solution(s)}</Link>
                 ))}
               </div>
             )}
           </div>
-          <Link to="/signin" className="block py-4 text-lg font-semibold text-ink">Sign in</Link>
+          <Link to="/signin" className="block py-4 text-lg font-semibold text-ink">{t('footer.signIn')}</Link>
         </div>
+        <div className="mt-4"><LanguageSwitcher /></div>
         <TrialForm className="mt-4" />
       </div>
     </div>
@@ -368,6 +383,8 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
 }
 
 function MarketingFooter() {
+  const m = useMarketingT();
+  const { t } = m;
   const col = (title: string, links: { to: string; label: string }[]) => (
     <div>
       <p className="text-sm font-semibold text-ink">{title}</p>
@@ -381,18 +398,19 @@ function MarketingFooter() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:grid-cols-2 sm:px-6 lg:grid-cols-5 lg:px-8">
         <div className="lg:col-span-1">
           <Logo />
-          <p className="mt-3 text-sm text-ink-muted">Maintenance, requests and assets in one place — in English and Vietnamese.</p>
+          <p className="mt-3 text-sm text-ink-muted">{t('footer.tagline')}</p>
+          <a href={brochureHref(m.lang)} download className="mt-3 inline-block text-sm font-semibold text-brand hover:underline">{t('footer.brochure')}</a>
         </div>
-        {col('Features', FEATURE_GROUPS.slice(0, 5).map((g) => ({ to: `/features/${g.items[0].slug}`, label: g.label })))}
-        {col('Solutions', SOLUTION_COLUMNS.flatMap((c) => c.items.slice(0, 2)).map((s) => ({ to: `/solutions/${s.slug}`, label: s.title })))}
-        {col('Resources', RESOURCES.flat().slice(0, 6).map((r) => ({ to: resourceHref(r), label: r.title })))}
-        {col('Company', [
-          { to: '/#pricing', label: 'Pricing' }, { to: '/#demo', label: 'Book a demo' },
-          { to: '/signup', label: 'Start free trial' }, { to: '/signin', label: 'Sign in' },
+        {col(t('nav.features'), FEATURE_GROUPS.slice(0, 5).map((g) => ({ to: `/features/${g.items[0].slug}`, label: m.group(g) })))}
+        {col(t('nav.solutions'), SOLUTION_COLUMNS.flatMap((c) => c.items.slice(0, 2)).map((s) => ({ to: `/solutions/${s.slug}`, label: m.solution(s) })))}
+        {col(t('nav.resources'), RESOURCES.flat().slice(0, 6).map((r) => ({ to: resourceHref(r), label: m.resource(r) })))}
+        {col(t('footer.company'), [
+          { to: '/#pricing', label: t('nav.pricing') }, { to: '/#demo', label: t('footer.bookDemo') },
+          { to: '/signup', label: t('nav.startTrial') }, { to: '/signin', label: t('footer.signIn') },
         ])}
       </div>
       <div className="border-t border-line">
-        <p className="mx-auto max-w-7xl px-4 py-5 text-sm text-ink-muted sm:px-6 lg:px-8">© {new Date().getFullYear()} FacilityPro. Built for modern facilities teams.</p>
+        <p className="mx-auto max-w-7xl px-4 py-5 text-sm text-ink-muted sm:px-6 lg:px-8">© {new Date().getFullYear()} FacilityPro. {t('footer.rights')}</p>
       </div>
     </footer>
   );

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { ArrowRight, Check, ChevronRight } from 'lucide-react';
+import { ArrowRight, Check, ChevronRight, Download, FileText } from 'lucide-react';
 import MarketingLayout, { TrialForm } from '../marketing/MarketingLayout';
 import { INTEGRATIONS, INTEGRATION_CATEGORIES, featureGroupOf, findFeature, findResource, findSolution, type FeatureItem } from '../marketing/content';
 import { featureById } from '../help/features';
+import { brochureHref, useMarketingT } from '../marketing/i18n';
 
 // Public pages behind the header menus: /features/:slug, /solutions/:slug,
 // /resources/:slug. Content lives in src/marketing/content.ts.
@@ -34,19 +35,23 @@ export default function MarketingPage({ kind }: { kind: 'feature' | 'solution' |
 }
 
 function Crumbs({ items }: { items: string[] }) {
+  const { t } = useMarketingT();
   return (
     <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-sm text-ink-muted">
-      <Link to="/" className="hover:text-brand">Home</Link>
+      <Link to="/" className="hover:text-brand">{t('page.home')}</Link>
       {items.map((x) => <span key={x} className="inline-flex items-center gap-1"><ChevronRight size={14} aria-hidden />{x}</span>)}
     </nav>
   );
 }
 
-function Hero({ icon: Icon, kicker, title, summary, crumbs }: { icon: FeatureItem['icon']; kicker: string; title: string; summary?: string; crumbs: string[] }) {
+function Hero({ icon: Icon, kicker, title, summary, crumbs, translated }: { icon: FeatureItem['icon']; kicker: string; title: string; summary?: string; crumbs: string[]; translated?: boolean }) {
+  const { t, lang } = useMarketingT();
   return (
     <section className="border-b border-line bg-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <Crumbs items={crumbs} />
+        {/* Only the home page and menus are translated so far. */}
+        {lang === 'vi' && !translated && <p className="mt-3 inline-block rounded-lg bg-surface px-3 py-1.5 text-sm text-ink-muted">{t('brochure.englishOnly')}</p>}
         <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
             <span className="grid h-14 w-14 place-items-center rounded-2xl bg-brand/10 text-brand"><Icon size={28} aria-hidden /></span>
@@ -56,7 +61,7 @@ function Hero({ icon: Icon, kicker, title, summary, crumbs }: { icon: FeatureIte
           </div>
           <div className="w-full max-w-md">
             <TrialForm />
-            <p className="mt-2 text-sm text-ink-muted">Free trial · no credit card required</p>
+            <p className="mt-2 text-sm text-ink-muted">{t('page.trialNote')}</p>
           </div>
         </div>
       </div>
@@ -146,22 +151,92 @@ function SolutionView({ slug }: { slug: string }) {
 
 function ResourceView({ slug }: { slug: string }) {
   const r = findResource(slug)!;
+  const m = useMarketingT();
+  const title = m.resource(r);
   return (
     <>
-      <Hero icon={r.icon} kicker="Resources" title={r.title} summary={r.summary} crumbs={['Resources', r.title]} />
-      {r.view === 'integrations' ? <IntegrationsDirectory /> : (
+      <Hero icon={r.icon} kicker={m.t('nav.resources')} title={title} summary={m.resourceSummary(r)} crumbs={[m.t('nav.resources'), title]} translated={r.view === 'brochure'} />
+      {r.view === 'integrations' ? <IntegrationsDirectory /> : r.view === 'brochure' ? <BrochureDownload /> : (
       <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="space-y-8">
-          {(r.sections ?? []).map((sec) => (
-            <div key={sec.heading}>
+        {(r.sections?.length ?? 0) > 8 && (
+          <nav aria-label="On this page" className="mb-10 rounded-2xl border border-line bg-surface p-5">
+            <p className="text-sm font-semibold uppercase tracking-wide text-brand">On this page</p>
+            <ol className="mt-3 grid gap-1.5 text-sm sm:grid-cols-2">
+              {r.sections!.map((sec, i) => (
+                <li key={sec.heading}><a href={`#s${i}`} className="text-ink-muted hover:text-brand">{sec.heading}</a></li>
+              ))}
+            </ol>
+          </nav>
+        )}
+        <div className="space-y-10">
+          {(r.sections ?? []).map((sec, i) => (
+            <div key={sec.heading} id={`s${i}`} className="scroll-mt-28">
               <h2 className="text-xl font-semibold text-ink">{sec.heading}</h2>
               {sec.body.map((b) => <p key={b} className="mt-2 leading-7 text-ink-muted">{b}</p>)}
+              {sec.list && (
+                <ul className="mt-3 space-y-2">
+                  {sec.list.map((x) => (
+                    <li key={x} className="flex items-start gap-2.5 leading-7 text-ink-muted">
+                      <Check size={18} className="mt-1 shrink-0 text-brand" aria-hidden />{x}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {sec.table && (
+                <div className="mt-4 overflow-x-auto rounded-xl border border-line">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-surface">
+                      <tr>{sec.table.head.map((h) => <th key={h} className="px-4 py-3 font-semibold text-ink">{h}</th>)}</tr>
+                    </thead>
+                    <tbody className="divide-y divide-line">
+                      {sec.table.rows.map((row) => (
+                        <tr key={row[0]}>
+                          {row.map((c, j) => <td key={j} className={`px-4 py-3 align-top leading-6 ${j === 0 ? 'whitespace-nowrap font-medium text-ink' : 'text-ink-muted'}`}>{c}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {sec.faq && (
+                <div className="mt-4 divide-y divide-line rounded-xl border border-line">
+                  {sec.faq.map((f) => (
+                    <details key={f.q} className="group px-4 py-3">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-medium text-ink">
+                        {f.q}<ChevronRight size={16} className="shrink-0 text-ink-muted transition group-open:rotate-90" aria-hidden />
+                      </summary>
+                      <p className="mt-2 leading-7 text-ink-muted">{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
       </section>
       )}
     </>
+  );
+}
+
+/** The brochure in the reader's language first, with the other language beside it. */
+function BrochureDownload() {
+  const { t, lang } = useMarketingT();
+  const other = lang === 'vi' ? 'en' : 'vi';
+  return (
+    <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-col items-start gap-5 rounded-2xl border border-line bg-white p-6 sm:flex-row sm:items-center">
+        <span className="grid h-16 w-14 shrink-0 place-items-center rounded-lg bg-brand/10 text-brand"><FileText size={30} aria-hidden /></span>
+        <div className="flex-1">
+          <p className="font-semibold text-ink">FacilityPro-brochure-{lang}.pdf</p>
+          <p className="mt-1 text-sm text-ink-muted">{t('resourceSummaries.brochure')}</p>
+          <a href={brochureHref(other)} download className="mt-2 inline-block text-sm font-medium text-brand hover:underline">{t('brochure.other')}</a>
+        </div>
+        <a href={brochureHref(lang)} download className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-brand px-5 py-3 font-semibold text-white hover:bg-brand-600">
+          <Download size={18} aria-hidden />{t('brochure.download')}
+        </a>
+      </div>
+    </section>
   );
 }
 
@@ -202,19 +277,20 @@ function IntegrationsDirectory() {
 }
 
 function CtaBand() {
+  const { t } = useMarketingT();
   return (
     <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-6 rounded-3xl bg-brand p-8 text-white lg:flex-row lg:items-center lg:justify-between lg:p-12">
         <div>
-          <h2 className="text-2xl font-semibold sm:text-3xl">Ready to run maintenance from one place?</h2>
-          <p className="mt-2 text-white/85">Start a free trial, or let us show you around.</p>
+          <h2 className="text-2xl font-semibold sm:text-3xl">{t('page.ctaTitle')}</h2>
+          <p className="mt-2 text-white/85">{t('page.ctaBody')}</p>
         </div>
         <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
           <Link to="/signup" className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-white px-6 py-3 font-semibold text-brand hover:bg-white/90">
-            Start free trial <ArrowRight size={18} aria-hidden />
+            {t('nav.startTrial')} <ArrowRight size={18} aria-hidden />
           </Link>
           <Link to="/#demo" className="inline-flex items-center justify-center whitespace-nowrap rounded-xl border border-white/60 px-6 py-3 font-semibold text-white hover:bg-white/10">
-            Book a demo
+            {t('footer.bookDemo')}
           </Link>
         </div>
       </div>
