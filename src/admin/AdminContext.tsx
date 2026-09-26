@@ -34,8 +34,16 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     enabled: !!user,
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('fp_admin_permissions');
+      let { data, error } = await supabase.rpc('fp_admin_permissions');
       if (error) throw error;
+      // Invited staff (0091): the first visit takes up the invite.
+      if (!(data as { role?: unknown } | null)?.role) {
+        const accepted = await supabase.rpc('fp_admin_accept_staff_invite');
+        if (!accepted.error && accepted.data) {
+          ({ data, error } = await supabase.rpc('fp_admin_permissions'));
+          if (error) throw error;
+        }
+      }
       const d = (data ?? {}) as { role?: unknown; mfa_required?: unknown; session_minutes?: unknown };
       return {
         role: isAdminRole(d.role) ? d.role : null,

@@ -50,9 +50,11 @@ select t.check('only super admins and admins count as platform admins for the ol
   and t.run('authenticated', :'padmin', $q$select 1 where fp_is_platform_admin()$q$) = 'ok:1'
   and t.run('authenticated', :'support', $q$select 1 where fp_is_platform_admin()$q$) = 'ok:0'
   and t.run('authenticated', :'gone', $q$select 1 where fp_is_platform_admin()$q$) = 'ok:0');
-select t.check('only super admins manage staff accounts',
-  t.run('authenticated', :'padmin', format($q$update fp_platform_admins set role = 'super_admin' where user_id = %L$q$, :'padmin')) = 'ok:0'
-  and t.run('authenticated', :'super', format($q$update fp_platform_admins set display_name = 'Ana' where user_id = %L$q$, :'analyst')) = 'ok:1'
+select t.check('only super admins manage staff accounts, and only through the team functions (0091)',
+  t.run('authenticated', :'padmin', format($q$update fp_platform_admins set role = 'super_admin' where user_id = %L$q$, :'padmin')) like 'err:%'
+  and t.run('authenticated', :'super', format($q$update fp_platform_admins set display_name = 'Ana' where user_id = %L$q$, :'analyst')) like 'err:%'
+  and t.run('authenticated', :'super', format($q$select fp_admin_rename_staff(%L, 'Ana')$q$, :'analyst')) = 'ok:1'
+  and t.run('authenticated', :'padmin', format($q$select fp_admin_rename_staff(%L, 'Ana')$q$, :'analyst')) like 'err:%'
   and t.run('authenticated', :'ownerA', 'select * from fp_platform_admins') = 'ok:0');
 
 -- ===========================================================================

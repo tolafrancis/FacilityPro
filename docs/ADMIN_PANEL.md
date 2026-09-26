@@ -271,6 +271,23 @@ Stripe **and** PayPal subscriptions, plus manual invoices.
   the right Monitoring tab. For alerts that still arrive when email is down, use the `health` Edge
   Function with an uptime monitor (docs/OPERATIONS.md).
 
+## Admin team (0091)
+
+`/admin/team`, super admins only.
+
+- Staff list with role, 2FA, last sign-in and actions in the last 30 days (linked to the audit log).
+- **Invite staff** by email with a role and optional name. A person who already has a confirmed
+  account is added straight away and emailed a sign-in link; anyone else gets an invite to sign up
+  with that address (the sign-up form is pre-filled). The invite is taken up the first time they open
+  `/admin` signed in with that confirmed email. Invites last 7 days; resend (renews) or revoke.
+  Links point to the site the invite was sent from.
+- Change role, disable/enable access, rename, remove from the team. Removing only takes away admin
+  console access: the account, tenant memberships and audit history stay.
+- Guards (in the database): nobody changes, disables or removes their own account here, and the last
+  active super admin can't be demoted, disabled or removed. Staff accounts can't be written directly
+  any more (only through these functions); every change is in the audit log.
+- A role/permission matrix shows exactly what each role can do.
+
 ### Demo data (local or staging only)
 
 ```sql
@@ -312,5 +329,5 @@ keys are Edge Function secrets (see Billing setup).
 | 7. Analytics & reports | Done |
 | 8. Audit log & security | Done |
 | 9. Monitoring | Done |
-| 10. Admin team | Planned |
+| 10. Admin team | Done |
 | Demo seed data (20 tenants, 200 users, invoices, tickets, activity) | Done: `supabase/seed/admin_demo.sql`, local/staging only |

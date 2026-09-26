@@ -60,7 +60,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { key: 'audit', to: '/admin/audit', icon: ScrollText, permission: 'audit.view', ready: true },
       { key: 'security', to: '/admin/security', icon: ShieldCheck, permission: 'security.manage', ready: true },
       { key: 'monitoring', to: '/admin/monitoring', icon: Activity, permission: 'monitoring.view', ready: true },
-      { key: 'team', to: '/admin/team', icon: UserCog, permission: 'team.manage', ready: false },
+      { key: 'team', to: '/admin/team', icon: UserCog, permission: 'team.manage', ready: true },
     ],
   },
 ];

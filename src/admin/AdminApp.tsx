@@ -21,6 +21,7 @@ import Reports from './pages/Reports';
 import AuditLog from './pages/AuditLog';
 import Security from './pages/Security';
 import Monitoring from './pages/Monitoring';
+import Team from './pages/Team';
 import MfaSetup from './components/MfaSetup';
 
 /**
@@ -59,6 +60,7 @@ function AdminRoutes() {
         <Route path="audit" element={<Guard permission="audit.view"><AuditLog /></Guard>} />
         <Route path="security" element={<Guard permission="security.manage"><Security /></Guard>} />
         <Route path="monitoring" element={<Guard permission="monitoring.view"><Monitoring /></Guard>} />
+        <Route path="team" element={<Guard permission="team.manage"><Team /></Guard>} />
         {ADMIN_NAV.flatMap((g) => g.items)
           .filter((i) => !i.ready)
           .map((i) => (

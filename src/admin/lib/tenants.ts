@@ -241,7 +241,7 @@ export function useAdminAction<V>(fn: (v: V) => Promise<unknown>, success: strin
         'admin_invoices', 'admin_invoice', 'admin_billing_overview', 'admin_subscriptions', 'admin_plans_full', 'admin_plans',
         'admin_coupons', 'admin_billing_events', 'admin_tickets', 'admin_ticket', 'admin_ticket_stats', 'admin_ticket_macros',
         'admin_flags', 'admin_announcements', 'admin_platform_settings', 'admin_templates', 'app_status',
-        'admin_monitoring', 'admin_outbox', 'admin_outbox_stats', 'admin_app_errors', 'admin_app_error', 'admin_jobs', 'admin_job_runs']) {
+        'admin_monitoring', 'admin_outbox', 'admin_outbox_stats', 'admin_app_errors', 'admin_app_error', 'admin_jobs', 'admin_job_runs', 'admin_team', 'admin_security']) {
         void qc.invalidateQueries({ queryKey: [k] });
       }
     },

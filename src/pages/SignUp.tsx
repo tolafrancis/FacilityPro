@@ -22,7 +22,7 @@ export default function SignUp() {
   const next = safeNext(params.get('next'));
   const signInLink = next ? `/signin?next=${encodeURIComponent(next)}` : '/signin';
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => params.get('email')?.trim() ?? '');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
