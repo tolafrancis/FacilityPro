@@ -583,7 +583,7 @@ export const RESOURCES: Resource[][] = [
     { slug: 'integrations', title: 'Integrations', icon: Plug, view: 'integrations',
       summary: 'Everything FacilityPro connects to today: messaging, notifications, sensors and payments.' },
     { slug: 'brochure', title: 'Brochure (PDF)', icon: FileDown, view: 'brochure',
-      summary: 'A two-page overview of FacilityPro to share with your team, in English or Vietnamese.' },
+      summary: 'A three-page overview of FacilityPro, with plans and prices, to share with your team, in English or Vietnamese.' },
     { slug: 'help', title: 'Help & support', icon: LifeBuoy,
       summary: 'Where to find answers inside FacilityPro, and how to reach our team.',
       sections: [

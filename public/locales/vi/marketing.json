@@ -75,57 +75,73 @@
       "price": "$0",
       "cadence": "mỗi tháng",
       "blurb": "Cho đội nhỏ bắt đầu làm việc có tổ chức.",
+      "cta": "Bắt đầu miễn phí",
       "f1": "3 nhân sự · 1 cơ sở · 25 tài sản",
       "f2": "Báo cáo sự cố & mã QR",
-      "f3": "Phiếu công việc & ứng dụng di động",
-      "f4": "Báo cáo cơ bản",
-      "cta": "Bắt đầu miễn phí"
+      "f3": "Phiếu công việc kèm ảnh",
+      "f4": "Ứng dụng di động, dùng được ngoại tuyến",
+      "f5": "Tài sản & vị trí",
+      "f6": "Báo cáo cơ bản"
     },
     "starter": {
       "name": "Khởi đầu",
       "price": "$29",
       "cadence": "mỗi tháng",
       "blurb": "Cho đội bắt đầu bảo trì có kế hoạch.",
-      "f1": "6 nhân sự · 2 cơ sở · 150 tài sản",
+      "cta": "Dùng thử miễn phí",
+      "f1": "10 nhân sự · 2 cơ sở · 150 tài sản",
       "f2": "Bảo trì phòng ngừa",
-      "f3": "Danh sách kiểm tra, phụ tùng & tồn kho",
-      "f4": "Cổng cư dân & cảnh báo email",
-      "cta": "Dùng thử miễn phí"
+      "f3": "Danh sách kiểm tra",
+      "f4": "Phụ tùng & tồn kho",
+      "f5": "Cổng thông tin cư dân",
+      "f6": "Thông báo email & đẩy"
     },
     "professional": {
       "name": "Chuyên nghiệp",
       "price": "$49",
       "cadence": "mỗi tháng",
       "blurb": "Cho hoạt động đang phát triển cần tự động hóa.",
+      "cta": "Dùng thử miễn phí",
       "f1": "25 nhân sự · 5 cơ sở · 1.000 tài sản",
-      "f2": "Quy trình, SLA & phê duyệt",
-      "f3": "Nhà cung cấp, hợp đồng & khảo sát",
-      "f4": "Hộp thư email & Zalo",
-      "f5": "Báo cáo đầy đủ & bảng hiển thị TV",
-      "cta": "Dùng thử miễn phí"
+      "f2": "Quy trình & tự động hóa",
+      "f3": "Mục tiêu SLA & phê duyệt",
+      "f4": "Đồng hồ & bảo trì theo chỉ số",
+      "f5": "Nhà cung cấp, hợp đồng & tài liệu",
+      "f6": "Khảo sát & thông báo chung",
+      "f7": "Hộp thư email & Zalo",
+      "f8": "Đặt phòng & chỗ ngồi",
+      "f9": "Giấy phép làm việc",
+      "f10": "Ngân sách, mua sắm & hóa đơn",
+      "f11": "Cảm biến IoT & cảnh báo",
+      "f12": "Chấm công kỹ thuật viên",
+      "f13": "Bảng hiển thị trên TV",
+      "f14": "Trợ lý thông minh & chấm điểm cảm xúc",
+      "f15": "Báo cáo & bảng điều khiển đầy đủ",
+      "f16": "Hỗ trợ qua email"
     },
     "business": {
       "name": "Doanh nghiệp",
       "price": "$99",
       "cadence": "mỗi tháng",
       "blurb": "Cho danh mục nhiều cơ sở.",
+      "cta": "Đặt lịch demo",
       "f1": "75 nhân sự · 20 cơ sở · tài sản không giới hạn",
-      "f2": "Ngân sách, mua sắm & hóa đơn",
-      "f3": "Giấy phép làm việc & đặt chỗ",
-      "f4": "Cảm biến IoT & chấm công",
-      "f5": "Trợ lý thông minh & cảnh báo SMS",
-      "cta": "Đặt lịch demo"
+      "f2": "Hỗ trợ ưu tiên",
+      "f3": "Hỗ trợ triển khai ban đầu",
+      "f4": "Cảnh báo SMS & hộp thư WhatsApp"
     },
     "enterprise": {
       "name": "Doanh nghiệp lớn",
       "price": "Liên hệ",
       "cadence": "theo nhu cầu",
       "blurb": "Cho hệ thống lớn có yêu cầu riêng.",
+      "cta": "Liên hệ kinh doanh",
       "f1": "Không giới hạn người dùng, cơ sở & tài sản",
-      "f2": "Gateway Modbus & WhatsApp",
-      "f3": "Tích hợp theo yêu cầu",
-      "f4": "Hỗ trợ triển khai & hỗ trợ riêng",
-      "cta": "Liên hệ kinh doanh"
+      "f2": "Tích hợp theo yêu cầu",
+      "f3": "Thiết lập gateway Modbus",
+      "f4": "Nhập dữ liệu",
+      "f5": "Người liên hệ riêng",
+      "f6": "Thanh toán theo hóa đơn"
     }
   },
   "groups": {
@@ -219,7 +235,7 @@
     "mobile-offline": "FacilityPro trên điện thoại và máy tính bảng, kể cả khi không có sóng.",
     "integrations": "Mọi thứ FacilityPro đang kết nối: nhắn tin, thông báo, cảm biến và thanh toán.",
     "help": "Nơi tìm câu trả lời trong FacilityPro và cách liên hệ đội ngũ của chúng tôi.",
-    "brochure": "Tổng quan hai trang về FacilityPro để chia sẻ với đội ngũ, bằng tiếng Anh hoặc tiếng Việt."
+    "brochure": "Tổng quan ba trang về FacilityPro, kèm các gói và giá, để chia sẻ với đội ngũ, bằng tiếng Anh hoặc tiếng Việt."
   },
   "page": {
     "home": "Trang chủ",
