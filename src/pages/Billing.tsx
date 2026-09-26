@@ -184,6 +184,7 @@ export default function Billing() {
   const currentPlan = plans.find((p) => p.code === sub?.plan_code) ?? plans.find((p) => p.code === 'free') ?? null;
   const requestedPlan = plans.find((p) => p.code === sub?.requested_plan_code) ?? null;
   const hasYearly = plans.some((p) => p.price > 0 && p.price_year);
+  const maxSaving = Math.max(0, ...plans.filter((p) => p.price > 0 && p.price_year).map((p) => Math.round((1 - p.price_year! / (p.price * 12)) * 100)));
   const limit = (n?: number | null) => (n == null ? t('limitsUnlimited') : String(n));
   const periodEnd = sub?.status === 'trialing' ? sub.trial_ends_at ?? sub.current_period_end : sub?.current_period_end;
 
@@ -286,6 +287,7 @@ export default function Billing() {
               <button key={x} type="button" role="radio" aria-checked={interval === x} onClick={() => setInterval(x)}
                 className={`rounded-md px-3 py-1.5 font-medium ${interval === x ? 'bg-brand text-white' : 'text-ink-muted hover:text-ink'}`}>
                 {t(x === 'month' ? 'monthly' : 'yearly')}
+                {x === 'year' && maxSaving > 0 && <span className={`ml-1.5 text-xs ${interval === x ? 'text-white/90' : 'text-status-ok'}`}>{t('upTo', { pct: maxSaving })}</span>}
               </button>
             ))}
           </div>
@@ -313,9 +315,10 @@ export default function Billing() {
                 {yearly && saving > 0 && <Pill className="bg-status-ok/10 text-status-ok">{t('save', { pct: saving })}</Pill>}
               </div>
               <p className="mt-2 text-3xl font-semibold tracking-tight text-ink">
-                {plan.contact_sales ? t('custom') : plan.price > 0 ? money(price, plan.currency, lng) : t('free')}
-                {plan.price > 0 && <span className="text-sm font-normal text-ink-muted">{yearly ? t('perYear') : t('perMonth')}</span>}
+                {plan.contact_sales ? t('custom') : plan.price > 0 ? money(yearly ? Math.round(price / 12) : price, plan.currency, lng) : t('free')}
+                {plan.price > 0 && <span className="text-sm font-normal text-ink-muted">{t('perMonth')}</span>}
               </p>
+              {yearly && plan.price > 0 && <p className="text-xs text-ink-muted">{t('billedYearly', { amount: money(price, plan.currency, lng) })}</p>}
               <ul className="mt-4 flex-1 space-y-1.5 text-sm text-ink">
                 <li className="flex items-center gap-2"><Check size={14} className="shrink-0 text-status-ok" aria-hidden /> {t('assets')}: {limit(plan.limits.assets)}</li>
                 <li className="flex items-center gap-2"><Check size={14} className="shrink-0 text-status-ok" aria-hidden /> {t('members')}: {limit(plan.limits.members)}</li>

@@ -13,18 +13,23 @@ const whyItems = ['why1', 'why2', 'why3'];
 
 // Names, prices, blurbs and features come from the marketing translations
 // (tiers.<key>.*). Keep in line with fp_plans (0095) and the brochure.
+// month/year are USD list prices (fp_plans.price / price_year).
 const PRICING_TIERS = [
   { key: 'free', features: 6, href: '/signup' },
-  { key: 'starter', features: 11, href: '/signup' },
-  { key: 'professional', features: 11, href: '/signup', featured: true },
-  { key: 'business', features: 4, href: '#demo' },
+  { key: 'starter', features: 11, href: '/signup', month: 29, year: 288 },
+  { key: 'professional', features: 11, href: '/signup', featured: true, month: 49, year: 468 },
+  { key: 'business', features: 4, href: '#demo', month: 99, year: 948 },
   { key: 'enterprise', features: 6, href: '#demo' },
 ];
+const yearlySaving = (tier: { month?: number; year?: number }) =>
+  tier.month && tier.year ? Math.round((1 - tier.year / (tier.month * 12)) * 100) : 0;
+const MAX_SAVING = Math.max(...PRICING_TIERS.map(yearlySaving));
 
 export default function Landing() {
   const m = useMarketingT();
   const { t } = m;
   const [submitted, setSubmitted] = useState(false);
+  const [yearly, setYearly] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -144,6 +149,15 @@ export default function Landing() {
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">{t('home.pricingEyebrow')}</p>
             <h2 className="mt-3 text-3xl font-semibold text-ink">{t('home.pricingTitle')}</h2>
             <p className="mt-3 text-base leading-7 text-ink-muted">{t('home.pricingLead')}</p>
+            <div role="radiogroup" aria-label={t('home.billingPeriod')} className="mt-6 inline-flex rounded-full border border-line bg-white p-1 text-sm">
+              {[false, true].map((y) => (
+                <button key={String(y)} type="button" role="radio" aria-checked={yearly === y} onClick={() => setYearly(y)}
+                  className={`rounded-full px-4 py-1.5 font-semibold transition ${yearly === y ? 'bg-brand text-white' : 'text-ink-muted hover:text-ink'}`}>
+                  {t(y ? 'home.yearly' : 'home.monthly')}
+                  {y && <span className={`ml-1.5 text-xs font-medium ${yearly ? 'text-white/90' : 'text-status-ok'}`}>{t('home.upTo', { pct: MAX_SAVING })}</span>}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {PRICING_TIERS.map((tier, i) => (
@@ -157,8 +171,15 @@ export default function Landing() {
                 <h3 className="text-lg font-semibold text-ink">{t(`tiers.${tier.key}.name`)}</h3>
                 <p className="mt-1 text-sm text-ink-muted">{t(`tiers.${tier.key}.blurb`)}</p>
                 <div className="mt-4">
-                  <span className="whitespace-nowrap text-3xl font-semibold text-ink">{t(`tiers.${tier.key}.price`)}</span>
-                  <span className="block text-sm text-ink-muted">{t(`tiers.${tier.key}.cadence`)}</span>
+                  <span className="whitespace-nowrap text-3xl font-semibold text-ink">
+                    {tier.month ? `$${yearly ? Math.round(tier.year! / 12) : tier.month}` : t(`tiers.${tier.key}.price`)}
+                  </span>
+                  {yearly && yearlySaving(tier) > 0 && (
+                    <span className="ml-2 inline-flex rounded-full bg-status-ok/10 px-2 py-0.5 align-middle text-xs font-semibold text-status-ok">{t('home.save', { pct: yearlySaving(tier) })}</span>
+                  )}
+                  <span className="block text-sm text-ink-muted">
+                    {yearly && tier.year ? t('home.billedYearly', { amount: `$${tier.year}` }) : t(`tiers.${tier.key}.cadence`)}
+                  </span>
                 </div>
                 <Link
                   to={tier.href === '#demo' ? '/#demo' : tier.href}

@@ -107,5 +107,7 @@
   "platform": {
     "moved": "Gói, yêu cầu đăng ký và hóa đơn được quản lý trong bảng điều khiển quản trị.",
     "open": "Mở trang thanh toán quản trị"
-  }
+  },
+  "billedYearly": "Thanh toán {{amount}} mỗi năm",
+  "upTo": "tiết kiệm đến {{pct}}%"
 }
