@@ -109,5 +109,6 @@
     "open": "Mở trang thanh toán quản trị"
   },
   "billedYearly": "Thanh toán {{amount}} mỗi năm",
-  "upTo": "tiết kiệm đến {{pct}}%"
+  "upTo": "tiết kiệm đến {{pct}}%",
+  "payee": "Khoản thanh toán được nhận bởi {{company}} (MST {{taxId}}), công ty sở hữu FacilityPro. Đây là tên bạn sẽ thấy trên biên lai PayPal hoặc thẻ."
 }

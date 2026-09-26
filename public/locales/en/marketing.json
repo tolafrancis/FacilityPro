@@ -20,7 +20,11 @@
     "bookDemo": "Book a demo",
     "signIn": "Sign in",
     "brochure": "Download brochure",
-    "rights": "Built for modern facilities teams."
+    "rights": "Built for modern facilities teams.",
+    "contact": "Contact",
+    "owner": "FacilityPro is a brand of {{company}}",
+    "taxId": "Tax ID: {{taxId}}",
+    "faq": "FAQ"
   },
   "home": {
     "eyebrow": "Built for facilities teams that need calm, coordinated operations",
@@ -230,7 +234,8 @@
     "integrations": "Integrations",
     "help": "Help & support",
     "brochure": "Brochure (PDF)",
-    "demo": "Book a demo"
+    "demo": "Book a demo",
+    "faq": "FAQ"
   },
   "resourceSummaries": {
     "getting-started": "From sign-up to your first work order in an afternoon.",
@@ -241,7 +246,8 @@
     "mobile-offline": "FacilityPro on phones and tablets, including where there’s no signal.",
     "integrations": "Everything FacilityPro connects to today: messaging, notifications, sensors and payments.",
     "help": "Where to find answers inside FacilityPro, and how to reach our team.",
-    "brochure": "A three-page overview of FacilityPro, with plans and prices, to share with your team, in English or Vietnamese."
+    "brochure": "A three-page overview of FacilityPro, with plans and prices, to share with your team, in English or Vietnamese.",
+    "faq": "Answers to the questions people ask most about FacilityPro, plans, payments and support."
   },
   "page": {
     "home": "Home",
@@ -253,5 +259,123 @@
     "download": "Download the English brochure",
     "other": "Also available in Vietnamese",
     "englishOnly": "This page is in English."
+  },
+  "faqPage": {
+    "title": "Frequently asked questions",
+    "summary": "Answers to the questions people ask most about FacilityPro, plans, payments and support.",
+    "more": "Still have a question?",
+    "moreBody": "Email {{email}} or call {{phone}}, or book a demo and we'll walk you through it.",
+    "groups": [
+      {
+        "title": "About FacilityPro",
+        "items": [
+          {
+            "q": "What is FacilityPro?",
+            "a": "FacilityPro is a maintenance and facilities management system (CMMS). It brings fault requests, work orders, preventive maintenance, assets, vendors and reports into one place, so your team always knows what needs doing and what has been done."
+          },
+          {
+            "q": "Who is FacilityPro for?",
+            "a": "Teams that look after buildings and equipment: commercial and residential property managers, hotels, hospitals and clinics, schools, factories and warehouses. It works for a single building or a portfolio of many sites."
+          },
+          {
+            "q": "Which company owns FacilityPro?",
+            "a": "FacilityPro is a brand of ROYAL DESTINY COMPANY LIMITED (Tax ID 0315466813), registered at 75/3 Nguyễn Tử Giản, Phường An Hội Tây, Thành phố Hồ Chí Minh, Việt Nam."
+          },
+          {
+            "q": "Which languages does it support?",
+            "a": "English and Vietnamese. Each person chooses their own language, and names of locations, assets and categories can be entered in both."
+          }
+        ]
+      },
+      {
+        "title": "Plans and pricing",
+        "items": [
+          {
+            "q": "How much does FacilityPro cost?",
+            "a": "There are five plans: Free ($0, up to 3 staff users), Starter ($29 a month, up to 10), Professional ($49 a month, up to 25), Business ($99 a month, up to 75) and Enterprise (custom pricing). Paying yearly lowers the monthly price to $24, $39 and $79."
+          },
+          {
+            "q": "Is there a free trial?",
+            "a": "Yes. New organisations get a 14-day free trial, and no credit card is needed to start. When it ends you can choose a plan or carry on with the Free plan."
+          },
+          {
+            "q": "Do occupants and vendors count as users?",
+            "a": "No. Occupants who report faults and vendors who receive work are free on every plan. Only staff users (admins, managers and technicians) count towards your plan's limit."
+          },
+          {
+            "q": "Can I change or cancel my plan?",
+            "a": "Yes, at any time from the Billing page. If you cancel, the Free plan's limits apply from then on and nothing is deleted."
+          },
+          {
+            "q": "Do you offer longer contracts?",
+            "a": "Enterprise customers can choose two- or three-year terms. Get in touch and we'll put together a quote."
+          }
+        ]
+      },
+      {
+        "title": "Payments",
+        "items": [
+          {
+            "q": "How can I pay?",
+            "a": "Admins pay from the Billing page, monthly or yearly, with PayPal or by card. Prices are in US dollars."
+          },
+          {
+            "q": "Who receives my payment?",
+            "a": "Payments are received by ROYAL DESTINY COMPANY LIMITED (Tax ID 0315466813), the company that owns FacilityPro. This is the name you'll see on your PayPal receipt or card statement."
+          },
+          {
+            "q": "Is my card information safe?",
+            "a": "Card and PayPal payments are handled by Stripe and PayPal. FacilityPro never sees or stores your card details."
+          }
+        ]
+      },
+      {
+        "title": "Using FacilityPro",
+        "items": [
+          {
+            "q": "How long does it take to get started?",
+            "a": "Most teams create their first work order in an afternoon. A full rollout of one site usually takes two to four weeks; see the Rollout playbook for a step-by-step plan."
+          },
+          {
+            "q": "Is there a mobile app?",
+            "a": "Yes. Open FacilityPro on your phone and choose \"Add to Home Screen\"; there's no app store download. Technicians can keep working without a signal, and their updates are sent when they're back online."
+          },
+          {
+            "q": "Can tenants report a fault without an account?",
+            "a": "Yes. Anyone can report a fault by scanning an asset's QR code or using your public report link, and signed-in occupants can follow their own requests."
+          },
+          {
+            "q": "Does FacilityPro work with Zalo?",
+            "a": "Yes. Messages to your Zalo Official Account arrive in the FacilityPro inbox, where your team can reply and turn them into requests, and people can choose to receive notifications on Zalo."
+          }
+        ]
+      },
+      {
+        "title": "Security and data",
+        "items": [
+          {
+            "q": "Is our data safe?",
+            "a": "Each organisation's data is separated at the database level, so no other customer can see it. Connections are encrypted, accounts can use two-factor authentication, and changes are recorded in an audit trail."
+          },
+          {
+            "q": "Who can see what?",
+            "a": "Everyone sees only what their role allows. Staff can be limited to their own sites, and occupants only ever see their own requests."
+          }
+        ]
+      },
+      {
+        "title": "Help and support",
+        "items": [
+          {
+            "q": "How do I get help?",
+            "a": "Click ? Help on any page for an explanation of that screen, or open the User guide from the menu. Signed-in staff can also open a support ticket under Help & support."
+          },
+          {
+            "q": "How do I contact the team?",
+            "a": "Email sales@facilitypro.tech or call +1 339 800 1703. You can also book a demo from the home page."
+          }
+        ]
+      }
+    ]
   }
 }

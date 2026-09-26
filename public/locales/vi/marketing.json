@@ -20,7 +20,11 @@
     "bookDemo": "Đặt lịch demo",
     "signIn": "Đăng nhập",
     "brochure": "Tải brochure",
-    "rights": "Xây dựng cho đội ngũ quản lý cơ sở vật chất hiện đại."
+    "rights": "Xây dựng cho đội ngũ quản lý cơ sở vật chất hiện đại.",
+    "contact": "Liên hệ",
+    "owner": "FacilityPro là thương hiệu của {{company}}",
+    "taxId": "Mã số thuế: {{taxId}}",
+    "faq": "Câu hỏi thường gặp"
   },
   "home": {
     "eyebrow": "Dành cho đội ngũ cơ sở vật chất cần vận hành nhịp nhàng, có tổ chức",
@@ -230,7 +234,8 @@
     "integrations": "Tích hợp",
     "help": "Trợ giúp & hỗ trợ",
     "brochure": "Brochure (PDF)",
-    "demo": "Đặt lịch demo"
+    "demo": "Đặt lịch demo",
+    "faq": "Câu hỏi thường gặp"
   },
   "resourceSummaries": {
     "getting-started": "Từ lúc đăng ký đến phiếu công việc đầu tiên chỉ trong một buổi chiều.",
@@ -241,7 +246,8 @@
     "mobile-offline": "FacilityPro trên điện thoại và máy tính bảng, kể cả khi không có sóng.",
     "integrations": "Mọi thứ FacilityPro đang kết nối: nhắn tin, thông báo, cảm biến và thanh toán.",
     "help": "Nơi tìm câu trả lời trong FacilityPro và cách liên hệ đội ngũ của chúng tôi.",
-    "brochure": "Tổng quan ba trang về FacilityPro, kèm các gói và giá, để chia sẻ với đội ngũ, bằng tiếng Anh hoặc tiếng Việt."
+    "brochure": "Tổng quan ba trang về FacilityPro, kèm các gói và giá, để chia sẻ với đội ngũ, bằng tiếng Anh hoặc tiếng Việt.",
+    "faq": "Câu trả lời cho những câu hỏi thường gặp nhất về FacilityPro, các gói, thanh toán và hỗ trợ."
   },
   "page": {
     "home": "Trang chủ",
@@ -253,5 +259,123 @@
     "download": "Tải brochure tiếng Việt",
     "other": "Cũng có bản tiếng Anh",
     "englishOnly": "Trang này hiện chỉ có bằng tiếng Anh."
+  },
+  "faqPage": {
+    "title": "Câu hỏi thường gặp",
+    "summary": "Câu trả lời cho những câu hỏi thường gặp nhất về FacilityPro, các gói, thanh toán và hỗ trợ.",
+    "more": "Bạn vẫn còn câu hỏi?",
+    "moreBody": "Gửi email tới {{email}}, gọi {{phone}}, hoặc đặt lịch demo để chúng tôi hướng dẫn bạn.",
+    "groups": [
+      {
+        "title": "Về FacilityPro",
+        "items": [
+          {
+            "q": "FacilityPro là gì?",
+            "a": "FacilityPro là hệ thống quản lý bảo trì và cơ sở vật chất (CMMS). Hệ thống gom yêu cầu báo lỗi, phiếu công việc, bảo trì định kỳ, tài sản, nhà thầu và báo cáo về một nơi, để đội ngũ luôn biết việc gì cần làm và việc gì đã xong."
+          },
+          {
+            "q": "FacilityPro dành cho ai?",
+            "a": "Các đội ngũ chăm lo tòa nhà và thiết bị: đơn vị quản lý bất động sản thương mại và nhà ở, khách sạn, bệnh viện và phòng khám, trường học, nhà máy và kho bãi. Phù hợp cho một tòa nhà hay cả danh mục nhiều cơ sở."
+          },
+          {
+            "q": "Công ty nào sở hữu FacilityPro?",
+            "a": "FacilityPro là thương hiệu của ROYAL DESTINY COMPANY LIMITED (MST 0315466813), địa chỉ đăng ký tại 75/3 Nguyễn Tử Giản, Phường An Hội Tây, Thành phố Hồ Chí Minh, Việt Nam."
+          },
+          {
+            "q": "FacilityPro hỗ trợ những ngôn ngữ nào?",
+            "a": "Tiếng Anh và tiếng Việt. Mỗi người tự chọn ngôn ngữ của mình, và tên vị trí, tài sản, danh mục có thể nhập bằng cả hai thứ tiếng."
+          }
+        ]
+      },
+      {
+        "title": "Gói dịch vụ và giá",
+        "items": [
+          {
+            "q": "FacilityPro có giá bao nhiêu?",
+            "a": "Có năm gói: Miễn phí (0 USD, tối đa 3 người dùng nhân viên), Starter (29 USD/tháng, tối đa 10), Professional (49 USD/tháng, tối đa 25), Business (99 USD/tháng, tối đa 75) và Enterprise (giá theo thỏa thuận). Thanh toán theo năm giảm giá mỗi tháng xuống còn 24, 39 và 79 USD."
+          },
+          {
+            "q": "Có dùng thử miễn phí không?",
+            "a": "Có. Tổ chức mới được dùng thử miễn phí 14 ngày, không cần thẻ tín dụng. Khi hết hạn, bạn có thể chọn một gói hoặc tiếp tục với gói Miễn phí."
+          },
+          {
+            "q": "Người sử dụng và nhà thầu có được tính là người dùng không?",
+            "a": "Không. Người sử dụng báo lỗi và nhà thầu nhận việc đều miễn phí ở mọi gói. Chỉ người dùng nhân viên (quản trị viên, quản lý và kỹ thuật viên) được tính vào giới hạn của gói."
+          },
+          {
+            "q": "Tôi có thể đổi hoặc hủy gói không?",
+            "a": "Có, bất cứ lúc nào tại trang Thanh toán. Nếu hủy, giới hạn của gói Miễn phí sẽ áp dụng từ đó và không dữ liệu nào bị xóa."
+          },
+          {
+            "q": "Có hợp đồng dài hạn hơn không?",
+            "a": "Khách hàng Enterprise có thể chọn kỳ hạn hai hoặc ba năm. Hãy liên hệ để chúng tôi gửi báo giá."
+          }
+        ]
+      },
+      {
+        "title": "Thanh toán",
+        "items": [
+          {
+            "q": "Tôi có thể thanh toán bằng cách nào?",
+            "a": "Quản trị viên thanh toán tại trang Thanh toán, theo tháng hoặc theo năm, qua PayPal hoặc bằng thẻ. Giá tính bằng đô la Mỹ."
+          },
+          {
+            "q": "Ai nhận khoản thanh toán của tôi?",
+            "a": "Khoản thanh toán được nhận bởi ROYAL DESTINY COMPANY LIMITED (MST 0315466813), công ty sở hữu FacilityPro. Đây là tên bạn sẽ thấy trên biên lai PayPal hoặc sao kê thẻ."
+          },
+          {
+            "q": "Thông tin thẻ của tôi có an toàn không?",
+            "a": "Thanh toán bằng thẻ và PayPal do Stripe và PayPal xử lý. FacilityPro không bao giờ thấy hay lưu thông tin thẻ của bạn."
+          }
+        ]
+      },
+      {
+        "title": "Sử dụng FacilityPro",
+        "items": [
+          {
+            "q": "Mất bao lâu để bắt đầu?",
+            "a": "Phần lớn đội ngũ tạo được phiếu công việc đầu tiên chỉ trong một buổi chiều. Triển khai đầy đủ cho một cơ sở thường mất hai đến bốn tuần; xem Kế hoạch triển khai để có lộ trình từng bước."
+          },
+          {
+            "q": "Có ứng dụng di động không?",
+            "a": "Có. Mở FacilityPro trên điện thoại và chọn \"Thêm vào màn hình chính\", không cần tải từ kho ứng dụng. Kỹ thuật viên vẫn làm việc được khi mất sóng, và các cập nhật sẽ được gửi khi có mạng trở lại."
+          },
+          {
+            "q": "Người thuê có thể báo lỗi mà không cần tài khoản không?",
+            "a": "Có. Bất kỳ ai cũng có thể báo lỗi bằng cách quét mã QR trên tài sản hoặc dùng đường dẫn báo lỗi công khai của bạn, và người sử dụng đã đăng nhập có thể theo dõi yêu cầu của chính mình."
+          },
+          {
+            "q": "FacilityPro có hoạt động với Zalo không?",
+            "a": "Có. Tin nhắn gửi đến Zalo Official Account của bạn sẽ vào hộp thư FacilityPro, nơi đội ngũ có thể trả lời và chuyển thành yêu cầu, và mỗi người có thể chọn nhận thông báo qua Zalo."
+          }
+        ]
+      },
+      {
+        "title": "Bảo mật và dữ liệu",
+        "items": [
+          {
+            "q": "Dữ liệu của chúng tôi có an toàn không?",
+            "a": "Dữ liệu của mỗi tổ chức được tách biệt ở cấp cơ sở dữ liệu, nên không khách hàng nào khác xem được. Kết nối được mã hóa, tài khoản có thể dùng xác thực hai lớp, và các thay đổi được ghi lại trong nhật ký kiểm tra."
+          },
+          {
+            "q": "Ai được xem những gì?",
+            "a": "Mỗi người chỉ thấy những gì vai trò của mình cho phép. Nhân viên có thể được giới hạn theo cơ sở, và người sử dụng chỉ thấy yêu cầu của chính mình."
+          }
+        ]
+      },
+      {
+        "title": "Trợ giúp và hỗ trợ",
+        "items": [
+          {
+            "q": "Tôi tìm trợ giúp ở đâu?",
+            "a": "Nhấn ? Trợ giúp trên bất kỳ trang nào để xem giải thích về màn hình đó, hoặc mở Hướng dẫn sử dụng từ menu. Nhân viên đã đăng nhập cũng có thể gửi yêu cầu hỗ trợ tại mục Trợ giúp & hỗ trợ."
+          },
+          {
+            "q": "Làm sao để liên hệ đội ngũ?",
+            "a": "Gửi email tới sales@facilitypro.tech hoặc gọi +1 339 800 1703. Bạn cũng có thể đặt lịch demo từ trang chủ."
+          }
+        ]
+      }
+    ]
   }
 }

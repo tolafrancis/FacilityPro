@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, CreditCard, ExternalLink, FileText, Settings2, Tag } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { COMPANY } from '../lib/company';
 import { useOrg } from '../contexts/OrgContext';
 import { usePlanUsage, useIsPlatformAdmin, useJobHealth, useSystemChecks, usePlans, useSubscription } from '../lib/queries';
 import { resolveI18n } from '../i18n/resolver';
@@ -370,6 +371,7 @@ export default function Billing() {
         </div>
       )}
       {isAdmin && (providers.stripe || providers.paypal) && <p className="mt-3 text-xs text-ink-muted">{t('secureNote')}</p>}
+      {isAdmin && <p className="mt-1 text-xs text-ink-muted">{t('payee', { company: COMPANY.legalName, taxId: COMPANY.taxId })}</p>}
 
       {/* Invoices */}
       {isAdmin && (
