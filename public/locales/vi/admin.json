@@ -573,7 +573,10 @@
     "ticket_create": "Mở phiếu cho khách",
     "ticket_update": "Cập nhật phiếu",
     "ticket_reply": "Trả lời phiếu",
-    "ticket_note": "Ghi chú nội bộ trên phiếu"
+    "ticket_note": "Ghi chú nội bộ trên phiếu",
+    "report_send_now": "Gửi báo cáo",
+    "settings_change": "Thay đổi cài đặt nền tảng",
+    "staff_change": "Thay đổi tài khoản nhân viên"
   },
   "errors2": {
     "permission": "Bạn không có quyền làm việc này.",
@@ -592,7 +595,8 @@
     "not_authorized": "Bạn không có quyền thực hiện việc này.",
     "failed": "Đã có lỗi.",
     "invalid_default_language": "Ngôn ngữ mặc định phải thuộc các ngôn ngữ được hỗ trợ.",
-    "invalid_version": "Kiểm tra lại số phiên bản."
+    "invalid_version": "Kiểm tra lại số phiên bản.",
+    "mfa_needed_first": "Hãy thiết lập và xác minh 2FA cho tài khoản của bạn trước."
   },
   "users": {
     "subtitle": "Mọi tài khoản trên nền tảng, thuộc tất cả khách hàng.",
@@ -1232,5 +1236,245 @@
       "saved": "Đã lưu cài đặt.",
       "templateSaved": "Đã lưu mẫu."
     }
+  },
+  "reports": {
+    "subtitle": "Cách khách hàng dùng FacilityPro, báo cáo tự tạo và báo cáo gửi email định kỳ.",
+    "tabsLabel": "Các mục báo cáo",
+    "tabs": {
+      "overview": "Mức sử dụng",
+      "builder": "Tạo báo cáo",
+      "schedules": "Email định kỳ"
+    },
+    "kpi": {
+      "activeTenants": "Khách hàng hoạt động",
+      "activeUsers": "Người dùng hoạt động",
+      "stickiness": "Độ gắn bó (DAU/MAU)",
+      "wau": "Người dùng hoạt động tuần",
+      "workOrders": "Lệnh công việc đã tạo",
+      "requests": "Yêu cầu",
+      "assets": "Tài sản thêm mới",
+      "iot": "Thiết bị IoT trực tuyến"
+    },
+    "ofTenants": "trên {{total}} khách hàng",
+    "stickinessHint": "Tỷ lệ người dùng tháng hoạt động hôm nay",
+    "wauHint": "7 ngày qua",
+    "resolved_one": "{{count}} đã xử lý",
+    "resolved_other": "{{count}} đã xử lý",
+    "devicesOnline": "{{online}} / {{total}}",
+    "iotTenants_one": "tại {{count}} khách hàng",
+    "iotTenants_other": "tại {{count}} khách hàng",
+    "metric": {
+      "work_orders_created": "Lệnh công việc đã tạo",
+      "work_orders_resolved": "Lệnh công việc đã xử lý",
+      "requests": "Yêu cầu",
+      "active_users": "Người dùng hoạt động",
+      "active_tenants": "Khách hàng hoạt động"
+    },
+    "activityHint": "Trên mọi khách hàng, trong khoảng thời gian đã chọn.",
+    "show": "Hiển thị",
+    "noActivity": "Không có hoạt động trong khoảng này.",
+    "adoption": "Mức dùng mô-đun",
+    "adoptionHint": "Số khách hàng dùng từng mô-đun.",
+    "module": "Mô-đun",
+    "tenantsUsing": "Khách hàng sử dụng",
+    "tenantsOf": "{{n}}/{{total}}",
+    "modules": {
+      "requests": "Yêu cầu"
+    },
+    "channels": "Kênh gửi yêu cầu",
+    "channelsHint": "Yêu cầu đến từ đâu.",
+    "channelHeader": "Kênh",
+    "channel": {
+      "web": "Ứng dụng web",
+      "qr": "Mã QR",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "telegram": "Telegram",
+      "messenger": "Messenger",
+      "line": "LINE",
+      "zalo": "Zalo",
+      "public": "Biểu mẫu công khai"
+    },
+    "cohorts": "Giữ chân khách hàng",
+    "cohortsHint": "Khách hàng theo tháng đăng ký và tỷ lệ còn hoạt động ở các tháng sau.",
+    "signedUp": "Đăng ký",
+    "tenants": "Khách hàng",
+    "monthZero": "Tháng 0",
+    "monthN": "+{{n}}",
+    "cohortCell": "{{active}}/{{tenants}} khách hàng hoạt động ({{pct}}%)",
+    "tenantUsage": "Mức sử dụng theo khách hàng",
+    "tenantUsageHint": "50 khách hàng hoạt động nhiều nhất trong khoảng thời gian.",
+    "cols": {
+      "tenant": "Khách hàng",
+      "plan": "Gói",
+      "activeUsers": "Người dùng hoạt động",
+      "workOrders": "Lệnh công việc",
+      "requests": "Yêu cầu",
+      "assets": "Tài sản",
+      "devices": "Thiết bị"
+    },
+    "dataset": "Dữ liệu",
+    "groupBy": "Chia theo",
+    "measure": "Đo lường",
+    "run": "Chạy báo cáo",
+    "builderHint": "Dùng khoảng thời gian ở đầu trang.",
+    "datasets": {
+      "tenants": "Khách hàng (đăng ký)",
+      "members": "Thành viên (tham gia)",
+      "work_orders": "Lệnh công việc",
+      "requests": "Yêu cầu",
+      "invoices": "Hóa đơn",
+      "tickets": "Phiếu hỗ trợ",
+      "assets": "Tài sản",
+      "devices": "Thiết bị IoT"
+    },
+    "groups": {
+      "month": "Tháng",
+      "week": "Tuần",
+      "day": "Ngày",
+      "tenant": "Khách hàng",
+      "plan": "Gói",
+      "industry": "Ngành",
+      "status": "Trạng thái",
+      "priority": "Ưu tiên",
+      "channel": "Kênh",
+      "category": "Loại",
+      "provider": "Nhà cung cấp thanh toán",
+      "role": "Vai trò"
+    },
+    "measures": {
+      "count": "Số lượng",
+      "amount": "Số tiền (trừ hoàn tiền)"
+    },
+    "builderTitle": "{{measure}} {{dataset}} theo {{group}}",
+    "period": "{{from}} – {{to}}",
+    "noRows": "Không có dữ liệu trong khoảng này.",
+    "capped": "Hiển thị 500 dòng đầu.",
+    "pdf": "In / PDF",
+    "emailIt": "Gửi email định kỳ",
+    "scheduleTitle": "Gửi báo cáo này qua email định kỳ",
+    "scheduleName": "Tên",
+    "frequency": "Tần suất",
+    "frequencies": {
+      "weekly": "Hàng tuần",
+      "monthly": "Hàng tháng"
+    },
+    "frequencyHint": {
+      "weekly": "Mỗi thứ Hai, cho 7 ngày qua.",
+      "monthly": "Ngày 1 hàng tháng, cho tháng trước."
+    },
+    "recipients": "Gửi tới",
+    "recipientsHint": "Tối đa 10 địa chỉ, cách nhau bằng dấu phẩy.",
+    "schedule": "Lên lịch",
+    "noSchedules": "Chưa có báo cáo định kỳ.",
+    "noSchedulesBody": "Tạo một báo cáo rồi chọn “Gửi email định kỳ”.",
+    "nextRun": "Lần tới: {{when}}",
+    "paused": "Tạm dừng",
+    "lastSent": "gửi lần cuối {{when}}",
+    "sendNow": "Gửi ngay",
+    "toggleSchedule": "Bật/tắt {{name}}",
+    "deleteSchedule": "Xóa {{name}}",
+    "toast": {
+      "scheduled": "Đã lên lịch báo cáo.",
+      "updated": "Đã lưu.",
+      "deleted": "Đã xóa lịch.",
+      "sent": "Đã gửi báo cáo."
+    }
+  },
+  "audit": {
+    "subtitle": "Mọi thay đổi do nhân viên thực hiện: ai, làm gì, khi nào, từ IP nào, và giá trị trước/sau.",
+    "search": "Tìm email, khách hàng, mã bản ghi, IP hoặc giá trị",
+    "allActions": "Mọi thao tác",
+    "allIn": "Tất cả: {{group}}",
+    "allStaff": "Mọi nhân viên",
+    "groups": {
+      "tenant": "Khách hàng",
+      "member": "Thành viên",
+      "user": "Người dùng",
+      "invoice": "Hóa đơn",
+      "subscription": "Gói đăng ký",
+      "ticket": "Phiếu hỗ trợ",
+      "client": "Thao tác khác",
+      "report": "Báo cáo",
+      "insert": "Thêm bản ghi",
+      "update": "Sửa bản ghi",
+      "delete": "Xóa bản ghi"
+    },
+    "cols": {
+      "at": "Thời điểm",
+      "staff": "Nhân viên",
+      "action": "Thao tác",
+      "target": "Bản ghi",
+      "tenant": "Khách hàng"
+    },
+    "system": "Hệ thống",
+    "empty": "Không có mục nào khớp.",
+    "immutable": "Không ai có thể sửa hoặc xóa các mục nhật ký.",
+    "exported_one": "Đã xuất {{count}} mục.",
+    "exported_other": "Đã xuất {{count}} mục.",
+    "changes": "Thay đổi",
+    "showUnchanged": "Hiện trường không đổi",
+    "field": "Trường",
+    "before": "Trước",
+    "after": "Sau",
+    "kind": {
+      "added": "thêm",
+      "removed": "xóa",
+      "changed": "đổi"
+    },
+    "noFieldChanges": "Không ghi nhận thay đổi trường nào.",
+    "clearType": "Chỉ hiện {{type}} — hiện tất cả"
+  },
+  "security": {
+    "subtitle": "Xác thực hai lớp và quy tắc đăng nhập cho nhân viên nền tảng.",
+    "yourMfa": "Xác thực hai lớp của bạn",
+    "yourMfaHint": "Dùng ứng dụng xác thực (Google Authenticator, Microsoft Authenticator, 1Password…).",
+    "policies": "Quy tắc đăng nhập của nhân viên",
+    "require2fa": "Nhân viên bắt buộc dùng xác thực hai lớp",
+    "require2faHint": "Nhân viên chưa có 2FA sẽ được yêu cầu thiết lập trước khi mở trang quản trị. Cơ sở dữ liệu từ chối thao tác của nhân viên từ phiên không có 2FA.",
+    "require2faFirst": "Hãy xác minh 2FA của chính bạn ở trên trước để không tự khóa mình.",
+    "withoutMfa_one": "{{count}} nhân viên chưa thiết lập 2FA; họ sẽ được yêu cầu ở lần truy cập tới.",
+    "withoutMfa_other": "{{count}} nhân viên chưa thiết lập 2FA; họ sẽ được yêu cầu ở lần truy cập tới.",
+    "sessionTimeout": "Đăng xuất khi không hoạt động",
+    "sessionTimeoutHint": "Trang quản trị đăng xuất nhân viên sau khoảng thời gian không hoạt động này.",
+    "minutes_one": "{{count}} phút",
+    "minutes_other": "{{count}} phút",
+    "hours_one": "{{count}} giờ",
+    "hours_other": "{{count}} giờ",
+    "staff": "Tài khoản nhân viên",
+    "staffHint": "Ai có thể mở trang quản trị và họ có dùng 2FA không.",
+    "cols": {
+      "staff": "Nhân viên",
+      "role": "Vai trò",
+      "mfa": "2FA",
+      "lastSignIn": "Đăng nhập gần nhất",
+      "sessions": "Thiết bị đang đăng nhập"
+    },
+    "disabled": "Đã vô hiệu",
+    "mfaOn": "Bật",
+    "mfaOff": "Chưa thiết lập",
+    "sensitive": "Thao tác nhạy cảm (30 ngày)",
+    "sensitiveHint": "Đăng nhập thay người dùng, cấm, hoàn tiền, xóa và thay đổi nhân viên hoặc cài đặt.",
+    "openAudit": "Mở nhật ký",
+    "noSensitive": "Không có trong 30 ngày qua.",
+    "passwordNote": "Độ dài mật khẩu và giới hạn đăng nhập của mọi người dùng được đặt trong Supabase (Authentication → Policies).",
+    "toast": {
+      "saved": "Đã lưu cài đặt bảo mật."
+    }
+  },
+  "mfa": {
+    "intro": "Thêm ứng dụng xác thực vào tài khoản. Bạn sẽ nhập mã 6 số từ ứng dụng khi đăng nhập trang quản trị.",
+    "setUp": "Thiết lập ứng dụng xác thực",
+    "scan": "Quét mã này bằng ứng dụng xác thực, rồi nhập mã 6 số hiển thị.",
+    "qrAlt": "Mã QR cho ứng dụng xác thực",
+    "cantScan": "Không quét được? Nhập khóa này:",
+    "enterCode": "Nhập mã 6 số từ ứng dụng xác thực để tiếp tục.",
+    "code": "Mã 6 số",
+    "verify": "Xác minh",
+    "wrongCode": "Mã không đúng. Kiểm tra giờ trên điện thoại và thử mã mới nhất.",
+    "enrolFailed": "Không thể bắt đầu thiết lập. Hãy thử lại.",
+    "active": "Xác thực hai lớp đang bật cho phiên này.",
+    "gateTitle": "Yêu cầu xác thực hai lớp",
+    "gateBody": "Nhân viên nền tảng phải xác nhận đăng nhập bằng ứng dụng xác thực."
   }
 }

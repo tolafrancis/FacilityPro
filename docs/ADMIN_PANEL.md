@@ -213,6 +213,35 @@ Stripe **and** PayPal subscriptions, plus manual invoices.
   templates** (English and Vietnamese) with placeholders and a preview. The support ticket emails and
   notifications use them.
 
+## Analytics & reports (0089)
+
+- **Usage** (`/admin/reports`, reports permission: super admin, admin, analyst): active tenants and
+  users, DAU / WAU / MAU and stickiness, work orders created and resolved, requests, new assets, IoT
+  devices online; activity over time (one measure at a time); module adoption (tenants using each
+  module); request channels; tenant retention by sign-up month (share active 0–5 months later);
+  per-tenant usage with CSV.
+- **Report builder**: tenants, members, work orders, requests, invoices, tickets, assets or devices,
+  counted (or invoice amounts summed) by month / week / day / tenant / plan / status / priority /
+  channel / category / provider / role over the chosen dates. Table view, CSV, print to PDF. The query
+  is built from fixed pieces in the database (`fp_report_run`); nothing typed reaches the SQL.
+- **Scheduled emails**: any report weekly (Mondays, last 7 days) or monthly (1st, last month) to up to 10
+  addresses; pause, send now, delete. Sent by the `send_scheduled_reports` job through the email outbox.
+
+## Audit log & security (0089)
+
+- **Audit log** (`/admin/audit`, audit permission: super admin, admin): every staff action and change to
+  admin records, with who, when, IP, tenant and a field-by-field before/after view; search, filters by
+  action group, action and staff member, date range, CSV. Entries can't be edited or deleted.
+- **Security** (`/admin/security`, super admin):
+  - **Your two-factor authentication**: add an authenticator app (Supabase Auth TOTP) and verify.
+  - **Staff must use 2FA**: when on, a staff session that hasn't passed 2FA has no staff role in the
+    database at all (every admin function and table refuses it) and the panel asks for the code first.
+    It can only be switched on from a 2FA session, so nobody locks themselves out.
+  - **Sign out after inactivity** (5 minutes – 7 days) for the admin panel.
+  - Staff accounts with 2FA status, last sign-in and signed-in devices; sensitive actions in the last
+    30 days, linked to the audit log.
+  - Password rules for all users stay in Supabase (Authentication → Policies).
+
 ### Demo data (local or staging only)
 
 ```sql
@@ -251,5 +280,7 @@ keys are Edge Function secrets (see Billing setup).
 | 4. Plans & billing (Stripe + PayPal) | Done: add provider keys to go live |
 | 5. App management | Done |
 | 6. Support tickets | Done |
-| 7. Analytics · 8. Audit & security · 9. Monitoring · 10. Admin team | Planned, schema in place |
+| 7. Analytics & reports | Done |
+| 8. Audit log & security | Done |
+| 9. Monitoring · 10. Admin team | Planned |
 | Demo seed data (20 tenants, 200 users, invoices, tickets, activity) | Done: `supabase/seed/admin_demo.sql`, local/staging only |

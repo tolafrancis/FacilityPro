@@ -573,7 +573,10 @@
     "ticket_create": "Ticket opened for customer",
     "ticket_update": "Ticket updated",
     "ticket_reply": "Replied to ticket",
-    "ticket_note": "Internal note on ticket"
+    "ticket_note": "Internal note on ticket",
+    "report_send_now": "Report sent",
+    "settings_change": "Platform settings changed",
+    "staff_change": "Staff accounts changed"
   },
   "errors2": {
     "permission": "You don’t have permission to do that.",
@@ -592,7 +595,8 @@
     "not_authorized": "You don't have permission to do this.",
     "failed": "Something went wrong.",
     "invalid_default_language": "The default language must be one of the supported languages.",
-    "invalid_version": "Check the version numbers."
+    "invalid_version": "Check the version numbers.",
+    "mfa_needed_first": "Set up and verify 2FA for your own account first."
   },
   "users": {
     "subtitle": "Every account on the platform, across all tenants.",
@@ -1232,5 +1236,245 @@
       "saved": "Settings saved.",
       "templateSaved": "Template saved."
     }
+  },
+  "reports": {
+    "subtitle": "How tenants use FacilityPro, your own reports, and reports emailed on a schedule.",
+    "tabsLabel": "Report sections",
+    "tabs": {
+      "overview": "Usage",
+      "builder": "Report builder",
+      "schedules": "Scheduled emails"
+    },
+    "kpi": {
+      "activeTenants": "Active tenants",
+      "activeUsers": "Active users",
+      "stickiness": "Stickiness (DAU/MAU)",
+      "wau": "Weekly active users",
+      "workOrders": "Work orders created",
+      "requests": "Requests",
+      "assets": "Assets added",
+      "iot": "IoT devices online"
+    },
+    "ofTenants": "of {{total}} tenants",
+    "stickinessHint": "Share of monthly users active today",
+    "wauHint": "Last 7 days",
+    "resolved_one": "{{count}} resolved",
+    "resolved_other": "{{count}} resolved",
+    "devicesOnline": "{{online}} / {{total}}",
+    "iotTenants_one": "at {{count}} tenant",
+    "iotTenants_other": "at {{count}} tenants",
+    "metric": {
+      "work_orders_created": "Work orders created",
+      "work_orders_resolved": "Work orders resolved",
+      "requests": "Requests",
+      "active_users": "Active users",
+      "active_tenants": "Active tenants"
+    },
+    "activityHint": "Across all tenants, in the selected period.",
+    "show": "Show",
+    "noActivity": "No activity in this period.",
+    "adoption": "Module adoption",
+    "adoptionHint": "Tenants using each module.",
+    "module": "Module",
+    "tenantsUsing": "Tenants using it",
+    "tenantsOf": "{{n}} of {{total}}",
+    "modules": {
+      "requests": "Requests"
+    },
+    "channels": "Request channels",
+    "channelsHint": "Where requests came from.",
+    "channelHeader": "Channel",
+    "channel": {
+      "web": "Web app",
+      "qr": "QR code",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "telegram": "Telegram",
+      "messenger": "Messenger",
+      "line": "LINE",
+      "zalo": "Zalo",
+      "public": "Public form"
+    },
+    "cohorts": "Tenant retention",
+    "cohortsHint": "Tenants by sign-up month, and the share active in each following month.",
+    "signedUp": "Signed up",
+    "tenants": "Tenants",
+    "monthZero": "Month 0",
+    "monthN": "+{{n}}",
+    "cohortCell": "{{active}} of {{tenants}} tenants active ({{pct}}%)",
+    "tenantUsage": "Tenant usage",
+    "tenantUsageHint": "The 50 most active tenants in the period.",
+    "cols": {
+      "tenant": "Tenant",
+      "plan": "Plan",
+      "activeUsers": "Active users",
+      "workOrders": "Work orders",
+      "requests": "Requests",
+      "assets": "Assets",
+      "devices": "Devices"
+    },
+    "dataset": "Data",
+    "groupBy": "Break down by",
+    "measure": "Measure",
+    "run": "Run report",
+    "builderHint": "Uses the date range at the top of the page.",
+    "datasets": {
+      "tenants": "Tenants (signed up)",
+      "members": "Members (joined)",
+      "work_orders": "Work orders",
+      "requests": "Requests",
+      "invoices": "Invoices",
+      "tickets": "Support tickets",
+      "assets": "Assets",
+      "devices": "IoT devices"
+    },
+    "groups": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day",
+      "tenant": "Tenant",
+      "plan": "Plan",
+      "industry": "Industry",
+      "status": "Status",
+      "priority": "Priority",
+      "channel": "Channel",
+      "category": "Category",
+      "provider": "Payment provider",
+      "role": "Role"
+    },
+    "measures": {
+      "count": "Number",
+      "amount": "Amount (net of refunds)"
+    },
+    "builderTitle": "{{measure}} of {{dataset}} by {{group}}",
+    "period": "{{from}} – {{to}}",
+    "noRows": "Nothing in this period.",
+    "capped": "Showing the first 500 rows.",
+    "pdf": "Print / PDF",
+    "emailIt": "Email regularly",
+    "scheduleTitle": "Email this report regularly",
+    "scheduleName": "Name",
+    "frequency": "How often",
+    "frequencies": {
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "frequencyHint": {
+      "weekly": "Every Monday, covering the last 7 days.",
+      "monthly": "On the 1st, covering the last month."
+    },
+    "recipients": "Send to",
+    "recipientsHint": "Up to 10 addresses, separated by commas.",
+    "schedule": "Schedule",
+    "noSchedules": "No scheduled reports.",
+    "noSchedulesBody": "Build a report, then choose “Email regularly”.",
+    "nextRun": "Next: {{when}}",
+    "paused": "Paused",
+    "lastSent": "last sent {{when}}",
+    "sendNow": "Send now",
+    "toggleSchedule": "Turn {{name}} on or off",
+    "deleteSchedule": "Delete {{name}}",
+    "toast": {
+      "scheduled": "Report scheduled.",
+      "updated": "Saved.",
+      "deleted": "Schedule deleted.",
+      "sent": "Report sent."
+    }
+  },
+  "audit": {
+    "subtitle": "Every change made by staff: who, what, when, from which IP, and the values before and after.",
+    "search": "Search email, tenant, record ID, IP or values",
+    "allActions": "All actions",
+    "allIn": "All: {{group}}",
+    "allStaff": "All staff",
+    "groups": {
+      "tenant": "Tenants",
+      "member": "Members",
+      "user": "Users",
+      "invoice": "Invoices",
+      "subscription": "Subscriptions",
+      "ticket": "Tickets",
+      "client": "Other actions",
+      "report": "Reports",
+      "insert": "Records added",
+      "update": "Records changed",
+      "delete": "Records deleted"
+    },
+    "cols": {
+      "at": "When",
+      "staff": "Staff",
+      "action": "Action",
+      "target": "Record",
+      "tenant": "Tenant"
+    },
+    "system": "System",
+    "empty": "No entries match.",
+    "immutable": "Entries can't be edited or deleted, by anyone.",
+    "exported_one": "Exported {{count}} entry.",
+    "exported_other": "Exported {{count}} entries.",
+    "changes": "Changes",
+    "showUnchanged": "Show unchanged fields",
+    "field": "Field",
+    "before": "Before",
+    "after": "After",
+    "kind": {
+      "added": "added",
+      "removed": "removed",
+      "changed": "changed"
+    },
+    "noFieldChanges": "No field changes recorded.",
+    "clearType": "Showing {{type}} only — show all"
+  },
+  "security": {
+    "subtitle": "Two-factor authentication and sign-in rules for platform staff.",
+    "yourMfa": "Your two-factor authentication",
+    "yourMfaHint": "Use an authenticator app (Google Authenticator, Microsoft Authenticator, 1Password…).",
+    "policies": "Staff sign-in rules",
+    "require2fa": "Staff must use two-factor authentication",
+    "require2faHint": "Staff without 2FA are asked to set it up before the admin panel opens. The database refuses staff actions from sessions without 2FA.",
+    "require2faFirst": "Verify your own 2FA above first, so you can't lock yourself out.",
+    "withoutMfa_one": "{{count}} staff member hasn't set up 2FA yet; they'll be asked to at their next visit.",
+    "withoutMfa_other": "{{count}} staff members haven't set up 2FA yet; they'll be asked to at their next visit.",
+    "sessionTimeout": "Sign out after inactivity",
+    "sessionTimeoutHint": "The admin panel signs staff out after this long without activity.",
+    "minutes_one": "{{count}} minute",
+    "minutes_other": "{{count}} minutes",
+    "hours_one": "{{count}} hour",
+    "hours_other": "{{count}} hours",
+    "staff": "Staff accounts",
+    "staffHint": "Who can open the admin panel, and whether they use 2FA.",
+    "cols": {
+      "staff": "Staff",
+      "role": "Role",
+      "mfa": "2FA",
+      "lastSignIn": "Last sign-in",
+      "sessions": "Signed-in devices"
+    },
+    "disabled": "Disabled",
+    "mfaOn": "On",
+    "mfaOff": "Not set up",
+    "sensitive": "Sensitive actions (30 days)",
+    "sensitiveHint": "Sign-ins as users, bans, refunds, deletions and changes to staff or settings.",
+    "openAudit": "Open audit log",
+    "noSensitive": "None in the last 30 days.",
+    "passwordNote": "Password length and sign-in limits for all users are set in Supabase (Authentication → Policies).",
+    "toast": {
+      "saved": "Security settings saved."
+    }
+  },
+  "mfa": {
+    "intro": "Add an authenticator app to your account. You'll enter a 6-digit code from it when you sign in to the admin panel.",
+    "setUp": "Set up authenticator app",
+    "scan": "Scan this code with your authenticator app, then enter the 6-digit code it shows.",
+    "qrAlt": "QR code for your authenticator app",
+    "cantScan": "Can't scan? Enter this key instead:",
+    "enterCode": "Enter the 6-digit code from your authenticator app to continue.",
+    "code": "6-digit code",
+    "verify": "Verify",
+    "wrongCode": "That code didn't work. Check your phone's time and try the newest code.",
+    "enrolFailed": "Couldn't start the setup. Try again.",
+    "active": "Two-factor authentication is on for this session.",
+    "gateTitle": "Two-factor authentication required",
+    "gateBody": "Platform staff must confirm their sign-in with an authenticator app."
   }
 }

@@ -62,7 +62,46 @@ function usePopover() {
   return { open, setOpen, ref };
 }
 
+
+const ACTIVE_KEY = 'fp.admin.lastActive';
+
+/**
+ * Signs staff out after the configured minutes without activity (0089),
+ * across all admin tabs of this browser.
+ */
+function useIdleSignOut(minutes: number) {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const out = useRef<() => void>(() => undefined);
+  out.current = () => void signOut().then(() => navigate(`/signin?reason=timeout&next=${encodeURIComponent(window.location.pathname)}`, { replace: true }));
+  useEffect(() => {
+    let last = Date.now();
+    writeStorage(ACTIVE_KEY, String(last));
+    const bump = () => {
+      const now = Date.now();
+      if (now - last > 15_000) {
+        last = now;
+        writeStorage(ACTIVE_KEY, String(now));
+      }
+    };
+    const events = ['mousedown', 'keydown', 'touchstart', 'scroll', 'mousemove'] as const;
+    events.forEach((e) => window.addEventListener(e, bump, { passive: true }));
+    const timer = window.setInterval(() => {
+      const shared = Number(readStorage(ACTIVE_KEY)) || last;
+      if (Date.now() - Math.max(last, shared) > minutes * 60_000) {
+        window.clearInterval(timer);
+        out.current();
+      }
+    }, 30_000);
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, bump));
+      window.clearInterval(timer);
+    };
+  }, [minutes]);
+}
+
 export default function AdminShell() {
+  useIdleSignOut(useAdmin().sessionMinutes);
   const { t } = useTranslation('admin');
   const { can } = useAdmin();
   const location = useLocation();
@@ -120,7 +159,7 @@ export default function AdminShell() {
   return (
     <div className="flex min-h-screen bg-surface text-ink">
       {/* Desktop sidebar */}
-      <aside className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-panel transition-[width] lg:flex ${collapsed ? 'w-16' : 'w-60'}`}>
+      <aside className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-line bg-panel transition-[width] lg:flex print:hidden ${collapsed ? 'w-16' : 'w-60'}`}>
         {brand(collapsed)}
         {nav(collapsed)}
         <div className="border-t border-line p-2">
@@ -154,7 +193,7 @@ export default function AdminShell() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-line bg-panel/90 px-3 backdrop-blur sm:px-5">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-line bg-panel/90 px-3 backdrop-blur sm:px-5 print:hidden">
           <button type="button" onClick={() => setMobileOpen(true)} className="grid h-9 w-9 place-items-center rounded-md text-ink hover:bg-ink/5 lg:hidden" aria-label={t('openMenu')}>
             <Menu size={19} aria-hidden />
           </button>

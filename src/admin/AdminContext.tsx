@@ -9,6 +9,11 @@ type Theme = 'light' | 'dark' | 'system';
 interface AdminContextValue {
   role: AdminRole | null;
   loading: boolean;
+  /** Staff account that must finish two-factor sign-in first (0089). */
+  mfaRequired: boolean;
+  /** Minutes of inactivity before the panel signs out. */
+  sessionMinutes: number;
+  refresh: () => void;
   can: (p: Permission) => boolean;
   theme: Theme;
   setTheme: (t: Theme) => void;
@@ -31,8 +36,12 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     queryFn: async () => {
       const { data, error } = await supabase.rpc('fp_admin_permissions');
       if (error) throw error;
-      const role = (data as { role: unknown } | null)?.role;
-      return isAdminRole(role) ? role : null;
+      const d = (data ?? {}) as { role?: unknown; mfa_required?: unknown; session_minutes?: unknown };
+      return {
+        role: isAdminRole(d.role) ? d.role : null,
+        mfaRequired: d.mfa_required === true,
+        sessionMinutes: typeof d.session_minutes === 'number' && d.session_minutes >= 5 ? d.session_minutes : 480,
+      };
     },
   });
 
@@ -61,10 +70,13 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }, [dark]);
 
   const value = useMemo<AdminContextValue>(() => {
-    const role = q.data ?? null;
+    const role = q.data?.role ?? null;
     return {
       role,
       loading: q.isLoading,
+      mfaRequired: q.data?.mfaRequired ?? false,
+      sessionMinutes: q.data?.sessionMinutes ?? 480,
+      refresh: () => void q.refetch(),
       can: (p) => roleCan(role, p),
       theme,
       setTheme: (t) => {
@@ -77,6 +89,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       },
       dark,
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q.data, q.isLoading, theme, dark]);
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;

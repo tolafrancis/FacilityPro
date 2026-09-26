@@ -43,7 +43,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { key: 'users', to: '/admin/users', icon: Users, permission: 'users.view', ready: true },
       { key: 'billing', to: '/admin/billing', icon: CreditCard, permission: 'billing.view', ready: true },
       { key: 'tickets', to: '/admin/tickets', icon: LifeBuoy, permission: 'tickets.view', ready: true },
-      { key: 'reports', to: '/admin/reports', icon: BarChart3, permission: 'reports.view', ready: false },
+      { key: 'reports', to: '/admin/reports', icon: BarChart3, permission: 'reports.view', ready: true },
     ],
   },
   {
@@ -57,8 +57,8 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   {
     key: 'security',
     items: [
-      { key: 'audit', to: '/admin/audit', icon: ScrollText, permission: 'audit.view', ready: false },
-      { key: 'security', to: '/admin/security', icon: ShieldCheck, permission: 'security.manage', ready: false },
+      { key: 'audit', to: '/admin/audit', icon: ScrollText, permission: 'audit.view', ready: true },
+      { key: 'security', to: '/admin/security', icon: ShieldCheck, permission: 'security.manage', ready: true },
       { key: 'monitoring', to: '/admin/monitoring', icon: Activity, permission: 'monitoring.view', ready: false },
       { key: 'team', to: '/admin/team', icon: UserCog, permission: 'team.manage', ready: false },
     ],

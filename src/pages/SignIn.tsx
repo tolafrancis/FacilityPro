@@ -68,6 +68,7 @@ export default function SignIn() {
       {next?.startsWith('/invite') && <div className="mb-4"><AuthNotice>{t('signIn.invited')}</AuthNotice></div>}
       {params.get('reset') === 'done' && <div className="mb-4"><AuthNotice>{t('reset.done')}</AuthNotice></div>}
       {params.get('link') === 'expired' && <div className="mb-4"><AuthNotice>{t('signIn.linkExpired')}</AuthNotice></div>}
+      {params.get('reason') === 'timeout' && <div className="mb-4"><AuthNotice>{t('signIn.sessionTimeout')}</AuthNotice></div>}
       <form onSubmit={onSubmit} className="space-y-4" noValidate>
         <AuthField label={t('signIn.email')} htmlFor="signin-email">
           <AuthInput

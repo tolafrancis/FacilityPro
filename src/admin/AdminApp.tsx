@@ -17,6 +17,10 @@ import TicketDetail from './pages/TicketDetail';
 import Features from './pages/Features';
 import Announcements from './pages/Announcements';
 import AppSettings from './pages/AppSettings';
+import Reports from './pages/Reports';
+import AuditLog from './pages/AuditLog';
+import Security from './pages/Security';
+import MfaSetup from './components/MfaSetup';
 
 /**
  * The platform admin panel (/admin), loaded only when opened. Every route
@@ -31,8 +35,9 @@ export default function AdminApp() {
 }
 
 function AdminRoutes() {
-  const { role, loading } = useAdmin();
+  const { role, loading, mfaRequired, refresh } = useAdmin();
   if (loading) return <FullSkeleton />;
+  if (!role && mfaRequired) return <MfaGate onDone={refresh} />;
   if (!role) return <NotStaff />;
 
   return (
@@ -49,6 +54,9 @@ function AdminRoutes() {
         <Route path="features" element={<Guard permission="platform.manage"><Features /></Guard>} />
         <Route path="announcements" element={<Guard permission="announcements.manage"><Announcements /></Guard>} />
         <Route path="settings" element={<Guard permission="platform.manage"><AppSettings /></Guard>} />
+        <Route path="reports" element={<Guard permission="reports.view"><Reports /></Guard>} />
+        <Route path="audit" element={<Guard permission="audit.view"><AuditLog /></Guard>} />
+        <Route path="security" element={<Guard permission="security.manage"><Security /></Guard>} />
         {ADMIN_NAV.flatMap((g) => g.items)
           .filter((i) => !i.ready)
           .map((i) => (
@@ -103,6 +111,21 @@ function FullSkeleton() {
         <Skeleton className="h-8 w-48" />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-24" />)}</div>
         <Skeleton className="h-64" />
+      </div>
+    </div>
+  );
+}
+
+/** Staff must finish two-factor sign-in before the panel opens (0089). */
+function MfaGate({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation('admin');
+  return (
+    <div className="grid min-h-screen place-items-center bg-surface px-4">
+      <div className="w-full max-w-md rounded-2xl border border-line bg-panel p-8 shadow-sm">
+        <ShieldAlert size={28} className="text-brand" aria-hidden />
+        <h1 className="mt-3 text-xl font-semibold text-ink">{t('mfa.gateTitle')}</h1>
+        <p className="mb-5 mt-1 text-sm text-ink-muted">{t('mfa.gateBody')}</p>
+        <MfaSetup onDone={onDone} />
       </div>
     </div>
   );
