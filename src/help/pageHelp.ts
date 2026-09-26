@@ -18,6 +18,9 @@ export interface PageHelp {
   guide?: string;
 }
 
+/** The translatable part of a PageHelp entry (Vietnamese in pageHelpData.vi.ts, same order as PAGE_HELP). */
+export type PageHelpText = Pick<PageHelp, 'title' | 'what' | 'canDo' | 'fields' | 'tip'>;
+
 export function matchPattern(pattern: string, pathname: string): boolean {
   const a = pattern.split('/').filter(Boolean);
   const b = pathname.replace(/\/+$/, '').split('/').filter(Boolean);

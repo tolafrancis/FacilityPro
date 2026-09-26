@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BookOpen, CircleHelp, Compass, X } from 'lucide-react';
 import { useOrg } from '../../contexts/OrgContext';
-import { pageHelpFor } from '../../help/pageHelp';
+import { localizedPageHelp } from '../../help/localized';
 import { startTour } from '../../lib/tour';
 
 // "? Help" in the top bar: explains the page you're on — what it's for,
@@ -11,12 +11,12 @@ import { startTour } from '../../lib/tour';
 // guide section. Page texts live in src/help/pageHelp.ts.
 
 export default function HelpButton() {
-  const { t } = useTranslation('help');
+  const { t, i18n } = useTranslation('help');
   const { pathname } = useLocation();
   const { role } = useOrg();
   const [open, setOpen] = useState(false);
   const titleId = useId();
-  const page = pageHelpFor(pathname, role);
+  const page = localizedPageHelp(pathname, role, i18n.resolvedLanguage);
 
   useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {

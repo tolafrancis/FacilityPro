@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 // blocks, --- rules. Anything else shows as plain text.
 
 export type Block =
-  | { type: 'heading'; level: 2 | 3 | 4; text: string }
+  | { type: 'heading'; level: 2 | 3 | 4; text: string; id?: string }
   | { type: 'paragraph'; text: string }
   | { type: 'list'; ordered: boolean; items: string[] }
   | { type: 'quote'; text: string }
@@ -44,7 +44,8 @@ export function parseMarkdown(src: string): Block[] {
     const h = /^(#{1,4})\s+(.*)$/.exec(line);
     if (h) {
       // The post title is the page's h1, so # and ## are both section headings (h2).
-      blocks.push({ type: 'heading', level: Math.max(2, h[1].length) as 2 | 3 | 4, text: h[2].trim() });
+      const { text, id } = splitHeadingId(h[2]);
+      blocks.push({ type: 'heading', level: Math.max(2, h[1].length) as 2 | 3 | 4, text, ...(id ? { id } : {}) });
       i += 1;
       continue;
     }
@@ -117,6 +118,12 @@ export function renderInline(text: string, keyPrefix = 'i'): ReactNode[] {
   return out;
 }
 
+/** "Đóng lệnh công việc {#closing-a-work-order}" → text + explicit anchor (translations keep the English anchor). */
+export function splitHeadingId(raw: string): { text: string; id?: string } {
+  const m = /^(.*?)\s*\{#([a-z0-9-]+)\}\s*$/.exec(raw);
+  return m ? { text: m[1].trim(), id: m[2] } : { text: raw.trim() };
+}
+
 /** URL fragment for a heading: "Closing a work order" → "closing-a-work-order". */
 export function headingId(text: string): string {
   return text
@@ -164,7 +171,7 @@ export function Markdown({
               ? b.level === 2 ? 'scroll-mt-24 border-t border-line pt-6 text-xl font-semibold text-ink first:border-0 first:pt-0' : b.level === 3 ? 'scroll-mt-24 pt-2 text-lg font-semibold text-ink' : 'scroll-mt-24 font-semibold text-ink'
               : b.level === 2 ? 'pt-4 text-2xl font-semibold text-ink' : b.level === 3 ? 'pt-2 text-xl font-semibold text-ink' : 'text-lg font-semibold text-ink';
             const Tag = `h${b.level}` as 'h2' | 'h3' | 'h4';
-            return <Tag key={k} id={headingId(b.text) || undefined} className={cls}>{renderInline(b.text, k)}</Tag>;
+            return <Tag key={k} id={b.id ?? (headingId(b.text) || undefined)} className={cls}>{renderInline(b.text, k)}</Tag>;
           }
           case 'paragraph':
             return <p key={k}>{renderInline(b.text, k)}</p>;
