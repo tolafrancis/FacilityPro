@@ -1,8 +1,10 @@
-import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import MarketingLayout, { TrialForm } from '../marketing/MarketingLayout';
+import { FEATURE_GROUPS, RESOURCES, SOLUTION_COLUMNS, resourceHref } from '../marketing/content';
 
 const featureCards = [
   {
@@ -20,24 +22,6 @@ const featureCards = [
 ];
 
 const proofPoints = ['Reduce response time', 'Keep assets reliable', 'Improve team visibility'];
-
-const FEATURES_MENU = [
-  { label: 'Work orders & requests', href: '#features' },
-  { label: 'Preventive maintenance', href: '#features' },
-  { label: 'Assets & inventory', href: '#features' },
-  { label: 'Workflows & automation', href: '#features' },
-  { label: 'Surveys & feedback', href: '#features' },
-  { label: 'IoT & sensors', href: '#features' },
-];
-
-const SOLUTIONS_MENU = [
-  { label: 'Facilities management', href: '#demo' },
-  { label: 'Property management', href: '#demo' },
-  { label: 'Manufacturing', href: '#demo' },
-  { label: 'Healthcare', href: '#demo' },
-  { label: 'Education', href: '#demo' },
-  { label: 'Retail & hospitality', href: '#demo' },
-];
 
 const PRICING_TIERS = [
   {
@@ -67,26 +51,6 @@ const PRICING_TIERS = [
   },
 ];
 
-function NavDropdown({ label, items }: { label: string; items: { label: string; href: string }[] }) {
-  return (
-    <div className="group relative">
-      <button type="button" className="inline-flex items-center gap-1 text-sm font-medium text-ink-muted hover:text-brand">
-        {label}
-        <ChevronDown size={15} className="transition group-hover:rotate-180" aria-hidden />
-      </button>
-      <div className="absolute left-0 top-full z-20 hidden min-w-[15rem] pt-3 group-hover:block">
-        <div className="rounded-xl border border-line bg-white p-2 shadow-lg">
-          {items.map((item) => (
-            <a key={item.label} href={item.href} className="block rounded-lg px-3 py-2 text-sm text-ink hover:bg-surface hover:text-brand">
-              {item.label}
-            </a>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Landing() {
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -96,42 +60,21 @@ export default function Landing() {
     message: '',
   });
 
+  // Menu links elsewhere on the site come back as /#pricing, /#demo, …
+  const location = useLocation();
+  useEffect(() => {
+    if (!location.hash) return;
+    const id = setTimeout(() => document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'smooth' }), 50);
+    return () => clearTimeout(id);
+  }, [location.hash]);
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitted(true);
   };
 
   return (
-    <div className="min-h-screen bg-surface text-ink">
-      <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand font-semibold text-white">
-            F
-          </div>
-          <div>
-            <p className="text-lg font-semibold">FacilityPro</p>
-            <p className="text-sm text-ink-muted">Operations made simple</p>
-          </div>
-        </div>
-
-        <nav className="hidden items-center gap-6 lg:flex">
-          <a href="#pricing" className="text-sm font-medium text-ink-muted hover:text-brand">Pricing</a>
-          <NavDropdown label="Features" items={FEATURES_MENU} />
-          <a href="#resources" className="text-sm font-medium text-ink-muted hover:text-brand">Resources</a>
-          <NavDropdown label="Solutions" items={SOLUTIONS_MENU} />
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <Link to="/signin" className="text-sm font-medium text-ink-muted hover:text-brand">
-            Sign in
-          </Link>
-          <a href="#demo" className="inline-flex items-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600">
-            Request demo
-          </a>
-        </div>
-      </header>
-
-      <main>
+    <MarketingLayout>
         <section className="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-24">
           <div className="max-w-2xl">
             <div className="mb-4 inline-flex rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-sm font-medium text-brand">
@@ -143,13 +86,11 @@ export default function Landing() {
             <p className="mt-5 text-lg leading-8 text-ink-muted">
               FacilityPro helps operations leaders cut response times, keep assets healthy, and give teams a single place to work faster with less friction.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a href="#demo" className="inline-flex items-center justify-center rounded-lg bg-brand px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-600">
-                Book a demo
-              </a>
-              <Link to="/signin" className="inline-flex items-center justify-center rounded-lg border border-line bg-white px-5 py-3 text-sm font-semibold text-ink transition hover:bg-surface">
-                Explore the platform
-              </Link>
+            <div className="mt-8">
+              <TrialForm size="lg" />
+              <p className="mt-2 text-sm text-ink-muted">
+                Free trial · no credit card required · or <a href="#demo" className="font-medium text-brand hover:underline">book a demo</a>
+              </p>
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
               {proofPoints.map((point) => (
@@ -181,7 +122,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="features" className="mx-auto max-w-7xl px-6 py-6 lg:px-8">
+        <section id="features" className="scroll-mt-24 mx-auto max-w-7xl px-6 py-6 lg:px-8">
           <div className="grid gap-4 md:grid-cols-3">
             {featureCards.map((card) => (
               <div key={card.title} className="rounded-2xl border border-line bg-white p-6 shadow-sm">
@@ -192,7 +133,44 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="pricing" className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">One platform</p>
+            <h2 className="mt-3 text-3xl font-semibold text-ink">Everything your facilities team runs on.</h2>
+          </div>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {FEATURE_GROUPS.map((g) => (
+              <div key={g.key} className="rounded-2xl border border-line bg-white p-6">
+                <p className="font-semibold text-ink">{g.label}</p>
+                <ul className="mt-3 space-y-1.5">
+                  {g.items.slice(0, 5).map((f) => (
+                    <li key={f.slug}>
+                      <Link to={`/features/${f.slug}`} className="flex items-center gap-2 text-sm text-ink-muted hover:text-brand">
+                        <f.icon size={16} className="text-brand" aria-hidden />{f.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <Link to={`/features/${g.items[0].slug}`} className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand hover:underline">
+                  Explore {g.label.toLowerCase()} <ArrowRight size={14} aria-hidden />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-6 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-semibold text-ink">Built for your industry</h2>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {SOLUTION_COLUMNS.flatMap((c) => c.items).map((s) => (
+              <Link key={s.slug} to={`/solutions/${s.slug}`} className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm text-ink hover:border-brand hover:text-brand">
+                <s.icon size={16} className="text-brand" aria-hidden />{s.title}
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section id="pricing" className="scroll-mt-24 mx-auto max-w-7xl px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Pricing</p>
             <h2 className="mt-3 text-3xl font-semibold text-ink">Simple plans that scale with your team.</h2>
@@ -232,28 +210,23 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="resources" className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+        <section id="resources" className="scroll-mt-24 mx-auto max-w-7xl px-6 py-10 lg:px-8">
           <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Resources</p>
             <h2 className="mt-3 text-2xl font-semibold text-ink">Everything you need to get more from FacilityPro.</h2>
             <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <a href="#demo" className="rounded-2xl border border-line p-5 hover:border-brand hover:bg-surface">
-                <p className="font-semibold text-ink">Guides & docs</p>
-                <p className="mt-1 text-sm text-ink-muted">Step-by-step setup and best practices for your team.</p>
-              </a>
-              <a href="#demo" className="rounded-2xl border border-line p-5 hover:border-brand hover:bg-surface">
-                <p className="font-semibold text-ink">Blog</p>
-                <p className="mt-1 text-sm text-ink-muted">Trends and tips for modern facilities operations.</p>
-              </a>
-              <a href="#demo" className="rounded-2xl border border-line p-5 hover:border-brand hover:bg-surface">
-                <p className="font-semibold text-ink">Help center</p>
-                <p className="mt-1 text-sm text-ink-muted">Answers, FAQs, and support when you need it.</p>
-              </a>
+              {RESOURCES.flat().filter((r) => !r.href).map((r) => (
+                <Link key={r.slug} to={resourceHref(r)} className="rounded-2xl border border-line p-5 hover:border-brand hover:bg-surface">
+                  <r.icon size={20} className="text-brand" aria-hidden />
+                  <p className="mt-2 font-semibold text-ink">{r.title}</p>
+                  <p className="mt-1 text-sm text-ink-muted">{r.summary}</p>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
 
-        <section id="demo" className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+        <section id="demo" className="scroll-mt-24 mx-auto max-w-7xl px-6 py-16 lg:px-8">
           <div className="grid gap-8 rounded-3xl border border-line bg-white p-8 shadow-sm lg:grid-cols-[0.8fr_1.2fr]">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-brand">Request a demo</p>
@@ -314,19 +287,6 @@ export default function Landing() {
             </form>
           </div>
         </section>
-      </main>
-
-      <footer className="border-t border-line bg-white/70">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-6 text-sm text-ink-muted lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <p>© 2026 FacilityPro. Built for modern facilities teams.</p>
-          <div className="flex gap-4">
-            <a href="#pricing" className="hover:text-brand">Pricing</a>
-            <a href="#resources" className="hover:text-brand">Resources</a>
-            <Link to="/signin" className="hover:text-brand">Sign in</Link>
-            <a href="#demo" className="hover:text-brand">Book demo</a>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </MarketingLayout>
   );
 }

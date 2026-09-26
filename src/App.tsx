@@ -16,6 +16,7 @@ import { rememberInvite, safeNext } from './lib/redirect';
 // which page a role ever opens.
 const SignIn = lazy(() => import('./pages/SignIn'));
 const DisplayBoard = lazy(() => import('./pages/DisplayBoard'));
+const MarketingPage = lazy(() => import('./pages/MarketingPage'));
 const SignUp = lazy(() => import('./pages/SignUp'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
@@ -118,6 +119,19 @@ export default function App() {
 
   // TV display boards (0092): the link is the key; no sign-in, organisation
   // or maintenance screen, so a wall screen keeps working on its own.
+  // Public site pages behind the header menus: the same for everyone.
+  if (/^\/(features|solutions|resources)\//.test(location.pathname)) {
+    return (
+      <Suspense fallback={<FullPageLoader />}>
+        <Routes>
+          <Route path="/features/:slug" element={<MarketingPage kind="feature" />} />
+          <Route path="/solutions/:slug" element={<MarketingPage kind="solution" />} />
+          <Route path="/resources/:slug" element={<MarketingPage kind="resource" />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
   if (location.pathname.startsWith('/display/')) {
     return (
       <Suspense fallback={<FullPageLoader />}>
