@@ -5,8 +5,8 @@ The live demo runs in its own Supabase account, never in production (`jzrugcrpdd
 ## Prerequisites (owner)
 
 - A Supabase personal access token for the demo account, stored in the Claude Code environment as `DEMO_SUPABASE_ACCESS_TOKEN`. It is never pasted in chat.
-- The demo administrator's email: `tolafrancis4biz@gmail.com`, pending the owner's confirmation.
-- A Cloudflare Pages project (e.g. `demo.facilitypro.tech`) building `main`, with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` set to the demo project's values.
+- The demo administrator's email: `tolafrancis4biz@gmail.com` (confirmed).
+- A Cloudflare Pages project on `demo.facilitypro.tech` (confirmed) building `main`, with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` set to the demo project's values.
 
 ## Steps (Claude)
 
