@@ -94,7 +94,12 @@
       "f3": "Checklists",
       "f4": "Parts & inventory",
       "f5": "Tenant portal",
-      "f6": "Email & push notifications"
+      "f6": "Email & push notifications",
+      "f7": "Email & Zalo inbox",
+      "f8": "Room & desk booking",
+      "f9": "Permits to work",
+      "f10": "Technician attendance",
+      "f11": "TV display boards"
     },
     "professional": {
       "name": "Professional",
@@ -108,16 +113,11 @@
       "f4": "Meters & meter-based maintenance",
       "f5": "Vendors, contracts & documents",
       "f6": "Surveys & broadcasts",
-      "f7": "Email & Zalo inbox",
-      "f8": "Room & desk booking",
-      "f9": "Permits to work",
-      "f10": "Budgets, procurement & invoices",
-      "f11": "IoT sensors & alerts",
-      "f12": "Technician attendance",
-      "f13": "TV display boards",
-      "f14": "Smart assistant & sentiment scoring",
-      "f15": "Full reports & dashboards",
-      "f16": "Email support"
+      "f7": "Budgets, procurement & invoices",
+      "f8": "IoT sensors & alerts",
+      "f9": "Smart assistant & sentiment scoring",
+      "f10": "Full reports & dashboards",
+      "f11": "Email support"
     },
     "business": {
       "name": "Business",

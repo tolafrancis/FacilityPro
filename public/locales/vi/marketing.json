@@ -94,7 +94,12 @@
       "f3": "Danh sách kiểm tra",
       "f4": "Phụ tùng & tồn kho",
       "f5": "Cổng thông tin cư dân",
-      "f6": "Thông báo email & đẩy"
+      "f6": "Thông báo email & đẩy",
+      "f7": "Hộp thư email & Zalo",
+      "f8": "Đặt phòng & chỗ ngồi",
+      "f9": "Giấy phép làm việc",
+      "f10": "Chấm công kỹ thuật viên",
+      "f11": "Bảng hiển thị trên TV"
     },
     "professional": {
       "name": "Chuyên nghiệp",
@@ -108,16 +113,11 @@
       "f4": "Đồng hồ & bảo trì theo chỉ số",
       "f5": "Nhà cung cấp, hợp đồng & tài liệu",
       "f6": "Khảo sát & thông báo chung",
-      "f7": "Hộp thư email & Zalo",
-      "f8": "Đặt phòng & chỗ ngồi",
-      "f9": "Giấy phép làm việc",
-      "f10": "Ngân sách, mua sắm & hóa đơn",
-      "f11": "Cảm biến IoT & cảnh báo",
-      "f12": "Chấm công kỹ thuật viên",
-      "f13": "Bảng hiển thị trên TV",
-      "f14": "Trợ lý thông minh & chấm điểm cảm xúc",
-      "f15": "Báo cáo & bảng điều khiển đầy đủ",
-      "f16": "Hỗ trợ qua email"
+      "f7": "Ngân sách, mua sắm & hóa đơn",
+      "f8": "Cảm biến IoT & cảnh báo",
+      "f9": "Trợ lý thông minh & chấm điểm cảm xúc",
+      "f10": "Báo cáo & bảng điều khiển đầy đủ",
+      "f11": "Hỗ trợ qua email"
     },
     "business": {
       "name": "Doanh nghiệp",
