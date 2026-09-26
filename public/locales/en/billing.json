@@ -107,5 +107,7 @@
   "platform": {
     "moved": "Plans, subscription requests and invoices are managed in the admin console.",
     "open": "Open admin billing"
-  }
+  },
+  "billedYearly": "Billed {{amount}} yearly",
+  "upTo": "save up to {{pct}}%"
 }
