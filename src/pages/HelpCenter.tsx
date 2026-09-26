@@ -6,11 +6,11 @@ import {
   Gauge, Bell, BarChart3, LayoutGrid, MapPin, Package, Rocket, Search, Settings, TriangleAlert, Users, UserCog, Wrench,
 } from 'lucide-react';
 import { useOrg } from '../contexts/OrgContext';
-import { Markdown, headingId } from '../lib/markdown';
+import { Markdown, headingId, splitHeadingId } from '../lib/markdown';
 import { articleDocs, searchHelp, type HelpDoc } from '../lib/helpSearch';
 import { startTour } from '../lib/tour';
-import { GUIDE, KNOWN_ISSUES, QUICK_STARTS, guideSection } from '../help/guide';
-import { FEATURES, localizedScreen, type FeatureArea } from '../help/features';
+import { localizedScreen, type FeatureArea } from '../help/features';
+import { useHelpContent } from '../help/localized';
 import NotFound from '../components/NotFound';
 
 // The Help Center (/help): the user guide, the feature directory, role
@@ -23,22 +23,24 @@ const ICONS: Record<string, typeof BookOpen> = {
 };
 
 function useHelpDocs(): HelpDoc[] {
+  const { t } = useTranslation('help');
+  const { guide: GUIDE, quickStarts: QUICK_STARTS, knownIssues: KNOWN_ISSUES, features: FEATURES, areaLabel } = useHelpContent();
   return useMemo(() => {
     const docs: HelpDoc[] = [];
     for (const s of GUIDE) docs.push(...articleDocs(`/help/guide/${s.id}`, s.title, s.body));
-    for (const q of QUICK_STARTS) docs.push(...articleDocs(`/help/quick-start/${q.role}`, `Quick start: ${q.title}`, q.body));
-    docs.push(...articleDocs('/help/known-issues', 'Known issues', KNOWN_ISSUES));
+    for (const q of QUICK_STARTS) docs.push(...articleDocs(`/help/quick-start/${q.role}`, `${t('center.quickStarts')}: ${q.title}`, q.body));
+    docs.push(...articleDocs('/help/known-issues', t('center.knownIssues'), KNOWN_ISSUES));
     for (const f of FEATURES) {
       docs.push({
         href: `/help/features#${f.id}`,
         title: f.name,
-        context: `Feature directory · ${f.area}`,
+        context: `${t('center.features')} · ${areaLabel(f.area)}`,
         text: [f.purpose, f.who, f.where, ...f.prereq, ...f.steps].join(' '),
         keywords: f.keywords,
       });
     }
     return docs;
-  }, []);
+  }, [t, GUIDE, QUICK_STARTS, KNOWN_ISSUES, FEATURES, areaLabel]);
 }
 
 /** Internal links inside Markdown navigate in-app; scroll to #hash after render. */
@@ -126,6 +128,7 @@ function SearchResults({ q }: { q: string }) {
 }
 
 function HelpHome() {
+  const { guide: GUIDE, quickStarts: QUICK_STARTS } = useHelpContent();
   const { t } = useTranslation('help');
   const { role } = useOrg();
   const [params, setParams] = useSearchParams();
@@ -215,15 +218,15 @@ function HelpHome() {
 
 function Toc({ body }: { body: string }) {
   const { t } = useTranslation('help');
-  const heads = [...body.matchAll(/^##\s+(.+)$/gm)].map((m) => m[1].trim());
+  const heads = [...body.matchAll(/^##\s+(.+)$/gm)].map((m) => splitHeadingId(m[1]));
   if (heads.length < 2) return null;
   return (
     <nav aria-label={t('center.onThisPage')} className="sticky top-4 hidden max-h-[calc(100vh-2rem)] overflow-y-auto xl:block">
       <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">{t('center.onThisPage')}</p>
       <ul className="mt-2 space-y-1 border-l border-line text-sm">
         {heads.map((h) => (
-          <li key={h}>
-            <Link to={{ hash: headingId(h) }} className="-ml-px block border-l-2 border-transparent py-0.5 pl-3 text-ink-muted hover:border-brand hover:text-ink">{h}</Link>
+          <li key={h.text}>
+            <Link to={{ hash: h.id ?? headingId(h.text) }} className="-ml-px block border-l-2 border-transparent py-0.5 pl-3 text-ink-muted hover:border-brand hover:text-ink">{h.text}</Link>
           </li>
         ))}
       </ul>
@@ -232,6 +235,7 @@ function Toc({ body }: { body: string }) {
 }
 
 function GuideNav({ current }: { current?: string }) {
+  const { guide: GUIDE } = useHelpContent();
   const { t } = useTranslation('help');
   return (
     <nav aria-label={t('center.guide')} className="hidden lg:block">
@@ -273,9 +277,10 @@ function Article({ title, kicker, body, children }: { title: string; kicker: str
 }
 
 function GuidePage() {
+  const { guide: GUIDE } = useHelpContent();
   const { t } = useTranslation('help');
   const { id } = useParams();
-  const s = guideSection(id);
+  const s = GUIDE.find((g) => g.id === id);
   if (!s) return <NotFound backTo="/help" backLabel={t('center.back')} />;
   const i = GUIDE.indexOf(s);
   const prev = GUIDE[i - 1];
@@ -308,6 +313,7 @@ function GuidePage() {
 }
 
 function QuickStartPage() {
+  const { quickStarts: QUICK_STARTS } = useHelpContent();
   const { t } = useTranslation('help');
   const { role } = useParams();
   const s = QUICK_STARTS.find((q) => q.role === role);
@@ -335,6 +341,7 @@ function QuickStartPage() {
 }
 
 function KnownIssuesPage() {
+  const { knownIssues: KNOWN_ISSUES } = useHelpContent();
   const { t } = useTranslation('help');
   return (
     <div className="grid gap-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
@@ -350,6 +357,7 @@ function KnownIssuesPage() {
 const AREAS: FeatureArea[] = ['Basics', 'Maintenance', 'Assets & places', 'Operations', 'Inventory & finance', 'IoT', 'People & settings'];
 
 function FeatureDirectory() {
+  const { features: FEATURES, areaLabel } = useHelpContent();
   const { t, i18n } = useTranslation('help');
   const { hash } = useLocation();
   const [q, setQ] = useState('');
@@ -382,7 +390,7 @@ function FeatureDirectory() {
           <span className="sr-only">{t('center.filterAll')}</span>
           <select value={area} onChange={(e) => setArea(e.target.value as FeatureArea | '')} className="h-12 w-full rounded-xl border border-line bg-white px-3 text-sm text-ink">
             <option value="">{t('center.filterAll')}</option>
-            {AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+            {AREAS.map((a) => <option key={a} value={a}>{areaLabel(a)}</option>)}
           </select>
         </label>
       </div>
@@ -396,7 +404,7 @@ function FeatureDirectory() {
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-ink">{f.name}</span>
-                    <span className="rounded-full bg-surface px-2 py-0.5 text-xs text-ink-muted">{f.area}</span>
+                    <span className="rounded-full bg-surface px-2 py-0.5 text-xs text-ink-muted">{areaLabel(f.area)}</span>
                   </span>
                   <span className="mt-0.5 block text-sm text-ink-muted">{f.purpose}</span>
                 </span>

@@ -21,6 +21,9 @@ export interface Feature {
   keywords?: string[];
 }
 
+/** The translatable part of a feature (Vietnamese in features.vi.ts, keyed by id). */
+export type FeatureText = Pick<Feature, 'name' | 'purpose' | 'who' | 'where' | 'prereq' | 'steps'>;
+
 const S = (name: string) => `/help/screens/${name}.webp`;
 
 /** Screenshots have a Vietnamese set in public/help/screens/vi/ (scripts/help/shots.cjs, HELP_LANG=vi). */

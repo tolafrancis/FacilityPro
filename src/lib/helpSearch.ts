@@ -1,5 +1,5 @@
 import { foldText } from './ui';
-import { headingId } from './markdown';
+import { headingId, splitHeadingId } from './markdown';
 
 // Search for the Help Center: guide articles (split into their ## sections),
 // the feature directory and the per-page help. Accent-insensitive, every
@@ -34,8 +34,9 @@ export function articleDocs(path: string, articleTitle: string, markdown: string
     const h = /^##\s+(.*)$/.exec(line);
     if (h) {
       flush();
-      title = h[1].trim();
-      anchor = headingId(title);
+      const { text, id } = splitHeadingId(h[1]);
+      title = text;
+      anchor = id ?? headingId(title);
       buf = [];
     } else {
       buf.push(line);
