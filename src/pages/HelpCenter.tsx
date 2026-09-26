@@ -10,7 +10,7 @@ import { Markdown, headingId } from '../lib/markdown';
 import { articleDocs, searchHelp, type HelpDoc } from '../lib/helpSearch';
 import { startTour } from '../lib/tour';
 import { GUIDE, KNOWN_ISSUES, QUICK_STARTS, guideSection } from '../help/guide';
-import { FEATURES, type FeatureArea } from '../help/features';
+import { FEATURES, localizedScreen, type FeatureArea } from '../help/features';
 import NotFound from '../components/NotFound';
 
 // The Help Center (/help): the user guide, the feature directory, role
@@ -261,11 +261,12 @@ function GuideNav({ current }: { current?: string }) {
 
 function Article({ title, kicker, body, children }: { title: string; kicker: string; body: string; children?: React.ReactNode }) {
   const onClick = useArticleLinks();
+  const { i18n } = useTranslation();
   return (
     <article className="min-w-0 rounded-2xl border border-line bg-white p-5 sm:p-8" onClick={onClick}>
       <p className="text-xs font-semibold uppercase tracking-wide text-brand">{kicker}</p>
       <h1 className="mt-1 text-2xl font-semibold text-ink sm:text-3xl">{title}</h1>
-      <div className="mt-5"><Markdown source={body} compact /></div>
+      <div className="mt-5"><Markdown source={body} compact imageUrl={(src) => localizedScreen(src, i18n.resolvedLanguage)} /></div>
       {children}
     </article>
   );
@@ -349,7 +350,7 @@ function KnownIssuesPage() {
 const AREAS: FeatureArea[] = ['Basics', 'Maintenance', 'Assets & places', 'Operations', 'Inventory & finance', 'IoT', 'People & settings'];
 
 function FeatureDirectory() {
-  const { t } = useTranslation('help');
+  const { t, i18n } = useTranslation('help');
   const { hash } = useLocation();
   const [q, setQ] = useState('');
   const [area, setArea] = useState<FeatureArea | ''>('');
@@ -424,7 +425,7 @@ function FeatureDirectory() {
                     {f.path && <Link to={f.path} className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface"><ExternalLink size={14} aria-hidden /> {t('center.openPage')}</Link>}
                   </div>
                 </dl>
-                {f.screenshot && <img src={f.screenshot} alt={f.name} loading="lazy" className="w-full self-start rounded-lg border border-line" />}
+                {f.screenshot && <img src={localizedScreen(f.screenshot, i18n.resolvedLanguage)} alt={f.name} loading="lazy" className="w-full self-start rounded-lg border border-line" />}
               </div>
             </details>
           </li>

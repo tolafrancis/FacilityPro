@@ -79,6 +79,7 @@ The scripts in `scripts/help/` drive the built app against a local database seed
 The scripts:
 
 - `node scripts/help/run.cjs shots` — captures every screenshot into `public/help/screens/` as WebP, with numbered markers drawn on the real elements, and writes `manifest.json` with each image's legend.
+  Run it again with `HELP_LANG=vi` to capture the Vietnamese set into `public/help/screens/vi/`; the Help Center shows those when the app is in Vietnamese, and `pageHelp.test.ts` fails if one is missing.
 - `node scripts/help/run.cjs crawl` — opens every page as each of the 5 roles and reports console errors, failed API calls and error screens.
 - `node scripts/help/run.cjs workflows` — performs the documented workflows end to end through the UI and checks the database after each step.
 - `node scripts/help/run.cjs help` — tests the tour, the "? Help" panel on 29 pages, and the Help Center (search, links, anchors, screenshots, phone layout).

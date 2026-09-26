@@ -1,6 +1,17 @@
 // Captures the Help Center screenshots (public/help/screens/*.webp + manifest.json) from the running app, drawing numbered markers on real elements.
 // Run with: node scripts/help/run.cjs (see docs/USER_GUIDE.md). Uses the demo organisation from supabase/seed/tenant_demo.sql.
-const OUTDIR = path.join(ROOT, 'public/help/screens'); fs.mkdirSync(OUTDIR, { recursive: true });
+// HELP_LANG=vi captures the Vietnamese set into public/help/screens/vi/. Pages are driven in
+// English (the selectors below match English labels) and switched to Vietnamese just before each shot.
+const LANG = process.env.HELP_LANG === 'vi' ? 'vi' : 'en';
+const OUTDIR = path.join(ROOT, 'public/help/screens', LANG === 'en' ? '' : LANG); fs.mkdirSync(OUTDIR, { recursive: true });
+async function setLang(pg, lng) {
+  if (LANG === 'en') return;
+  const changed = await pg.evaluate((lng) => {
+    const b = [...document.querySelectorAll('button[aria-pressed]')].find((x) => x.textContent.trim() === lng.toUpperCase());
+    if (!b || b.getAttribute('aria-pressed') === 'true') return false; b.click(); return true;
+  }, lng);
+  if (changed) await pg.waitForTimeout(900);
+}
 const U = Object.fromEntries(sql("select split_part(u.email,'.',1), u.id from auth.users u where u.email like '%harbourview-demo.test'").split('\n').map(l => l.split('|')));
 const ORG = sql("select id from fp_organizations where settings->>'demo_key'='harbourview'");
 const id = (q) => sql(q);
@@ -24,9 +35,15 @@ const go = async (pg, route) => { await pg.goto(BASE + route); await pg.waitForL
 // Numbered markers on real elements. items: [n, locator, side?]
 async function mark(pg, items) {
   const boxes = [];
+  // Resolve every marker while the page is still in English, then switch language and measure.
+  const handles = [];
   for (const [n, loc, side = 'tl'] of items) {
     const el = typeof loc === 'string' ? pg.locator(loc).first() : loc.first();
-    const b = await el.boundingBox().catch(() => null);
+    handles.push([n, loc, side, await el.elementHandle({ timeout: 4000 }).catch(() => null)]);
+  }
+  await setLang(pg, LANG);
+  for (const [n, loc, side, h] of handles) {
+    const b = h ? await h.boundingBox().catch(() => null) : null;
     if (!b) { console.log('  !! marker', n, 'not found:', String(loc)); continue; }
     const sx = await pg.evaluate(() => [window.scrollX, window.scrollY]);
     boxes.push({ n, x: b.x + sx[0], y: b.y + sx[1], w: b.width, h: b.height, side });
@@ -45,6 +62,7 @@ async function mark(pg, items) {
   }, boxes);
 }
 async function save(pg, name, title, legend, { full = false, clip = null, maxH = 1500 } = {}) {
+  await setLang(pg, LANG);
   await pg.waitForTimeout(250);
   let opt = {};
   if (clip) opt.clip = clip;
@@ -61,6 +79,7 @@ async function save(pg, name, title, legend, { full = false, clip = null, maxH =
   manifest[name] = { title, legend };
   console.log('saved', name, Math.round(Buffer.from(webp, 'base64').length / 1024) + 'KB');
   await pg.evaluate(() => document.querySelectorAll('.fp-mk').forEach((e) => e.remove()));
+  await setLang(pg, 'en');
 }
 const label = (pg, text) => pg.locator(`label:text-is("${text}")`).locator('xpath=..');
 const btn = (pg, text) => pg.locator(`button:has-text("${text}")`);
@@ -224,6 +243,6 @@ const boxOf = (pg, text) => pg.locator(`p:text-is("${text}"), dt:text-is("${text
   await go(s.pg, '/');
   await save(s.pg, 'mobile-dashboard', 'FacilityPro on a phone', []);
   await s.ctx.close();
-  fs.writeFileSync(path.join(OUTDIR, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  if (LANG === 'en') fs.writeFileSync(path.join(OUTDIR, 'manifest.json'), JSON.stringify(manifest, null, 2));
   await browser.close(); server.close();
 })();

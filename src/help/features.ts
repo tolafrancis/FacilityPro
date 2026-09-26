@@ -22,6 +22,13 @@ export interface Feature {
 }
 
 const S = (name: string) => `/help/screens/${name}.webp`;
+
+/** Screenshots have a Vietnamese set in public/help/screens/vi/ (scripts/help/shots.cjs, HELP_LANG=vi). */
+export function localizedScreen(src: string, lng: string | undefined): string {
+  return lng === 'vi' && src.startsWith('/help/screens/') && !src.startsWith('/help/screens/vi/')
+    ? src.replace('/help/screens/', '/help/screens/vi/')
+    : src;
+}
 const ADMIN_MANAGER = 'Administrators and Managers';
 const STAFF = 'Administrators, Managers and Technicians';
 

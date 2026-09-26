@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { matchPattern, pageHelpFor } from './pageHelp';
 import { PAGE_HELP } from './pageHelpData';
 import { GUIDE, QUICK_STARTS } from './guide';
-import { FEATURES } from './features';
+import { FEATURES, localizedScreen } from './features';
 import { headingId } from '../lib/markdown';
 import { existsSync } from 'node:fs';
 
@@ -32,6 +32,7 @@ describe('help content', () => {
   it('every screenshot referenced exists', () => {
     const imgs = [...allMarkdown.flatMap((md) => [...md.matchAll(/!\[[^\]]*\]\(([^)]+)\)/g)].map((m) => m[1])), ...FEATURES.flatMap((f) => (f.screenshot ? [f.screenshot] : []))];
     for (const src of imgs) expect(existsSync(`public${src}`), src).toBe(true);
+    for (const src of imgs) expect(existsSync(`public${localizedScreen(src, 'vi')}`), `vi: ${src}`).toBe(true);
   });
   it('page help and features link to real guide sections', () => {
     for (const p of PAGE_HELP) if (p.guide) checkLink(p.guide);
