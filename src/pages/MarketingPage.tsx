@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowRight, Check, ChevronRight } from 'lucide-react';
 import MarketingLayout, { TrialForm } from '../marketing/MarketingLayout';
-import { featureGroupOf, findFeature, findResource, findSolution, type FeatureItem } from '../marketing/content';
+import { INTEGRATIONS, INTEGRATION_CATEGORIES, featureGroupOf, findFeature, findResource, findSolution, type FeatureItem } from '../marketing/content';
+import { featureById } from '../help/features';
 
 // Public pages behind the header menus: /features/:slug, /solutions/:slug,
 // /resources/:slug. Content lives in src/marketing/content.ts.
@@ -76,6 +77,9 @@ function FeatureCard({ f }: { f: FeatureItem }) {
 function FeatureView({ f }: { f: FeatureItem }) {
   const group = featureGroupOf(f.slug);
   const related = (group?.items ?? []).filter((x) => x.slug !== f.slug).slice(0, 6);
+  // Steps come from the in-app Feature directory, so the site and the Help Center agree.
+  const help = f.helpId ? featureById(f.helpId) : undefined;
+  const steps = f.steps ?? help?.steps ?? [];
   return (
     <>
       <Hero icon={f.icon} kicker={group?.label ?? 'Feature'} title={f.title} summary={f.summary} crumbs={['Features', group?.label ?? '', f.title].filter(Boolean)} />
@@ -90,6 +94,20 @@ function FeatureView({ f }: { f: FeatureItem }) {
           ))}
         </ul>
       </section>
+      {steps.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-semibold text-ink">How it works</h2>
+          {help?.who && <p className="mt-2 text-ink-muted">Used by: {help.who}.</p>}
+          <ol className="mt-6 grid gap-4 md:grid-cols-3">
+            {steps.map((step, i) => (
+              <li key={step} className="rounded-2xl border border-line bg-surface p-5">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-brand/10 text-sm font-semibold text-brand">{i + 1}</span>
+                <p className="mt-3 text-ink">{step}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
       {related.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-semibold text-ink">More in {group?.label}</h2>
@@ -131,6 +149,7 @@ function ResourceView({ slug }: { slug: string }) {
   return (
     <>
       <Hero icon={r.icon} kicker="Resources" title={r.title} summary={r.summary} crumbs={['Resources', r.title]} />
+      {r.view === 'integrations' ? <IntegrationsDirectory /> : (
       <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="space-y-8">
           {(r.sections ?? []).map((sec) => (
@@ -141,7 +160,44 @@ function ResourceView({ slug }: { slug: string }) {
           ))}
         </div>
       </section>
+      )}
     </>
+  );
+}
+
+/** Category chips across the top, then a card per integration. */
+function IntegrationsDirectory() {
+  const [category, setCategory] = useState<string>('All');
+  const shown = category === 'All' ? INTEGRATIONS : INTEGRATIONS.filter((i) => i.category === category);
+  const chip = (c: string, count: number) => (
+    <button key={c} type="button" onClick={() => setCategory(c)} aria-pressed={category === c}
+      className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${category === c ? 'border-brand bg-brand text-white' : 'border-line bg-white text-ink hover:border-brand hover:text-brand'}`}>
+      {c} <span className={category === c ? 'text-white/80' : 'text-ink-muted'}>({count})</span>
+    </button>
+  );
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="flex flex-wrap gap-2">
+        {chip('All', INTEGRATIONS.length)}
+        {INTEGRATION_CATEGORIES.map((c) => chip(c, INTEGRATIONS.filter((i) => i.category === c).length))}
+      </div>
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {shown.map((i) => (
+          <div key={i.name} className="flex flex-col rounded-2xl border border-line bg-white p-5">
+            <div className="flex items-start justify-between gap-3">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-brand/10 text-brand"><i.icon size={22} aria-hidden /></span>
+              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${i.status === 'Live' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>{i.status}</span>
+            </div>
+            <p className="mt-4 font-semibold text-ink">{i.name}</p>
+            <p className="mt-1 text-xs font-medium uppercase tracking-wide text-ink-muted">{i.category}</p>
+            <p className="mt-2 flex-1 text-sm leading-6 text-ink-muted">{i.summary}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-8 text-sm text-ink-muted">
+        <strong className="text-ink">Live</strong> integrations work as soon as you switch them on. <strong className="text-ink">On request</strong> ones are connected by our team for your organisation. Need something else? <Link to="/#demo" className="font-semibold text-brand hover:underline">Tell us</Link>.
+      </p>
+    </section>
   );
 }
 

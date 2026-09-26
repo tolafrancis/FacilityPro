@@ -230,27 +230,27 @@ function FeaturesPanel() {
   const [group, setGroup] = useState(FEATURE_GROUPS[0].key);
   const g = FEATURE_GROUPS.find((x) => x.key === group) ?? FEATURE_GROUPS[0];
   return (
-    <div className={`${panel} flex w-max max-w-full`} role="region" aria-label="Features">
-      <ul className="my-5 w-[236px] shrink-0 border-r border-[#E5E7EB]" role="tablist" aria-orientation="vertical">
+    <div className={`${panel} w-[1040px] max-w-full px-6 pb-5 pt-4`} role="region" aria-label="Features">
+      {/* Categories as tabs across the top; the chosen one's features below. */}
+      <div className="flex flex-wrap gap-x-1 border-b border-[#E5E7EB]" role="tablist" aria-orientation="horizontal">
         {FEATURE_GROUPS.map((x) => (
-          <li key={x.key}>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={x.key === group}
-              onMouseEnter={() => setGroup(x.key)}
-              onFocus={() => setGroup(x.key)}
-              onClick={() => setGroup(x.key)}
-              className={`-mr-px flex w-[calc(100%+1px)] items-center gap-2 whitespace-nowrap border-r-2 px-5 py-3.5 text-left text-[15px] transition ${
-                x.key === group ? 'border-brand text-brand' : 'border-transparent text-[#333] hover:text-brand'}`}
-            >
-              {x.label}
-              {x.badge && <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold leading-none text-white">{x.badge}</span>}
-            </button>
-          </li>
+          <button
+            key={x.key}
+            type="button"
+            role="tab"
+            aria-selected={x.key === group}
+            onMouseEnter={() => setGroup(x.key)}
+            onFocus={() => setGroup(x.key)}
+            onClick={() => setGroup(x.key)}
+            className={`-mb-px inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-[14.5px] font-semibold transition ${
+              x.key === group ? 'border-brand text-brand' : 'border-transparent text-[#555] hover:text-brand'}`}
+          >
+            {x.label}
+            {x.badge && <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold leading-none text-white">{x.badge}</span>}
+          </button>
         ))}
-      </ul>
-      <div className="grid min-w-[760px] flex-1 grid-cols-[repeat(3,max-content)] content-start gap-x-12 px-9 py-5" role="tabpanel">
+      </div>
+      <div className="grid grid-cols-3 gap-x-10 px-3 pt-3" role="tabpanel">
         {g.items.map((f) => (
           <Link key={f.slug} to={`/features/${f.slug}`} className={itemLink}>
             <f.icon {...iconProps} />
@@ -285,18 +285,15 @@ function ResourcesPanel() {
 
 function SolutionsPanel() {
   return (
-    <div className={`${panel} grid w-max max-w-full grid-cols-[repeat(3,max-content)] gap-x-7 px-5 py-6`} role="region" aria-label="Solutions">
+    <div className={`${panel} grid w-max max-w-full grid-cols-[repeat(3,max-content)] gap-x-10 px-8 py-5`} role="region" aria-label="Solutions">
       {SOLUTION_COLUMNS.map((c) => (
-        <div key={c.key}>
-          <p className="mb-2 min-w-[14rem] border-b-2 border-[#E5E7EB] pb-2.5 text-[15px] font-semibold" style={{ color: c.color }}>{c.label}</p>
-          <div className="pl-3">
-            {c.items.map((s) => (
-              <Link key={s.slug} to={`/solutions/${s.slug}`} className={itemLink}>
-                <s.icon {...iconProps} size={18} />
-                <span>{s.title}</span>
-              </Link>
-            ))}
-          </div>
+        <div key={c.key} className="min-w-[14rem]">
+          {c.items.map((s) => (
+            <Link key={s.slug} to={`/solutions/${s.slug}`} className={itemLink}>
+              <s.icon {...iconProps} size={18} />
+              <span>{s.title}</span>
+            </Link>
+          ))}
         </div>
       ))}
     </div>
@@ -355,14 +352,9 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
           <div>
             {head('solutions', 'Solutions')}
             {section === 'solutions' && (
-              <div className="space-y-4 pb-4">
-                {SOLUTION_COLUMNS.map((c) => (
-                  <div key={c.key}>
-                    <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wide" style={{ color: c.color }}>{c.label}</p>
-                    {c.items.map((s) => (
-                      <Link key={s.slug} to={`/solutions/${s.slug}`} className={small}><s.icon size={18} className="text-brand" aria-hidden />{s.title}</Link>
-                    ))}
-                  </div>
+              <div className="pb-4">
+                {SOLUTION_COLUMNS.flatMap((c) => c.items).map((s) => (
+                  <Link key={s.slug} to={`/solutions/${s.slug}`} className={small}><s.icon size={18} className="text-brand" aria-hidden />{s.title}</Link>
                 ))}
               </div>
             )}
