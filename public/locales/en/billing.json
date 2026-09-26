@@ -109,5 +109,6 @@
     "open": "Open admin billing"
   },
   "billedYearly": "Billed {{amount}} yearly",
-  "upTo": "save up to {{pct}}%"
+  "upTo": "save up to {{pct}}%",
+  "payee": "Payments are received by {{company}} (Tax ID {{taxId}}), the company that owns FacilityPro. This is the name you'll see on your PayPal or card receipt."
 }

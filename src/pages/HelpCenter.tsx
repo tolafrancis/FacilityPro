@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { Link, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import ZoomableImage from '../components/help/ZoomableImage';
 import {
   ArrowLeft, ArrowRight, BookOpen, Boxes, Building2, CalendarClock, ChevronRight, Compass, Cpu, ExternalLink,
   Gauge, Bell, BarChart3, LayoutGrid, MapPin, Package, Rocket, Search, Settings, TriangleAlert, Users, UserCog, Wrench,
@@ -270,7 +271,7 @@ function Article({ title, kicker, body, children }: { title: string; kicker: str
     <article className="min-w-0 rounded-2xl border border-line bg-white p-5 sm:p-8" onClick={onClick}>
       <p className="text-xs font-semibold uppercase tracking-wide text-brand">{kicker}</p>
       <h1 className="mt-1 text-2xl font-semibold text-ink sm:text-3xl">{title}</h1>
-      <div className="mt-5"><Markdown source={body} compact imageUrl={(src) => localizedScreen(src, i18n.resolvedLanguage)} /></div>
+      <div className="mt-5"><Markdown source={body} compact imageUrl={(src) => localizedScreen(src, i18n.resolvedLanguage)} renderImage={(src, alt, cls) => <ZoomableImage src={src} alt={alt} className={cls} />} /></div>
       {children}
     </article>
   );
@@ -433,7 +434,7 @@ function FeatureDirectory() {
                     {f.path && <Link to={f.path} className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface"><ExternalLink size={14} aria-hidden /> {t('center.openPage')}</Link>}
                   </div>
                 </dl>
-                {f.screenshot && <img src={localizedScreen(f.screenshot, i18n.resolvedLanguage)} alt={f.name} loading="lazy" className="w-full self-start rounded-lg border border-line" />}
+                {f.screenshot && <ZoomableImage src={localizedScreen(f.screenshot, i18n.resolvedLanguage)} alt={f.name} className="w-full rounded-lg border border-line" />}
               </div>
             </details>
           </li>

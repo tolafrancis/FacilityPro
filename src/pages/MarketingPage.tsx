@@ -5,6 +5,7 @@ import MarketingLayout, { TrialForm } from '../marketing/MarketingLayout';
 import { INTEGRATIONS, INTEGRATION_CATEGORIES, featureGroupOf, findFeature, findResource, findSolution, type FeatureItem } from '../marketing/content';
 import { featureById } from '../help/features';
 import { brochureHref, useMarketingT } from '../marketing/i18n';
+import { COMPANY } from '../lib/company';
 
 // Public pages behind the header menus: /features/:slug, /solutions/:slug,
 // /resources/:slug. Content lives in src/marketing/content.ts.
@@ -155,8 +156,8 @@ function ResourceView({ slug }: { slug: string }) {
   const title = m.resource(r);
   return (
     <>
-      <Hero icon={r.icon} kicker={m.t('nav.resources')} title={title} summary={m.resourceSummary(r)} crumbs={[m.t('nav.resources'), title]} translated={r.view === 'brochure'} />
-      {r.view === 'integrations' ? <IntegrationsDirectory /> : r.view === 'brochure' ? <BrochureDownload /> : (
+      <Hero icon={r.icon} kicker={m.t('nav.resources')} title={title} summary={m.resourceSummary(r)} crumbs={[m.t('nav.resources'), title]} translated={r.view === 'brochure' || r.view === 'faq'} />
+      {r.view === 'integrations' ? <IntegrationsDirectory /> : r.view === 'brochure' ? <BrochureDownload /> : r.view === 'faq' ? <FaqList /> : (
       <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
         {(r.sections?.length ?? 0) > 8 && (
           <nav aria-label="On this page" className="mb-10 rounded-2xl border border-line bg-surface p-5">
@@ -216,6 +217,39 @@ function ResourceView({ slug }: { slug: string }) {
       </section>
       )}
     </>
+  );
+}
+
+type FaqGroup = { title: string; items: { q: string; a: string }[] };
+
+/** The FAQ, fully translated (marketing.json → faqPage), grouped by topic. */
+function FaqList() {
+  const { t } = useMarketingT();
+  const groups = t('faqPage.groups', { returnObjects: true }) as FaqGroup[];
+  return (
+    <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="space-y-10">
+        {groups.map((g) => (
+          <div key={g.title}>
+            <h2 className="text-xl font-semibold text-ink">{g.title}</h2>
+            <div className="mt-4 divide-y divide-line rounded-xl border border-line bg-white">
+              {g.items.map((f) => (
+                <details key={f.q} className="group px-4 py-3">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-medium text-ink">
+                    {f.q}<ChevronRight size={16} className="shrink-0 text-ink-muted transition group-open:rotate-90" aria-hidden />
+                  </summary>
+                  <p className="mt-2 leading-7 text-ink-muted">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-12 rounded-2xl border border-line bg-surface p-6">
+        <p className="font-semibold text-ink">{t('faqPage.more')}</p>
+        <p className="mt-1 leading-7 text-ink-muted">{t('faqPage.moreBody', { email: COMPANY.email, phone: COMPANY.phone })}</p>
+      </div>
+    </section>
   );
 }
 

@@ -104,5 +104,11 @@
     "readGuide": "Đọc hướng dẫn",
     "filterAll": "Tất cả",
     "searchFeatures": "Tìm tính năng"
+  },
+  "zoom": {
+    "open": "Phóng to ảnh chụp màn hình: {{alt}}",
+    "full": "Xem kích thước thật",
+    "fit": "Vừa màn hình",
+    "close": "Đóng"
   }
 }

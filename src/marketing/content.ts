@@ -3,7 +3,7 @@ import {
   Activity, BadgeCheck, BarChart3, BellRing, BookOpen, Bot, Boxes, Briefcase, Building, Building2, CalendarCheck, CalendarClock,
   Camera, Church, ClipboardCheck, ClipboardList, Cpu, CreditCard, Factory, FileDown, FileSignature, FileText, Flame, Gauge,
   GitBranch, GraduationCap, Hammer, HardHat, Hospital, Hotel, Inbox, KeyRound, Landmark, Languages, LayoutGrid,
-  LifeBuoy, MapPin, Megaphone, MessageSquareHeart, MonitorPlay, Network, Package, Plug, QrCode, Receipt, Rocket,
+  LifeBuoy, MapPin, Megaphone, MessageCircleQuestion, MessageSquareHeart, MonitorPlay, Network, Package, Plug, QrCode, Receipt, Rocket,
   Newspaper, ShieldCheck, ShoppingBag, ShoppingCart, Smartphone, Sparkles, SprayCan, Tag, Truck, UserCheck, Users,
   Wallet, Warehouse, Wrench, Zap,
 } from 'lucide-react';
@@ -316,7 +316,7 @@ export interface Resource {
   summary?: string;
   sections?: ResourceSection[];
   /** A page with its own layout instead of sections. */
-  view?: 'integrations' | 'brochure';
+  view?: 'integrations' | 'brochure' | 'faq';
 }
 
 export interface ResourceSection {
@@ -584,6 +584,8 @@ export const RESOURCES: Resource[][] = [
       summary: 'Everything FacilityPro connects to today: messaging, notifications, sensors and payments.' },
     { slug: 'brochure', title: 'Brochure (PDF)', icon: FileDown, view: 'brochure',
       summary: 'A three-page overview of FacilityPro, with plans and prices, to share with your team, in English or Vietnamese.' },
+    { slug: 'faq', title: 'FAQ', icon: MessageCircleQuestion, view: 'faq',
+      summary: 'Answers to the questions people ask most about FacilityPro, plans, payments and support.' },
     { slug: 'help', title: 'Help & support', icon: LifeBuoy,
       summary: 'Where to find answers inside FacilityPro, and how to reach our team.',
       sections: [

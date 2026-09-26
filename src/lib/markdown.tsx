@@ -153,10 +153,13 @@ const CALLOUT_CLASS = {
 export function Markdown({
   source,
   imageUrl = (s: string) => s,
+  renderImage,
   compact = false,
 }: {
   source: string;
   imageUrl?: (src: string) => string;
+  /** Renders a block image in place of a plain <img> (e.g. to make it zoomable). */
+  renderImage?: (src: string, alt: string, className: string) => ReactNode;
   /** Smaller type for help articles (blog posts use the large reading size). */
   compact?: boolean;
 }) {
@@ -194,7 +197,10 @@ export function Markdown({
             const safe = safeUrl(imageUrl(b.src));
             return safe ? (
               <figure key={k}>
-                <img src={safe} alt={b.alt} className={`w-full border border-line ${compact ? 'rounded-xl shadow-sm' : 'rounded-2xl'}`} loading="lazy" />
+                {(() => {
+                  const cls = `w-full border border-line ${compact ? 'rounded-xl shadow-sm' : 'rounded-2xl'}`;
+                  return renderImage ? renderImage(safe, b.alt, cls) : <img src={safe} alt={b.alt} className={cls} loading="lazy" />;
+                })()}
                 {b.alt && <figcaption className="mt-2 text-center text-sm text-ink-muted">{b.alt}</figcaption>}
               </figure>
             ) : null;

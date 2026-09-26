@@ -5,6 +5,7 @@ import { ChevronDown, Menu, X } from 'lucide-react';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { FEATURE_GROUPS, RESOURCES, SOLUTION_COLUMNS, resourceHref, type Resource } from './content';
 import { brochureHref, useMarketingT } from './i18n';
+import { COMPANY } from '../lib/company';
 
 type MenuKey = 'features' | 'resources' | 'solutions';
 
@@ -406,11 +407,23 @@ function MarketingFooter() {
         {col(t('nav.resources'), RESOURCES.flat().slice(0, 6).map((r) => ({ to: resourceHref(r), label: m.resource(r) })))}
         {col(t('footer.company'), [
           { to: '/#pricing', label: t('nav.pricing') }, { to: '/#demo', label: t('footer.bookDemo') },
-          { to: '/signup', label: t('nav.startTrial') }, { to: '/signin', label: t('footer.signIn') },
+          { to: '/resources/faq', label: t('footer.faq') }, { to: '/signup', label: t('nav.startTrial') }, { to: '/signin', label: t('footer.signIn') },
         ])}
       </div>
       <div className="border-t border-line">
-        <p className="mx-auto max-w-7xl px-4 py-5 text-sm text-ink-muted sm:px-6 lg:px-8">© {new Date().getFullYear()} FacilityPro. {t('footer.rights')}</p>
+        <div className="mx-auto grid max-w-7xl gap-4 px-4 py-6 text-sm text-ink-muted sm:px-6 md:grid-cols-2 lg:px-8">
+          <div>
+            <p className="font-semibold text-ink">{t('footer.owner', { company: COMPANY.legalName })}</p>
+            <p className="mt-1">{t('footer.taxId', { taxId: COMPANY.taxId })}</p>
+            <p className="mt-1">{COMPANY.address}</p>
+          </div>
+          <div className="md:text-right">
+            <p className="font-semibold text-ink">{t('footer.contact')}</p>
+            <p className="mt-1"><a href={`mailto:${COMPANY.email}`} className="hover:text-brand">{COMPANY.email}</a></p>
+            <p className="mt-1"><a href={COMPANY.phoneHref} className="hover:text-brand">{COMPANY.phone}</a></p>
+          </div>
+          <p className="md:col-span-2">© {new Date().getFullYear()} FacilityPro. {t('footer.rights')}</p>
+        </div>
       </div>
     </footer>
   );
