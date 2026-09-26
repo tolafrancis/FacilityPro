@@ -313,7 +313,7 @@ export default function Billing() {
                 {yearly && saving > 0 && <Pill className="bg-status-ok/10 text-status-ok">{t('save', { pct: saving })}</Pill>}
               </div>
               <p className="mt-2 text-3xl font-semibold tracking-tight text-ink">
-                {plan.price > 0 ? money(price, plan.currency, lng) : t('free')}
+                {plan.contact_sales ? t('custom') : plan.price > 0 ? money(price, plan.currency, lng) : t('free')}
                 {plan.price > 0 && <span className="text-sm font-normal text-ink-muted">{yearly ? t('perYear') : t('perMonth')}</span>}
               </p>
               <ul className="mt-4 flex-1 space-y-1.5 text-sm text-ink">
@@ -325,9 +325,9 @@ export default function Billing() {
               <div className="mt-5 space-y-2">
                 {isCurrent ? (
                   <Button variant="secondary" disabled className="w-full justify-center">{t('current')}</Button>
-                ) : !isAdmin || plan.price === 0 ? null : payingOnline ? (
+                ) : !isAdmin || (plan.price === 0 && !plan.contact_sales) ? null : payingOnline && !plan.contact_sales ? (
                   <Button variant="secondary" disabled className="w-full justify-center">{t('changeFirst')}</Button>
-                ) : canCard || canPaypal ? (
+                ) : (canCard || canPaypal) && !plan.contact_sales ? (
                   <>
                     {canCard && (
                       <Button onClick={() => start.mutate({ plan: plan.code, provider: 'stripe' })} loading={start.isPending && start.variables?.plan === plan.code && start.variables.provider === 'stripe'} className="w-full justify-center">

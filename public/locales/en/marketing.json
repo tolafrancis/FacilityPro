@@ -51,8 +51,10 @@
     "industries": "Built for your industry",
     "pricingEyebrow": "Pricing",
     "pricingTitle": "Simple plans that scale with your team.",
-    "pricingLead": "Start free, upgrade when you need automation and multi-site support.",
+    "pricingLead": "Start free, then upgrade as your team and sites grow. New accounts get 14 days of Professional free.",
     "mostPopular": "Most popular",
+    "everythingIn": "Everything in {{plan}}, plus:",
+    "pricingNote": "Occupants and vendors are free on every plan. Pay yearly and get 2 months free.",
     "resourcesEyebrow": "Resources",
     "resourcesTitle": "Everything you need to get more from FacilityPro.",
     "demoEyebrow": "Request a demo",
@@ -68,35 +70,78 @@
     "thanks": "Thank you. We’ve captured your request and will be in touch shortly."
   },
   "tiers": {
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "cadence": "per month",
+      "blurb": "For small teams getting organised.",
+      "cta": "Start free",
+      "f1": "3 staff users · 1 site · 25 assets",
+      "f2": "Issue reporting & QR codes",
+      "f3": "Work orders with photos",
+      "f4": "Mobile app, works offline",
+      "f5": "Assets & locations",
+      "f6": "Basic reports"
+    },
     "starter": {
       "name": "Starter",
-      "blurb": "For small teams getting organized.",
+      "price": "$29",
       "cadence": "per month",
-      "f1": "Up to 5 users",
-      "f2": "Work orders & requests",
-      "f3": "Basic reporting",
-      "cta": "Start free"
-    },
-    "growth": {
-      "name": "Growth",
-      "blurb": "For growing operations that need automation.",
-      "cadence": "per month",
-      "f1": "Unlimited users",
+      "blurb": "For teams starting planned maintenance.",
+      "cta": "Start free trial",
+      "f1": "10 staff users · 2 sites · 150 assets",
       "f2": "Preventive maintenance",
-      "f3": "Workflows & surveys",
-      "f4": "Email & SMS alerts",
-      "cta": "Book a demo"
+      "f3": "Checklists",
+      "f4": "Parts & inventory",
+      "f5": "Tenant portal",
+      "f6": "Email & push notifications"
+    },
+    "professional": {
+      "name": "Professional",
+      "price": "$49",
+      "cadence": "per month",
+      "blurb": "For growing operations that need automation.",
+      "cta": "Start free trial",
+      "f1": "25 staff users · 5 sites · 1,000 assets",
+      "f2": "Workflows & automation",
+      "f3": "SLA targets & approvals",
+      "f4": "Meters & meter-based maintenance",
+      "f5": "Vendors, contracts & documents",
+      "f6": "Surveys & broadcasts",
+      "f7": "Email & Zalo inbox",
+      "f8": "Room & desk booking",
+      "f9": "Permits to work",
+      "f10": "Budgets, procurement & invoices",
+      "f11": "IoT sensors & alerts",
+      "f12": "Technician attendance",
+      "f13": "TV display boards",
+      "f14": "Smart assistant & sentiment scoring",
+      "f15": "Full reports & dashboards",
+      "f16": "Email support"
+    },
+    "business": {
+      "name": "Business",
+      "price": "$99",
+      "cadence": "per month",
+      "blurb": "For multi-site portfolios.",
+      "cta": "Book a demo",
+      "f1": "75 staff users · 20 sites · unlimited assets",
+      "f2": "Priority support",
+      "f3": "Onboarding help",
+      "f4": "SMS alerts & WhatsApp inbox"
     },
     "enterprise": {
       "name": "Enterprise",
-      "price": "Let's talk",
-      "blurb": "For multi-site teams with advanced needs.",
-      "cadence": "custom",
-      "f1": "SSO & advanced security",
-      "f2": "IoT & sensors",
-      "f3": "Dedicated support",
-      "f4": "Custom integrations",
-      "cta": "Contact sales"
+      "price": "Custom",
+      "cadence": "tailored",
+      "blurb": "For large estates with special requirements.",
+      "cta": "Contact sales",
+      "f1": "Unlimited users, sites & assets",
+      "f2": "Custom integrations",
+      "f3": "Modbus gateway set-up",
+      "f4": "Data import",
+      "f5": "Dedicated contact",
+      "f6": "Invoice billing"
     }
   },
   "groups": {
@@ -190,7 +235,7 @@
     "mobile-offline": "FacilityPro on phones and tablets, including where there’s no signal.",
     "integrations": "Everything FacilityPro connects to today: messaging, notifications, sensors and payments.",
     "help": "Where to find answers inside FacilityPro, and how to reach our team.",
-    "brochure": "A two-page overview of FacilityPro to share with your team, in English or Vietnamese."
+    "brochure": "A three-page overview of FacilityPro, with plans and prices, to share with your team, in English or Vietnamese."
   },
   "page": {
     "home": "Home",

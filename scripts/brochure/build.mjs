@@ -51,10 +51,13 @@ const T = {
     ],
     pricingTitle: 'Plans',
     tiers: [
-      ['Starter', '$0 / month', 'Up to 5 users, work orders, requests and basic reporting.'],
-      ['Growth', '$49 / month', 'Unlimited users, preventive maintenance, workflows, surveys and alerts.'],
-      ['Enterprise', 'Let’s talk', 'Multi-site teams: IoT, dedicated support and custom integrations.'],
+      { name: "Free", price: "$0", limits: "3 staff users · 1 site · 25 assets", plus: null, features: ["Issue reporting & QR codes", "Work orders with photos", "Mobile app, works offline", "Assets & locations", "Basic reports"] },
+      { name: "Starter", price: "$29 / month", limits: "10 staff users · 2 sites · 150 assets", plus: "Everything in Free, plus:", features: ["Preventive maintenance", "Checklists", "Parts & inventory", "Tenant portal", "Email & push notifications"] },
+      { name: "Professional", price: "$49 / month", limits: "25 staff users · 5 sites · 1,000 assets", plus: "Everything in Starter, plus:", features: ["Workflows & automation", "SLA targets & approvals", "Meters & meter-based maintenance", "Vendors, contracts & documents", "Surveys & broadcasts", "Email & Zalo inbox", "Room & desk booking", "Permits to work", "Budgets, procurement & invoices", "IoT sensors & alerts", "Technician attendance", "TV display boards", "Smart assistant & sentiment scoring", "Full reports & dashboards", "Email support"], featured: true },
+      { name: "Business", price: "$99 / month", limits: "75 staff users · 20 sites · unlimited assets", plus: "Everything in Professional, plus:", features: ["Priority support", "Onboarding help", "SMS alerts & WhatsApp inbox"] },
+      { name: "Enterprise", price: "Custom", limits: "Unlimited users, sites & assets", plus: "Everything in Business, plus:", features: ["Custom integrations", "Modbus gateway set-up", "Data import", "Dedicated contact", "Invoice billing"] },
     ],
+    tiersNote: 'Occupants and vendors are free on every plan. Pay yearly and get 2 months free.',
     ctaTitle: 'Start a free trial or book a demo',
     ctaBody: 'No credit card required. Our team can help you plan your pilot, load your data and train your champions.',
     page: 'Page',
@@ -98,10 +101,13 @@ const T = {
     ],
     pricingTitle: 'Các gói',
     tiers: [
-      ['Khởi đầu', '0 USD / tháng', 'Tối đa 5 người dùng, phiếu công việc, yêu cầu và báo cáo cơ bản.'],
-      ['Tăng trưởng', '49 USD / tháng', 'Không giới hạn người dùng, bảo trì phòng ngừa, quy trình, khảo sát và cảnh báo.'],
-      ['Doanh nghiệp', 'Liên hệ', 'Cho đội nhiều cơ sở: IoT, hỗ trợ riêng và tích hợp theo yêu cầu.'],
+      { name: "Miễn phí", price: "$0", limits: "3 nhân sự · 1 cơ sở · 25 tài sản", plus: null, features: ["Báo cáo sự cố & mã QR", "Phiếu công việc kèm ảnh", "Ứng dụng di động, dùng được ngoại tuyến", "Tài sản & vị trí", "Báo cáo cơ bản"] },
+      { name: "Khởi đầu", price: "$29 / tháng", limits: "10 nhân sự · 2 cơ sở · 150 tài sản", plus: "Mọi thứ trong gói Miễn phí, thêm:", features: ["Bảo trì phòng ngừa", "Danh sách kiểm tra", "Phụ tùng & tồn kho", "Cổng thông tin cư dân", "Thông báo email & đẩy"] },
+      { name: "Chuyên nghiệp", price: "$49 / tháng", limits: "25 nhân sự · 5 cơ sở · 1.000 tài sản", plus: "Mọi thứ trong gói Khởi đầu, thêm:", features: ["Quy trình & tự động hóa", "Mục tiêu SLA & phê duyệt", "Đồng hồ & bảo trì theo chỉ số", "Nhà cung cấp, hợp đồng & tài liệu", "Khảo sát & thông báo chung", "Hộp thư email & Zalo", "Đặt phòng & chỗ ngồi", "Giấy phép làm việc", "Ngân sách, mua sắm & hóa đơn", "Cảm biến IoT & cảnh báo", "Chấm công kỹ thuật viên", "Bảng hiển thị trên TV", "Trợ lý thông minh & chấm điểm cảm xúc", "Báo cáo & bảng điều khiển đầy đủ", "Hỗ trợ qua email"], featured: true },
+      { name: "Doanh nghiệp", price: "$99 / tháng", limits: "75 nhân sự · 20 cơ sở · tài sản không giới hạn", plus: "Mọi thứ trong gói Chuyên nghiệp, thêm:", features: ["Hỗ trợ ưu tiên", "Hỗ trợ triển khai ban đầu", "Cảnh báo SMS & hộp thư WhatsApp"] },
+      { name: "Doanh nghiệp lớn", price: "Liên hệ", limits: "Không giới hạn người dùng, cơ sở & tài sản", plus: "Mọi thứ trong gói Doanh nghiệp, thêm:", features: ["Tích hợp theo yêu cầu", "Thiết lập gateway Modbus", "Nhập dữ liệu", "Người liên hệ riêng", "Thanh toán theo hóa đơn"] },
     ],
+    tiersNote: 'Cư dân và nhà cung cấp được miễn phí ở mọi gói. Thanh toán theo năm được tặng 2 tháng.',
     ctaTitle: 'Dùng thử miễn phí hoặc đặt lịch demo',
     ctaBody: 'Không cần thẻ tín dụng. Đội ngũ của chúng tôi có thể giúp bạn lên kế hoạch thí điểm, nhập dữ liệu và đào tạo nhân sự nòng cốt.',
     page: 'Trang',
@@ -134,7 +140,7 @@ body{font-family:BVP,sans-serif;color:#1F2937;font-size:10.5pt;line-height:1.5}
 .eyebrow{margin-top:10mm;color:#E8552D;font-weight:600;font-size:9pt;letter-spacing:.12em;text-transform:uppercase}
 h1{font-size:25pt;line-height:1.2;margin-top:3mm;font-weight:700;max-width:160mm}
 .lead{margin-top:4mm;font-size:11.5pt;color:#4B5563;max-width:165mm}
-h2{font-size:13.5pt;font-weight:700;margin:6mm 0 2.5mm}
+h2{font-size:13pt;font-weight:700;margin:5mm 0 2mm}
 .why{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
 .card{border:1px solid #E5E7EB;border-radius:10px;padding:4mm;background:#fff}
 .card b{display:block;font-weight:600;margin-bottom:1mm}
@@ -148,11 +154,20 @@ li:before{content:"";position:absolute;left:0;top:2.2mm;width:1.6mm;height:1.6mm
 .steps p{font-size:9pt}
 .num{display:grid;place-items:center;width:8mm;height:8mm;border-radius:50%;background:#E8552D;color:#fff;font-weight:700;margin-bottom:2mm}
 .chips{display:flex;flex-wrap:wrap;gap:2mm}
-.chip{border:1px solid #E5E7EB;border-radius:999px;padding:1mm 3.5mm;font-size:9pt}
+.chip{border:1px solid #E5E7EB;border-radius:999px;padding:0.8mm 3mm;font-size:8.5pt}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:6mm}
-.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
-.price{font-size:14pt;font-weight:700;margin:1mm 0}
-.cta{margin-top:6mm;background:#E8552D;color:#fff;border-radius:14px;padding:5mm 7mm}
+.tiers{display:grid;grid-template-columns:1fr 1fr 1.9fr 1fr 1fr;gap:2.5mm;align-items:start}
+.tiers .featured ul{columns:2;column-gap:3mm}
+.tiers .featured li{break-inside:avoid}
+.tiers .card{padding:3.5mm 3mm}
+.tiers .card.featured{border:1.5px solid #E8552D}
+.tiers .limits{font-size:8.5pt;font-weight:600;border-top:1px solid #E5E7EB;padding-top:2mm;margin-top:2mm}
+.tiers .plus{font-size:7.5pt;font-weight:700;color:#E8552D;text-transform:uppercase;letter-spacing:.04em;margin-top:2mm}
+.tiers li{font-size:8.5pt;margin-top:1.2mm}
+.note{margin-top:2mm;font-size:8.5pt;color:#6B7280}
+.price{font-size:14pt;font-weight:700;margin:1mm 0;white-space:nowrap}
+.price small{font-size:8pt;font-weight:500;color:#6B7280;margin-left:1mm}
+.cta{margin-top:5mm;background:#E8552D;color:#fff;border-radius:14px;padding:5mm 7mm}
 .cta{display:flex;align-items:center;justify-content:space-between;gap:6mm}
 .cta h3{font-size:16pt;font-weight:700}
 .cta p{margin-top:1.5mm;opacity:.92}
@@ -170,7 +185,7 @@ li:before{content:"";position:absolute;left:0;top:2.2mm;width:1.6mm;height:1.6mm
   <div class="why">${t.why.map(([h, p]) => `<div class="card"><b>${esc(h)}</b><p>${esc(p)}</p></div>`).join('')}</div>
   <h2>${esc(t.featuresTitle)}</h2>
   <div class="groups">${t.groups.map(([h, items]) => `<div class="card"><b>${esc(h)}</b><ul>${items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul></div>`).join('')}</div>
-  <div class="foot"><span>facilitypro.tech</span><span>${t.page} 1 / 2</span></div>
+  <div class="foot"><span>facilitypro.tech</span><span>${t.page} 1 / 3</span></div>
 </section>
 <section class="page">
   <h2 style="margin-top:0">${esc(t.howTitle)}</h2>
@@ -181,10 +196,14 @@ li:before{content:"";position:absolute;left:0;top:2.2mm;width:1.6mm;height:1.6mm
     <div><h2>${esc(t.connectTitle)}</h2><p style="color:#4B5563">${esc(t.connect)}</p></div>
     <div><h2>${esc(t.trustTitle)}</h2><ul>${t.trust.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>
   </div>
-  <h2>${esc(t.pricingTitle)}</h2>
-  <div class="tiers">${t.tiers.map(([n, p, d]) => `<div class="card"><b>${esc(n)}</b><div class="price">${esc(p)}</div><p>${esc(d)}</p></div>`).join('')}</div>
   <div class="cta"><div><h3>${esc(t.ctaTitle)}</h3><p>${esc(t.ctaBody)}</p></div><p class="url">facilitypro.tech</p></div>
-  <div class="foot"><span>© ${new Date().getFullYear()} FacilityPro</span><span>${t.page} 2 / 2</span></div>
+  <div class="foot"><span>facilitypro.tech</span><span>${t.page} 2 / 3</span></div>
+</section>
+<section class="page">
+  <h2 style="margin-top:0">${esc(t.pricingTitle)}</h2>
+  <div class="tiers">${t.tiers.map((x) => `<div class="card${x.featured ? ' featured' : ''}"><b>${esc(x.name)}</b><div class="price">${esc(x.price.split(' / ')[0])}${x.price.includes(' / ') ? `<small>/ ${esc(x.price.split(' / ')[1])}</small>` : ''}</div><p class="limits">${esc(x.limits)}</p>${x.plus ? `<p class="plus">${esc(x.plus)}</p>` : ''}<ul>${x.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul></div>`).join('')}</div>
+  <p class="note">${esc(t.tiersNote)}</p>
+  <div class="foot"><span>© ${new Date().getFullYear()} FacilityPro</span><span>${t.page} 3 / 3</span></div>
 </section>
 </body></html>`;
 }

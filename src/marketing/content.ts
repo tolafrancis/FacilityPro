@@ -539,7 +539,7 @@ export const RESOURCES: Resource[][] = [
           { q: 'How long does deployment take?', a: 'A single site with a clear scope can go live in two to four weeks. Portfolios of many sites usually take six to ten weeks, rolled out in waves after a pilot.' },
           { q: 'Do we need an outside consultant?', a: 'Usually not. A committed rollout lead, a few site champions and support from the FacilityPro team are enough for most organisations. Very large or regulated portfolios sometimes add a consultant for process design.' },
           { q: 'What matters most for adoption?', a: 'Visible backing from management, a system that is quicker than the old way for technicians, training by role, and closing the old reporting channels on go-live day.' },
-          { q: 'Is a CMMS worth it for a small team?', a: 'Yes. Small teams feel the benefit quickly because they have the least time to chase lost requests. FacilityPro’s Starter plan is free for up to five users.' },
+          { q: 'Is a CMMS worth it for a small team?', a: 'Yes. Small teams feel the benefit quickly because they have the least time to chase lost requests. FacilityPro’s Free plan covers three staff users on one site, and occupants and vendors are free on every plan.' },
           { q: 'What return can we expect?', a: 'Most gains come from fewer emergency repairs, longer asset life, less time spent chasing information and clearer spending. Measure your starting point before go-live so you can show the difference.' },
           { q: 'Can FacilityPro work with sensors and building systems?', a: 'Yes. Devices can send readings over MQTT or HTTP, LoRaWAN devices connect through The Things Network or ChirpStack, and Modbus equipment connects through the FacilityPro edge gateway. Alerts can open work orders automatically.' },
           { q: 'Is a CMMS the same as an EAM system?', a: 'They overlap. A CMMS focuses on running maintenance day to day: requests, work orders, schedules and asset histories. Enterprise asset management adds full life-cycle planning, capital budgeting and deeper finance links. FacilityPro covers the CMMS core plus budgets, procurement and vendor invoices.' },
@@ -583,7 +583,7 @@ export const RESOURCES: Resource[][] = [
     { slug: 'integrations', title: 'Integrations', icon: Plug, view: 'integrations',
       summary: 'Everything FacilityPro connects to today: messaging, notifications, sensors and payments.' },
     { slug: 'brochure', title: 'Brochure (PDF)', icon: FileDown, view: 'brochure',
-      summary: 'A two-page overview of FacilityPro to share with your team, in English or Vietnamese.' },
+      summary: 'A three-page overview of FacilityPro, with plans and prices, to share with your team, in English or Vietnamese.' },
     { slug: 'help', title: 'Help & support', icon: LifeBuoy,
       summary: 'Where to find answers inside FacilityPro, and how to reach our team.',
       sections: [

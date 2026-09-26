@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, Download } from 'lucide-react';
+import { ArrowRight, Check, Download } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import MarketingLayout, { TrialForm } from '../marketing/MarketingLayout';
@@ -11,11 +11,14 @@ const featureCards = ['card1', 'card2', 'card3'];
 const proofPoints = ['proof1', 'proof2', 'proof3'];
 const whyItems = ['why1', 'why2', 'why3'];
 
-// Names, blurbs and features come from the marketing translations (tiers.<key>.*).
+// Names, prices, blurbs and features come from the marketing translations
+// (tiers.<key>.*). Keep in line with fp_plans (0095) and the brochure.
 const PRICING_TIERS = [
-  { key: 'starter', price: '$0', features: 3 },
-  { key: 'growth', price: '$49', features: 4, featured: true },
-  { key: 'enterprise', price: null, features: 4 },
+  { key: 'free', features: 6, href: '/signup' },
+  { key: 'starter', features: 6, href: '/signup' },
+  { key: 'professional', features: 16, href: '/signup', featured: true },
+  { key: 'business', features: 4, href: '#demo' },
+  { key: 'enterprise', features: 6, href: '#demo' },
 ];
 
 export default function Landing() {
@@ -142,38 +145,42 @@ export default function Landing() {
             <h2 className="mt-3 text-3xl font-semibold text-ink">{t('home.pricingTitle')}</h2>
             <p className="mt-3 text-base leading-7 text-ink-muted">{t('home.pricingLead')}</p>
           </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {PRICING_TIERS.map((tier) => (
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {PRICING_TIERS.map((tier, i) => (
               <div
                 key={tier.key}
-                className={`flex flex-col rounded-3xl border bg-white p-6 shadow-sm ${tier.featured ? 'border-brand ring-1 ring-brand/30' : 'border-line'}`}
+                className={`flex flex-col rounded-3xl border bg-white p-5 shadow-sm ${tier.featured ? 'border-brand ring-1 ring-brand/30' : 'border-line'}`}
               >
                 {tier.featured && (
                   <span className="mb-3 inline-flex w-fit rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">{t('home.mostPopular')}</span>
                 )}
                 <h3 className="text-lg font-semibold text-ink">{t(`tiers.${tier.key}.name`)}</h3>
                 <p className="mt-1 text-sm text-ink-muted">{t(`tiers.${tier.key}.blurb`)}</p>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-semibold text-ink">{tier.price ?? t(`tiers.${tier.key}.price`)}</span>
-                  <span className="text-sm text-ink-muted">/ {t(`tiers.${tier.key}.cadence`)}</span>
+                <div className="mt-4">
+                  <span className="whitespace-nowrap text-3xl font-semibold text-ink">{t(`tiers.${tier.key}.price`)}</span>
+                  <span className="block text-sm text-ink-muted">{t(`tiers.${tier.key}.cadence`)}</span>
                 </div>
-                <ul className="mt-4 space-y-2 text-sm text-ink-muted">
-                  {Array.from({ length: tier.features }, (_, i) => `f${i + 1}`).map((f) => (
+                <Link
+                  to={tier.href === '#demo' ? '/#demo' : tier.href}
+                  className={`mt-4 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold transition ${tier.featured ? 'bg-brand text-white hover:bg-brand-600' : 'border border-line bg-white text-ink hover:bg-surface'}`}
+                >
+                  {t(`tiers.${tier.key}.cta`)}
+                </Link>
+                {/* f1 is the plan's limits; f2… are its features. */}
+                <p className="mt-5 border-t border-line pt-4 text-sm font-semibold text-ink">{t(`tiers.${tier.key}.f1`)}</p>
+                {i > 0 && <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-brand">{t('home.everythingIn', { plan: t(`tiers.${PRICING_TIERS[i - 1].key}.name`) })}</p>}
+                <ul className="mt-2 space-y-1.5 text-sm text-ink-muted">
+                  {Array.from({ length: tier.features - 1 }, (_, n) => `f${n + 2}`).map((f) => (
                     <li key={f} className="flex items-start gap-2">
-                      <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" aria-hidden />
+                      <Check size={15} className="mt-0.5 shrink-0 text-brand" aria-hidden />
                       {t(`tiers.${tier.key}.${f}`)}
                     </li>
                   ))}
                 </ul>
-                <a
-                  href="#demo"
-                  className={`mt-6 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold transition ${tier.featured ? 'bg-brand text-white hover:bg-brand-600' : 'border border-line bg-white text-ink hover:bg-surface'}`}
-                >
-                  {t(`tiers.${tier.key}.cta`)}
-                </a>
               </div>
             ))}
           </div>
+          <p className="mt-6 text-center text-sm text-ink-muted">{t('home.pricingNote')}</p>
         </section>
 
         <section id="resources" className="scroll-mt-24 mx-auto max-w-7xl px-6 py-10 lg:px-8">
