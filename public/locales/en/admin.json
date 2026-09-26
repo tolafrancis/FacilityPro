@@ -29,7 +29,8 @@
       "audit": "Audit log",
       "security": "Security",
       "monitoring": "Monitoring",
-      "team": "Admin team"
+      "team": "Admin team",
+      "blog": "Blog"
     }
   },
   "search": {
@@ -609,7 +610,8 @@
     "invalid_email": "Enter a valid email address.",
     "invite_limit": "You’ve sent a lot of invites today. Try again tomorrow.",
     "invite_not_pending": "That invite is no longer pending.",
-    "invite_sent_recently": "That invite was just sent. Wait a minute before sending it again."
+    "invite_sent_recently": "That invite was just sent. Wait a minute before sending it again.",
+    "blog_slug_taken": "Another post already uses that link."
   },
   "users": {
     "subtitle": "Every account on the platform, across all tenants.",
@@ -1839,6 +1841,91 @@
       "resent": "Invite sent again",
       "revoked": "Invite revoked",
       "renamed": "Name saved"
+    }
+  },
+  "blog": {
+    "subtitle": "Articles for the public blog at /blog. Drafts and scheduled posts are only visible to staff.",
+    "viewBlog": "View blog",
+    "new": "New post",
+    "editTitle": "Edit post",
+    "empty": "No posts yet",
+    "emptyHint": "Write your first article — it appears at /blog once you publish it.",
+    "edited": "edited {{when}}",
+    "publishedOn": "published {{date}}",
+    "scheduledFor": "scheduled for {{date}}",
+    "state": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "published": "Published"
+    },
+    "view": "View on site",
+    "previewLink": "Preview",
+    "edit": "Edit",
+    "delete": "Delete post",
+    "deleteBody": "Delete “{{title}}”? It disappears from the blog straight away.",
+    "saveDraft": "Save draft",
+    "unpublish": "Unpublish",
+    "publish": "Publish",
+    "update": "Update",
+    "schedule": "Schedule",
+    "publishing": "Publishing",
+    "status": "Status",
+    "seo": "Link & search engines",
+    "toolbar": "Formatting",
+    "tabs": {
+      "write": "Write",
+      "preview": "Preview"
+    },
+    "tools": {
+      "heading": "Heading",
+      "bold": "Bold",
+      "italic": "Italic",
+      "link": "Link",
+      "linkText": "link text",
+      "list": "Bullet list",
+      "quote": "Quote",
+      "image": "Insert image"
+    },
+    "markdownHelp": "Markdown: ## Heading, **bold**, *italic*, [link](https://…), - list, > quote, ![caption](image). Leave a blank line between paragraphs.",
+    "nothingYet": "Nothing to preview yet.",
+    "uploading": "Uploading…",
+    "uploadCover": "Upload a cover image",
+    "changeCover": "Change image",
+    "removeCover": "Remove cover image",
+    "coverHint": "Shown on the blog list and at the top of the post. 16:9, PNG/JPG/WebP, up to 5 MB.",
+    "removeTag": "Remove {{tag}}",
+    "chars": "{{count}} / {{max}} characters",
+    "fields": {
+      "title": "Title",
+      "titlePh": "e.g. 5 signs it’s time to move maintenance off spreadsheets",
+      "excerpt": "Summary",
+      "excerptHint": "One or two sentences shown on the blog list and under the title.",
+      "body": "Article",
+      "bodyPh": "Write your article in Markdown…",
+      "date": "Publish date",
+      "dateHint": "Leave empty to publish now. A future date schedules the post.",
+      "author": "Author",
+      "authorPh": "e.g. FacilityPro team",
+      "cover": "Cover image",
+      "tags": "Tags",
+      "tagsPh": "Type a tag and press Enter",
+      "slug": "Link (slug)",
+      "seoTitle": "Search title",
+      "seoTitleHint": "Optional — the title shown in Google (defaults to the post title).",
+      "seoDescription": "Search description"
+    },
+    "errors": {
+      "title": "Give the post a title.",
+      "slug": "The link can only use lowercase letters, numbers and dashes.",
+      "slugTaken": "Another post already uses that link.",
+      "blog_image_type": "Use a PNG, JPG, WebP or GIF image.",
+      "blog_image_size": "Images must be 5 MB or smaller."
+    },
+    "toast": {
+      "draft": "Draft saved",
+      "published": "Post published",
+      "scheduled": "Post scheduled",
+      "deleted": "Post deleted"
     }
   }
 }

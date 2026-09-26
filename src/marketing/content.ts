@@ -4,7 +4,7 @@ import {
   Camera, Church, ClipboardCheck, ClipboardList, Cpu, CreditCard, Factory, FileSignature, FileText, Flame, Gauge,
   GitBranch, GraduationCap, Hammer, HardHat, Hospital, Hotel, Inbox, KeyRound, Landmark, Languages, LayoutGrid,
   LifeBuoy, MapPin, Megaphone, MessageSquareHeart, MonitorPlay, Network, Package, Plug, QrCode, Receipt, Rocket,
-  ShieldCheck, ShoppingBag, ShoppingCart, Smartphone, Sparkles, SprayCan, Tag, Truck, UserCheck, Users,
+  Newspaper, ShieldCheck, ShoppingBag, ShoppingCart, Smartphone, Sparkles, SprayCan, Tag, Truck, UserCheck, Users,
   Wallet, Warehouse, Wrench, Zap,
 } from 'lucide-react';
 
@@ -312,6 +312,7 @@ export interface Resource {
 
 export const RESOURCES: Resource[][] = [
   [
+    { slug: 'blog', title: 'Blog', icon: Newspaper, href: '/blog' },
     { slug: 'getting-started', title: 'Getting started guide', icon: Rocket,
       summary: 'From sign-up to your first work order in an afternoon.',
       sections: [

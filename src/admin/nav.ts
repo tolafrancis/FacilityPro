@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   LifeBuoy,
   Megaphone,
+  Newspaper,
   ScrollText,
   Settings2,
   ShieldCheck,
@@ -51,6 +52,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { key: 'flags', to: '/admin/features', icon: Flag, permission: 'platform.manage', ready: true },
       { key: 'announcements', to: '/admin/announcements', icon: Megaphone, permission: 'announcements.manage', ready: true },
+      { key: 'blog', to: '/admin/blog', icon: Newspaper, permission: 'announcements.manage', ready: true },
       { key: 'settings', to: '/admin/settings', icon: Settings2, permission: 'platform.manage', ready: true },
     ],
   },

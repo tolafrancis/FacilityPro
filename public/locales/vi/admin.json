@@ -29,7 +29,8 @@
       "audit": "Nhật ký kiểm tra",
       "security": "Bảo mật",
       "monitoring": "Giám sát",
-      "team": "Đội quản trị"
+      "team": "Đội quản trị",
+      "blog": "Blog"
     }
   },
   "search": {
@@ -609,7 +610,8 @@
     "invalid_email": "Nhập địa chỉ email hợp lệ.",
     "invite_limit": "Hôm nay bạn đã gửi nhiều lời mời. Vui lòng thử lại vào ngày mai.",
     "invite_not_pending": "Lời mời này không còn chờ nữa.",
-    "invite_sent_recently": "Lời mời vừa được gửi. Vui lòng đợi một phút trước khi gửi lại."
+    "invite_sent_recently": "Lời mời vừa được gửi. Vui lòng đợi một phút trước khi gửi lại.",
+    "blog_slug_taken": "Đã có bài viết khác dùng liên kết này."
   },
   "users": {
     "subtitle": "Mọi tài khoản trên nền tảng, thuộc tất cả khách hàng.",
@@ -1824,6 +1826,91 @@
       "resent": "Đã gửi lại lời mời",
       "revoked": "Đã thu hồi lời mời",
       "renamed": "Đã lưu tên"
+    }
+  },
+  "blog": {
+    "subtitle": "Bài viết cho blog công khai tại /blog. Bản nháp và bài hẹn giờ chỉ nhân viên xem được.",
+    "viewBlog": "Xem blog",
+    "new": "Bài viết mới",
+    "editTitle": "Sửa bài viết",
+    "empty": "Chưa có bài viết",
+    "emptyHint": "Viết bài đầu tiên — bài sẽ xuất hiện tại /blog khi bạn xuất bản.",
+    "edited": "sửa {{when}}",
+    "publishedOn": "xuất bản {{date}}",
+    "scheduledFor": "hẹn đăng {{date}}",
+    "state": {
+      "draft": "Bản nháp",
+      "scheduled": "Đã hẹn giờ",
+      "published": "Đã xuất bản"
+    },
+    "view": "Xem trên trang",
+    "previewLink": "Xem trước",
+    "edit": "Sửa",
+    "delete": "Xóa bài viết",
+    "deleteBody": "Xóa “{{title}}”? Bài sẽ biến mất khỏi blog ngay lập tức.",
+    "saveDraft": "Lưu nháp",
+    "unpublish": "Gỡ xuất bản",
+    "publish": "Xuất bản",
+    "update": "Cập nhật",
+    "schedule": "Hẹn giờ đăng",
+    "publishing": "Xuất bản",
+    "status": "Trạng thái",
+    "seo": "Liên kết & công cụ tìm kiếm",
+    "toolbar": "Định dạng",
+    "tabs": {
+      "write": "Viết",
+      "preview": "Xem trước"
+    },
+    "tools": {
+      "heading": "Tiêu đề",
+      "bold": "In đậm",
+      "italic": "In nghiêng",
+      "link": "Liên kết",
+      "linkText": "văn bản liên kết",
+      "list": "Danh sách",
+      "quote": "Trích dẫn",
+      "image": "Chèn ảnh"
+    },
+    "markdownHelp": "Markdown: ## Tiêu đề, **đậm**, *nghiêng*, [liên kết](https://…), - danh sách, > trích dẫn, ![chú thích](ảnh). Để một dòng trống giữa các đoạn.",
+    "nothingYet": "Chưa có gì để xem trước.",
+    "uploading": "Đang tải lên…",
+    "uploadCover": "Tải ảnh bìa lên",
+    "changeCover": "Đổi ảnh",
+    "removeCover": "Xóa ảnh bìa",
+    "coverHint": "Hiển thị trong danh sách blog và đầu bài viết. Tỷ lệ 16:9, PNG/JPG/WebP, tối đa 5 MB.",
+    "removeTag": "Xóa {{tag}}",
+    "chars": "{{count}} / {{max}} ký tự",
+    "fields": {
+      "title": "Tiêu đề",
+      "titlePh": "VD: 5 dấu hiệu nên chuyển việc bảo trì khỏi bảng tính",
+      "excerpt": "Tóm tắt",
+      "excerptHint": "Một hai câu hiển thị trong danh sách blog và dưới tiêu đề.",
+      "body": "Nội dung",
+      "bodyPh": "Viết bài bằng Markdown…",
+      "date": "Ngày xuất bản",
+      "dateHint": "Để trống để đăng ngay. Chọn ngày tương lai để hẹn giờ.",
+      "author": "Tác giả",
+      "authorPh": "VD: Đội ngũ FacilityPro",
+      "cover": "Ảnh bìa",
+      "tags": "Thẻ",
+      "tagsPh": "Nhập thẻ rồi nhấn Enter",
+      "slug": "Liên kết (slug)",
+      "seoTitle": "Tiêu đề tìm kiếm",
+      "seoTitleHint": "Không bắt buộc — tiêu đề hiển thị trên Google (mặc định là tiêu đề bài).",
+      "seoDescription": "Mô tả tìm kiếm"
+    },
+    "errors": {
+      "title": "Hãy đặt tiêu đề cho bài viết.",
+      "slug": "Liên kết chỉ gồm chữ thường, số và dấu gạch ngang.",
+      "slugTaken": "Đã có bài viết khác dùng liên kết này.",
+      "blog_image_type": "Hãy dùng ảnh PNG, JPG, WebP hoặc GIF.",
+      "blog_image_size": "Ảnh phải nhỏ hơn hoặc bằng 5 MB."
+    },
+    "toast": {
+      "draft": "Đã lưu nháp",
+      "published": "Đã xuất bản bài viết",
+      "scheduled": "Đã hẹn giờ đăng bài",
+      "deleted": "Đã xóa bài viết"
     }
   }
 }

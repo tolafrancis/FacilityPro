@@ -288,6 +288,23 @@ Stripe **and** PayPal subscriptions, plus manual invoices.
   any more (only through these functions); every change is in the audit log.
 - A role/permission matrix shows exactly what each role can do.
 
+## Blog (0093)
+
+`/admin/blog` (super admins and admins — the announcements permission) writes the public blog at
+`/blog`, linked from Resources in the site header and the footer.
+
+- Posts: title, summary, Markdown article with a formatting toolbar and live preview, cover image and
+  inline images (public `fp-blog` bucket, 5 MB, PNG/JPG/WebP/GIF), tags, author, link (slug) and
+  search-engine title/description. Reading time is worked out on save.
+- Save as draft, publish now, or pick a future date to schedule. Unpublish hides it at once.
+  Staff can preview drafts and scheduled posts on the site (with a "Preview" banner).
+- Visitors only ever receive published posts whose date has come (row-level security). Posts are
+  written only through `fp_admin_save_blog_post` / `fp_admin_delete_blog_post` and every change is in
+  the audit log. Markdown is rendered as React elements, never raw HTML, and only http(s), site and
+  mailto links are allowed — so a post can't inject scripts.
+- `/blog` lists posts (newest first, the latest featured) with tag filters; `/blog/<slug>` shows the
+  post with its cover, author, date, reading time, a free-trial box and related posts.
+
 ### Demo data (local or staging only)
 
 ```sql

@@ -22,6 +22,7 @@ import AuditLog from './pages/AuditLog';
 import Security from './pages/Security';
 import Monitoring from './pages/Monitoring';
 import Team from './pages/Team';
+import BlogAdmin, { BlogEditor } from './pages/BlogAdmin';
 import MfaSetup from './components/MfaSetup';
 
 /**
@@ -61,6 +62,8 @@ function AdminRoutes() {
         <Route path="security" element={<Guard permission="security.manage"><Security /></Guard>} />
         <Route path="monitoring" element={<Guard permission="monitoring.view"><Monitoring /></Guard>} />
         <Route path="team" element={<Guard permission="team.manage"><Team /></Guard>} />
+        <Route path="blog" element={<Guard permission="announcements.manage"><BlogAdmin /></Guard>} />
+        <Route path="blog/:id" element={<Guard permission="announcements.manage"><BlogEditor /></Guard>} />
         {ADMIN_NAV.flatMap((g) => g.items)
           .filter((i) => !i.ready)
           .map((i) => (
