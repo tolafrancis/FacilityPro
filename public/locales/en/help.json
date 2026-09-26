@@ -106,5 +106,11 @@
     "readGuide": "Read the guide",
     "filterAll": "All areas",
     "searchFeatures": "Search features"
+  },
+  "zoom": {
+    "open": "Enlarge screenshot: {{alt}}",
+    "full": "Show full size",
+    "fit": "Fit to screen",
+    "close": "Close"
   }
 }
